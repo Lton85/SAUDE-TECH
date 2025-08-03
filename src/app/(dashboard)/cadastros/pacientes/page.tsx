@@ -87,7 +87,8 @@ export default function PacientesPage() {
         item.nome.toLowerCase().includes(lowercasedFilter) ||
         item.mae.toLowerCase().includes(lowercasedFilter) ||
         item.cpf.includes(searchTerm) ||
-        item.cns.includes(searchTerm)
+        item.cns.includes(searchTerm) ||
+        (item.endereco && item.endereco.toLowerCase().includes(lowercasedFilter))
       );
     });
     setFilteredPacientes(filteredData);
@@ -127,7 +128,7 @@ export default function PacientesPage() {
               <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome, mãe, CPF ou CNS..."
+                  placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
                   className="pl-10 h-12"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
