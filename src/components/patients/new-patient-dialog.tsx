@@ -172,12 +172,12 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     )}
                                 />
                             </div>
-                            <div className="md:col-span-12 grid md:grid-cols-3 gap-4">
+                            <div className="md:col-span-12 grid md:grid-cols-3 gap-4 items-end">
                              <FormField
                                 control={form.control}
                                 name="nascimento"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-end pt-[0.45rem]">
+                                    <FormItem className="flex flex-col justify-end">
                                         <FormLabel>Data de Nascimento *</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -219,7 +219,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="sexo"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-end pt-2">
+                                    <FormItem>
                                         <FormLabel>Sexo *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
@@ -240,7 +240,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="cpf"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-end pt-2">
+                                    <FormItem>
                                         <FormLabel>CPF *</FormLabel>
                                         <FormControl>
                                             <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
