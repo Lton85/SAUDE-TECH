@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -31,7 +32,7 @@ const formSchema = z.object({
   mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
   pai: z.string().min(3, { message: "O nome do pai é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
-  cpf: z.string().min(11, { message: "O CPF deve ter 11 dígitos." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
+  cpf: z.string().min(11, { message: "O CPF é obrigatório." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
   nascimento: z.date({ required_error: "A data de nascimento é obrigatória."}),
   sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
@@ -65,7 +66,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         const newPatient: Omit<Paciente, 'id'> = {
             ...values,
             endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
@@ -80,7 +81,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             }
         };
         
-        onPatientCreated(newPatient);
+        await onPatientCreated(newPatient);
         onOpenChange(false);
         form.reset();
   }
@@ -403,3 +404,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -74,9 +75,10 @@ export default function PacientesPage() {
             className: "bg-green-500 text-white"
         });
     } catch (error) {
+        console.error("Detailed error saving patient: ", error);
          toast({
             title: "Erro ao cadastrar paciente",
-            description: "Não foi possível adicionar o novo paciente.",
+            description: "Não foi possível adicionar o novo paciente. Verifique os dados e tente novamente.",
             variant: "destructive",
         });
     }
@@ -257,3 +259,5 @@ export default function PacientesPage() {
     </>
   );
 }
+
+    
