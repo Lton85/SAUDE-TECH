@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HistoryDialog } from "@/components/patients/history-dialog";
+import { ViewDialog } from "@/components/patients/view-dialog";
 import type { Paciente } from "@/types/paciente";
 
 
@@ -69,7 +70,8 @@ const pacientesData: Paciente[] = [
 export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPacientes, setFilteredPacientes] = useState(pacientesData);
-  const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
+  const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
+  const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -109,7 +111,7 @@ export default function PacientesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px] px-2 py-2 text-xs">Código</TableHead>
-                <TableHead className="px-2 py-2 text-xs">Cliente</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Paciente</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Mãe</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Idade</TableHead>
@@ -132,7 +134,7 @@ export default function PacientesPage() {
                   <TableCell className="px-2 py-1 text-xs">{paciente.mae}</TableCell>
                   <TableCell className="px-2 py-1 text-xs">
                     <div className="flex items-center gap-1">
-                      <Mars className="h-3 w-3 text-blue-500" />
+                      {paciente.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
                       <span>{paciente.sexo}</span>
                     </div>
                   </TableCell>
@@ -147,7 +149,7 @@ export default function PacientesPage() {
                   </TableCell>
                   <TableCell className="text-right px-2 py-1">
                     <div className="flex items-center justify-end gap-1">
-                       <Button variant="ghost" size="icon" className="h-6 w-6">
+                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedPatientForView(paciente)}>
                           <Eye className="h-3 w-3" />
                           <span className="sr-only">Visualizar Cadastro</span>
                       </Button>
@@ -164,7 +166,7 @@ export default function PacientesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => setSelectedPatient(paciente)}>
+                          <DropdownMenuItem onClick={() => setSelectedPatientForHistory(paciente)}>
                               <History className="mr-2 h-3 w-3" />
                               <span>Histórico</span>
                           </DropdownMenuItem>
@@ -186,11 +188,18 @@ export default function PacientesPage() {
           </Table>
         </CardContent>
       </Card>
-      {selectedPatient && (
+      {selectedPatientForHistory && (
           <HistoryDialog
-            isOpen={!!selectedPatient}
-            onOpenChange={(isOpen) => !isOpen && setSelectedPatient(null)}
-            paciente={selectedPatient}
+            isOpen={!!selectedPatientForHistory}
+            onOpenChange={(isOpen) => !isOpen && setSelectedPatientForHistory(null)}
+            paciente={selectedPatientForHistory}
+          />
+      )}
+      {selectedPatientForView && (
+          <ViewDialog
+            isOpen={!!selectedPatientForView}
+            onOpenChange={(isOpen) => !isOpen && setSelectedPatientForView(null)}
+            paciente={selectedPatientForView}
           />
       )}
     </>
