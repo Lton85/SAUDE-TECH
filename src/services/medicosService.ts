@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
 
 const medicosCollection = collection(db, 'medicos');
@@ -23,4 +23,14 @@ export const getMedicos = async (): Promise<Medico[]> => {
     await seedMedicos();
     const snapshot = await getDocs(medicosCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico));
+};
+
+export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<Medico> => {
+    const docRef = await addDoc(medicosCollection, medico);
+    return { id: docRef.id, ...medico };
+};
+
+export const deleteMedico = async (id: string): Promise<void> => {
+    const medicoDoc = doc(db, 'medicos', id);
+    await deleteDoc(medicoDoc);
 };
