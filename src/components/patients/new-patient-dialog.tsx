@@ -39,7 +39,9 @@ const formSchema = z.object({
   sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
   raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada'], { required_error: "A raça/cor é obrigatória."}),
-  endereco: z.string().min(5, { message: "O endereço é obrigatório." }),
+  cep: z.string().min(8, { message: "O CEP é obrigatório." }),
+  endereco: z.string().min(3, { message: "O endereço é obrigatório." }),
+  numero: z.string().min(1, { message: "O número é obrigatório." }),
   nacionalidade: z.string().min(3, { message: "A nacionalidade é obrigatória." }),
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
@@ -57,7 +59,9 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             pai: "",
             cns: "",
             cpf: "",
+            cep: "",
             endereco: "",
+            numero: "",
             nacionalidade: "Brasileira",
             email: "",
             telefone: "",
@@ -69,6 +73,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         const newPatient: Paciente = {
             id: Math.floor(10000 + Math.random() * 90000).toString(),
             ...values,
+            endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
             nascimento: format(values.nascimento, 'dd/MM/yyyy'),
             idade: `${new Date().getFullYear() - values.nascimento.getFullYear()}a`,
             situacao: 'Ativo',
@@ -172,7 +177,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="nascimento"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-end">
+                                    <FormItem className="flex flex-col justify-end pt-[0.45rem]">
                                         <FormLabel>Data de Nascimento *</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -214,7 +219,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="sexo"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex flex-col justify-end pt-2">
                                         <FormLabel>Sexo *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
@@ -235,7 +240,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="cpf"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex flex-col justify-end pt-2">
                                         <FormLabel>CPF *</FormLabel>
                                         <FormControl>
                                             <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
@@ -308,19 +313,47 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="endereco"
-                                render={({ field }) => (
-                                    <FormItem className="md:col-span-12">
-                                        <FormLabel>Endereço *</FormLabel>
-                                        <FormControl>
-                                            <Input className="bg-muted/40" placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="md:col-span-12 grid grid-cols-12 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="cep"
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-3">
+                                            <FormLabel>CEP *</FormLabel>
+                                            <FormControl>
+                                                <Input className="bg-muted/40" placeholder="00000-000" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="endereco"
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-7">
+                                            <FormLabel>Endereço *</FormLabel>
+                                            <FormControl>
+                                                <Input className="bg-muted/40" placeholder="Rua, Bairro, Cidade - Estado" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="numero"
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-2">
+                                            <FormLabel>Nº *</FormLabel>
+                                            <FormControl>
+                                                <Input className="bg-muted/40" placeholder="000" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                            
                             <FormField
                                 control={form.control}

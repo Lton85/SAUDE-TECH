@@ -11,7 +11,9 @@ export interface Paciente {
     situacao: 'Ativo' | 'Inativo';
     estadoCivil?: 'Solteiro(a)' | 'Casado(a)' | 'Divorciado(a)' | 'Viúvo(a)' | 'União Estável';
     raca?: 'Branca' | 'Preta' | 'Parda' | 'Amarela' | 'Indígena' | 'Não declarada';
+    cep?: string;
     endereco?: string;
+    numero?: string;
     nacionalidade?: string;
     email?: string;
     telefone?: string;
