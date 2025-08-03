@@ -111,7 +111,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                         <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
                         <TabsTrigger value="info-complementares">Informações complementares</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="info-gerais" className="bg-muted/30 p-4 rounded-md border">
+                    <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -120,7 +120,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>Nome Completo *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Digite o nome completo do paciente" {...field} />
+                                            <Input className="bg-muted/40" placeholder="Digite o nome completo do paciente" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -133,7 +133,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>Nº do CNS *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="000 0000 0000 0000" {...field} />
+                                            <Input className="bg-muted/40" placeholder="000 0000 0000 0000" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -147,7 +147,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormItem>
                                             <FormLabel>Nome da Mãe *</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                                                <Input className="bg-muted/40" placeholder="Digite o nome da mãe do paciente" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -160,7 +160,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormItem>
                                             <FormLabel>Nome do Pai *</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Digite o nome do pai" {...field} />
+                                                <Input className="bg-muted/40" placeholder="Digite o nome do pai" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -179,7 +179,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                                 <Button
                                                 variant={"outline"}
                                                 className={cn(
-                                                    "w-full pl-3 text-left font-normal bg-card",
+                                                    "w-full pl-3 text-left font-normal bg-muted/40",
                                                     !field.value && "text-muted-foreground"
                                                 )}
                                                 >
@@ -217,7 +217,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Sexo *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger className="bg-card">
+                                                <SelectTrigger className="bg-muted/40">
                                                     <SelectValue placeholder="Selecione o sexo" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -237,7 +237,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>CPF *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="000.000.000-00" {...field} />
+                                            <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -252,7 +252,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Estado Civil *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger className="bg-card">
+                                                <SelectTrigger className="bg-muted/40">
                                                     <SelectValue placeholder="Selecione o estado civil" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -276,7 +276,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Raça/Cor *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger className="bg-card">
+                                                <SelectTrigger className="bg-muted/40">
                                                     <SelectValue placeholder="Selecione a raça/cor" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -300,7 +300,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>Nacionalidade *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Ex: Brasileira" {...field} />
+                                            <Input className="bg-muted/40" placeholder="Ex: Brasileira" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -313,7 +313,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem className="md:col-span-2">
                                         <FormLabel>Endereço *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
+                                            <Input className="bg-muted/40" placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -327,7 +327,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>E-mail</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="paciente@email.com" {...field} />
+                                            <Input className="bg-muted/40" placeholder="paciente@email.com" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -340,7 +340,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem>
                                         <FormLabel>Telefone</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="(00) 00000-0000" {...field} />
+                                            <Input className="bg-muted/40" placeholder="(00) 00000-0000" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -353,7 +353,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormItem className="md:col-span-2">
                                         <FormLabel>Observações</FormLabel>
                                         <FormControl>
-                                            <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
+                                            <Textarea className="bg-muted/40" placeholder="Alguma observação sobre o paciente..." {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -361,7 +361,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                             />
                          </div>
                     </TabsContent>
-                     <TabsContent value="info-complementares" className="bg-muted/30 p-4 rounded-md border">
+                     <TabsContent value="info-complementares" className="bg-card p-4 rounded-md border">
                         <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
                     </TabsContent>
                 </Tabs>
