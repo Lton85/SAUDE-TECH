@@ -1,0 +1,268 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, UserPlus } from "lucide-react";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import type { Paciente } from "@/types/paciente";
+import { useToast } from "@/hooks/use-toast";
+
+
+interface NewPatientDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onPatientCreated: (paciente: Paciente) => void;
+}
+
+const formSchema = z.object({
+  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
+  cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
+  cpf: z.string().min(11, { message: "O CPF deve ter 11 dígitos." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
+  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável']),
+  nascimento: z.date({ required_error: "A data de nascimento é obrigatória."}),
+  sexo: z.enum(['Masculino', 'Feminino']),
+  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada']),
+  mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
+});
+
+export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: NewPatientDialogProps) {
+    const { toast } = useToast();
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            nome: "",
+            cns: "",
+            cpf: "",
+            mae: "",
+        },
+    });
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        const newPatient: Paciente = {
+            id: Math.floor(10000 + Math.random() * 90000).toString(),
+            ...values,
+            nascimento: format(values.nascimento, 'dd/MM/yyyy'),
+            idade: `${new Date().getFullYear() - values.nascimento.getFullYear()}a`,
+            situacao: 'Ativo',
+            historico: {
+                criadoEm: new Date().toISOString(),
+                criadoPor: 'Recepção',
+                alteradoEm: new Date().toISOString(),
+                alteradoPor: 'Recepção',
+            }
+        };
+        
+        onPatientCreated(newPatient);
+        toast({
+            title: "Paciente Cadastrado!",
+            description: `O paciente ${newPatient.nome} foi adicionado com sucesso.`,
+            className: "bg-green-500 text-white"
+        });
+        onOpenChange(false);
+        form.reset();
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus />
+            Cadastrar Novo Paciente
+          </DialogTitle>
+           <DialogDescription>
+            Preencha os campos abaixo para adicionar um novo paciente ao sistema. Campos com * são obrigatórios.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                            <FormLabel>Nome Completo *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Digite o nome completo do paciente" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="mae"
+                    render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                            <FormLabel>Nome da Mãe *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="cns"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nº do CNS *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="0000 0000 0000 0000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="cpf"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>CPF *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="000.000.000-00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="nascimento"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Data de Nascimento *</FormLabel>
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                    )}
+                                    >
+                                    {field.value ? (
+                                        format(field.value, "PPP", { locale: ptBR})
+                                    ) : (
+                                        <span>Selecione uma data</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) =>
+                                    date > new Date() || date < new Date("1900-01-01")
+                                    }
+                                    initialFocus
+                                    locale={ptBR}
+                                />
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="sexo"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Sexo *</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o sexo" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Masculino">Masculino</SelectItem>
+                                    <SelectItem value="Feminino">Feminino</SelectItem>
+                                </SelectContent>
+                             </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="estadoCivil"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Estado Civil *</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o estado civil" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem>
+                                    <SelectItem value="Casado(a)">Casado(a)</SelectItem>
+                                    <SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem>
+                                    <SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem>
+                                    <SelectItem value="União Estável">União Estável</SelectItem>
+                                </SelectContent>
+                             </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="raca"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Raça/Cor *</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione a raça/cor" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Branca">Branca</SelectItem>
+                                    <SelectItem value="Preta">Preta</SelectItem>
+                                    <SelectItem value="Parda">Parda</SelectItem>
+                                    <SelectItem value="Amarela">Amarela</SelectItem>
+                                    <SelectItem value="Indígena">Indígena</SelectItem>
+                                    <SelectItem value="Não declarada">Não declarada</SelectItem>
+                                </SelectContent>
+                             </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <DialogFooter className="md:col-span-2 mt-4">
+                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        Cancelar
+                    </Button>
+                    <Button type="submit">Salvar Paciente</Button>
+                </DialogFooter>
+            </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

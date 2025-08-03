@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HistoryDialog } from "@/components/patients/history-dialog";
 import { ViewDialog } from "@/components/patients/view-dialog";
+import { NewPatientDialog } from "@/components/patients/new-patient-dialog";
 import type { Paciente } from "@/types/paciente";
 
 
@@ -72,6 +73,7 @@ export default function PacientesPage() {
   const [filteredPacientes, setFilteredPacientes] = useState(pacientesData);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
+  const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false);
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -105,7 +107,7 @@ export default function PacientesPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button>
+              <Button onClick={() => setIsNewPatientDialogOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Novo Paciente
               </Button>
@@ -208,6 +210,13 @@ export default function PacientesPage() {
             paciente={selectedPatientForView}
           />
       )}
+       <NewPatientDialog
+          isOpen={isNewPatientDialogOpen}
+          onOpenChange={setIsNewPatientDialogOpen}
+          onPatientCreated={(newPatient) => {
+            setFilteredPacientes(prev => [newPatient, ...prev]);
+          }}
+        />
     </>
   );
 }
