@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -110,7 +111,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                         <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
                         <TabsTrigger value="info-complementares">Informações complementares</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="info-gerais">
+                    <TabsContent value="info-gerais" className="bg-muted/30 p-4 rounded-md border">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -138,32 +139,34 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="mae"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome da Mãe *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Digite o nome da mãe do paciente" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="pai"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome do Pai *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Digite o nome do pai" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="md:col-span-2 grid md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="mae"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Nome da Mãe *</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="pai"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Nome do Pai *</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Digite o nome do pai" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                              <FormField
                                 control={form.control}
                                 name="nascimento"
@@ -176,7 +179,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                                 <Button
                                                 variant={"outline"}
                                                 className={cn(
-                                                    "w-full pl-3 text-left font-normal",
+                                                    "w-full pl-3 text-left font-normal bg-card",
                                                     !field.value && "text-muted-foreground"
                                                 )}
                                                 >
@@ -214,7 +217,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Sexo *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="bg-card">
                                                     <SelectValue placeholder="Selecione o sexo" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -249,7 +252,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Estado Civil *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="bg-card">
                                                     <SelectValue placeholder="Selecione o estado civil" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -273,7 +276,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Raça/Cor *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="bg-card">
                                                     <SelectValue placeholder="Selecione a raça/cor" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -358,7 +361,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                             />
                          </div>
                     </TabsContent>
-                     <TabsContent value="info-complementares">
+                     <TabsContent value="info-complementares" className="bg-muted/30 p-4 rounded-md border">
                         <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
                     </TabsContent>
                 </Tabs>
@@ -376,4 +379,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
   );
 }
 
+    
     
