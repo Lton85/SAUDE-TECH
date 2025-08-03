@@ -4,14 +4,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HistoryDialog } from "@/components/patients/history-dialog";
 import { ViewDialog } from "@/components/patients/view-dialog";
 import { NewPatientDialog } from "@/components/patients/new-patient-dialog";
 import type { Paciente } from "@/types/paciente";
+import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 
 const pacientesData: Paciente[] = [
@@ -70,14 +72,17 @@ const pacientesData: Paciente[] = [
 
 export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [pacientes, setPacientes] = useState(pacientesData);
   const [filteredPacientes, setFilteredPacientes] = useState(pacientesData);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
   const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
-    const filteredData = pacientesData.filter((item) => {
+    const filteredData = pacientes.filter((item) => {
       return (
         item.nome.toLowerCase().includes(lowercasedFilter) ||
         item.mae.toLowerCase().includes(lowercasedFilter) ||
@@ -86,7 +91,28 @@ export default function PacientesPage() {
       );
     });
     setFilteredPacientes(filteredData);
-  }, [searchTerm]);
+  }, [searchTerm, pacientes]);
+
+  const handlePatientCreated = (newPatient: Paciente) => {
+    const updatedPacientes = [newPatient, ...pacientes];
+    setPacientes(updatedPacientes);
+    setFilteredPacientes(updatedPacientes);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (patientToDelete) {
+      const updatedPacientes = pacientes.filter(p => p.id !== patientToDelete.id);
+      setPacientes(updatedPacientes);
+      setFilteredPacientes(updatedPacientes);
+      toast({
+        title: "Paciente Excluído!",
+        description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
+        variant: "destructive",
+      });
+      setPatientToDelete(null);
+    }
+  };
+
 
   return (
     <>
@@ -178,7 +204,11 @@ export default function PacientesPage() {
                               <History className="mr-2 h-3 w-3" />
                               <span>Histórico</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">Excluir</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setPatientToDelete(paciente)}>
+                              <Trash2 className="mr-2 h-3 w-3" />
+                              <span>Excluir</span>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -213,9 +243,13 @@ export default function PacientesPage() {
        <NewPatientDialog
           isOpen={isNewPatientDialogOpen}
           onOpenChange={setIsNewPatientDialogOpen}
-          onPatientCreated={(newPatient) => {
-            setFilteredPacientes(prev => [newPatient, ...prev]);
-          }}
+          onPatientCreated={handlePatientCreated}
+        />
+        <DeleteConfirmationDialog
+          isOpen={!!patientToDelete}
+          onOpenChange={(isOpen) => !isOpen && setPatientToDelete(null)}
+          onConfirm={handleDeleteConfirm}
+          patientName={patientToDelete?.nome || ''}
         />
     </>
   );
