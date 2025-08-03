@@ -15,9 +15,10 @@ export default function PainelPage() {
   const [currentCall, setCurrentCall] = useState<Call>(initialCall);
   const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [isBlinking, setIsBlinking] = useState(false);
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    setTime(new Date()); // Set initial time on client
     const timeInterval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timeInterval);
   }, []);
@@ -51,6 +52,7 @@ export default function PainelPage() {
 
     }, 8000); // New call every 8 seconds
 
+    // Cleanup the interval on component unmount
     return () => clearInterval(callInterval);
   }, [currentCall]);
 
@@ -82,8 +84,17 @@ export default function PainelPage() {
             <span className="text-2xl font-bold">Saúde Fácil</span>
           </div>
           <div className="flex flex-col items-end">
-             <p className="text-3xl font-mono font-bold">{time.toLocaleTimeString('pt-BR')}</p>
-             <p className="text-lg">{time.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</p>
+            {time ? (
+                <>
+                    <p className="text-3xl font-mono font-bold">{time.toLocaleTimeString('pt-BR')}</p>
+                    <p className="text-lg">{time.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</p>
+                </>
+            ) : (
+                <>
+                    <div className="h-9 w-36 bg-gray-700/80 rounded-md animate-pulse"></div>
+                    <div className="h-6 w-48 bg-gray-700/80 rounded-md mt-2 animate-pulse"></div>
+                </>
+            )}
           </div>
         </div>
       </aside>
