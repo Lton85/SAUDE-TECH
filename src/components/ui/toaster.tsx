@@ -29,7 +29,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport className="sm:top-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2" />
     </ToastProvider>
   )
 }
