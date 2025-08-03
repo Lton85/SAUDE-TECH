@@ -17,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import type { Paciente } from "@/types/paciente";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "../ui/textarea";
 
 
 interface NewPatientDialogProps {
@@ -27,13 +28,19 @@ interface NewPatientDialogProps {
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
+  mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
+  pai: z.string().min(3, { message: "O nome do pai é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
   cpf: z.string().min(11, { message: "O CPF deve ter 11 dígitos." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
-  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável']),
   nascimento: z.date({ required_error: "A data de nascimento é obrigatória."}),
-  sexo: z.enum(['Masculino', 'Feminino']),
-  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada']),
-  mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
+  sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
+  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
+  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada'], { required_error: "A raça/cor é obrigatória."}),
+  endereco: z.string().min(5, { message: "O endereço é obrigatório." }),
+  nacionalidade: z.string().min(3, { message: "A nacionalidade é obrigatória." }),
+  email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
+  telefone: z.string().optional(),
+  observacoes: z.string().optional(),
 });
 
 export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: NewPatientDialogProps) {
@@ -43,9 +50,15 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         resolver: zodResolver(formSchema),
         defaultValues: {
             nome: "",
+            mae: "",
+            pai: "",
             cns: "",
             cpf: "",
-            mae: "",
+            endereco: "",
+            nacionalidade: "",
+            email: "",
+            telefone: "",
+            observacoes: "",
         },
     });
 
@@ -76,7 +89,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus />
@@ -88,12 +101,12 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         </DialogHeader>
         
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
                 <FormField
                     control={form.control}
                     name="nome"
                     render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                        <FormItem className="md:col-span-3">
                             <FormLabel>Nome Completo *</FormLabel>
                             <FormControl>
                                 <Input placeholder="Digite o nome completo do paciente" {...field} />
@@ -110,6 +123,19 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                             <FormLabel>Nome da Mãe *</FormLabel>
                             <FormControl>
                                 <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="pai"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nome do Pai *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Digite o nome do pai" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -254,7 +280,75 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                     )}
                 />
 
-                <DialogFooter className="md:col-span-2 mt-4">
+                <FormField
+                    control={form.control}
+                    name="endereco"
+                    render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                            <FormLabel>Endereço *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="nacionalidade"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nacionalidade *</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ex: Brasileira" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>E-mail</FormLabel>
+                            <FormControl>
+                                <Input placeholder="paciente@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="telefone"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Telefone</FormLabel>
+                            <FormControl>
+                                <Input placeholder="(00) 00000-0000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="observacoes"
+                    render={({ field }) => (
+                        <FormItem className="md:col-span-3">
+                            <FormLabel>Observações</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+
+                <DialogFooter className="md:col-span-3 mt-4">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                         Cancelar
                     </Button>
