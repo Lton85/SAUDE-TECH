@@ -35,7 +35,9 @@ export const addDepartamento = async (departamento: Omit<Departamento, 'id'>): P
 
 export const updateDepartamento = async (id: string, departamento: Partial<Omit<Departamento, 'id'>>): Promise<void> => {
     const departamentoDoc = doc(db, 'departamentos', id);
-    await updateDoc(departamentoDoc, departamento);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: departamentoId, ...departamentoData } = departamento as Departamento;
+    await updateDoc(departamentoDoc, departamentoData);
 };
 
 export const deleteDepartamento = async (id: string): Promise<void> => {
