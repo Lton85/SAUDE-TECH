@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import type { Paciente } from "@/types/paciente";
 import { Textarea } from "../ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 
 interface NewPatientDialogProps {
@@ -32,8 +33,8 @@ const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
   pai: z.string().optional(),
-  cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório e deve conter 11 dígitos." }).max(14, { message: "CPF inválido."}),
+  cns: z.string().min(15, { message: "O CNS deve ter pelo menos 15 dígitos." }),
+  cpf: z.string().min(11, { message: "O CPF é obrigatório." }),
   nascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
     message: "A data deve estar no formato DD/MM/AAAA.",
   }),
@@ -51,6 +52,7 @@ const formSchema = z.object({
 
 export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: NewPatientDialogProps) {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -78,7 +80,6 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             const newPatient: Omit<Paciente, 'id'> = {
                 ...values,
                 endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
-                nascimento: values.nascimento,
                 idade: `${new Date().getFullYear() - birthDate.getFullYear()}a`,
                 situacao: 'Ativo',
                 historico: {
@@ -93,8 +94,11 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             onOpenChange(false);
             form.reset();
         } catch (error) {
-            console.error("Erro ao submeter formulário:", error);
-            // Optionally, show a toast or error message to the user here
+             toast({
+                title: "Erro ao salvar paciente",
+                description: "Não foi possível salvar o paciente. Verifique os dados e tente novamente.",
+                variant: "destructive",
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -115,7 +119,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="max-h-[60vh] overflow-y-auto pr-2">
+                <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4">
                 <Tabs defaultValue="info-gerais" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mb-4">
                         <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
@@ -184,16 +188,22 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col justify-end">
                                     <FormLabel>Data de Nascimento *</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
+                                     <Popover>
+                                        <div className="relative">
                                             <FormControl>
                                                 <Input
-                                                className="bg-muted/40"
+                                                className="bg-muted/40 pr-10"
                                                 placeholder="DD/MM/AAAA"
                                                 {...field}
                                                 />
                                             </FormControl>
-                                        </PopoverTrigger>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground">
+                                                    <CalendarIcon className="h-4 w-4" />
+                                                    <span className="sr-only">Abrir calendário</span>
+                                                </Button>
+                                            </PopoverTrigger>
+                                        </div>
                                         <PopoverContent className="w-auto p-0" align="start">
                                         <Calendar
                                             mode="single"
@@ -412,3 +422,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
+
+    
