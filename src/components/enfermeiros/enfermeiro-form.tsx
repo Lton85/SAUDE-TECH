@@ -1,9 +1,9 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,19 +21,35 @@ type EnfermeiroFormValues = z.infer<typeof formSchema>;
 
 interface EnfermeiroFormProps {
   onSubmit: (values: EnfermeiroFormValues) => void;
-  defaultValues?: Partial<EnfermeiroFormValues>;
+  enfermeiro?: Partial<Enfermeiro> | null;
   isSubmitting: boolean;
 }
 
-export function EnfermeiroForm({ onSubmit, defaultValues, isSubmitting }: EnfermeiroFormProps) {
+export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: EnfermeiroFormProps) {
   const form = useForm<EnfermeiroFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: defaultValues?.nome || "",
-      coren: defaultValues?.coren || "",
-      turno: defaultValues?.turno,
+      nome: "",
+      coren: "",
+      turno: "Manhã",
     },
   });
+
+  React.useEffect(() => {
+    if (enfermeiro) {
+      form.reset({
+        nome: enfermeiro.nome || "",
+        coren: enfermeiro.coren || "",
+        turno: enfermeiro.turno as "Manhã" | "Tarde" | "Noite" || "Manhã",
+      });
+    } else {
+        form.reset({
+            nome: "",
+            coren: "",
+            turno: "Manhã",
+        });
+    }
+  }, [enfermeiro, form]);
 
   return (
     <Form {...form}>

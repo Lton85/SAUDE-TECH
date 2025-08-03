@@ -65,7 +65,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
         </DialogHeader>
         <EnfermeiroForm
           onSubmit={handleSubmit}
-          defaultValues={enfermeiro || {}}
+          enfermeiro={enfermeiro}
           isSubmitting={isSubmitting}
         />
       </DialogContent>

@@ -65,7 +65,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
         </DialogHeader>
         <MedicoForm
           onSubmit={handleSubmit}
-          defaultValues={medico || {}}
+          medico={medico}
           isSubmitting={isSubmitting}
         />
       </DialogContent>

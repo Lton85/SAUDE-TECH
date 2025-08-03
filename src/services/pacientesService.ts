@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
@@ -6,7 +5,6 @@ import type { Paciente } from '@/types/paciente';
 const pacientesCollection = collection(db, 'pacientes');
 
 const pacientesData: Omit<Paciente, 'id'>[] = [];
-
 
 export const seedPacientes = async () => {
     const snapshot = await getDocs(pacientesCollection);
@@ -27,15 +25,13 @@ export const getPacientes = async (): Promise<Paciente[]> => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente));
 };
 
-export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<string> => {
-    const docRef = await addDoc(pacientesCollection, paciente);
-    return docRef.id;
+export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<void> => {
+    await addDoc(pacientesCollection, paciente);
 };
 
 export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id'>>): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
-    const { id: pacienteId, ...pacienteData } = paciente as Paciente;
-    await updateDoc(pacienteDoc, pacienteData);
+    await updateDoc(pacienteDoc, paciente);
 };
 
 export const deletePaciente = async (id: string): Promise<void> => {

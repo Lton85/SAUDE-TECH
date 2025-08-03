@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,6 +8,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import type { Medico } from "@/types/medico";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -18,19 +20,35 @@ type MedicoFormValues = z.infer<typeof formSchema>;
 
 interface MedicoFormProps {
   onSubmit: (values: MedicoFormValues) => void;
-  defaultValues?: Partial<MedicoFormValues>;
+  medico?: Partial<Medico> | null;
   isSubmitting: boolean;
 }
 
-export function MedicoForm({ onSubmit, defaultValues, isSubmitting }: MedicoFormProps) {
+export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) {
   const form = useForm<MedicoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: defaultValues?.nome || "",
-      crm: defaultValues?.crm || "",
-      especialidade: defaultValues?.especialidade || "",
+      nome: "",
+      crm: "",
+      especialidade: "",
     },
   });
+
+  React.useEffect(() => {
+    if (medico) {
+      form.reset({
+        nome: medico.nome || "",
+        crm: medico.crm || "",
+        especialidade: medico.especialidade || "",
+      });
+    } else {
+        form.reset({
+            nome: "",
+            crm: "",
+            especialidade: "",
+        });
+    }
+  }, [medico, form]);
 
   return (
     <Form {...form}>

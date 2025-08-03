@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
@@ -30,15 +29,13 @@ export const getMedicos = async (): Promise<Medico[]> => {
     return medicos;
 };
 
-export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<string> => {
-    const docRef = await addDoc(medicosCollection, medico);
-    return docRef.id;
+export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<void> => {
+    await addDoc(medicosCollection, medico);
 };
 
 export const updateMedico = async (id: string, medico: Partial<Omit<Medico, 'id'>>): Promise<void> => {
     const medicoDoc = doc(db, 'medicos', id);
-    const { id: medicoId, ...medicoData } = medico as Medico;
-    await updateDoc(medicoDoc, medicoData);
+    await updateDoc(medicoDoc, medico);
 };
 
 export const deleteMedico = async (id: string): Promise<void> => {
