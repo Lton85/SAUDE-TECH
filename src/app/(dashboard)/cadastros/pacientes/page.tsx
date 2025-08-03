@@ -5,7 +5,6 @@ import { MoreHorizontal, History, Pencil, Search, Mars } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const pacientes = [
   {
@@ -43,58 +42,58 @@ export default function PacientesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Código</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Mãe</TableHead>
-              <TableHead>Sexo</TableHead>
-              <TableHead>Idade</TableHead>
-              <TableHead>Nascimento</TableHead>
-              <TableHead>CNS</TableHead>
-              <TableHead>CPF</TableHead>
-              <TableHead>Situação</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="w-[80px] px-2 py-2 text-xs">Código</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Cliente</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Mãe</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Idade</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Nascimento</TableHead>
+              <TableHead className="px-2 py-2 text-xs">CNS</TableHead>
+              <TableHead className="px-2 py-2 text-xs">CPF</TableHead>
+              <TableHead className="px-2 py-2 text-xs">Situação</TableHead>
+              <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pacientes.map((paciente) => (
               <TableRow key={paciente.id}>
-                <TableCell>
+                <TableCell className="px-2 py-1 text-xs">
                   <Badge variant="outline">{paciente.id}</Badge>
                 </TableCell>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium px-2 py-1 text-xs">
                   {paciente.nome}
                 </TableCell>
-                <TableCell>{paciente.mae}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Mars className="h-4 w-4 text-blue-500" />
+                <TableCell className="px-2 py-1 text-xs">{paciente.mae}</TableCell>
+                <TableCell className="px-2 py-1 text-xs">
+                  <div className="flex items-center gap-1">
+                    <Mars className="h-3 w-3 text-blue-500" />
                     <span>{paciente.sexo}</span>
                   </div>
                 </TableCell>
-                <TableCell>{paciente.idade}</TableCell>
-                <TableCell>{paciente.nascimento}</TableCell>
-                <TableCell>{paciente.cns}</TableCell>
-                <TableCell>{paciente.cpf}</TableCell>
-                <TableCell>
-                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                <TableCell className="px-2 py-1 text-xs">{paciente.idade}</TableCell>
+                <TableCell className="px-2 py-1 text-xs">{paciente.nascimento}</TableCell>
+                <TableCell className="px-2 py-1 text-xs">{paciente.cns}</TableCell>
+                <TableCell className="px-2 py-1 text-xs">{paciente.cpf}</TableCell>
+                <TableCell className="px-2 py-1 text-xs">
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
                     {paciente.situacao}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <History className="h-4 w-4" />
+                <TableCell className="text-right px-2 py-1">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <History className="h-3 w-3" />
                         <span className="sr-only">Histórico</span>
                     </Button>
-                     <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
+                     <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <Pencil className="h-3 w-3" />
                         <span className="sr-only">Editar</span>
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-6 w-6 p-0">
                           <span className="sr-only">Abrir menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="h-3 w-3" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
