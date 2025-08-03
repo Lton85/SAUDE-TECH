@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -18,7 +16,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import type { Paciente } from "@/types/paciente";
-import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -26,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface NewPatientDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onPatientCreated: (paciente: Paciente) => void;
+  onPatientCreated: (paciente: Omit<Paciente, 'id'>) => void;
 }
 
 const formSchema = z.object({
@@ -49,7 +46,6 @@ const formSchema = z.object({
 });
 
 export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: NewPatientDialogProps) {
-    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -70,8 +66,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        const newPatient: Paciente = {
-            id: Math.floor(10000 + Math.random() * 90000).toString(),
+        const newPatient: Omit<Paciente, 'id'> = {
             ...values,
             endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
             nascimento: format(values.nascimento, 'dd/MM/yyyy'),
@@ -86,11 +81,6 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         };
         
         onPatientCreated(newPatient);
-        toast({
-            title: "Paciente Cadastrado!",
-            description: `O paciente ${newPatient.nome} foi adicionado com sucesso.`,
-            className: "bg-green-500 text-white"
-        });
         onOpenChange(false);
         form.reset();
   }

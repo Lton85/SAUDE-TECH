@@ -1,17 +1,34 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
-const enfermeiros = [
-  { id: '1', nome: 'Mariana Lima', coren: '111222-SP', turno: 'Manhã' },
-  { id: '2', nome: 'Felipe Souza', coren: '333444-RJ', turno: 'Tarde' },
-  { id: '3', nome: 'Juliana Ribeiro', coren: '555666-MG', turno: 'Noite' },
-];
+import { getEnfermeiros } from "@/services/enfermeirosService";
+import type { Enfermeiro } from "@/types/enfermeiro";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EnfermeirosPage() {
+  const [enfermeiros, setEnfermeiros] = useState<Enfermeiro[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEnfermeiros() {
+      try {
+        const data = await getEnfermeiros();
+        setEnfermeiros(data);
+      } catch (error) {
+        console.error("Erro ao buscar enfermeiros:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchEnfermeiros();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -37,28 +54,38 @@ export default function EnfermeirosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {enfermeiros.map((enfermeiro) => (
-              <TableRow key={enfermeiro.id}>
-                <TableCell className="font-medium">{enfermeiro.nome}</TableCell>
-                <TableCell>{enfermeiro.coren}</TableCell>
-                <TableCell><Badge variant="outline">{enfermeiro.turno}</Badge></TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Abrir menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive focus:text-destructive">Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading ? (
+               [...Array(3)].map((_, i) => (
+                <TableRow key={i}>
+                  {[...Array(4)].map((_, j) => (
+                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              enfermeiros.map((enfermeiro) => (
+                <TableRow key={enfermeiro.id}>
+                  <TableCell className="font-medium">{enfermeiro.nome}</TableCell>
+                  <TableCell>{enfermeiro.coren}</TableCell>
+                  <TableCell><Badge variant="outline">{enfermeiro.turno}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive focus:text-destructive">Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>

@@ -14,71 +14,39 @@ import { NewPatientDialog } from "@/components/patients/new-patient-dialog";
 import type { Paciente } from "@/types/paciente";
 import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getPacientes, addPaciente, deletePaciente } from "@/services/pacientesService";
+import { Skeleton } from "@/components/ui/skeleton";
 
-
-const pacientesData: Paciente[] = [
-  {
-    id: '81232',
-    nome: 'Aarao de Carvalho da Costa',
-    mae: 'Marinete de Carvalho da Costa',
-    sexo: 'Masculino',
-    idade: '49a',
-    nascimento: '28/01/1976',
-    cns: '706403696677388',
-    cpf: '844.481.724-49',
-    situacao: 'Ativo',
-    historico: {
-        criadoEm: '2023-10-26T06:50:00',
-        criadoPor: 'Recepção',
-        alteradoEm: '2023-10-26T07:00:00',
-        alteradoPor: 'Triagem',
-    }
-  },
-  {
-    id: '81233',
-    nome: 'Beatriz Almeida',
-    mae: 'Juliana Almeida',
-    sexo: 'Feminino',
-    idade: '32a',
-    nascimento: '15/05/1992',
-    cns: '700001234567890',
-    cpf: '123.456.789-00',
-    situacao: 'Ativo',
-    historico: {
-        criadoEm: '2023-10-27T08:00:00',
-        criadoPor: 'Recepção',
-        alteradoEm: '2023-10-27T08:15:00',
-        alteradoPor: 'Triagem',
-    }
-  },
-  {
-    id: '81234',
-    nome: 'Carlos Eduardo Pereira',
-    mae: 'Maria Pereira',
-    sexo: 'Masculino',
-    idade: '55a',
-    nascimento: '10/11/1968',
-    cns: '701234567890123',
-    cpf: '987.654.321-11',
-    situacao: 'Inativo',
-    historico: {
-        criadoEm: '2023-10-28T09:30:00',
-        criadoPor: 'Recepção',
-        alteradoEm: '2023-10-28T10:00:00',
-        alteradoPor: 'Recepção',
-    }
-  },
-];
 
 export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [pacientes, setPacientes] = useState(pacientesData);
-  const [filteredPacientes, setFilteredPacientes] = useState(pacientesData);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
   const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchPacientes() {
+      try {
+        const data = await getPacientes();
+        setPacientes(data);
+        setFilteredPacientes(data);
+      } catch (error) {
+        toast({
+          title: "Erro ao buscar pacientes",
+          description: "Não foi possível carregar a lista de pacientes.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchPacientes();
+  }, [toast]);
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -94,23 +62,46 @@ export default function PacientesPage() {
     setFilteredPacientes(filteredData);
   }, [searchTerm, pacientes]);
 
-  const handlePatientCreated = (newPatient: Paciente) => {
-    const updatedPacientes = [newPatient, ...pacientes];
-    setPacientes(updatedPacientes);
-    setFilteredPacientes(updatedPacientes);
+  const handlePatientCreated = async (newPatientData: Omit<Paciente, 'id'>) => {
+    try {
+        const newPatient = await addPaciente(newPatientData);
+        const updatedPacientes = [newPatient, ...pacientes];
+        setPacientes(updatedPacientes);
+        setFilteredPacientes(updatedPacientes);
+         toast({
+            title: "Paciente Cadastrado!",
+            description: `O paciente ${newPatient.nome} foi adicionado com sucesso.`,
+            className: "bg-green-500 text-white"
+        });
+    } catch (error) {
+         toast({
+            title: "Erro ao cadastrar paciente",
+            description: "Não foi possível adicionar o novo paciente.",
+            variant: "destructive",
+        });
+    }
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (patientToDelete) {
-      const updatedPacientes = pacientes.filter(p => p.id !== patientToDelete.id);
-      setPacientes(updatedPacientes);
-      setFilteredPacientes(updatedPacientes);
-      toast({
-        title: "Paciente Excluído!",
-        description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
-        variant: "destructive",
-      });
-      setPatientToDelete(null);
+      try {
+        await deletePaciente(patientToDelete.id);
+        const updatedPacientes = pacientes.filter(p => p.id !== patientToDelete.id);
+        setPacientes(updatedPacientes);
+        setFilteredPacientes(updatedPacientes);
+        toast({
+          title: "Paciente Excluído!",
+          description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
+        });
+      } catch (error) {
+         toast({
+          title: "Erro ao excluir paciente",
+          description: "Não foi possível remover o paciente.",
+          variant: "destructive",
+        });
+      } finally {
+        setPatientToDelete(null);
+      }
     }
   };
 
@@ -158,70 +149,81 @@ export default function PacientesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPacientes.map((paciente) => (
-                <TableRow key={paciente.id}>
-                  <TableCell className="px-2 py-1 text-xs">
-                    <Badge variant="outline">{paciente.id}</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium px-2 py-1 text-xs">
-                    {paciente.nome}
-                  </TableCell>
-                  <TableCell className="px-2 py-1 text-xs">{paciente.mae}</TableCell>
-                  <TableCell className="px-2 py-1 text-xs">
-                    <div className="flex items-center gap-1">
-                      {paciente.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
-                      <span>{paciente.sexo}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-2 py-1 text-xs">{paciente.idade}</TableCell>
-                  <TableCell className="px-2 py-1 text-xs">{paciente.nascimento}</TableCell>
-                  <TableCell className="px-2 py-1 text-xs">{paciente.cns}</TableCell>
-                  <TableCell className="px-2 py-1 text-xs">{paciente.cpf}</TableCell>
-                  <TableCell className="px-2 py-1 text-xs">
-                    <Badge variant={paciente.situacao === 'Ativo' ? "default" : "destructive"} className={paciente.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
-                      {paciente.situacao}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right px-2 py-1">
-                    <div className="flex items-center justify-end gap-1">
-                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedPatientForView(paciente)}>
-                          <Eye className="h-3 w-3" />
-                          <span className="sr-only">Visualizar Cadastro</span>
-                      </Button>
-                       <Button variant="ghost" size="icon" className="h-6 w-6">
-                          <Pencil className="h-3 w-3" />
-                          <span className="sr-only">Editar</span>
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-6 w-6 p-0">
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => setSelectedPatientForHistory(paciente)}>
-                              <History className="mr-2 h-3 w-3" />
-                              <span>Histórico</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setPatientToDelete(paciente)}>
-                              <Trash2 className="mr-2 h-3 w-3" />
-                              <span>Excluir</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-               {filteredPacientes.length === 0 && (
-                  <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                      Nenhum resultado encontrado.
+               {isLoading ? (
+                [...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[...Array(10)].map((_, j) => (
+                      <TableCell key={j} className="px-2 py-1 text-xs">
+                        <Skeleton className="h-4 w-full" />
                       </TableCell>
+                    ))}
                   </TableRow>
+                ))
+              ) : filteredPacientes.length > 0 ? (
+                filteredPacientes.map((paciente) => (
+                  <TableRow key={paciente.id}>
+                    <TableCell className="px-2 py-1 text-xs">
+                      <Badge variant="outline">{paciente.id.substring(0,5)}</Badge>
+                    </TableCell>
+                    <TableCell className="font-medium px-2 py-1 text-xs">
+                      {paciente.nome}
+                    </TableCell>
+                    <TableCell className="px-2 py-1 text-xs">{paciente.mae}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs">
+                      <div className="flex items-center gap-1">
+                        {paciente.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
+                        <span>{paciente.sexo}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-2 py-1 text-xs">{paciente.idade}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs">{paciente.nascimento}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs">{paciente.cns}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs">{paciente.cpf}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs">
+                      <Badge variant={paciente.situacao === 'Ativo' ? "default" : "destructive"} className={paciente.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
+                        {paciente.situacao}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right px-2 py-1">
+                      <div className="flex items-center justify-end gap-1">
+                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedPatientForView(paciente)}>
+                            <Eye className="h-3 w-3" />
+                            <span className="sr-only">Visualizar Cadastro</span>
+                        </Button>
+                         <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Pencil className="h-3 w-3" />
+                            <span className="sr-only">Editar</span>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-6 w-6 p-0">
+                              <span className="sr-only">Abrir menu</span>
+                              <MoreHorizontal className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => setSelectedPatientForHistory(paciente)}>
+                                <History className="mr-2 h-3 w-3" />
+                                <span>Histórico</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setPatientToDelete(paciente)}>
+                                <Trash2 className="mr-2 h-3 w-3" />
+                                <span>Excluir</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={10} className="h-24 text-center">
+                    Nenhum resultado encontrado.
+                    </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
