@@ -43,7 +43,7 @@ export function ViewDepartamentoDialog({ isOpen, onOpenChange, departamento }: V
         <div className="space-y-4 py-4 pr-4">
             <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
                 <InfoRow icon={Building} label="Nome" value={departamento.nome} />
-                <InfoRow icon={Hash} label="Nº da Sala" value={departamento.numero} />
+                <InfoRow icon={Hash} label="Nº da Sala" value={departamento.numero || "Não informado"} />
                  <InfoRow icon={Activity} label="Situação">
                     <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${departamento.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
                         {departamento.situacao}

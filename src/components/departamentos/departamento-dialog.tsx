@@ -25,15 +25,16 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
   const handleSubmit = async (values: Omit<Departamento, 'id'>) => {
     setIsSubmitting(true);
     try {
+      const dataToSave = { ...values, numero: values.numero || '' };
       if (isEditMode) {
-        await updateDepartamento(departamento.id, values);
+        await updateDepartamento(departamento.id, dataToSave);
         toast({
           title: "Departamento Atualizado!",
           description: `Os dados de ${values.nome} foram atualizados.`,
           className: "bg-green-500 text-white"
         });
       } else {
-        await addDepartamento(values);
+        await addDepartamento(dataToSave);
         toast({
           title: "Departamento Cadastrado!",
           description: `${values.nome} foi adicionado com sucesso.`,

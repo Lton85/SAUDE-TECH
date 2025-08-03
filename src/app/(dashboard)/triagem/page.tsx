@@ -131,7 +131,7 @@ export default function DepartamentosPage() {
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
                     <TableCell className="font-medium">{departamento.nome}</TableCell>
-                    <TableCell>{departamento.numero}</TableCell>
+                    <TableCell>{departamento.numero || "N/A"}</TableCell>
                     <TableCell>
                       <Badge variant={departamento.situacao === 'Ativo' ? "default" : "destructive"} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}

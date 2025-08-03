@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome é obrigatório." }),
-  numero: z.string().min(1, { message: "O número da sala é obrigatório." }),
+  numero: z.string().optional(),
   situacao: z.enum(['Ativo', 'Inativo'], { required_error: "A situação é obrigatória." }),
 });
 
