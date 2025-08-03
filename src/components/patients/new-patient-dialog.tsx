@@ -112,7 +112,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                         <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-primary">Informações complementares</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField
                                 control={form.control}
                                 name="nome"
@@ -121,6 +121,19 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Nome Completo *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome completo do paciente" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="cns"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nº do CNS *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="000 0000 0000 0000" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -152,6 +165,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
+                            <div /> 
                              <FormField
                                 control={form.control}
                                 name="nascimento"
@@ -228,19 +242,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="cns"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nº do CNS *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="0000 0000 0000 0000" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            
                             <FormField
                                 control={form.control}
                                 name="estadoCivil"
@@ -307,7 +309,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="endereco"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem className="md:col-span-3">
                                         <FormLabel>Endereço *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
@@ -347,7 +349,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="observacoes"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem className="md:col-span-3">
                                         <FormLabel>Observações</FormLabel>
                                         <FormControl>
                                             <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
@@ -377,6 +379,3 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
-
-    
-
