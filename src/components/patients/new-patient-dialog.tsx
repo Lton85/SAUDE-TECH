@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -91,7 +92,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus />
@@ -111,12 +112,12 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                         <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-primary">Informações complementares</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="nome"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
+                                    <FormItem className="md:col-span-2">
                                         <FormLabel>Nome Completo *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome completo do paciente" {...field} />
@@ -129,7 +130,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="mae"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                         <FormLabel>Nome da Mãe *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome da mãe do paciente" {...field} />
@@ -142,7 +143,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="pai"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                         <FormLabel>Nome do Pai *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome do pai" {...field} />
@@ -306,7 +307,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="endereco"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
+                                    <FormItem className="md:col-span-2">
                                         <FormLabel>Endereço *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
@@ -346,7 +347,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="observacoes"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
+                                    <FormItem className="md:col-span-2">
                                         <FormLabel>Observações</FormLabel>
                                         <FormControl>
                                             <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
@@ -378,3 +379,4 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
 }
 
     
+
