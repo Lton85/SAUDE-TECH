@@ -103,12 +103,14 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <Tabs defaultValue="info-gerais" className="w-full">
-                    <TabsList className="grid w-full grid-cols-1 mb-4">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
                         <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
+                        <TabsTrigger value="info-complementares">Informações Complementares</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info-gerais">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
                             <FormField
                                 control={form.control}
                                 name="nome"
@@ -135,46 +137,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="pai"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome do Pai *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Digite o nome do pai" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="cns"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nº do CNS *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="0000 0000 0000 0000" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="cpf"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>CPF *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="000.000.000-00" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="nascimento"
                                 render={({ field }) => (
@@ -216,7 +179,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="sexo"
                                 render={({ field }) => (
@@ -237,7 +200,50 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
+                             <FormField
+                                control={form.control}
+                                name="cpf"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>CPF *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="000.000.000-00" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
+                                control={form.control}
+                                name="cns"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nº do CNS *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="0000 0000 0000 0000" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                         </div>
+                    </TabsContent>
+                     <TabsContent value="info-complementares">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                              <FormField
+                                control={form.control}
+                                name="pai"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-3">
+                                        <FormLabel>Nome do Pai *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Digite o nome do pai" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
                                 control={form.control}
                                 name="estadoCivil"
                                 render={({ field }) => (
@@ -286,20 +292,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="endereco"
-                                render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
-                                        <FormLabel>Endereço *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="nacionalidade"
                                 render={({ field }) => (
@@ -312,6 +305,20 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="endereco"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-3">
+                                        <FormLabel>Endereço *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                           
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -354,6 +361,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                          </div>
                     </TabsContent>
                 </Tabs>
+                </div>
                 <DialogFooter className="md:col-span-3 mt-4">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                         Cancelar
