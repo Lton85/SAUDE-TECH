@@ -4,11 +4,7 @@ import type { Enfermeiro } from '@/types/enfermeiro';
 
 const enfermeirosCollection = collection(db, 'enfermeiros');
 
-const enfermeirosData: Omit<Enfermeiro, 'id'>[] = [
-    { nome: 'Mariana Lima', coren: '111222-SP', turno: 'Manhã' },
-    { nome: 'Felipe Souza', coren: '333444-RJ', turno: 'Tarde' },
-    { nome: 'Juliana Ribeiro', coren: '555666-MG', turno: 'Noite' },
-];
+const enfermeirosData: Omit<Enfermeiro, 'id'>[] = [];
 
 export const seedEnfermeiros = async () => {
     const snapshot = await getDocs(enfermeirosCollection);

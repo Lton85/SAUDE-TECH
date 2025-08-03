@@ -4,11 +4,7 @@ import type { Medico } from '@/types/medico';
 
 const medicosCollection = collection(db, 'medicos');
 
-const medicosData: Omit<Medico, 'id'>[] = [
-  { nome: 'Dr. Ricardo Alves', crm: '12345-SP', especialidade: 'Cardiologia' },
-  { nome: 'Dra. Ana Costa', crm: '54321-RJ', especialidade: 'Pediatria' },
-  { nome: 'Dr. Lucas Martins', crm: '67890-MG', especialidade: 'Ortopedia' },
-];
+const medicosData: Omit<Medico, 'id'>[] = [];
 
 export const seedMedicos = async () => {
     const snapshot = await getDocs(medicosCollection);
