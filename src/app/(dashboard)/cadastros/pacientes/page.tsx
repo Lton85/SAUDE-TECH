@@ -29,24 +29,26 @@ export default function PacientesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchPacientes() {
-      try {
-        const data = await getPacientes();
-        setPacientes(data);
-        setFilteredPacientes(data);
-      } catch (error) {
-        toast({
-          title: "Erro ao buscar pacientes",
-          description: "Não foi possível carregar a lista de pacientes.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchPacientes = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getPacientes();
+      setPacientes(data);
+      setFilteredPacientes(data); // Initialize filteredPacientes here
+    } catch (error) {
+      toast({
+        title: "Erro ao buscar pacientes",
+        description: "Não foi possível carregar a lista de pacientes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchPacientes();
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -64,13 +66,11 @@ export default function PacientesPage() {
 
   const handlePatientCreated = async (newPatientData: Omit<Paciente, 'id'>) => {
     try {
-        const newPatient = await addPaciente(newPatientData);
-        const updatedPacientes = [newPatient, ...pacientes];
-        setPacientes(updatedPacientes);
-        setFilteredPacientes(updatedPacientes);
+        await addPaciente(newPatientData);
+        await fetchPacientes(); // Refetch all patients to get the new one
          toast({
             title: "Paciente Cadastrado!",
-            description: `O paciente ${newPatient.nome} foi adicionado com sucesso.`,
+            description: `O paciente ${newPatientData.nome} foi adicionado com sucesso.`,
             className: "bg-green-500 text-white"
         });
     } catch (error) {
@@ -119,8 +119,8 @@ export default function PacientesPage() {
               <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
-                  className="pl-10 h-12"
+                  placeholder="Buscar por nome, mãe, CPF ou CNS..."
+                  className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -221,7 +221,7 @@ export default function PacientesPage() {
               ) : (
                 <TableRow>
                     <TableCell colSpan={10} className="h-24 text-center">
-                    Nenhum resultado encontrado.
+                    Nenhum paciente cadastrado. Comece adicionando um novo.
                     </TableCell>
                 </TableRow>
               )}
