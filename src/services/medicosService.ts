@@ -1,6 +1,7 @@
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
+import type { DocumentReference } from 'firebase/firestore';
 
 const medicosCollection = collection(db, 'medicos');
 
