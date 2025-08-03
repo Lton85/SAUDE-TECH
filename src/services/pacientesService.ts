@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
@@ -28,7 +29,8 @@ export const getPacientes = async (): Promise<Paciente[]> => {
 };
 
 export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<DocumentReference> => {
-    return await addDoc(pacientesCollection, paciente);
+    const { id, ...dataToSave } = paciente as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    return await addDoc(pacientesCollection, dataToSave);
 };
 
 export const deletePaciente = async (id: string): Promise<void> => {
