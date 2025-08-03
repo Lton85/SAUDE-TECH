@@ -177,42 +177,45 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 />
                             </div>
                             <div className="md:col-span-12 grid md:grid-cols-3 gap-4 items-end">
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="nascimento"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col justify-end">
-                                        <FormLabel>Data de Nascimento *</FormLabel>
-                                        <div className="relative">
-                                            <FormControl>
-                                                <Input
-                                                    className="bg-muted/40 pr-10"
-                                                    placeholder="DD/MM/AAAA"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="ghost" className="absolute right-0 top-0 h-full px-3">
-                                                        <CalendarIcon className="h-4 w-4 opacity-50" />
-                                                        <span className="sr-only">Abrir calendário</span>
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
-                                                        onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
-                                                        disabled={(date) =>
-                                                            date > new Date() || date < new Date("1900-01-01")
-                                                        }
-                                                        initialFocus
-                                                        locale={ptBR}
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                        <FormMessage />
+                                    <FormLabel>Data de Nascimento *</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full pl-3 text-left font-normal bg-muted/40",
+                                                !field.value && "text-muted-foreground"
+                                            )}
+                                            >
+                                            {field.value ? (
+                                                format(parse(field.value, 'dd/MM/yyyy', new Date()), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                                            ) : (
+                                                <span>Selecione a data</span>
+                                            )}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
+                                            onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
+                                            disabled={(date) =>
+                                                date > new Date() || date < new Date("1900-01-01")
+                                            }
+                                            initialFocus
+                                            locale={ptBR}
+                                        />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -417,5 +420,3 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
-
-    
