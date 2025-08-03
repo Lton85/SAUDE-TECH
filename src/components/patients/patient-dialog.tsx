@@ -16,7 +16,15 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico'>;
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes'> & {
+    pai?: string;
+    cep?: string;
+    numero?: string;
+    nacionalidade?: string;
+    email?: string;
+    telefone?: string;
+    observacoes?: string;
+};
 
 
 export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
@@ -111,7 +119,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
     const defaultValues = isEditMode && paciente ? {
         ...paciente,
         ...getCepParts(paciente.endereco),
-    } : {};
+    } : undefined;
 
 
   return (

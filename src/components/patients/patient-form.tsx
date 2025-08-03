@@ -51,13 +51,46 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        ...defaultValues,
-        pai: defaultValues?.pai || "",
-        email: defaultValues?.email || "",
-        telefone: defaultValues?.telefone || "",
-        observacoes: defaultValues?.observacoes || "",
+      nome: defaultValues?.nome || "",
+      mae: defaultValues?.mae || "",
+      pai: defaultValues?.pai || "",
+      cns: defaultValues?.cns || "",
+      cpf: defaultValues?.cpf || "",
+      nascimento: defaultValues?.nascimento || "",
+      sexo: defaultValues?.sexo,
+      estadoCivil: defaultValues?.estadoCivil,
+      raca: defaultValues?.raca,
+      cep: defaultValues?.cep || "",
+      endereco: defaultValues?.endereco || "",
+      numero: defaultValues?.numero || "",
+      nacionalidade: defaultValues?.nacionalidade || "",
+      email: defaultValues?.email || "",
+      telefone: defaultValues?.telefone || "",
+      observacoes: defaultValues?.observacoes || "",
     },
   });
+
+  React.useEffect(() => {
+    form.reset({
+      nome: defaultValues?.nome || "",
+      mae: defaultValues?.mae || "",
+      pai: defaultValues?.pai || "",
+      cns: defaultValues?.cns || "",
+      cpf: defaultValues?.cpf || "",
+      nascimento: defaultValues?.nascimento || "",
+      sexo: defaultValues?.sexo,
+      estadoCivil: defaultValues?.estadoCivil,
+      raca: defaultValues?.raca,
+      cep: defaultValues?.cep || "",
+      endereco: defaultValues?.endereco || "",
+      numero: defaultValues?.numero || "",
+      nacionalidade: defaultValues?.nacionalidade || "",
+      email: defaultValues?.email || "",
+      telefone: defaultValues?.telefone || "",
+      observacoes: defaultValues?.observacoes || "",
+    });
+  }, [defaultValues, form]);
+
 
   return (
     <Form {...form}>
