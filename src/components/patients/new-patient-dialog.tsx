@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -92,7 +91,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus />
@@ -107,17 +106,17 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <Tabs defaultValue="info-gerais" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted">
-                        <TabsTrigger value="info-gerais" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-primary">Informações Gerais</TabsTrigger>
-                        <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-primary">Informações complementares</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
+                        <TabsTrigger value="info-complementares">Informações complementares</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <TabsContent value="info-gerais">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="nome"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                         <FormLabel>Nome Completo *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome completo do paciente" {...field} />
@@ -165,7 +164,6 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                            <div /> 
                              <FormField
                                 control={form.control}
                                 name="nascimento"
@@ -309,7 +307,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="endereco"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
+                                    <FormItem className="md:col-span-2">
                                         <FormLabel>Endereço *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
@@ -349,7 +347,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="observacoes"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
+                                    <FormItem className="md:col-span-2">
                                         <FormLabel>Observações</FormLabel>
                                         <FormControl>
                                             <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
@@ -361,13 +359,11 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                          </div>
                     </TabsContent>
                      <TabsContent value="info-complementares">
-                        <div className="py-4 bg-card p-4 rounded-md border">
-                            <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
-                        </div>
+                        <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
                     </TabsContent>
                 </Tabs>
                 </div>
-                <DialogFooter className="md:col-span-3 mt-4">
+                <DialogFooter className="mt-4">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                         Cancelar
                     </Button>
@@ -379,3 +375,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
+
+    
