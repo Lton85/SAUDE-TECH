@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "../ui/button";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome é obrigatório." }),
@@ -21,10 +23,11 @@ type DepartamentoFormValues = z.infer<typeof formSchema>;
 interface DepartamentoFormProps {
   onSubmit: (values: DepartamentoFormValues) => void;
   defaultValues?: Partial<DepartamentoFormValues>;
+  isSubmitting: boolean;
 }
 
 export const DepartamentoForm = React.forwardRef<HTMLFormElement, DepartamentoFormProps>(
-  ({ onSubmit, defaultValues }, ref) => {
+  ({ onSubmit, defaultValues, isSubmitting }, ref) => {
     const form = useForm<DepartamentoFormValues>({
       resolver: zodResolver(formSchema),
       defaultValues: {

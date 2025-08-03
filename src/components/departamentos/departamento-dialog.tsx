@@ -70,6 +70,7 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
           ref={formRef}
           onSubmit={handleSubmit}
           defaultValues={departamento || {}}
+          isSubmitting={isSubmitting}
         />
          <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
