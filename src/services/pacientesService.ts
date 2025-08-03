@@ -34,7 +34,8 @@ export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<strin
 
 export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id'>>): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
-    await updateDoc(pacienteDoc, paciente);
+    const { id: pacienteId, ...pacienteData } = paciente as Paciente;
+    await updateDoc(pacienteDoc, pacienteData);
 };
 
 export const deletePaciente = async (id: string): Promise<void> => {
