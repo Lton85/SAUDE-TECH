@@ -61,7 +61,7 @@ export default function DashboardLayout({
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href) && item.href !== '/painel')}
+                  isActive={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href) && item.href !== '/painel'}
                 >
                   <Link href={item.href} target={item.target}>
                     <item.icon />
