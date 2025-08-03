@@ -26,10 +26,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/cadastros", label: "Cadastros", icon: Users },
-  { href: "/triagem", label: "Triagem", icon: ClipboardList },
-  { href: "/atendimento", label: "Atendimento", icon: Clock },
+  { href: "/", label: "Início", icon: Home, target: "_self" },
+  { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
+  { href: "/triagem", label: "Triagem", icon: ClipboardList, target: "_self" },
+  { href: "/atendimento", label: "Atendimento", icon: Clock, target: "_self" },
+  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" },
 ];
 
 export default function DashboardLayout({
@@ -41,7 +42,8 @@ export default function DashboardLayout({
 
   const getPageTitle = () => {
     if (pathname === "/") return "Dashboard";
-    const current = menuItems.find(item => pathname.startsWith(item.href) && item.href !== '/');
+    const mainRoute = "/" + (pathname.split('/')[1] || "");
+    const current = menuItems.find(item => item.href === mainRoute);
     if (current) return current.label;
     if (pathname.startsWith("/cadastros")) return "Cadastros";
     return "Saúde Fácil";
@@ -62,9 +64,9 @@ export default function DashboardLayout({
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))}
+                  isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href) && item.href !== '/painel')}
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} target={item.target}>
                     <item.icon />
                     {item.label}
                   </Link>
@@ -73,18 +75,6 @@ export default function DashboardLayout({
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-           <SidebarMenu>
-             <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/painel" target="_blank">
-                    <Tv2 />
-                    Abrir Painel
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-           </SidebarMenu>
-        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
