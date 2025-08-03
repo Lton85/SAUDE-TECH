@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -6,7 +9,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
-const pacientes = [
+const pacientesData = [
   {
     id: '81232',
     nome: 'Aarao de Carvalho da Costa',
@@ -18,9 +21,47 @@ const pacientes = [
     cpf: '844.481.724-49',
     situacao: 'Ativo'
   },
+  {
+    id: '81233',
+    nome: 'Beatriz Almeida',
+    mae: 'Juliana Almeida',
+    sexo: 'Feminino',
+    idade: '32a',
+    nascimento: '15/05/1992',
+    cns: '700001234567890',
+    cpf: '123.456.789-00',
+    situacao: 'Ativo'
+  },
+  {
+    id: '81234',
+    nome: 'Carlos Eduardo Pereira',
+    mae: 'Maria Pereira',
+    sexo: 'Masculino',
+    idade: '55a',
+    nascimento: '10/11/1968',
+    cns: '701234567890123',
+    cpf: '987.654.321-11',
+    situacao: 'Inativo'
+  },
 ];
 
 export default function PacientesPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredPacientes, setFilteredPacientes] = useState(pacientesData);
+
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase();
+    const filteredData = pacientesData.filter((item) => {
+      return (
+        item.nome.toLowerCase().includes(lowercasedFilter) ||
+        item.mae.toLowerCase().includes(lowercasedFilter) ||
+        item.cpf.includes(searchTerm) ||
+        item.cns.includes(searchTerm)
+      );
+    });
+    setFilteredPacientes(filteredData);
+  }, [searchTerm]);
+
   return (
     <Card>
       <CardHeader>
@@ -32,8 +73,10 @@ export default function PacientesPage() {
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
+              placeholder="Buscar por nome, mãe, CPF ou CNS..."
               className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -55,7 +98,7 @@ export default function PacientesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pacientes.map((paciente) => (
+            {filteredPacientes.map((paciente) => (
               <TableRow key={paciente.id}>
                 <TableCell className="px-2 py-1 text-xs">
                   <Badge variant="outline">{paciente.id}</Badge>
@@ -75,7 +118,7 @@ export default function PacientesPage() {
                 <TableCell className="px-2 py-1 text-xs">{paciente.cns}</TableCell>
                 <TableCell className="px-2 py-1 text-xs">{paciente.cpf}</TableCell>
                 <TableCell className="px-2 py-1 text-xs">
-                  <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
+                  <Badge variant={paciente.situacao === 'Ativo' ? "default" : "destructive"} className={paciente.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
                     {paciente.situacao}
                   </Badge>
                 </TableCell>
@@ -106,6 +149,13 @@ export default function PacientesPage() {
                 </TableCell>
               </TableRow>
             ))}
+             {filteredPacientes.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={10} className="h-24 text-center">
+                    Nenhum resultado encontrado.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>
