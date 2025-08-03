@@ -20,10 +20,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home, target: "_self" },
@@ -61,7 +58,7 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             {menuItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
+              <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href) && item.href !== '/painel')}
