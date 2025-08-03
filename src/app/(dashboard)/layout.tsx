@@ -25,9 +25,8 @@ import {
 const menuItems = [
   { href: "/", label: "Início", icon: Home, target: "_self" },
   { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
-  { href: "/triagem", label: "Triagem", icon: ClipboardList, target: "_self" },
+  { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
   { href: "/atendimento", label: "Atendimento", icon: Clock, target: "_self" },
-  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" },
 ];
 
 export default function DashboardLayout({
@@ -58,10 +57,10 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             {menuItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
+               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href) && item.href !== '/painel'}
+                  isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
                 >
                   <Link href={item.href} target={item.target}>
                     <item.icon />
@@ -70,6 +69,17 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+             <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith('/painel')}
+                >
+                  <Link href={'/painel'} target={'_blank'}>
+                    <Tv2 />
+                    {'Abrir Painel'}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>

@@ -14,8 +14,8 @@ export default function DashboardPage() {
     },
     {
       href: "/triagem",
-      title: "Triagem",
-      description: "Realize a triagem e priorize atendimentos.",
+      title: "Departamentos",
+      description: "Gerencie os departamentos e suas prioridades.",
       icon: ClipboardList,
       target: "_self"
     },

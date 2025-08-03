@@ -27,8 +27,8 @@ export default function TriagemPage() {
     <div className="grid lg:grid-cols-2 gap-8">
       <Card className="self-start">
         <CardHeader>
-          <CardTitle>Nova Triagem</CardTitle>
-          <CardDescription>Preencha os dados para iniciar a triagem do paciente.</CardDescription>
+          <CardTitle>Controle de Departamentos</CardTitle>
+          <CardDescription>Gerencie os departamentos e suas prioridades.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
