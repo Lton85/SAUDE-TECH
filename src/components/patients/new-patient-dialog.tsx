@@ -4,7 +4,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, UserPlus, Loader2 } from "lucide-react";
 import * as React from "react";
@@ -34,7 +34,9 @@ const formSchema = z.object({
   pai: z.string().optional(),
   cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
   cpf: z.string().min(11, { message: "O CPF é obrigatório e deve conter apenas números." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
-  nascimento: z.date({ required_error: "A data de nascimento é obrigatória."}),
+  nascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
+    message: "A data deve estar no formato DD/MM/AAAA.",
+  }),
   sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
   raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada'], { required_error: "A raça/cor é obrigatória."}),
@@ -58,6 +60,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             pai: "",
             cns: "",
             cpf: "",
+            nascimento: "",
             cep: "",
             endereco: "",
             numero: "",
@@ -71,11 +74,12 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
+            const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
             const newPatient: Omit<Paciente, 'id'> = {
                 ...values,
                 endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
-                nascimento: format(values.nascimento, 'dd/MM/yyyy'),
-                idade: `${new Date().getFullYear() - values.nascimento.getFullYear()}a`,
+                nascimento: values.nascimento,
+                idade: `${new Date().getFullYear() - birthDate.getFullYear()}a`,
                 situacao: 'Ativo',
                 historico: {
                     criadoEm: new Date().toISOString(),
@@ -179,38 +183,35 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col justify-end">
                                         <FormLabel>Data de Nascimento *</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
+                                        <div className="relative">
                                             <FormControl>
-                                                <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full pl-3 text-left font-normal bg-muted/40",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                                >
-                                                {field.value ? (
-                                                    format(field.value, "PPP", { locale: ptBR})
-                                                ) : (
-                                                    <span>Selecione uma data</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
+                                                <Input
+                                                    className="bg-muted/40 pr-10"
+                                                    placeholder="DD/MM/AAAA"
+                                                    {...field}
+                                                />
                                             </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                disabled={(date) =>
-                                                date > new Date() || date < new Date("1900-01-01")
-                                                }
-                                                initialFocus
-                                                locale={ptBR}
-                                            />
-                                            </PopoverContent>
-                                        </Popover>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" className="absolute right-0 top-0 h-full px-3">
+                                                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                                                        <span className="sr-only">Abrir calendário</span>
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
+                                                        onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
+                                                        disabled={(date) =>
+                                                            date > new Date() || date < new Date("1900-01-01")
+                                                        }
+                                                        initialFocus
+                                                        locale={ptBR}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -416,3 +417,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
+
+    
