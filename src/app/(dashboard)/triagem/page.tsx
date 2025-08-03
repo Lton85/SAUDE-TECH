@@ -48,6 +48,7 @@ export default function DepartamentosPage() {
 
   const handleSuccess = () => {
     fetchDepartamentos();
+    setIsDialogOpen(false);
     setSelectedDepartamento(null);
   };
 
@@ -60,7 +61,7 @@ export default function DepartamentosPage() {
     setSelectedDepartamento(departamento);
     setIsDialogOpen(true);
   };
-
+  
   const handleView = (departamento: Departamento) => {
     setSelectedDepartamento(departamento);
     setIsViewDialogOpen(true);
@@ -187,7 +188,12 @@ export default function DepartamentosPage() {
       {selectedDepartamento && (
         <ViewDepartamentoDialog
           isOpen={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
+          onOpenChange={(isOpen) => {
+            setIsViewDialogOpen(isOpen);
+            if (!isOpen) {
+              setSelectedDepartamento(null);
+            }
+          }}
           departamento={selectedDepartamento}
         />
       )}

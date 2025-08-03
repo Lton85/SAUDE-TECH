@@ -9,8 +9,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "../ui/button";
-import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome é obrigatório." }),
@@ -20,34 +18,40 @@ const formSchema = z.object({
 
 type DepartamentoFormValues = z.infer<typeof formSchema>;
 
-interface DepartamentoFormProps {
+interface DepartamentoFormProps extends React.ComponentPropsWithoutRef<'form'> {
   onSubmit: (values: DepartamentoFormValues) => void;
-  defaultValues?: Partial<DepartamentoFormValues>;
-  isSubmitting: boolean;
+  departamento?: Departamento | null;
 }
 
-export const DepartamentoForm = React.forwardRef<HTMLFormElement, DepartamentoFormProps>(
-  ({ onSubmit, defaultValues, isSubmitting }, ref) => {
+export const DepartamentoForm = ({ onSubmit, departamento, ...props }: DepartamentoFormProps) => {
     const form = useForm<DepartamentoFormValues>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        nome: defaultValues?.nome || "",
-        numero: defaultValues?.numero || "",
-        situacao: defaultValues?.situacao || 'Ativo',
+        nome: "",
+        numero: "",
+        situacao: 'Ativo',
       },
     });
 
     React.useEffect(() => {
-        form.reset({
-            nome: defaultValues?.nome || "",
-            numero: defaultValues?.numero || "",
-            situacao: defaultValues?.situacao || 'Ativo',
-        });
-    }, [defaultValues, form]);
+        if (departamento) {
+            form.reset({
+                nome: departamento.nome || "",
+                numero: departamento.numero || "",
+                situacao: departamento.situacao || 'Ativo',
+            });
+        } else {
+             form.reset({
+                nome: "",
+                numero: "",
+                situacao: 'Ativo',
+            });
+        }
+    }, [departamento, form]);
 
     return (
       <Form {...form}>
-        <form ref={ref} id="departamento-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4" {...props}>
           <FormField
             control={form.control}
             name="nome"
@@ -98,7 +102,6 @@ export const DepartamentoForm = React.forwardRef<HTMLFormElement, DepartamentoFo
         </form>
       </Form>
     );
-  }
-);
+  };
 
 DepartamentoForm.displayName = "DepartamentoForm";

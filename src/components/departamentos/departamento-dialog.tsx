@@ -19,7 +19,7 @@ interface DepartamentoDialogProps {
 export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamento }: DepartamentoDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const formId = "departamento-form";
   const isEditMode = !!departamento;
 
   const handleSubmit = async (values: Omit<Departamento, 'id'>) => {
@@ -42,8 +42,8 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
         });
       }
       onSuccess();
-      onOpenChange(false);
     } catch (error) {
+      console.error("Erro ao salvar departamento:", error);
       toast({
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'}`,
         description: `Não foi possível salvar os dados. Tente novamente.`,
@@ -67,16 +67,15 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
           </DialogDescription>
         </DialogHeader>
         <DepartamentoForm
-          ref={formRef}
+          id={formId}
           onSubmit={handleSubmit}
-          defaultValues={departamento || {}}
-          isSubmitting={isSubmitting}
+          departamento={departamento}
         />
          <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                 Cancelar
             </Button>
-            <Button type="submit" form="departamento-form" disabled={isSubmitting}>
+            <Button type="submit" form={formId} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Salvando...' : 'Salvar'}
             </Button>
