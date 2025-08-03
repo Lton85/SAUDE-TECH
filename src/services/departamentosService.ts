@@ -1,5 +1,6 @@
+"use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import type { Departamento } from '@/types/departamento';
 
 const departamentosCollection = collection(db, 'departamentos');
