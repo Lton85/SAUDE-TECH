@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, History, Pencil, Search, Mars } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -147,9 +147,9 @@ export default function PacientesPage() {
                   </TableCell>
                   <TableCell className="text-right px-2 py-1">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedPatient(paciente)}>
-                          <History className="h-3 w-3" />
-                          <span className="sr-only">Histórico</span>
+                       <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <Eye className="h-3 w-3" />
+                          <span className="sr-only">Visualizar Cadastro</span>
                       </Button>
                        <Button variant="ghost" size="icon" className="h-6 w-6">
                           <Pencil className="h-3 w-3" />
@@ -164,7 +164,10 @@ export default function PacientesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem>Ver Prontuário</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedPatient(paciente)}>
+                              <History className="mr-2 h-3 w-3" />
+                              <span>Histórico</span>
+                          </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive focus:text-destructive">Excluir</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
