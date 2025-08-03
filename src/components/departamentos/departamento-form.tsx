@@ -34,6 +34,14 @@ export const DepartamentoForm = React.forwardRef<HTMLFormElement, DepartamentoFo
       },
     });
 
+    React.useEffect(() => {
+        form.reset({
+            nome: defaultValues?.nome || "",
+            numero: defaultValues?.numero || "",
+            situacao: defaultValues?.situacao || 'Ativo',
+        });
+    }, [defaultValues, form]);
+
     return (
       <Form {...form}>
         <form ref={ref} id="departamento-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
