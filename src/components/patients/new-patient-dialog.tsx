@@ -113,7 +113,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                     </TabsList>
                     <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
                         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="nome"
                                 render={({ field }) => (
@@ -167,11 +167,12 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     )}
                                 />
                             </div>
+                            <div className="md:col-span-6 grid md:grid-cols-3 gap-4">
                              <FormField
                                 control={form.control}
                                 name="nascimento"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col md:col-span-2">
+                                    <FormItem className="flex flex-col">
                                         <FormLabel>Data de Nascimento *</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -213,7 +214,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="sexo"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                         <FormLabel>Sexo *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
@@ -234,7 +235,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 control={form.control}
                                 name="cpf"
                                 render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
+                                    <FormItem>
                                         <FormLabel>CPF *</FormLabel>
                                         <FormControl>
                                             <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
@@ -243,6 +244,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
+                            </div>
                             
                             <FormField
                                 control={form.control}
