@@ -106,8 +106,8 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                 <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <Tabs defaultValue="info-gerais" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mb-4">
-                        <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
-                        <TabsTrigger value="info-complementares">Informações Complementares</TabsTrigger>
+                        <TabsTrigger value="info-gerais" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Informações Gerais</TabsTrigger>
+                        <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Informações Complementares</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info-gerais">
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
@@ -132,6 +132,19 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                         <FormLabel>Nome da Mãe *</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="pai"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-2">
+                                        <FormLabel>Nome do Pai *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Digite o nome do pai" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -226,30 +239,13 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     </FormItem>
                                 )}
                             />
-                         </div>
-                    </TabsContent>
-                     <TabsContent value="info-complementares">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                              <FormField
-                                control={form.control}
-                                name="pai"
-                                render={({ field }) => (
-                                    <FormItem className="md:col-span-3">
-                                        <FormLabel>Nome do Pai *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Digite o nome do pai" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="estadoCivil"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Estado Civil *</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValuechange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Selecione o estado civil" />
@@ -359,6 +355,11 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                 )}
                             />
                          </div>
+                    </TabsContent>
+                     <TabsContent value="info-complementares">
+                        <div className="py-4">
+                            <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
+                        </div>
                     </TabsContent>
                 </Tabs>
                 </div>
