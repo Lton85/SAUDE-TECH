@@ -29,8 +29,7 @@ export const getPacientes = async (): Promise<Paciente[]> => {
 };
 
 export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<DocumentReference> => {
-    const { id, ...dataToSave } = paciente as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    return await addDoc(pacientesCollection, dataToSave);
+    return await addDoc(pacientesCollection, paciente);
 };
 
 export const deletePaciente = async (id: string): Promise<void> => {
