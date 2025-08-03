@@ -110,8 +110,8 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                         <TabsTrigger value="info-gerais" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground">Informações Gerais</TabsTrigger>
                         <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground">Informações complementares</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="info-gerais">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                    <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField
                                 control={form.control}
                                 name="nome"
@@ -358,7 +358,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                          </div>
                     </TabsContent>
                      <TabsContent value="info-complementares">
-                        <div className="py-4">
+                        <div className="py-4 bg-card p-4 rounded-md border">
                             <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
                         </div>
                     </TabsContent>
@@ -376,3 +376,5 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
+
+    
