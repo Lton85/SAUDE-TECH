@@ -65,7 +65,7 @@ export default function PacientesPage() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                        <AvatarFallback className="bg-muted-foreground/20">
-                         <User className="h-4 w-4 text-muted-foreground" />
+                         {paciente.nome.substring(0, 2).toUpperCase()}
                        </AvatarFallback>
                     </Avatar>
                     <span>{paciente.nome}</span>
