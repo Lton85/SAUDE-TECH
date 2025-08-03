@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import type { Enfermeiro } from '@/types/enfermeiro';
 
 const enfermeirosCollection = collection(db, 'enfermeiros');
@@ -24,4 +24,19 @@ export const getEnfermeiros = async (): Promise<Enfermeiro[]> => {
     await seedEnfermeiros();
     const snapshot = await getDocs(enfermeirosCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enfermeiro));
+};
+
+export const addEnfermeiro = async (enfermeiro: Omit<Enfermeiro, 'id'>): Promise<string> => {
+    const docRef = await addDoc(enfermeirosCollection, enfermeiro);
+    return docRef.id;
+};
+
+export const updateEnfermeiro = async (id: string, enfermeiro: Partial<Omit<Enfermeiro, 'id'>>): Promise<void> => {
+    const enfermeiroDoc = doc(db, 'enfermeiros', id);
+    await updateDoc(enfermeiroDoc, enfermeiro);
+};
+
+export const deleteEnfermeiro = async (id: string): Promise<void> => {
+    const enfermeiroDoc = doc(db, 'enfermeiros', id);
+    await deleteDoc(enfermeiroDoc);
 };

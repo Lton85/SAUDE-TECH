@@ -1,8 +1,7 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
-import type { DocumentReference } from 'firebase/firestore';
 
 const medicosCollection = collection(db, 'medicos');
 
@@ -31,8 +30,14 @@ export const getMedicos = async (): Promise<Medico[]> => {
     return medicos;
 };
 
-export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<DocumentReference> => {
-    return await addDoc(medicosCollection, medico);
+export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<string> => {
+    const docRef = await addDoc(medicosCollection, medico);
+    return docRef.id;
+};
+
+export const updateMedico = async (id: string, medico: Partial<Omit<Medico, 'id'>>): Promise<void> => {
+    const medicoDoc = doc(db, 'medicos', id);
+    await updateDoc(medicoDoc, medico);
 };
 
 export const deleteMedico = async (id: string): Promise<void> => {

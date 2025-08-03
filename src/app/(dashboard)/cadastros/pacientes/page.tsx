@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,11 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HistoryDialog } from "@/components/patients/history-dialog";
 import { ViewDialog } from "@/components/patients/view-dialog";
-import { NewPatientDialog } from "@/components/patients/new-patient-dialog";
+import { PatientDialog } from "@/components/patients/patient-dialog";
 import type { Paciente } from "@/types/paciente";
 import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { getPacientes, addPaciente, deletePaciente } from "@/services/pacientesService";
+import { getPacientes, deletePaciente } from "@/services/pacientesService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -25,7 +24,8 @@ export default function PacientesPage() {
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
-  const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false);
+  const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -35,7 +35,7 @@ export default function PacientesPage() {
     try {
       const data = await getPacientes();
       setPacientes(data);
-      setFilteredPacientes(data); // Initialize filteredPacientes here
+      setFilteredPacientes(data);
     } catch (error) {
       toast({
         title: "Erro ao buscar pacientes",
@@ -65,34 +65,30 @@ export default function PacientesPage() {
     setFilteredPacientes(filteredData);
   }, [searchTerm, pacientes]);
 
-  const handlePatientCreated = async (newPatientData: Omit<Paciente, 'id'>) => {
-    try {
-        await addPaciente(newPatientData);
-        await fetchPacientes(); // Refetch all patients to get the new one
-         toast({
-            title: "Paciente Cadastrado!",
-            description: `O paciente ${newPatientData.nome} foi adicionado com sucesso.`,
-            className: "bg-green-500 text-white"
-        });
-    } catch (error) {
-        console.error("Detailed error saving patient: ", error);
-         toast({
-            title: "Erro ao cadastrar paciente",
-            description: "Não foi possível adicionar o novo paciente. Verifique os dados e tente novamente.",
-            variant: "destructive",
-        });
-        // Re-throw to be caught in the dialog
-        throw error;
-    }
+  const handleSuccess = () => {
+    fetchPacientes();
+    setSelectedPatient(null);
+  };
+
+  const handleAddNew = () => {
+    setSelectedPatient(null);
+    setIsPatientDialogOpen(true);
+  };
+
+  const handleEdit = (paciente: Paciente) => {
+    setSelectedPatient(paciente);
+    setIsPatientDialogOpen(true);
+  };
+
+  const handleDelete = (paciente: Paciente) => {
+    setPatientToDelete(paciente);
   };
 
   const handleDeleteConfirm = async () => {
     if (patientToDelete) {
       try {
         await deletePaciente(patientToDelete.id);
-        const updatedPacientes = pacientes.filter(p => p.id !== patientToDelete.id);
-        setPacientes(updatedPacientes);
-        setFilteredPacientes(updatedPacientes);
+        fetchPacientes();
         toast({
           title: "Paciente Excluído!",
           description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
@@ -129,7 +125,7 @@ export default function PacientesPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button onClick={() => setIsNewPatientDialogOpen(true)}>
+              <Button onClick={handleAddNew}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Novo Paciente
               </Button>
@@ -194,7 +190,7 @@ export default function PacientesPage() {
                             <Eye className="h-3 w-3" />
                             <span className="sr-only">Visualizar Cadastro</span>
                         </Button>
-                         <Button variant="ghost" size="icon" className="h-6 w-6">
+                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(paciente)}>
                             <Pencil className="h-3 w-3" />
                             <span className="sr-only">Editar</span>
                         </Button>
@@ -212,7 +208,7 @@ export default function PacientesPage() {
                                 <span>Histórico</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setPatientToDelete(paciente)}>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(paciente)}>
                                 <Trash2 className="mr-2 h-3 w-3" />
                                 <span>Excluir</span>
                             </DropdownMenuItem>
@@ -247,17 +243,20 @@ export default function PacientesPage() {
             paciente={selectedPatientForView}
           />
       )}
-       <NewPatientDialog
-          isOpen={isNewPatientDialogOpen}
-          onOpenChange={setIsNewPatientDialogOpen}
-          onPatientCreated={handlePatientCreated}
+       <PatientDialog
+          isOpen={isPatientDialogOpen}
+          onOpenChange={setIsPatientDialogOpen}
+          onSuccess={handleSuccess}
+          paciente={selectedPatient}
         />
-        <DeleteConfirmationDialog
-          isOpen={!!patientToDelete}
-          onOpenChange={(isOpen) => !isOpen && setPatientToDelete(null)}
-          onConfirm={handleDeleteConfirm}
-          patientName={patientToDelete?.nome || ''}
-        />
+        {patientToDelete && (
+            <DeleteConfirmationDialog
+                isOpen={!!patientToDelete}
+                onOpenChange={() => setPatientToDelete(null)}
+                onConfirm={handleDeleteConfirm}
+                patientName={patientToDelete?.nome || ''}
+            />
+        )}
     </>
   );
 }
