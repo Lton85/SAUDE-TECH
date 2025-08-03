@@ -105,9 +105,9 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <Tabs defaultValue="info-gerais" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                        <TabsTrigger value="info-gerais" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Informações Gerais</TabsTrigger>
-                        <TabsTrigger value="info-complementares" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Informações Complementares</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted">
+                        <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
+                        <TabsTrigger value="info-complementares">Informações Complementares</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info-gerais">
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
