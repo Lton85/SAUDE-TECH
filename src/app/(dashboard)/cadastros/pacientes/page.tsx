@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -95,14 +95,20 @@ export default function PacientesPage() {
               <CardTitle>Lista de Pacientes</CardTitle>
               <CardDescription>Visualize e gerencie os pacientes cadastrados no sistema.</CardDescription>
             </div>
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, mãe, CPF ou CNS..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, mãe, CPF ou CNS..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Novo Paciente
+              </Button>
             </div>
           </div>
         </CardHeader>
