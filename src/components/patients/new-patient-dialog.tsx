@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import type { Paciente } from "@/types/paciente";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "../ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 interface NewPatientDialogProps {
@@ -55,7 +56,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             cns: "",
             cpf: "",
             endereco: "",
-            nacionalidade: "",
+            nacionalidade: "Brasileira",
             email: "",
             telefone: "",
             observacoes: "",
@@ -101,253 +102,258 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         </DialogHeader>
         
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                        <FormItem className="md:col-span-3">
-                            <FormLabel>Nome Completo *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Digite o nome completo do paciente" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="mae"
-                    render={({ field }) => (
-                        <FormItem className="md:col-span-2">
-                            <FormLabel>Nome da Mãe *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Digite o nome da mãe do paciente" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="pai"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Nome do Pai *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Digite o nome do pai" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="cns"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Nº do CNS *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="0000 0000 0000 0000" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="cpf"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>CPF *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="000.000.000-00" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="nascimento"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Data de Nascimento *</FormLabel>
-                             <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                    )}
-                                    >
-                                    {field.value ? (
-                                        format(field.value, "PPP", { locale: ptBR})
-                                    ) : (
-                                        <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) =>
-                                    date > new Date() || date < new Date("1900-01-01")
-                                    }
-                                    initialFocus
-                                    locale={ptBR}
-                                />
-                                </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="sexo"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Sexo *</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o sexo" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Masculino">Masculino</SelectItem>
-                                    <SelectItem value="Feminino">Feminino</SelectItem>
-                                </SelectContent>
-                             </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="estadoCivil"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Estado Civil *</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o estado civil" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem>
-                                    <SelectItem value="Casado(a)">Casado(a)</SelectItem>
-                                    <SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem>
-                                    <SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem>
-                                    <SelectItem value="União Estável">União Estável</SelectItem>
-                                </SelectContent>
-                             </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="raca"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Raça/Cor *</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione a raça/cor" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Branca">Branca</SelectItem>
-                                    <SelectItem value="Preta">Preta</SelectItem>
-                                    <SelectItem value="Parda">Parda</SelectItem>
-                                    <SelectItem value="Amarela">Amarela</SelectItem>
-                                    <SelectItem value="Indígena">Indígena</SelectItem>
-                                    <SelectItem value="Não declarada">Não declarada</SelectItem>
-                                </SelectContent>
-                             </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="endereco"
-                    render={({ field }) => (
-                        <FormItem className="md:col-span-2">
-                            <FormLabel>Endereço *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="nacionalidade"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Nacionalidade *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Ex: Brasileira" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>E-mail</FormLabel>
-                            <FormControl>
-                                <Input placeholder="paciente@email.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="telefone"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Telefone</FormLabel>
-                            <FormControl>
-                                <Input placeholder="(00) 00000-0000" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="observacoes"
-                    render={({ field }) => (
-                        <FormItem className="md:col-span-3">
-                            <FormLabel>Observações</FormLabel>
-                            <FormControl>
-                                <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+                <Tabs defaultValue="info-gerais" className="w-full">
+                    <TabsList className="grid w-full grid-cols-1 mb-4">
+                        <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="info-gerais">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+                            <FormField
+                                control={form.control}
+                                name="nome"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-3">
+                                        <FormLabel>Nome Completo *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Digite o nome completo do paciente" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="mae"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-2">
+                                        <FormLabel>Nome da Mãe *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Digite o nome da mãe do paciente" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="pai"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nome do Pai *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Digite o nome do pai" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="cns"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nº do CNS *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="0000 0000 0000 0000" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="cpf"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>CPF *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="000.000.000-00" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="nascimento"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Data de Nascimento *</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full pl-3 text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                                >
+                                                {field.value ? (
+                                                    format(field.value, "PPP", { locale: ptBR})
+                                                ) : (
+                                                    <span>Selecione uma data</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) =>
+                                                date > new Date() || date < new Date("1900-01-01")
+                                                }
+                                                initialFocus
+                                                locale={ptBR}
+                                            />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="sexo"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Sexo *</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Selecione o sexo" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Masculino">Masculino</SelectItem>
+                                                <SelectItem value="Feminino">Feminino</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="estadoCivil"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Estado Civil *</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Selecione o estado civil" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem>
+                                                <SelectItem value="Casado(a)">Casado(a)</SelectItem>
+                                                <SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem>
+                                                <SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem>
+                                                <SelectItem value="União Estável">União Estável</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="raca"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Raça/Cor *</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Selecione a raça/cor" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Branca">Branca</SelectItem>
+                                                <SelectItem value="Preta">Preta</SelectItem>
+                                                <SelectItem value="Parda">Parda</SelectItem>
+                                                <SelectItem value="Amarela">Amarela</SelectItem>
+                                                <SelectItem value="Indígena">Indígena</SelectItem>
+                                                <SelectItem value="Não declarada">Não declarada</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="endereco"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-2">
+                                        <FormLabel>Endereço *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ex: Rua, Número, Bairro, Cidade - Estado" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="nacionalidade"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nacionalidade *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ex: Brasileira" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>E-mail</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="paciente@email.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="telefone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Telefone</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="(00) 00000-0000" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="observacoes"
+                                render={({ field }) => (
+                                    <FormItem className="md:col-span-3">
+                                        <FormLabel>Observações</FormLabel>
+                                        <FormControl>
+                                            <Textarea placeholder="Alguma observação sobre o paciente..." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                         </div>
+                    </TabsContent>
+                </Tabs>
                 <DialogFooter className="md:col-span-3 mt-4">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                         Cancelar
