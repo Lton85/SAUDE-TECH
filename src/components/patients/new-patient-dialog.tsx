@@ -33,7 +33,7 @@ const formSchema = z.object({
   mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
   pai: z.string().optional(),
   cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório e deve conter apenas números." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
+  cpf: z.string().min(11, { message: "O CPF é obrigatório e deve conter 11 dígitos." }).max(14, { message: "CPF inválido."}),
   nascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
     message: "A data deve estar no formato DD/MM/AAAA.",
   }),
@@ -71,7 +71,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
         },
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true);
         try {
             const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
@@ -94,6 +94,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
             form.reset();
         } catch (error) {
             console.error("Erro ao submeter formulário:", error);
+            // Optionally, show a toast or error message to the user here
         } finally {
             setIsSubmitting(false);
         }
@@ -185,22 +186,13 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     <FormLabel>Data de Nascimento *</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-full pl-3 text-left font-normal bg-muted/40",
-                                                !field.value && "text-muted-foreground"
-                                            )}
-                                            >
-                                            {field.value ? (
-                                                format(parse(field.value, 'dd/MM/yyyy', new Date()), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                                            ) : (
-                                                <span>Selecione a data</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
+                                            <FormControl>
+                                                <Input
+                                                className="bg-muted/40"
+                                                placeholder="DD/MM/AAAA"
+                                                {...field}
+                                                />
+                                            </FormControl>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
                                         <Calendar
@@ -405,7 +397,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                     </TabsContent>
                 </Tabs>
                 </div>
-                <DialogFooter className="mt-4">
+                <DialogFooter className="mt-4 pt-4 border-t">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                         Cancelar
                     </Button>
