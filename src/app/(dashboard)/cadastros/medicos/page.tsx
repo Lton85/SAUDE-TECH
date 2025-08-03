@@ -22,32 +22,33 @@ export default function MedicosPage() {
   const [medicoToDelete, setMedicoToDelete] = useState<Medico | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchMedicos() {
-      try {
-        const data = await getMedicos();
-        setMedicos(data);
-      } catch (error) {
-        toast({
-          title: "Erro ao buscar médicos",
-          description: "Não foi possível carregar a lista de médicos.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchMedicos = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getMedicos();
+      setMedicos(data);
+    } catch (error) {
+      toast({
+        title: "Erro ao buscar médicos",
+        description: "Não foi possível carregar a lista de médicos.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchMedicos();
-  }, [toast]);
+  }, []);
 
   const handleMedicoCreated = async (newMedicoData: Omit<Medico, 'id'>) => {
     try {
-        const newMedico = await addMedico(newMedicoData);
-        const updatedMedicos = [newMedico, ...medicos];
-        setMedicos(updatedMedicos);
+        await addMedico(newMedicoData);
+        await fetchMedicos();
          toast({
             title: "Médico Cadastrado!",
-            description: `O médico ${newMedico.nome} foi adicionado com sucesso.`,
+            description: `O médico ${newMedicoData.nome} foi adicionado com sucesso.`,
             className: "bg-green-500 text-white"
         });
     } catch (error) {

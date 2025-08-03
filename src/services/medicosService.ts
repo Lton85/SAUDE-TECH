@@ -22,12 +22,15 @@ export const seedMedicos = async () => {
 export const getMedicos = async (): Promise<Medico[]> => {
     await seedMedicos();
     const snapshot = await getDocs(medicosCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico));
+    const medicos: Medico[] = [];
+    snapshot.forEach(doc => {
+        medicos.push({ id: doc.id, ...doc.data() } as Medico);
+    });
+    return medicos;
 };
 
-export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<Medico> => {
-    const docRef = await addDoc(medicosCollection, medico);
-    return { id: docRef.id, ...medico };
+export const addMedico = async (medico: Omit<Medico, 'id'>): Promise<DocumentReference> => {
+    return await addDoc(medicosCollection, medico);
 };
 
 export const deleteMedico = async (id: string): Promise<void> => {
