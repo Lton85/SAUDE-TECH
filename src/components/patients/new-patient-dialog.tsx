@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, UserPlus } from "lucide-react";
+import { CalendarIcon, UserPlus, Loader2 } from "lucide-react";
+import * as React from "react";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,15 +25,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface NewPatientDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onPatientCreated: (paciente: Omit<Paciente, 'id'>) => void;
+  onPatientCreated: (paciente: Omit<Paciente, 'id'>) => Promise<void>;
 }
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
-  pai: z.string().min(3, { message: "O nome do pai é obrigatório." }),
+  pai: z.string().optional(),
   cns: z.string().min(15, { message: "O CNS deve ter 15 dígitos." }).max(15, { message: "O CNS deve ter 15 dígitos." }),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
+  cpf: z.string().min(11, { message: "O CPF é obrigatório e deve conter apenas números." }).max(14, { message: "O CPF deve ter até 14 caracteres."}),
   nascimento: z.date({ required_error: "A data de nascimento é obrigatória."}),
   sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
@@ -47,6 +48,7 @@ const formSchema = z.object({
 });
 
 export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: NewPatientDialogProps) {
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -67,24 +69,31 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const newPatient: Omit<Paciente, 'id'> = {
-            ...values,
-            endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
-            nascimento: format(values.nascimento, 'dd/MM/yyyy'),
-            idade: `${new Date().getFullYear() - values.nascimento.getFullYear()}a`,
-            situacao: 'Ativo',
-            historico: {
-                criadoEm: new Date().toISOString(),
-                criadoPor: 'Recepção',
-                alteradoEm: new Date().toISOString(),
-                alteradoPor: 'Recepção',
-            }
-        };
-        
-        await onPatientCreated(newPatient);
-        onOpenChange(false);
-        form.reset();
-  }
+        setIsSubmitting(true);
+        try {
+            const newPatient: Omit<Paciente, 'id'> = {
+                ...values,
+                endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
+                nascimento: format(values.nascimento, 'dd/MM/yyyy'),
+                idade: `${new Date().getFullYear() - values.nascimento.getFullYear()}a`,
+                situacao: 'Ativo',
+                historico: {
+                    criadoEm: new Date().toISOString(),
+                    criadoPor: 'Recepção',
+                    alteradoEm: new Date().toISOString(),
+                    alteradoPor: 'Recepção',
+                }
+            };
+            
+            await onPatientCreated(newPatient);
+            onOpenChange(false);
+            form.reset();
+        } catch (error) {
+            console.error("Erro ao submeter formulário:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -154,7 +163,7 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                                     name="pai"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Nome do Pai *</FormLabel>
+                                            <FormLabel>Nome do Pai</FormLabel>
                                             <FormControl>
                                                 <Input className="bg-muted/40" placeholder="Digite o nome do pai" {...field} />
                                             </FormControl>
@@ -393,10 +402,13 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
                 </Tabs>
                 </div>
                 <DialogFooter className="mt-4">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                         Cancelar
                     </Button>
-                    <Button type="submit">Salvar Paciente</Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Salvar Paciente
+                    </Button>
                 </DialogFooter>
             </form>
         </Form>
@@ -404,5 +416,3 @@ export function NewPatientDialog({ isOpen, onOpenChange, onPatientCreated }: New
     </Dialog>
   );
 }
-
-    

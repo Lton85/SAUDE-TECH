@@ -81,6 +81,8 @@ export default function PacientesPage() {
             description: "Não foi possível adicionar o novo paciente. Verifique os dados e tente novamente.",
             variant: "destructive",
         });
+        // Re-throw to be caught in the dialog
+        throw error;
     }
   };
 
@@ -259,5 +261,3 @@ export default function PacientesPage() {
     </>
   );
 }
-
-    
