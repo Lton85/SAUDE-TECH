@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, History, Pencil, Search, User, Mars } from "lucide-react";
+import { MoreHorizontal, History, Pencil, Search, Mars } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -62,14 +62,7 @@ export default function PacientesPage() {
                   <Badge variant="outline">{paciente.id}</Badge>
                 </TableCell>
                 <TableCell className="font-medium">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                       <AvatarFallback className="bg-muted-foreground/20">
-                         {paciente.nome.substring(0, 2).toUpperCase()}
-                       </AvatarFallback>
-                    </Avatar>
-                    <span>{paciente.nome}</span>
-                  </div>
+                  {paciente.nome}
                 </TableCell>
                 <TableCell>{paciente.mae}</TableCell>
                 <TableCell>
