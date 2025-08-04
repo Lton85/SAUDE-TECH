@@ -37,6 +37,10 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
+    if (pathname === '/atendimento') {
+      return "Fila de Atendimento";
+    }
+
     const currentPath = "/" + (pathname.split('/')[1] || "");
     const currentItem = menuItems.find(item => item.href === currentPath);
     
