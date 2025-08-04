@@ -28,7 +28,7 @@ export default function ConfiguracoesPage() {
         const isNormal = resetType === 'Normal';
         const setLoading = isNormal ? setIsNormalResetting : setIsEmergenciaResetting;
         const counterName = isNormal ? 'senha_normal' : 'senha_emergencia';
-        const ticketExample = isNormal ? 'N-001' : 'U-001';
+        const ticketExample = isNormal ? 'N-001' : 'E-001';
 
         setLoading(true);
         setDialogOpen(false);
@@ -104,7 +104,7 @@ export default function ConfiguracoesPage() {
                                 disabled={isEmergenciaResetting}
                             >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${isEmergenciaResetting ? 'animate-spin' : ''}`} />
-                                {isEmergenciaResetting ? 'Zerando...' : 'Zerar (U-001)'}
+                                {isEmergenciaResetting ? 'Zerando...' : 'Zerar (E-001)'}
                             </Button>
                         </TableCell>
                     </TableRow>

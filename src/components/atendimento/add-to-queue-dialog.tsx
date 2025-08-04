@@ -67,7 +67,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       try {
         const counterName = classificationType === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
         const ticketNumber = await getNextCounter(counterName);
-        const ticketPrefix = classificationType === 'Emergência' ? 'U' : 'N';
+        const ticketPrefix = classificationType === 'Emergência' ? 'E' : 'N';
         const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
         setTicket(formattedTicket);
       } catch (error) {
