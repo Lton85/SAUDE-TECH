@@ -26,7 +26,7 @@ const menuItems = [
   { href: "/", label: "Início", icon: Home, target: "_self" },
   { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
   { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
-  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_self" },
+  { href: "/atendimento", label: "Atendimento", icon: Clock, target: "_self" },
 ];
 
 export default function DashboardLayout({
