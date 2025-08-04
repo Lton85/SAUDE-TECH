@@ -65,12 +65,12 @@ export function PacientesList() {
     const lowercasedQuery = searchTerm.toLowerCase();
 
     // Specific filters
-    if (lowercasedQuery.startsWith("rua:")) {
+    if (lowercasedQuery.startsWith("rua ")) {
       const searchValue = lowercasedQuery.substring(4).trim();
       setFilteredPacientes(pacientes.filter(p => p.endereco && p.endereco.toLowerCase().includes(searchValue)));
       return;
     }
-    if (lowercasedQuery.startsWith("numero:")) {
+    if (lowercasedQuery.startsWith("numero ")) {
       const searchValue = lowercasedQuery.substring(7).trim();
       setFilteredPacientes(pacientes.filter(p => p.numero && p.numero.toLowerCase().includes(searchValue)));
       return;

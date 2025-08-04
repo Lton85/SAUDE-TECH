@@ -60,13 +60,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     
     const lowercasedQuery = searchQuery.toLowerCase();
 
-    // Check for specific filters like "rua:" or "numero:"
-    if (lowercasedQuery.startsWith("rua:")) {
+    // Check for specific filters like "rua " or "numero "
+    if (lowercasedQuery.startsWith("rua ")) {
       const searchValue = lowercasedQuery.substring(4).trim();
       return pacientes.filter(p => p.endereco && p.endereco.toLowerCase().includes(searchValue));
     }
 
-    if (lowercasedQuery.startsWith("numero:")) {
+    if (lowercasedQuery.startsWith("numero ")) {
       const searchValue = lowercasedQuery.substring(7).trim();
       return pacientes.filter(p => p.numero && p.numero.toLowerCase().includes(searchValue));
     }
