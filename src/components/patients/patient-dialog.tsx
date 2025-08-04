@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -27,12 +28,15 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
     const handleSubmit = async (values: PatientFormValues) => {
         setIsSubmitting(true);
         try {
-            const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
-            const age = new Date().getFullYear() - birthDate.getFullYear();
+            let age = "";
+            if (values.nascimento) {
+                const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
+                age = `${new Date().getFullYear() - birthDate.getFullYear()}a`;
+            }
 
             const patientData = {
                 ...values,
-                idade: `${age}a`,
+                idade: age,
             };
 
             if (isEditMode && paciente) {

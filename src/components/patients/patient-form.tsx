@@ -21,23 +21,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
-  mae: z.string().min(3, { message: "O nome da mãe é obrigatório." }),
+  mae: z.string().optional(),
   pai: z.string().optional(),
   cns: z.string().min(15, { message: "O CNS deve ter pelo menos 15 dígitos." }),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório." }),
-  nascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
-    message: "A data deve estar no formato DD/MM/AAAA.",
-  }),
-  sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
-  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável'], { required_error: "O estado civil é obrigatório."}),
-  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada'], { required_error: "A raça/cor é obrigatória."}),
-  cep: z.string().min(8, { message: "O CEP é obrigatório." }),
-  endereco: z.string().min(3, { message: "O endereço é obrigatório." }),
-  numero: z.string().min(1, { message: "O número é obrigatório." }),
-  bairro: z.string().min(2, { message: "O bairro é obrigatório." }),
-  cidade: z.string().min(2, { message: "A cidade é obrigatória." }),
-  uf: z.string().length(2, { message: "Selecione uma UF." }),
-  nacionalidade: z.string().min(3, { message: "A nacionalidade é obrigatória." }),
+  cpf: z.string().optional(),
+  nascimento: z.string().optional(),
+  sexo: z.enum(['Masculino', 'Feminino']).optional(),
+  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável']).optional(),
+  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada']).optional(),
+  cep: z.string().optional(),
+  endereco: z.string().optional(),
+  numero: z.string().optional(),
+  bairro: z.string().optional(),
+  cidade: z.string().optional(),
+  uf: z.string().optional(),
+  nacionalidade: z.string().optional(),
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
   observacoes: z.string().optional(),
@@ -199,7 +197,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     name="mae"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome da Mãe *</FormLabel>
+                        <FormLabel>Nome da Mãe</FormLabel>
                         <FormControl>
                           <Input className="bg-muted/40" placeholder="Digite o nome da mãe do paciente" {...field} />
                         </FormControl>
@@ -227,7 +225,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     name="nascimento"
                     render={({ field }) => (
                       <FormItem className="flex flex-col justify-end">
-                        <FormLabel>Data de Nascimento *</FormLabel>
+                        <FormLabel>Data de Nascimento</FormLabel>
                         <div className="relative">
                           <FormControl>
                             <Input
@@ -252,7 +250,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                             <PopoverContent className="w-auto p-0" align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
+                                selected={field.value && /^\d{2}\/\d{2}\/\d{4}$/.test(field.value) ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
                                 onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
@@ -272,7 +270,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     name="sexo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sexo *</FormLabel>
+                        <FormLabel>Sexo</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="bg-muted/40">
@@ -293,7 +291,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     name="cpf"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>CPF *</FormLabel>
+                        <FormLabel>CPF</FormLabel>
                         <FormControl>
                           <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
                         </FormControl>
@@ -308,7 +306,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   name="estadoCivil"
                   render={({ field }) => (
                     <FormItem className="md:col-span-4">
-                      <FormLabel>Estado Civil *</FormLabel>
+                      <FormLabel>Estado Civil</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-muted/40">
@@ -332,7 +330,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   name="raca"
                   render={({ field }) => (
                     <FormItem className="md:col-span-4">
-                      <FormLabel>Raça/Cor *</FormLabel>
+                      <FormLabel>Raça/Cor</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-muted/40">
@@ -357,7 +355,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   name="nacionalidade"
                   render={({ field }) => (
                     <FormItem className="md:col-span-4">
-                      <FormLabel>Nacionalidade *</FormLabel>
+                      <FormLabel>Nacionalidade</FormLabel>
                       <FormControl>
                         <Input className="bg-muted/40" placeholder="Ex: Brasileira" {...field} />
                       </FormControl>
@@ -371,7 +369,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       name="cep"
                       render={({ field }) => (
                         <FormItem className="col-span-12 sm:col-span-2">
-                          <FormLabel>CEP *</FormLabel>
+                          <FormLabel>CEP</FormLabel>
                           <FormControl>
                             <Input className="bg-muted/40" placeholder="00000-000" {...field} onBlur={handleCepBlur} />
                           </FormControl>
@@ -384,7 +382,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       name="endereco"
                       render={({ field }) => (
                         <FormItem className="col-span-12 sm:col-span-8">
-                          <FormLabel>Endereço (Rua) *</FormLabel>
+                          <FormLabel>Endereço (Rua)</FormLabel>
                           <FormControl>
                             <Input className="bg-muted/40" placeholder="Ex: Av. Paulista" {...field} />
                           </FormControl>
@@ -397,7 +395,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       name="numero"
                       render={({ field }) => (
                         <FormItem className="col-span-12 sm:col-span-2">
-                          <FormLabel>Nº *</FormLabel>
+                          <FormLabel>Nº</FormLabel>
                           <FormControl>
                             <Input className="bg-muted/40" placeholder="000" {...field} />
                           </FormControl>
@@ -410,7 +408,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         name="bairro"
                         render={({ field }) => (
                             <FormItem className="col-span-12 sm:col-span-5">
-                            <FormLabel>Bairro *</FormLabel>
+                            <FormLabel>Bairro</FormLabel>
                             <FormControl>
                                 <Input className="bg-muted/40" placeholder="Ex: Bela Vista" {...field} />
                             </FormControl>
@@ -423,7 +421,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       name="uf"
                       render={({ field }) => (
                         <FormItem className="col-span-12 sm:col-span-2">
-                          <FormLabel>UF *</FormLabel>
+                          <FormLabel>UF</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="bg-muted/40">
@@ -445,11 +443,11 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         name="cidade"
                         render={({ field }) => (
                             <FormItem className="col-span-12 sm:col-span-5">
-                            <FormLabel>Cidade *</FormLabel>
+                            <FormLabel>Cidade</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value} disabled={isCitiesLoading || cities.length === 0}>
                                 <FormControl>
                                 <SelectTrigger className="bg-muted/40">
-                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (selectedUf ? "Selecione a cidade" : "Selecione um estado primeiro")} />
+                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (selectedUf ? "Selecione a cidade" : "Selecione um estado")} />
                                 </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -520,6 +518,3 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     </Form>
   );
 }
-
-
-    
