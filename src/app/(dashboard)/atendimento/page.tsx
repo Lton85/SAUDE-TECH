@@ -148,7 +148,7 @@ export default function AtendimentoPage() {
                                 <TableRow key={item.id} className="hover:bg-muted/50">
                                     <TableCell className="font-medium">{item.pacienteNome}</TableCell>
                                     <TableCell><Badge variant="secondary">{item.senha}</Badge></TableCell>
-                                    <TableCell>{item.departamentoNome}</TableCell>
+                                    <TableCell>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                     <TableCell>{item.profissionalNome}</TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-4">

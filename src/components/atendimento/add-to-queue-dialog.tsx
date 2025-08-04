@@ -134,6 +134,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         pacienteNome: selectedPaciente.nome,
         departamentoId: selectedDepartamento.id,
         departamentoNome: selectedDepartamento.nome,
+        departamentoNumero: selectedDepartamento.numero,
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
         senha: ticket,

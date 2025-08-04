@@ -101,6 +101,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
         departamentoNome: departamento.nome,
+        departamentoNumero: departamento.numero,
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
         senha: ticket,
