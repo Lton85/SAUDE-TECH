@@ -106,7 +106,7 @@ export default function PainelPage() {
                 >
                     <div className="text-center flex-1 flex flex-col justify-center">
                         <h2 className="text-5xl md:text-6xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
-                        <p className="font-black text-white tracking-tighter my-4 text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
+                        <p className="font-display font-black text-white tracking-tighter my-4 text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
                         <p className="text-5xl md:text-7xl font-semibold text-white/90 uppercase">{currentCall.departamentoNome}</p>
                     </div>
 
