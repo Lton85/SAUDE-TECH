@@ -146,7 +146,6 @@ export default function PacientesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px] px-2 py-2 text-xs">Código</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Paciente</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Mãe</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
@@ -162,7 +161,7 @@ export default function PacientesPage() {
                {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <TableRow key={i}>
-                    {[...Array(10)].map((_, j) => (
+                    {[...Array(9)].map((_, j) => (
                       <TableCell key={j} className="px-2 py-1 text-xs">
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
@@ -172,9 +171,6 @@ export default function PacientesPage() {
               ) : filteredPacientes.length > 0 ? (
                 filteredPacientes.map((paciente) => (
                   <TableRow key={paciente.id}>
-                    <TableCell className="px-2 py-1 text-xs">
-                      <Badge variant="outline">{paciente.codigo}</Badge>
-                    </TableCell>
                     <TableCell className="font-medium px-2 py-1 text-xs">
                       {paciente.nome}
                     </TableCell>
@@ -234,7 +230,7 @@ export default function PacientesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={10} className="h-24 text-center">
+                    <TableCell colSpan={9} className="h-24 text-center">
                     Nenhum paciente cadastrado. Comece adicionando um novo.
                     </TableCell>
                 </TableRow>
@@ -282,3 +278,5 @@ export default function PacientesPage() {
     </>
   );
 }
+
+    
