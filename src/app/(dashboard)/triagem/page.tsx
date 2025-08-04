@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Pencil, Trash2, Eye } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { PlusCircle, Pencil, Trash2, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getDepartamentos, deleteDepartamento } from "@/services/departamentosService";
 import type { Departamento } from "@/types/departamento";
@@ -113,10 +112,10 @@ export default function DepartamentosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-2 py-2">Nome</TableHead>
-                <TableHead className="px-2 py-2">Nº da Sala</TableHead>
-                <TableHead className="px-2 py-2">Situação</TableHead>
-                <TableHead className="text-right px-2 py-2">Ações</TableHead>
+                <TableHead className="px-1 py-1">Nome</TableHead>
+                <TableHead className="px-1 py-1">Nº da Sala</TableHead>
+                <TableHead className="px-1 py-1">Situação</TableHead>
+                <TableHead className="text-right px-1 py-1">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,21 +123,21 @@ export default function DepartamentosPage() {
                 [...Array(3)].map((_, i) => (
                   <TableRow key={i}>
                     {[...Array(4)].map((_, j) => (
-                      <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell key={j} className="px-1 py-1"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : departamentos.length > 0 ? (
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
-                    <TableCell className="font-medium px-2 py-1">{departamento.nome}</TableCell>
-                    <TableCell className="px-2 py-1">{departamento.numero || "N/A"}</TableCell>
-                    <TableCell className="px-2 py-1">
+                    <TableCell className="font-medium px-1 py-1">{departamento.nome}</TableCell>
+                    <TableCell className="px-1 py-1">{departamento.numero || "N/A"}</TableCell>
+                    <TableCell className="px-1 py-1">
                       <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right px-2 py-1">
+                    <TableCell className="text-right px-1 py-1">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleView(departamento)}>
                           <Eye className="h-4 w-4" />
@@ -148,21 +147,10 @@ export default function DepartamentosPage() {
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Abrir menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Opções</DropdownMenuLabel>
-                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(departamento)}>
-                              <Trash2 className="mr-2 h-3 w-3" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(departamento)}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Excluir</span>
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
