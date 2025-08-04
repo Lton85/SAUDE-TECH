@@ -28,7 +28,6 @@ const formSchema = z.object({
   nascimento: z.string().optional(),
   sexo: z.enum(['Masculino', 'Feminino']).optional(),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável']).optional(),
-  raca: z.enum(['Branca', 'Preta', 'Parda', 'Amarela', 'Indígena', 'Não declarada']).optional(),
   cep: z.string().optional(),
   endereco: z.string().optional(),
   numero: z.string().optional(),
@@ -73,7 +72,6 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       nascimento: "",
       sexo: undefined,
       estadoCivil: undefined,
-      raca: undefined,
       cep: "",
       endereco: "",
       numero: "",
@@ -323,31 +321,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="raca"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-4">
-                      <FormLabel>Raça/Cor</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-muted/40">
-                            <SelectValue placeholder="Selecione a raça/cor" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Branca">Branca</SelectItem>
-                          <SelectItem value="Preta">Preta</SelectItem>
-                          <SelectItem value="Parda">Parda</SelectItem>
-                          <SelectItem value="Amarela">Amarela</SelectItem>
-                          <SelectItem value="Indígena">Indígena</SelectItem>
-                          <SelectItem value="Não declarada">Não declarada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
                  <div className="md:col-span-12 grid grid-cols-12 gap-4">
                     <FormField
                       control={form.control}
