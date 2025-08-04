@@ -24,10 +24,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, target: "_self" },
-  { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
-  { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
-  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_self" },
+  { href: "/", label: "Início", icon: Home },
+  { href: "/cadastros", label: "Cadastros", icon: Users },
+  { href: "/triagem", label: "Departamentos", icon: ClipboardList },
+  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
   { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" },
 ];
 
@@ -84,7 +84,7 @@ export default function DashboardLayout({
             {getPageTitle()}
           </h1>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
