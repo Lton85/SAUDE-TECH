@@ -34,9 +34,25 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                 age = `${new Date().getFullYear() - birthDate.getFullYear()}a`;
             }
 
+            // Sanitize optional fields to be empty strings instead of undefined
             const patientData = {
                 ...values,
                 idade: age,
+                mae: values.mae || "",
+                pai: values.pai || "",
+                nascimento: values.nascimento || "",
+                sexo: values.sexo || "",
+                cpf: values.cpf || "",
+                estadoCivil: values.estadoCivil || "",
+                cep: values.cep || "",
+                endereco: values.endereco || "",
+                numero: values.numero || "",
+                bairro: values.bairro || "",
+                cidade: values.cidade || "",
+                uf: values.uf || "",
+                email: values.email || "",
+                telefone: values.telefone || "",
+                observacoes: values.observacoes || "",
             };
 
             if (isEditMode && paciente) {
