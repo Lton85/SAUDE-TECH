@@ -78,7 +78,6 @@ export function PacientesList() {
   const handleSuccess = () => {
     fetchData();
     setSelectedPatient(null);
-    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -287,5 +286,3 @@ export function PacientesList() {
     </>
   );
 }
-
-    
