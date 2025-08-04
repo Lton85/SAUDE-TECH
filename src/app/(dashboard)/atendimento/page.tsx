@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +21,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
 import { HistoryQueueItemDialog } from "@/components/atendimento/history-dialog";
+import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -57,6 +58,7 @@ export default function AtendimentoPage() {
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToProntuario, setItemToProntuario] = useState<FilaDeEsperaItem | null>(null);
 
     const { toast } = useToast();
 
@@ -120,6 +122,10 @@ export default function AtendimentoPage() {
     const handleEdit = (item: FilaDeEsperaItem) => {
         setItemToEdit(item);
     };
+    
+    const handleProntuario = (item: FilaDeEsperaItem) => {
+        setItemToProntuario(item);
+    }
 
     const handleDelete = (item: FilaDeEsperaItem) => {
         setItemToDelete(item);
@@ -209,6 +215,10 @@ export default function AtendimentoPage() {
                                                         <Pencil className="mr-2 h-4 w-4" />
                                                         <span>Editar</span>
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleProntuario(item)}>
+                                                        <FileText className="mr-2 h-4 w-4" />
+                                                        <span>Prontuário</span>
+                                                    </DropdownMenuItem>
                                                      <DropdownMenuItem onClick={() => handleHistory(item)}>
                                                         <History className="mr-2 h-4 w-4" />
                                                         <span>Histórico</span>
@@ -255,6 +265,14 @@ export default function AtendimentoPage() {
                 isOpen={!!itemToEdit}
                 onOpenChange={() => setItemToEdit(null)}
                 item={itemToEdit}
+            />
+        )}
+        
+        {itemToProntuario && (
+            <ProntuarioDialog
+                isOpen={!!itemToProntuario}
+                onOpenChange={() => setItemToProntuario(null)}
+                item={itemToProntuario}
             />
         )}
         
