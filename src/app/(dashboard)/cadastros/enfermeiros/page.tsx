@@ -122,7 +122,7 @@ export default function EnfermeirosPage() {
               <CardDescription>Gerencie a equipe de enfermagem.</CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative w-full max-w-sm">
+              <div className="relative w-full max-w-sm min-w-[350px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar por nome, CPF, CNS ou COREN..."
