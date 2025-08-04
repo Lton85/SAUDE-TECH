@@ -163,5 +163,3 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
     </Dialog>
   );
 }
-
-    
