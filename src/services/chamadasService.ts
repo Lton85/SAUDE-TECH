@@ -6,12 +6,11 @@ interface Chamada {
     ticket: string;
     room: string;
     doctor: string;
-    timestamp: Date;
 }
 
 const chamadasCollection = collection(db, 'chamadas');
 
-export const createChamada = async (chamadaData: Omit<Chamada, 'timestamp'> & { timestamp: Date }) => {
+export const createChamada = async (chamadaData: Chamada) => {
     try {
         await addDoc(chamadasCollection, {
             ...chamadaData,

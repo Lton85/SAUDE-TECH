@@ -1,28 +1,15 @@
 "use client"
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import type { FilaDeEsperaItem } from '@/types/fila';
+import { createChamada } from './chamadasService';
+import { getDoc } from 'firebase/firestore';
 
-export interface FilaDeEsperaItem {
-    id?: string;
-    pacienteId: string;
-    pacienteNome: string;
-    departamentoId: string;
-    departamentoNome: string;
-    profissionalId: string;
-    profissionalNome: string;
-    senha: string;
-    chegadaEm: Date;
-    chamadaEm?: Date;
-    finalizadaEm?: Date;
-    status: 'aguardando' | 'em-atendimento' | 'finalizado';
-}
 
-const filaCollection = collection(db, 'filaDeEspera');
-
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm'> & { chegadaEm: Date }) => {
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chegadaEm'>) => {
     // Verifica se o paciente já está na fila de qualquer departamento
-    const q = query(filaCollection, where("pacienteId", "==", item.pacienteId), where("status", "in", ["aguardando", "em-atendimento"]));
+    const q = query(collection(db, "filaDeEspera"), where("pacienteId", "==", item.pacienteId), where("status", "in", ["aguardando", "em-atendimento"]));
     const existing = await getDocs(q);
     
     if (!existing.empty) {
@@ -31,7 +18,7 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
     }
 
     try {
-        await addDoc(filaCollection, {
+        await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
             chegadaEm: serverTimestamp() 
         });
@@ -39,4 +26,64 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
         console.error("Erro ao adicionar paciente à fila: ", error);
         throw new Error("Não foi possível adicionar o paciente à fila no Firestore.");
     }
+};
+
+export const getFilaDeEspera = (
+    onUpdate: (data: FilaDeEsperaItem[]) => void,
+    onError: (error: string) => void
+) => {
+    const q = query(
+        collection(db, "filaDeEspera"), 
+        where("status", "==", "aguardando"),
+        where("chegadaEm", "!=", null)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem)).sort((a, b) => {
+             // Handle cases where a.chegadaEm or b.chegadaEm might be null temporarily from server
+            if (!a.chegadaEm) return 1;
+            if (!b.chegadaEm) return -1;
+            return a.chegadaEm.toMillis() - b.chegadaEm.toMillis();
+        });
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching queue: ", error);
+        onError("Não foi possível buscar a fila de atendimento.");
+    });
+
+    return unsubscribe;
+};
+
+export const chamarPaciente = async (item: FilaDeEsperaItem) => {
+    if (!item.id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+
+    // 1. Get the department details to find the room number
+    const departamentoDocRef = doc(db, 'departamentos', item.departamentoId);
+    const departamentoSnap = await getDoc(departamentoDocRef);
+
+    if (!departamentoSnap.exists()) {
+        throw new Error("Departamento não encontrado.");
+    }
+    const departamentoData = departamentoSnap.data();
+    const sala = departamentoData.numero ? `Sala ${departamentoData.numero}` : 'Recepção';
+
+
+    // 2. Register the call on the public panel
+    await createChamada({
+        ticket: item.senha,
+        room: sala,
+        doctor: item.profissionalNome,
+    });
+    
+    // 3. Update the patient's status in the queue
+    const filaDocRef = doc(db, "filaDeEspera", item.id);
+    await updateDoc(filaDocRef, {
+        status: "em-atendimento",
+        chamadaEm: serverTimestamp()
+    });
 };
