@@ -20,6 +20,7 @@ const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS é obrigatório." }),
   coren: z.string().min(4, { message: "O COREN é obrigatório." }),
+  especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
   sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   cpf: z.string().min(11, { message: "O CPF é obrigatório." }),
   dataNascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
@@ -45,6 +46,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
       nome: "",
       cns: "",
       coren: "",
+      especialidade: "",
       sexo: undefined,
       cpf: "",
       dataNascimento: "",
@@ -72,6 +74,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
         nome: enfermeiro.nome || "",
         cns: enfermeiro.cns || "",
         coren: enfermeiro.coren || "",
+        especialidade: enfermeiro.especialidade || "",
         sexo: enfermeiro.sexo || undefined,
         cpf: enfermeiro.cpf || "",
         dataNascimento: enfermeiro.dataNascimento || "",
@@ -84,6 +87,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
             nome: "",
             cns: "",
             coren: "",
+            especialidade: "",
             sexo: undefined,
             cpf: "",
             dataNascimento: "",
@@ -159,6 +163,20 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
                 )}
             />
 
+            <FormField
+              control={form.control}
+              name="especialidade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Especialidade</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: UTI" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="cpf"

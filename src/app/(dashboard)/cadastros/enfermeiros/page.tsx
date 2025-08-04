@@ -118,6 +118,7 @@ export default function EnfermeirosPage() {
                 <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
                 <TableHead className="px-2 py-2 text-xs">CNS</TableHead>
                 <TableHead className="px-2 py-2 text-xs">COREN</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Especialidade</TableHead>
                 <TableHead className="px-2 py-2 text-xs">CPF</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Situação</TableHead>
@@ -128,7 +129,7 @@ export default function EnfermeirosPage() {
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <TableRow key={i}>
-                    {[...Array(8)].map((_, j) => (
+                    {[...Array(9)].map((_, j) => (
                       <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
@@ -140,6 +141,7 @@ export default function EnfermeirosPage() {
                     <TableCell className="font-medium px-2 py-1 text-xs">{enfermeiro.nome}</TableCell>
                     <TableCell className="px-2 py-1 text-xs">{enfermeiro.cns}</TableCell>
                     <TableCell className="px-2 py-1 text-xs">{enfermeiro.coren}</TableCell>
+                    <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{enfermeiro.especialidade}</Badge></TableCell>
                     <TableCell className="px-2 py-1 text-xs">{enfermeiro.cpf}</TableCell>
                     <TableCell className="px-2 py-1 text-xs">
                      <div className="flex items-center gap-1">
@@ -176,7 +178,7 @@ export default function EnfermeirosPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                    <TableCell colSpan={9} className="h-24 text-center">
                     Nenhum enfermeiro cadastrado.
                     </TableCell>
                 </TableRow>

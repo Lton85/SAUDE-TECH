@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { User, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint, UserPlus } from "lucide-react";
+import { User, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint, UserPlus, Stethoscope } from "lucide-react";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import { Badge } from "@/components/ui/badge";
 
@@ -47,6 +47,7 @@ export function ViewEnfermeiroDialog({ isOpen, onOpenChange, enfermeiro }: ViewE
                     <InfoRow icon={User} label="Nome Completo" value={enfermeiro.nome} className="lg:col-span-2" />
                     <InfoRow icon={IdCard} label="COREN" value={enfermeiro.coren} />
                     <InfoRow icon={IdCard} label="CNS" value={enfermeiro.cns} />
+                    <InfoRow icon={Stethoscope} label="Especialidade" value={enfermeiro.especialidade} />
                 </div>
             </div>
 

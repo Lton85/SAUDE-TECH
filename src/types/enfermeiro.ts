@@ -5,6 +5,7 @@ export interface Enfermeiro {
     coren: string;
     cns: string;
     sexo: 'Masculino' | 'Feminino';
+    especialidade: string;
     cpf: string;
     dataNascimento: string;
     telefone: string;
