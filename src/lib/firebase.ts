@@ -3,14 +3,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  "apiKey": "SECRET_API_KEY",
-  "authDomain": "saude-b4594.firebaseapp.com",
-  "projectId": "saude-b4594",
-  "storageBucket": "saude-b4594.appspot.com",
-  "messagingSenderId": "1057457784013",
-  "appId": "1:1057457784013:web:71e9882269a23d38703a55"
+  apiKey: "AIzaSyChr1TSTg97Ggxm-gHR6_QTX-w1CEvigds",
+  authDomain: "saude-facil-99832.firebaseapp.com",
+  projectId: "saude-facil-99832",
+  storageBucket: "saude-facil-99832.firebasestorage.app",
+  messagingSenderId: "455583316123",
+  appId: "1:455583316123:web:a048e2629ded6a5712ee3e"
 };
-
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

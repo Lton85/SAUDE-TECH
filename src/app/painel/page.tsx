@@ -1,60 +1,61 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Volume2, HeartPulse } from 'lucide-react';
+import { HeartPulse } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 interface Call {
+  id?: string;
   ticket: string;
   room: string;
   doctor: string;
 }
 
-const initialCall: Call = { ticket: 'A001', room: 'SALA 01', doctor: 'Dr. Ricardo A.' };
+const emptyCall: Call = { ticket: '----', room: '-------', doctor: '-------' };
 
 export default function PainelPage() {
-  const [currentCall, setCurrentCall] = useState<Call>(initialCall);
+  const [currentCall, setCurrentCall] = useState<Call>(emptyCall);
   const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [isBlinking, setIsBlinking] = useState(false);
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    setTime(new Date()); // Set initial time on client
+    setTime(new Date()); 
     const timeInterval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timeInterval);
   }, []);
 
   useEffect(() => {
-    const ticketPrefixes = ['A', 'B', 'P'];
-    const doctors = ['Dr. Ricardo A.', 'Dra. Ana C.', 'Dr. Lucas M.', 'Dra. Sofia B.'];
+    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const calls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
+      
+      if (calls.length > 0) {
+        const newCall = calls[0];
 
-    const callInterval = setInterval(() => {
-      setCallHistory(prev => [currentCall, ...prev.slice(0, 4)]);
-      
-      const prefix = ticketPrefixes[Math.floor(Math.random() * ticketPrefixes.length)];
-      const number = Math.floor(Math.random() * 999) + 1;
-      const ticket = `${prefix}${number.toString().padStart(3, '0')}`;
-      const room = `CONSULTÓRIO ${Math.floor(Math.random() * 5) + 1}`;
-      const doctor = doctors[Math.floor(Math.random() * doctors.length)];
-      
-      setCurrentCall({ ticket, room, doctor });
+        // Only trigger animation if it's a new call
+        if (newCall.id !== currentCall.id) {
+          setCurrentCall(newCall);
+          setCallHistory(calls.slice(1)); // The rest are history
 
-      setIsBlinking(true);
-      
-      // In a real app, you would play a sound here
-      try {
-        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-        audio.play();
-      } catch (error) {
-        console.error("Error playing sound:", error);
+          setIsBlinking(true);
+          try {
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play();
+          } catch (error) {
+            console.error("Error playing sound:", error);
+          }
+          setTimeout(() => setIsBlinking(false), 2500);
+        }
+      } else {
+        setCurrentCall(emptyCall);
+        setCallHistory([]);
       }
+    });
 
-      setTimeout(() => setIsBlinking(false), 2500);
-
-    }, 8000); // New call every 8 seconds
-
-    // Cleanup the interval on component unmount
-    return () => clearInterval(callInterval);
-  }, [currentCall]);
+    return () => unsubscribe();
+  }, [currentCall.id]);
 
   return (
     <div className="flex h-screen font-headline select-none">
@@ -77,6 +78,11 @@ export default function PainelPage() {
               <p className="text-xl lg:text-2xl text-gray-400">{call.room}</p>
             </div>
           ))}
+           {callHistory.length === 0 && (
+            <div className="flex-grow flex items-center justify-center">
+              <p className="text-gray-500">Aguardando chamadas...</p>
+            </div>
+          )}
         </div>
         <div className="mt-auto flex items-center justify-between text-gray-400 pt-8 border-t border-gray-700">
           <div className="flex items-center gap-3">
