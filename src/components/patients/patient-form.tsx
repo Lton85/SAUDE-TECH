@@ -27,7 +27,7 @@ const formSchema = z.object({
   cpf: z.string().optional(),
   nascimento: z.string().optional(),
   sexo: z.enum(['Masculino', 'Feminino']).optional(),
-  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável']).optional(),
+  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável', '']).optional(),
   cep: z.string().optional(),
   endereco: z.string().optional(),
   numero: z.string().optional(),
