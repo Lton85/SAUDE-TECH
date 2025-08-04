@@ -41,6 +41,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
+  const [ticketNumber, setTicketNumber] = useState<number | null>(null);
   const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -63,12 +64,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     );
   }, [searchQuery, pacientes]);
 
-  const generateTicket = useCallback(async (classificationType: 'Normal' | 'Emergência') => {
+  const generateTicket = useCallback(async (pacienteSelecionado: Paciente, classif: 'Normal' | 'Emergência') => {
       try {
-        const counterName = classificationType === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-        const ticketNumber = await getNextCounter(counterName);
-        const ticketPrefix = classificationType === 'Emergência' ? 'E' : 'N';
-        const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+        const counterName = classif === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+        const newTicketNumber = await getNextCounter(counterName);
+        setTicketNumber(newTicketNumber);
+        const ticketPrefix = classif === 'Emergência' ? 'E' : 'N';
+        const formattedTicket = `${ticketPrefix}-${String(newTicketNumber).padStart(3, '0')}`;
         setTicket(formattedTicket);
       } catch (error) {
         toast({
@@ -77,6 +79,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
           variant: "destructive",
         });
         setTicket(""); // Clear ticket on error
+        setTicketNumber(null);
       }
   }, [toast]);
   
@@ -87,6 +90,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedProfissionalId("");
     setClassification('Normal');
     setTicket("");
+    setTicketNumber(null);
     setIsSubmitting(false);
     setSearchQuery("");
     setShowPatientList(false);
@@ -118,15 +122,16 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         handleSelectPatient(patientToAdd);
       }
     }
-  }, [isOpen, toast, patientToAdd]);
+  }, [isOpen, toast]);
 
   useEffect(() => {
-    if (selectedPaciente && isOpen) {
-        generateTicket(classification);
-    } else if (!selectedPaciente) {
-        setTicket("");
+    if (ticketNumber !== null) {
+      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+      setTicket(formattedTicket);
     }
-  }, [selectedPaciente, classification, isOpen, generateTicket]);
+  }, [classification, ticketNumber]);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -214,7 +219,15 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery(paciente.nome);
     setShowPatientList(false);
     setHighlightedIndex(-1);
+    generateTicket(paciente, classification);
   }
+  
+  useEffect(() => {
+    // This is to handle the case where the dialog is re-opened with a patient pre-selected.
+    if(patientToAdd && isOpen) {
+        handleSelectPatient(patientToAdd);
+    }
+  }, [patientToAdd, isOpen]);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (showPatientList && filteredPacientes.length > 0) {
@@ -268,6 +281,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                       } else {
                          setShowPatientList(false)
                          setSelectedPaciente(null)
+                         setTicketNumber(null);
+                         setTicket("");
                       }
                     }}
                     onFocus={() => { if(searchQuery) setShowPatientList(true) }}
@@ -275,7 +290,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     className="pl-10"
                   />
                   {searchQuery && (
-                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); setTicket(''); }}>
+                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); setTicket(''); setTicketNumber(null); }}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
@@ -398,5 +413,3 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
-
-    

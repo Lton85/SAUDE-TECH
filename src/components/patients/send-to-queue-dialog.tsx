@@ -49,28 +49,29 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
+  const [ticketNumber, setTicketNumber] = useState<number | null>(null);
   const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
   
-  const generateTicket = useCallback(async (classificationType: 'Normal' | 'Emergência') => {
+  const generateTicket = useCallback(async () => {
+      if(!paciente) return;
       try {
-        const counterName = classificationType === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-        const ticketNumber = await getNextCounter(counterName);
-        const ticketPrefix = classificationType === 'Emergência' ? 'E' : 'N';
-        const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-        setTicket(formattedTicket);
+        const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+        const newTicketNumber = await getNextCounter(counterName);
+        setTicketNumber(newTicketNumber);
       } catch (error) {
         toast({
           title: "Erro ao gerar senha",
           description: "Não foi possível obter a próxima senha sequencial.",
           variant: "destructive",
         });
-        setTicket(""); // Clear ticket on error
+        setTicket("");
+        setTicketNumber(null);
       }
-  }, [toast]);
+  }, [toast, paciente, classification]);
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -93,14 +94,18 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     
     if (isOpen) {
       fetchProfissionais();
+      generateTicket();
     }
-  }, [isOpen, toast]);
-  
-   useEffect(() => {
-     if (isOpen) {
-        generateTicket(classification);
-     }
-  }, [isOpen, classification, generateTicket]);
+  }, [isOpen, toast, generateTicket]);
+
+  useEffect(() => {
+    if (ticketNumber !== null) {
+      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+      setTicket(formattedTicket);
+    }
+  }, [classification, ticketNumber]);
+
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId || !ticket) {
@@ -161,6 +166,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         setSelectedDepartamentoId("");
         setSelectedProfissionalId("");
         setClassification('Normal');
+        setTicketNumber(null);
         setTicket("");
     }
     onOpenChange(open);
