@@ -45,7 +45,7 @@ const checkSalaExists = async (numero: string, currentId?: string): Promise<bool
     return true;
 };
 
-export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo' | 'historico'>): Promise<string> => {
+export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo'>): Promise<string> => {
     if (await checkSalaExists(departamento.numero || '')) {
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
@@ -89,12 +89,11 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
     const departamentoDoc = doc(db, 'departamentos', id);
     
     // Check if there are any patients in the queue for this department
-    // This is a placeholder for a real check that would depend on your `filaDeEspera` collection structure
-    // const q = query(collection(db, "filaDeEspera"), where("departamentoId", "==", id), where("status", "!=", "finalizado"));
-    // const activePatientsInQueue = await getDocs(q);
-    // if (!activePatientsInQueue.empty) {
-    //     throw new Error(`Não é possível excluir. Existem ${activePatientsInQueue.size} pacientes na fila deste departamento.`);
-    // }
+    const q = query(collection(db, "filaDeEspera"), where("departamentoId", "==", id), where("status", "!=", "finalizado"));
+    const activePatientsInQueue = await getDocs(q);
+    if (!activePatientsInQueue.empty) {
+        throw new Error(`Não é possível excluir. Existem ${activePatientsInQueue.size} pacientes na fila deste departamento.`);
+    }
 
     await deleteDoc(departamentoDoc);
 };

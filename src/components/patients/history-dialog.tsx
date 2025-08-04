@@ -81,5 +81,3 @@ export function HistoryDialog({ isOpen, onOpenChange, paciente }: HistoryDialogP
     </Dialog>
   );
 }
-
-    

@@ -1,6 +1,6 @@
 "use client"
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, increment, runTransaction } from 'firebase/firestore';
+import { doc, runTransaction, increment } from 'firebase/firestore';
 
 // Obtém o próximo número do contador para uma coleção específica
 export const getNextCounter = async (collectionName: string): Promise<number> => {
@@ -11,7 +11,7 @@ export const getNextCounter = async (collectionName: string): Promise<number> =>
             const counterDoc = await transaction.get(counterDocRef);
 
             if (!counterDoc.exists()) {
-                // Se o contador não existir, inicializa com 1 e retorna 1.
+                // Se o contador não existir, inicializa com 2 e retorna 1.
                 transaction.set(counterDocRef, { nextId: 2 });
                 return 1;
             }
@@ -26,4 +26,3 @@ export const getNextCounter = async (collectionName: string): Promise<number> =>
         throw error;
     }
 };
-

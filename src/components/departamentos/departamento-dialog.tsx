@@ -29,11 +29,6 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
          const updatedDepartamento: Partial<Departamento> = {
             ...values,
             numero: values.numero || '',
-            historico: {
-                ...departamento.historico,
-                alteradoEm: new Date().toISOString(),
-                alteradoPor: 'Admin (Edição)',
-            }
         };
         await updateDepartamento(departamento.id, updatedDepartamento);
         toast({
