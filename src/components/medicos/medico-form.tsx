@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -16,8 +15,6 @@ import type { Medico } from "@/types/medico";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
-import { cn } from "@/lib/utils";
-
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -201,12 +198,12 @@ export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) 
                       <FormLabel>Data de Nascimento</FormLabel>
                       <div className="relative">
                         <FormControl>
-                          <Input
-                            placeholder="DD/MM/AAAA"
-                            {...field}
-                            onChange={(e) => handleDateChange(e, field.onChange)}
-                            maxLength={10}
-                          />
+                           <Input
+                              placeholder="DD/MM/AAAA"
+                              {...field}
+                               onChange={(e) => handleDateChange(e, field.onChange)}
+                               maxLength={10}
+                            />
                         </FormControl>
                         <Popover>
                           <PopoverTrigger asChild>

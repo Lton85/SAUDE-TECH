@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { User, Cake, VenetianMask, BadgeInfo, FileText, Hand, Heart, IdCard, Calendar, Venus, Mars, Home, Globe, Mail, Phone, Pencil } from "lucide-react";
 import type { Paciente } from "@/types/paciente";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface ViewDialogProps {
@@ -49,7 +48,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
             <div className="p-4 border rounded-lg bg-muted/20">
                 <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    <InfoRow icon={IdCard} label="Código" value={paciente.codigo} />
+                    <InfoRow icon={BadgeInfo} label="Código" value={paciente.codigo} />
                     <InfoRow icon={User} label="Nome Completo" value={paciente.nome} />
                     <InfoRow icon={Hand} label="Nome da Mãe" value={paciente.mae} />
                     {paciente.pai && <InfoRow icon={Hand} label="Nome do Pai" value={paciente.pai} />}

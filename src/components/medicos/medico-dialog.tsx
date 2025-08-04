@@ -23,7 +23,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   const handleSubmit = async (values: Omit<Medico, 'id' | 'codigo' | 'historico'>) => {
     setIsSubmitting(true);
     try {
-      if (isEditMode) {
+      if (isEditMode && medico) {
         await updateMedico(medico.id, values);
         toast({
           title: "Médico Atualizado!",
