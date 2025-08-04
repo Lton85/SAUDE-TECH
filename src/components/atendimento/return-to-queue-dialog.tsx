@@ -73,6 +73,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                 profissionalId: selectedProf.id,
                 profissionalNome: selectedProf.nome,
                 classificacao: classification,
+                prioridade: classification === 'Emergência' ? 1 : 2,
             };
             
             await onConfirm(item, updates);

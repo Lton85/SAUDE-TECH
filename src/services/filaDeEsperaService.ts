@@ -8,7 +8,7 @@ import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'>) => {
     try {
         const q = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "!=", "finalizado"));
         const activeQueueEntries = await getDocs(q);
@@ -18,6 +18,7 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
 
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
+            prioridade: item.classificacao === 'Emergência' ? 1 : 2,
             chegadaEm: serverTimestamp(),
             chamadaEm: null,
             finalizadaEm: null
@@ -37,27 +38,16 @@ export const getFilaDeEspera = (
 ) => {
     const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "aguardando")
+        where("status", "==", "aguardando"),
+        orderBy("prioridade", "asc"),
+        orderBy("chegadaEm", "asc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        } as FilaDeEsperaItem)).filter(item => item.chegadaEm); 
-        
-        // Ordena os dados no lado do cliente
-        data.sort((a, b) => {
-            // Prioritize 'Emergência'
-            if (a.classificacao === 'Emergência' && b.classificacao !== 'Emergência') return -1;
-            if (a.classificacao !== 'Emergência' && b.classificacao === 'Emergência') return 1;
-
-            // Then sort by arrival time
-            if (a.chegadaEm && b.chegadaEm) {
-                return a.chegadaEm.toMillis() - b.chegadaEm.toMillis();
-            }
-            return 0;
-        });
+        } as FilaDeEsperaItem));
         
         onUpdate(data);
     }, (error) => {
@@ -74,21 +64,15 @@ export const getAtendimentosEmAndamento = (
 ) => {
      const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "em-atendimento")
+        where("status", "==", "em-atendimento"),
+        orderBy("chamadaEm", "asc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        } as FilaDeEsperaItem)).filter(item => item.chamadaEm); 
-        
-        data.sort((a, b) => {
-            if (a.chamadaEm && b.chamadaEm) {
-                return a.chamadaEm.toMillis() - b.chamadaEm.toMillis();
-            }
-            return 0;
-        });
+        } as FilaDeEsperaItem));
         
         onUpdate(data);
     }, (error) => {
@@ -162,18 +146,12 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
         const q = query(
             collection(db, "filaDeEspera"),
             where("pacienteId", "==", pacienteId),
-            where("status", "==", "finalizado")
+            where("status", "==", "finalizado"),
+            orderBy("finalizadaEm", "desc")
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
-        
-        // Ordena os dados no lado do cliente para evitar a necessidade de um índice composto
-        data.sort((a, b) => {
-            const timeA = a.finalizadaEm?.toMillis() || 0;
-            const timeB = b.finalizadaEm?.toMillis() || 0;
-            return timeB - timeA; // Descending order
-        });
         
         return data;
 
@@ -188,7 +166,11 @@ export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>
         throw new Error("ID do item da fila não encontrado.");
     }
     const filaDocRef = doc(db, "filaDeEspera", id);
-    await updateDoc(filaDocRef, data);
+    const updates = {...data};
+    if (data.classificacao) {
+        updates.prioridade = data.classificacao === 'Emergência' ? 1 : 2;
+    }
+    await updateDoc(filaDocRef, updates);
 };
 
 export const retornarPacienteParaFila = async (id: string): Promise<void> => {

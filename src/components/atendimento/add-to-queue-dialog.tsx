@@ -18,6 +18,7 @@ import { Label } from "../ui/label"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getNextCounter } from "@/services/countersService"
+import type { FilaDeEsperaItem } from "@/types/fila"
 
 interface Profissional {
   id: string;

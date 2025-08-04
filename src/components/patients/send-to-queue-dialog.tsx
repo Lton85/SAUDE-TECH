@@ -120,7 +120,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'> = {
+      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
