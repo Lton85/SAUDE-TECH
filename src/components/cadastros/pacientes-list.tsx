@@ -148,7 +148,7 @@ export function PacientesList() {
               <div className="relative w-full max-w-md min-w-[350px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
+                  placeholder="Buscar por nome, mãe, CPF, CNS, endereço ou nº..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
