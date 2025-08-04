@@ -34,15 +34,22 @@ export const getFilaDeEspera = (
 ) => {
     const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "aguardando"),
-        orderBy("chegadaEm", "asc")
+        where("status", "==", "aguardando")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        } as FilaDeEsperaItem)).filter(item => item.chegadaEm); // Garante que o campo 'chegadaEm' não seja nulo
+        } as FilaDeEsperaItem)).filter(item => item.chegadaEm); 
+        
+        // Ordena os dados no lado do cliente
+        data.sort((a, b) => {
+            if (a.chegadaEm && b.chegadaEm) {
+                return a.chegadaEm.toMillis() - b.chegadaEm.toMillis();
+            }
+            return 0;
+        });
         
         onUpdate(data);
     }, (error) => {
