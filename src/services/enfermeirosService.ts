@@ -1,3 +1,4 @@
+
 "use client"
 import { db } from '@/lib/firebase';
 import { collection, getDocs, writeBatch, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
@@ -65,7 +66,7 @@ export const addEnfermeiro = async (enfermeiro: Omit<Enfermeiro, 'id' | 'codigo'
 };
 
 // Atualiza um enfermeiro existente no banco de dados.
-export const updateEnfermeiro = async (id: string, enfermeiro: Partial<Omit<Enfermeiro, 'id' | 'codigo'>>): Promise<void> => {
+export const updateEnfermeiro = async (id: string, enfermeiro: Partial<Omit<Enfermeiro, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
     const enfermeiroDocRef = doc(db, 'enfermeiros', id);
     const enfermeiroSnap = await getDoc(enfermeiroDocRef);
     if (!enfermeiroSnap.exists()) {

@@ -12,7 +12,9 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
     try {
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
-            chegadaEm: serverTimestamp() 
+            chegadaEm: serverTimestamp(),
+            chamadaEm: null,
+            finalizadaEm: null
         });
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);

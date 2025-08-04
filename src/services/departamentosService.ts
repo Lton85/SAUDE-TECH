@@ -1,3 +1,4 @@
+
 "use client"
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, getDoc } from 'firebase/firestore';
@@ -105,3 +106,4 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
 
     await deleteDoc(departamentoDoc);
 };
+
