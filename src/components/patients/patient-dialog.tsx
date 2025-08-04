@@ -16,11 +16,14 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes' | 'endereco' | 'codigo'> & {
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes' | 'endereco' | 'codigo' | 'bairro' | 'cidade' | 'uf'> & {
     pai?: string;
     cep?: string;
     endereco: string;
     numero?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
     nacionalidade?: string;
     email?: string;
     telefone?: string;
@@ -41,7 +44,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
 
             const patientData = {
                 ...values,
-                endereco: `${values.endereco}, ${values.numero} - CEP: ${values.cep}`,
+                endereco: `${values.endereco}, ${values.numero}, ${values.bairro}, ${values.cidade} - ${values.uf}, CEP: ${values.cep}`,
             };
 
             if (isEditMode) {
@@ -93,34 +96,54 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
         }
     }
   
-    const getCepParts = (fullAddress: string | undefined) => {
-        if (!fullAddress) return { endereco: '', numero: '', cep: '' };
-        
-        const cepRegex = /CEP:\s*(\d{5}-\d{3}|\d{8})/;
-        const numeroRegex = /,\s*([^,-]+)\s*-\s*CEP:/;
+    const getAddressParts = (fullAddress: string | undefined) => {
+        if (!fullAddress) return { endereco: '', numero: '', bairro: '', cidade: '', uf: '', cep: '' };
 
+        const cepRegex = /CEP:\s*([\d-]+)/;
+        const ufRegex = /-\s*([A-Z]{2}),/;
+        
         const cepMatch = fullAddress.match(cepRegex);
-        const numeroMatch = fullAddress.match(numeroRegex);
+        const ufMatch = fullAddress.match(ufRegex);
 
         const cep = cepMatch ? cepMatch[1] : '';
-        const numero = numeroMatch ? numeroMatch[1].trim() : '';
+        const uf = ufMatch ? ufMatch[1] : '';
 
-        let endereco = fullAddress.replace(cepRegex, '').replace(numeroRegex, '');
-        if (numero) {
-           endereco = endereco.replace(`, ${numero}`, '');
-        }
+        const addressWithoutCep = fullAddress.replace(cepRegex, '').trim().replace(/,$/, '');
+        const addressWithoutUf = addressWithoutCep.replace(ufRegex, '').trim();
+
+        const parts = addressWithoutUf.split(',').map(part => part.trim());
 
         return {
-            endereco: endereco.replace(/,\s*-$/, '').trim(),
-            numero: numero,
+            endereco: parts[0] || '',
+            numero: parts[1] || '',
+            bairro: parts[2] || '',
+            cidade: parts[3] || '',
+            uf: uf,
             cep: cep,
         };
     };
 
-    const defaultValues = isEditMode && paciente ? {
-        ...paciente,
-        ...getCepParts(paciente.endereco),
-    } : undefined;
+    const defaultValues = React.useMemo(() => {
+        if (isEditMode && paciente) {
+            return {
+                ...paciente,
+                ...getAddressParts(paciente.endereco),
+            };
+        }
+        return {
+            pai: '',
+            cep: '',
+            endereco: '',
+            numero: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+            nacionalidade: '',
+            email: '',
+            telefone: '',
+            observacoes: '',
+        };
+    }, [paciente, isEditMode]);
 
 
   return (

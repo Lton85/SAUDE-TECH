@@ -11,9 +11,9 @@ interface ViewDialogProps {
   paciente: Paciente | null;
 }
 
-const InfoRow = ({ icon: Icon, label, value, children }: { icon: React.ElementType, label: string, value?: string, children?: React.ReactNode }) => {
+const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: React.ElementType, label: string, value?: string, children?: React.ReactNode, className?: string }) => {
     return (
-        <div className="flex items-start gap-3">
+        <div className={cn("flex items-start gap-3", className)}>
             <Icon className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
             <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground">{label}</span>
@@ -46,7 +46,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={IdCard} label="Código" value={paciente.codigo} />
-                    <InfoRow icon={User} label="Nome Completo" value={paciente.nome} />
+                    <InfoRow icon={User} label="Nome Completo" value={paciente.nome} className="lg:col-span-2" />
                     <InfoRow icon={Hand} label="Nome da Mãe" value={paciente.mae} />
                     {paciente.pai && <InfoRow icon={Hand} label="Nome do Pai" value={paciente.pai} />}
                     <InfoRow icon={paciente.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
@@ -75,7 +75,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     {paciente.email && <InfoRow icon={Mail} label="E-mail" value={paciente.email} />}
                     {paciente.telefone && <InfoRow icon={Phone} label="Telefone" value={paciente.telefone} />}
-                    {paciente.endereco && <InfoRow icon={Home} label="Endereço" value={paciente.endereco} className="md:col-span-2" />}
+                    {paciente.endereco && <InfoRow icon={Home} label="Endereço Completo" value={paciente.endereco} className="md:col-span-2" />}
                 </div>
             </div>
 

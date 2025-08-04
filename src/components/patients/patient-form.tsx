@@ -33,6 +33,9 @@ const formSchema = z.object({
   cep: z.string().min(8, { message: "O CEP é obrigatório." }),
   endereco: z.string().min(3, { message: "O endereço é obrigatório." }),
   numero: z.string().min(1, { message: "O número é obrigatório." }),
+  bairro: z.string().min(2, { message: "O bairro é obrigatório." }),
+  cidade: z.string().min(2, { message: "A cidade é obrigatória." }),
+  uf: z.string().length(2, { message: "UF deve ter 2 caracteres." }),
   nacionalidade: z.string().min(3, { message: "A nacionalidade é obrigatória." }),
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
@@ -51,44 +54,52 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: defaultValues?.nome || "",
-      mae: defaultValues?.mae || "",
-      pai: defaultValues?.pai || "",
-      cns: defaultValues?.cns || "",
-      cpf: defaultValues?.cpf || "",
-      nascimento: defaultValues?.nascimento || "",
-      sexo: defaultValues?.sexo,
-      estadoCivil: defaultValues?.estadoCivil,
-      raca: defaultValues?.raca,
-      cep: defaultValues?.cep || "",
-      endereco: defaultValues?.endereco || "",
-      numero: defaultValues?.numero || "",
-      nacionalidade: defaultValues?.nacionalidade || "",
-      email: defaultValues?.email || "",
-      telefone: defaultValues?.telefone || "",
-      observacoes: defaultValues?.observacoes || "",
+      nome: "",
+      mae: "",
+      pai: "",
+      cns: "",
+      cpf: "",
+      nascimento: "",
+      sexo: undefined,
+      estadoCivil: undefined,
+      raca: undefined,
+      cep: "",
+      endereco: "",
+      numero: "",
+      bairro: "",
+      cidade: "",
+      uf: "",
+      nacionalidade: "",
+      email: "",
+      telefone: "",
+      observacoes: "",
     },
   });
 
   React.useEffect(() => {
-    form.reset({
-      nome: defaultValues?.nome || "",
-      mae: defaultValues?.mae || "",
-      pai: defaultValues?.pai || "",
-      cns: defaultValues?.cns || "",
-      cpf: defaultValues?.cpf || "",
-      nascimento: defaultValues?.nascimento || "",
-      sexo: defaultValues?.sexo,
-      estadoCivil: defaultValues?.estadoCivil,
-      raca: defaultValues?.raca,
-      cep: defaultValues?.cep || "",
-      endereco: defaultValues?.endereco || "",
-      numero: defaultValues?.numero || "",
-      nacionalidade: defaultValues?.nacionalidade || "",
-      email: defaultValues?.email || "",
-      telefone: defaultValues?.telefone || "",
-      observacoes: defaultValues?.observacoes || "",
-    });
+    if (defaultValues) {
+        form.reset({
+            nome: defaultValues.nome || "",
+            mae: defaultValues.mae || "",
+            pai: defaultValues.pai || "",
+            cns: defaultValues.cns || "",
+            cpf: defaultValues.cpf || "",
+            nascimento: defaultValues.nascimento || "",
+            sexo: defaultValues.sexo,
+            estadoCivil: defaultValues.estadoCivil,
+            raca: defaultValues.raca,
+            cep: defaultValues.cep || "",
+            endereco: defaultValues.endereco || "",
+            numero: defaultValues.numero || "",
+            bairro: defaultValues.bairro || "",
+            cidade: defaultValues.cidade || "",
+            uf: defaultValues.uf || "",
+            nacionalidade: defaultValues.nacionalidade || "",
+            email: defaultValues.email || "",
+            telefone: defaultValues.telefone || "",
+            observacoes: defaultValues.observacoes || "",
+        });
+    }
   }, [defaultValues, form]);
 
 
@@ -298,46 +309,85 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     </FormItem>
                   )}
                 />
-                <div className="md:col-span-12 grid grid-cols-12 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="cep"
-                    render={({ field }) => (
-                      <FormItem className="col-span-3">
-                        <FormLabel>CEP *</FormLabel>
-                        <FormControl>
-                          <Input className="bg-muted/40" placeholder="00000-000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="endereco"
-                    render={({ field }) => (
-                      <FormItem className="col-span-7">
-                        <FormLabel>Endereço *</FormLabel>
-                        <FormControl>
-                          <Input className="bg-muted/40" placeholder="Rua, Bairro, Cidade - Estado" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="numero"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Nº *</FormLabel>
-                        <FormControl>
-                          <Input className="bg-muted/40" placeholder="000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                 <div className="md:col-span-12 grid grid-cols-12 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="cep"
+                      render={({ field }) => (
+                        <FormItem className="col-span-12 sm:col-span-2">
+                          <FormLabel>CEP *</FormLabel>
+                          <FormControl>
+                            <Input className="bg-muted/40" placeholder="00000-000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="endereco"
+                      render={({ field }) => (
+                        <FormItem className="col-span-12 sm:col-span-8">
+                          <FormLabel>Endereço (Rua) *</FormLabel>
+                          <FormControl>
+                            <Input className="bg-muted/40" placeholder="Ex: Av. Paulista" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="numero"
+                      render={({ field }) => (
+                        <FormItem className="col-span-12 sm:col-span-2">
+                          <FormLabel>Nº *</FormLabel>
+                          <FormControl>
+                            <Input className="bg-muted/40" placeholder="000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="bairro"
+                        render={({ field }) => (
+                            <FormItem className="col-span-12 sm:col-span-5">
+                            <FormLabel>Bairro *</FormLabel>
+                            <FormControl>
+                                <Input className="bg-muted/40" placeholder="Ex: Bela Vista" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    <FormField
+                        control={form.control}
+                        name="cidade"
+                        render={({ field }) => (
+                            <FormItem className="col-span-12 sm:col-span-5">
+                            <FormLabel>Cidade *</FormLabel>
+                            <FormControl>
+                                <Input className="bg-muted/40" placeholder="Ex: São Paulo" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    <FormField
+                        control={form.control}
+                        name="uf"
+                        render={({ field }) => (
+                            <FormItem className="col-span-12 sm:col-span-2">
+                            <FormLabel>UF *</FormLabel>
+                            <FormControl>
+                                <Input className="bg-muted/40" placeholder="SP" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                 </div>
 
                 <FormField

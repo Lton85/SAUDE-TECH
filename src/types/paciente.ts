@@ -15,6 +15,9 @@ export interface Paciente {
     cep?: string;
     endereco?: string;
     numero?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
     nacionalidade?: string;
     email?: string;
     telefone?: string;
