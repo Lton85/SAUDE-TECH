@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 
-const initialSessions = [
-  { patient: "João da Silva", doctor: "Dr. Ricardo Alves", room: "Sala 01", startTime: Date.now() - 5 * 60 * 1000 },
-  { patient: "Maria Oliveira", doctor: "Dra. Ana Costa", room: "Sala 02", startTime: Date.now() - 12 * 60 * 1000 },
-  { patient: "Carlos Pereira", doctor: "Dr. Lucas Martins", room: "Sala 03", startTime: Date.now() - 25 * 60 * 1000 },
-];
+const initialSessions: any[] = [];
 
 function formatDuration(seconds: number) {
   const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
