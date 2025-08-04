@@ -97,12 +97,12 @@ export default function PainelPage() {
             
             <div className="flex-grow"></div>
 
-            <div className="flex flex-col items-center justify-center w-full mt-8 text-center">
-                <div className="mb-6">
+            <div className="flex justify-between w-full mt-8">
+                <div className="text-left w-2/5">
                     <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Paciente</h3>
                     <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.patientName}</p>
                 </div>
-                 <div>
+                 <div className="text-right w-2/5">
                     <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Profissional</h3>
                     <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.doctor}</p>
                 </div>
@@ -124,3 +124,4 @@ export default function PainelPage() {
     </div>
   );
 }
+
