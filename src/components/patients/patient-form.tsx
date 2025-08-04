@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -144,6 +145,16 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     }
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 2) {
+      value = `${value.slice(0, 2)}/${value.slice(2)}`;
+    }
+    if (value.length > 5) {
+      value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+    }
+    fieldChange(value);
+  };
 
   return (
     <Form {...form}>
@@ -223,6 +234,8 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                               className="bg-muted/40 pr-10"
                               placeholder="DD/MM/AAAA"
                               {...field}
+                               onChange={(e) => handleDateChange(e, field.onChange)}
+                               maxLength={10}
                             />
                           </FormControl>
                           <Popover>
@@ -507,3 +520,6 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     </Form>
   );
 }
+
+
+    
