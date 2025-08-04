@@ -10,6 +10,7 @@ import {
   Clock,
   Tv2,
   HeartPulse,
+  Settings,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -28,6 +29,7 @@ const menuItems = [
   { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
   { href: "/cadastros", label: "Cadastros", icon: Users },
   { href: "/triagem", label: "Departamentos", icon: ClipboardList },
+  { href: "/configuracoes", label: "Configurações", icon: Settings },
   { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
 ];
 

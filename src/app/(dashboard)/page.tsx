@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardList, Clock, Tv2 } from "lucide-react";
+import { Users, ClipboardList, Clock, Tv2, Settings } from "lucide-react";
 
 export default function DashboardPage() {
   const features = [
@@ -26,6 +26,13 @@ export default function DashboardPage() {
       icon: Clock,
       target: "_self"
     },
+     {
+      href: "/configuracoes",
+      title: "Configurações",
+      description: "Ajuste as configurações gerais do sistema.",
+      icon: Settings,
+      target: "_self"
+    },
     {
       href: "/painel",
       title: "Painel de Senhas",
@@ -36,7 +43,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
       {features.map((feature) => (
         <Link href={feature.href} key={feature.title} target={feature.target} className="flex">
           <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
