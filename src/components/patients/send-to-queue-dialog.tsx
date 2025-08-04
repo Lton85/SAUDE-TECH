@@ -183,7 +183,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                     <SelectContent>
                       {departamentos.map((depto) => (
                         <SelectItem key={depto.id} value={depto.id}>
-                          {depto.nome}
+                          {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
