@@ -16,19 +16,7 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes' | 'endereco' | 'codigo' | 'bairro' | 'cidade' | 'uf'> & {
-    pai?: string;
-    cep?: string;
-    endereco: string;
-    numero?: string;
-    bairro?: string;
-    cidade?: string;
-    uf?: string;
-    nacionalidade?: string;
-    email?: string;
-    telefone?: string;
-    observacoes?: string;
-};
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico'  | 'codigo'>;
 
 
 export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
@@ -43,8 +31,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             const age = new Date().getFullYear() - birthDate.getFullYear();
 
             const patientData = {
-                ...values,
-                endereco: `${values.endereco}, ${values.numero}, ${values.bairro}, ${values.cidade} - ${values.uf}, CEP: ${values.cep}`,
+                ...values
             };
 
             if (isEditMode) {
@@ -96,38 +83,10 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
         }
     }
   
-    const getAddressParts = (fullAddress: string | undefined) => {
-        if (!fullAddress) return { endereco: '', numero: '', bairro: '', cidade: '', uf: '', cep: '' };
-
-        const cepRegex = /CEP:\s*([\d-]+)/;
-        const ufRegex = /-\s*([A-Z]{2}),/;
-        
-        const cepMatch = fullAddress.match(cepRegex);
-        const ufMatch = fullAddress.match(ufRegex);
-
-        const cep = cepMatch ? cepMatch[1] : '';
-        const uf = ufMatch ? ufMatch[1] : '';
-
-        const addressWithoutCep = fullAddress.replace(cepRegex, '').trim().replace(/,$/, '');
-        const addressWithoutUf = addressWithoutCep.replace(ufRegex, '').trim();
-
-        const parts = addressWithoutUf.split(',').map(part => part.trim());
-
-        return {
-            endereco: parts[0] || '',
-            numero: parts[1] || '',
-            bairro: parts[2] || '',
-            cidade: parts[3] || '',
-            uf: uf,
-            cep: cep,
-        };
-    };
-
     const defaultValues = React.useMemo(() => {
         if (isEditMode && paciente) {
             return {
                 ...paciente,
-                ...getAddressParts(paciente.endereco),
             };
         }
         return {

@@ -4,6 +4,7 @@ import { User, Cake, VenetianMask, BadgeInfo, FileText, Hand, Heart, IdCard, Cal
 import type { Paciente } from "@/types/paciente";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface ViewDialogProps {
   isOpen: boolean;
@@ -27,6 +28,9 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
 
 export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) {
   if (!paciente) return null;
+
+  const fullAddress = `${paciente.endereco}, ${paciente.numero} - ${paciente.bairro}, ${paciente.cidade} - ${paciente.uf}, CEP: ${paciente.cep}`;
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -75,7 +79,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     {paciente.email && <InfoRow icon={Mail} label="E-mail" value={paciente.email} />}
                     {paciente.telefone && <InfoRow icon={Phone} label="Telefone" value={paciente.telefone} />}
-                    {paciente.endereco && <InfoRow icon={Home} label="Endereço Completo" value={paciente.endereco} className="md:col-span-2" />}
+                    {paciente.endereco && <InfoRow icon={Home} label="Endereço Completo" value={fullAddress} className="md:col-span-2" />}
                 </div>
             </div>
 

@@ -55,7 +55,15 @@ const ufs = [
     'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
 ];
 
+interface IbgeCityResponse {
+    id: number;
+    nome: string;
+}
+
 export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFormProps) {
+  const [cities, setCities] = React.useState<string[]>([]);
+  const [isCitiesLoading, setIsCitiesLoading] = React.useState(false);
+
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,31 +89,38 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     },
   });
 
+  const selectedUf = form.watch('uf');
+
   React.useEffect(() => {
     if (defaultValues) {
         form.reset({
-            nome: defaultValues.nome || "",
-            mae: defaultValues.mae || "",
-            pai: defaultValues.pai || "",
-            cns: defaultValues.cns || "",
-            cpf: defaultValues.cpf || "",
-            nascimento: defaultValues.nascimento || "",
-            sexo: defaultValues.sexo,
-            estadoCivil: defaultValues.estadoCivil,
-            raca: defaultValues.raca,
-            cep: defaultValues.cep || "",
-            endereco: defaultValues.endereco || "",
-            numero: defaultValues.numero || "",
-            bairro: defaultValues.bairro || "",
-            cidade: defaultValues.cidade || "",
+            ...defaultValues,
             uf: defaultValues.uf || "",
-            nacionalidade: defaultValues.nacionalidade || "Brasileira",
-            email: defaultValues.email || "",
-            telefone: defaultValues.telefone || "",
-            observacoes: defaultValues.observacoes || "",
+            cidade: defaultValues.cidade || "",
         });
     }
   }, [defaultValues, form]);
+  
+  React.useEffect(() => {
+    const fetchCities = async () => {
+        if (!selectedUf) {
+            setCities([]);
+            return;
+        }
+        setIsCitiesLoading(true);
+        try {
+            const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`);
+            const data: IbgeCityResponse[] = await response.json();
+            setCities(data.map(city => city.nome).sort());
+        } catch (error) {
+            console.error("Erro ao buscar cidades:", error);
+            setCities([]);
+        } finally {
+            setIsCitiesLoading(false);
+        }
+    };
+    fetchCities();
+  }, [selectedUf]);
 
   const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const cep = e.target.value.replace(/\D/g, '');
@@ -118,8 +133,11 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       if (!data.erro) {
         form.setValue('endereco', data.logradouro);
         form.setValue('bairro', data.bairro);
-        form.setValue('cidade', data.localidade);
-        form.setValue('uf', data.uf);
+        form.setValue('uf', data.uf, { shouldValidate: true });
+        // Give time for cities to load before setting city value
+        setTimeout(() => {
+            form.setValue('cidade', data.localidade);
+        }, 500);
       }
     } catch (error) {
       console.error("Erro ao buscar CEP:", error);
@@ -241,7 +259,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sexo *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="bg-muted/40">
                               <SelectValue placeholder="Selecione o sexo" />
@@ -277,7 +295,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   render={({ field }) => (
                     <FormItem className="md:col-span-4">
                       <FormLabel>Estado Civil *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-muted/40">
                             <SelectValue placeholder="Selecione o estado civil" />
@@ -301,7 +319,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   render={({ field }) => (
                     <FormItem className="md:col-span-4">
                       <FormLabel>Raça/Cor *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-muted/40">
                             <SelectValue placeholder="Selecione a raça/cor" />
@@ -414,9 +432,18 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         render={({ field }) => (
                             <FormItem className="col-span-12 sm:col-span-5">
                             <FormLabel>Cidade *</FormLabel>
-                            <FormControl>
-                                <Input className="bg-muted/40" placeholder="Ex: São Paulo" {...field} />
-                            </FormControl>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={isCitiesLoading || cities.length === 0}>
+                                <FormControl>
+                                <SelectTrigger className="bg-muted/40">
+                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (selectedUf ? "Selecione a cidade" : "Selecione um estado primeiro")} />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {cities.map(city => (
+                                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                             </FormItem>
                         )}
