@@ -6,13 +6,7 @@ import { getNextCounter } from './countersService';
 
 const departamentosCollection = collection(db, 'departamentos');
 
-const departamentosData: Omit<Departamento, 'id' | 'codigo'>[] = [
-    { nome: "Recepção", situacao: 'Ativo' },
-    { nome: "Triagem", situacao: 'Ativo' },
-    { nome: "Consultório 1", numero: "01", situacao: 'Ativo' },
-    { nome: "Consultório 2", numero: "02", situacao: 'Ativo' },
-    { nome: "Sala de Coleta", numero: "03", situacao: 'Inativo' },
-];
+const departamentosData: Omit<Departamento, 'id' | 'codigo'>[] = [];
 
 export const seedDepartamentos = async () => {
     try {
