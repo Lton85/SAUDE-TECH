@@ -49,7 +49,8 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [senha, setSenha] = useState("");
   const { toast } = useToast()
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
@@ -78,6 +79,28 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       fetchProfissionais();
     }
   }, [isOpen, toast]);
+  
+  useEffect(() => {
+    const generateTicket = async () => {
+        if (paciente && isOpen) {
+            setSenha("Gerando senha...");
+            try {
+                const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+                const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+                setSenha(ticket);
+            } catch (error) {
+                console.error("Erro ao gerar senha:", error);
+                setSenha("Erro ao gerar");
+                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+            }
+        } else {
+            setSenha("");
+        }
+    };
+    generateTicket();
+  }, [paciente, isOpen, classification, toast]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId) {
@@ -92,7 +115,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     setIsSubmitting(true)
     try {
       const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-      const ticketNumber = await getNextCounter(counterName);
+      const ticketNumber = await getNextCounter(counterName, true); // true = increment
       const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
       const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
 
@@ -102,7 +125,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
+      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
@@ -113,6 +136,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         senha: ticket,
         status: "aguardando",
         classificacao: classification,
+        prioridade: classification === 'Emergência' ? 1 : 2,
       }
       
       await addPacienteToFila(newItem)
@@ -142,6 +166,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         setSelectedDepartamentoId("");
         setSelectedProfissionalId("");
         setClassification('Normal');
+        setSenha("");
     }
     onOpenChange(open);
   }
@@ -198,7 +223,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                 </div>
                  <div className="space-y-2 text-center">
                     <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
-                    <Input id="senha" readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" placeholder="Será gerada ao confirmar" />
+                    <Input id="senha" value={senha} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" placeholder="" />
                 </div>
             </div>
 
@@ -252,3 +277,5 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     </Dialog>
   )
 }
+
+    

@@ -1,10 +1,11 @@
 
+
 "use client"
 import { db } from '@/lib/firebase';
-import { doc, runTransaction, increment, writeBatch } from 'firebase/firestore';
+import { doc, runTransaction, increment, writeBatch, getDoc } from 'firebase/firestore';
 
 // Obtém o próximo número do contador para um contador específico
-export const getNextCounter = async (counterName: string): Promise<number> => {
+export const getNextCounter = async (counterName: string, incrementCounter: boolean = true): Promise<number> => {
     const counterDocRef = doc(db, 'counters', counterName);
 
     try {
@@ -12,13 +13,16 @@ export const getNextCounter = async (counterName: string): Promise<number> => {
             const counterDoc = await transaction.get(counterDocRef);
 
             if (!counterDoc.exists()) {
-                // Se o contador não existir, inicializa com 2 e retorna 1.
-                transaction.set(counterDocRef, { nextId: 2 });
+                if (incrementCounter) {
+                    transaction.set(counterDocRef, { nextId: 2 });
+                }
                 return 1;
             }
 
             const currentId = counterDoc.data().nextId;
-            transaction.update(counterDocRef, { nextId: increment(1) });
+            if (incrementCounter) {
+                transaction.update(counterDocRef, { nextId: increment(1) });
+            }
             return currentId;
         });
         return nextId;
@@ -40,3 +44,19 @@ export const resetCounterByName = async (counterName: string): Promise<void> => 
         throw new Error(`Não foi possível reiniciar o contador de senha ${counterName}.`);
     }
 };
+
+export const resetCounters = async (): Promise<void> => {
+    const normalCounterRef = doc(db, 'counters', 'senha_normal');
+    const emergenciaCounterRef = doc(db, 'counters', 'senha_emergencia');
+    try {
+        const batch = writeBatch(db);
+        batch.set(normalCounterRef, { nextId: 1 });
+        batch.set(emergenciaCounterRef, { nextId: 1 });
+        await batch.commit();
+    } catch (error) {
+        console.error("Error resetting counters: ", error);
+        throw new Error("Não foi possível reiniciar os contadores de senha.");
+    }
+};
+
+    

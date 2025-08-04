@@ -42,6 +42,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [senha, setSenha] = useState("");
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientList, setShowPatientList] = useState(false);
@@ -71,6 +72,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery("");
     setShowPatientList(false);
     setHighlightedIndex(-1);
+    setSenha("");
   }
 
   useEffect(() => {
@@ -100,6 +102,27 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   }, [isOpen, toast]);
 
+  useEffect(() => {
+    const generateTicket = async () => {
+        if (selectedPaciente) {
+            setSenha("Gerando senha...");
+            try {
+                const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+                const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+                setSenha(ticket);
+            } catch (error) {
+                console.error("Erro ao gerar senha:", error);
+                setSenha("Erro ao gerar");
+                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+            }
+        } else {
+            setSenha("");
+        }
+    };
+    generateTicket();
+  }, [selectedPaciente, classification, toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -136,7 +159,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setIsSubmitting(true)
     try {
       const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-      const ticketNumber = await getNextCounter(counterName);
+      const ticketNumber = await getNextCounter(counterName, true); // true = increment counter
       const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
       const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
 
@@ -360,10 +383,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
                     <Input 
                     id="senha" 
+                    value={senha}
                     readOnly
                     className="font-bold text-lg bg-muted/30"
                     disabled={!selectedPaciente}
-                    placeholder="Será gerada ao confirmar"
+                    placeholder=""
                     />
                 </div>
             </div>
@@ -382,3 +406,5 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    
