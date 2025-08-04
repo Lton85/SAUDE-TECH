@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, User, Building, Loader2, Info } from "lucide-react";
+import { FileText, Calendar, User, Building, Loader2, Info, CheckCircle } from "lucide-react";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from "../ui/scroll-area";
-import type { Paciente } from "@/types/paciente";
+import { Badge } from "../ui/badge";
 
 interface ProntuarioDialogProps {
   isOpen: boolean;
@@ -17,33 +17,43 @@ interface ProntuarioDialogProps {
   item: FilaDeEsperaItem | null;
 }
 
-const AtendimentoCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+const AtendimentoTimelineItem = ({ atendimento, isLast }: { atendimento: FilaDeEsperaItem, isLast: boolean }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 'Data não disponível';
-    const horaFormatada = dataFinalizacao ? format(dataFinalizacao, "HH:mm'h'", { locale: ptBR }) : '';
+    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : '';
+    const horaFormatada = dataFinalizacao ? format(dataFinalizacao, "HH:mm", { locale: ptBR }) : '';
 
     return (
-        <div className="flex flex-col gap-3 rounded-lg border p-4 bg-muted/30 shadow-sm transition-all hover:shadow-md">
-             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+       <div className="relative flex items-start gap-4">
+            <div className="flex flex-col items-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>{dataFormatada} às {horaFormatada}</span>
                 </div>
-                 <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-800">Finalizado</span>
+                {!isLast && <div className="w-px flex-1 bg-border/70 my-2"></div>}
             </div>
-            <div className="space-y-2 pl-6">
-                <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-primary" />
-                    <div>
-                        <p className="text-xs text-muted-foreground">Departamento</p>
-                        <p className="font-semibold">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</p>
-                    </div>
+            <div className="flex-1 pt-1.5">
+                <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">
+                        {dataFormatada} <span className="text-xs font-normal text-muted-foreground">às {horaFormatada}h</span>
+                    </p>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Finalizado
+                    </Badge>
                 </div>
-                 <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
-                    <div>
-                        <p className="text-xs text-muted-foreground">Profissional</p>
-                        <p className="font-semibold">{atendimento.profissionalNome}</p>
+                 <div className="mt-2 space-y-2 text-sm rounded-md border bg-muted/20 p-3">
+                    <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-primary" />
+                        <div>
+                            <p className="text-xs text-muted-foreground">Departamento</p>
+                            <p className="font-medium">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        <div>
+                            <p className="text-xs text-muted-foreground">Profissional</p>
+                            <p className="font-medium">{atendimento.profissionalNome}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -79,7 +89,7 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -91,16 +101,16 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
         </DialogHeader>
         
          <div className="py-4">
-            <ScrollArea className="h-[400px] pr-4">
+            <ScrollArea className="h-[450px] pr-4">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         <p className="mt-4 text-muted-foreground">Carregando histórico...</p>
                     </div>
                 ) : historico.length > 0 ? (
-                    <div className="space-y-4">
-                        {historico.map((atendimento) => (
-                           <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
+                    <div className="space-y-1">
+                        {historico.map((atendimento, index) => (
+                           <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento} isLast={index === historico.length - 1}/>
                         ))}
                     </div>
                 ) : (
