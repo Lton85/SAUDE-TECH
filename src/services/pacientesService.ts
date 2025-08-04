@@ -34,7 +34,7 @@ export const seedPacientes = async () => {
 
 // Obtém todos os pacientes do banco de dados.
 export const getPacientes = async (): Promise<Paciente[]> => {
-    await seedPacientes();
+    // await seedPacientes(); // Comentado para não popular
     const snapshot = await getDocs(pacientesCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente)).sort((a, b) => a.nome.localeCompare(b.nome));
 };

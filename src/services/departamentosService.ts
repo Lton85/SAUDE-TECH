@@ -28,7 +28,7 @@ export const seedDepartamentos = async () => {
 };
 
 export const getDepartamentos = async (): Promise<Departamento[]> => {
-    await seedDepartamentos();
+    // await seedDepartamentos(); // Comentado para não popular
     const snapshot = await getDocs(departamentosCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Departamento)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
 };

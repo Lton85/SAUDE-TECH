@@ -41,7 +41,7 @@ export const seedEnfermeiros = async () => {
 
 // Obtém todos os enfermeiros do banco de dados.
 export const getEnfermeiros = async (): Promise<Enfermeiro[]> => {
-    await seedEnfermeiros();
+    // await seedEnfermeiros(); // Comentado para não popular
     const snapshot = await getDocs(enfermeirosCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enfermeiro)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
 };

@@ -41,7 +41,7 @@ export const seedMedicos = async () => {
 
 // Obtém todos os médicos do banco de dados.
 export const getMedicos = async (): Promise<Medico[]> => {
-    await seedMedicos();
+    // await seedMedicos(); // Comentado para não popular
     const snapshot = await getDocs(medicosCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
 };
