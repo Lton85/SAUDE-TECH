@@ -16,7 +16,7 @@ import { HistoryEnfermeiroDialog } from "@/components/enfermeiros/history-dialog
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 
-export default function EnfermeirosPage() {
+export function EnfermeirosList() {
   const [enfermeiros, setEnfermeiros] = useState<Enfermeiro[]>([]);
   const [filteredEnfermeiros, setFilteredEnfermeiros] = useState<Enfermeiro[]>([]);
   const [isLoading, setIsLoading] = useState(true);

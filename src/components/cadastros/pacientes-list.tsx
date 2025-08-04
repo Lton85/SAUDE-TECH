@@ -22,7 +22,7 @@ import type { Departamento } from "@/types/departamento";
 import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
 
 
-export default function PacientesPage() {
+export function PacientesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);

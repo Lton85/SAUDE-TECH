@@ -17,7 +17,7 @@ import { HistoryMedicoDialog } from "@/components/medicos/history-dialog";
 import { Input } from "@/components/ui/input";
 
 
-export default function MedicosPage() {
+export function MedicosList() {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [filteredMedicos, setFilteredMedicos] = useState<Medico[]>([]);
   const [isLoading, setIsLoading] = useState(true);
