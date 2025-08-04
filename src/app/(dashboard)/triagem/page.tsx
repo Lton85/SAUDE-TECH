@@ -113,10 +113,10 @@ export default function DepartamentosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Nº da Sala</TableHead>
-                <TableHead>Situação</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="px-3 py-2">Nome</TableHead>
+                <TableHead className="px-3 py-2">Nº da Sala</TableHead>
+                <TableHead className="px-3 py-2">Situação</TableHead>
+                <TableHead className="text-right px-3 py-2">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,21 +124,21 @@ export default function DepartamentosPage() {
                 [...Array(3)].map((_, i) => (
                   <TableRow key={i}>
                     {[...Array(4)].map((_, j) => (
-                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell key={j} className="px-3 py-2"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : departamentos.length > 0 ? (
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
-                    <TableCell className="font-medium">{departamento.nome}</TableCell>
-                    <TableCell>{departamento.numero || "N/A"}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium px-3 py-2">{departamento.nome}</TableCell>
+                    <TableCell className="px-3 py-2">{departamento.numero || "N/A"}</TableCell>
+                    <TableCell className="px-3 py-2">
                       <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right px-3 py-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0 ml-2">
