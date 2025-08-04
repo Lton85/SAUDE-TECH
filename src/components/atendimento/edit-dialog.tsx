@@ -11,13 +11,14 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { Pencil, Loader2, Building, User } from "lucide-react";
+import { Pencil, Loader2, Building, User, Tag } from "lucide-react";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateFilaItem } from "@/services/filaDeEsperaService";
+import { Input } from "../ui/input";
 
 interface Profissional {
   id: string;
@@ -35,6 +36,7 @@ interface EditQueueItemDialogProps {
 export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais }: EditQueueItemDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
+    const [senha, setSenha] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
 
@@ -42,14 +44,15 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
         if (item) {
             setSelectedDepartamentoId(item.departamentoId);
             setSelectedProfissionalId(item.profissionalId);
+            setSenha(item.senha);
         }
     }, [item]);
 
     const handleSave = async () => {
-        if (!item || !selectedDepartamentoId || !selectedProfissionalId) {
+        if (!item || !selectedDepartamentoId || !selectedProfissionalId || !senha) {
             toast({
                 title: "Campos inválidos",
-                description: "Selecione um departamento e um profissional.",
+                description: "Selecione um departamento, um profissional e preencha a senha.",
                 variant: "destructive"
             });
             return;
@@ -70,6 +73,7 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
                 departamentoNumero: selectedDepto.numero,
                 profissionalId: selectedProf.id,
                 profissionalNome: selectedProf.nome,
+                senha: senha,
             };
             
             await updateFilaItem(item.id, updatedData);
@@ -108,6 +112,10 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
         </DialogHeader>
         
         <div className="py-4 space-y-4">
+             <div className="space-y-2">
+                 <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
+                 <Input id="senha" value={senha} onChange={(e) => setSenha(e.target.value.toUpperCase())} />
+            </div>
              <div className="space-y-2">
                   <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                   <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
