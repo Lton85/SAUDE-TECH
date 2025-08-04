@@ -122,7 +122,11 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         throw new Error("Departamento não encontrado.");
     }
     const departamentoData = departamentoSnap.data();
-    const sala = departamentoData.numero ? `SALA ${departamentoData.numero}` : item.departamentoNome.toUpperCase();
+    
+    let sala = item.departamentoNome;
+    if (departamentoData.numero) {
+        sala = `${item.departamentoNome} - SALA ${departamentoData.numero}`;
+    }
 
 
     // 2. Register the call on the public panel
