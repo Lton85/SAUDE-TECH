@@ -60,6 +60,7 @@ interface IbgeCityResponse {
 export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFormProps) {
   const [cities, setCities] = React.useState<string[]>([]);
   const [isCitiesLoading, setIsCitiesLoading] = React.useState(false);
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(formSchema),
@@ -93,6 +94,12 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
             uf: defaultValues.uf || "",
             cidade: defaultValues.cidade || "",
         });
+    } else {
+        // Only focus if it's a new patient form
+        const timer = setTimeout(() => {
+            nameInputRef.current?.focus();
+        }, 100); // Small delay to ensure the dialog is fully rendered
+        return () => clearTimeout(timer);
     }
   }, [defaultValues, form]);
   
@@ -168,7 +175,12 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     <FormItem className="md:col-span-8">
                       <FormLabel>Nome Completo *</FormLabel>
                       <FormControl>
-                        <Input className="bg-muted/40" placeholder="Digite o nome completo do paciente" {...field} />
+                        <Input
+                          {...field}
+                          ref={nameInputRef}
+                          className="bg-muted/40"
+                          placeholder="Digite o nome completo do paciente"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -476,3 +488,5 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     </Form>
   );
 }
+
+    
