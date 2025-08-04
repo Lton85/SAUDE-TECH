@@ -44,7 +44,7 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
                 <h3 className="font-semibold mb-4 text-primary">Informações Profissionais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={BadgeInfo} label="Código" value={medico.codigo} />
-                    <InfoRow icon={User} label="Nome Completo" value={medico.nome} className="lg:col-span-2" />
+                    <InfoRow icon={User} label="Nome Completo" value={medico.nome} />
                     <InfoRow icon={IdCard} label="CRM" value={medico.crm} />
                     <InfoRow icon={IdCard} label="CNS" value={medico.cns} />
                     <InfoRow icon={Stethoscope} label="Especialidade" value={medico.especialidade} />

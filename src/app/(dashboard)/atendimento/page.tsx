@@ -43,7 +43,7 @@ function FilaDeEsperaCard({ item, onChamar }: { item: FilaDeEsperaItem; onChamar
                         </CardDescription>
                     </div>
                     <Button size="sm" onClick={() => onChamar(item)}>
-                        <Megaphone className="mr-2" />
+                        <Megaphone className="mr-2 h-4 w-4" />
                         Chamar
                     </Button>
                 </div>

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -15,6 +15,7 @@ import type { Enfermeiro } from "@/types/enfermeiro";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
+import { DialogFooter } from "../ui/dialog";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -37,9 +38,10 @@ interface EnfermeiroFormProps {
   onSubmit: (values: EnfermeiroFormValues) => void;
   enfermeiro?: Partial<Enfermeiro> | null;
   isSubmitting: boolean;
+  onCancel: () => void;
 }
 
-export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: EnfermeiroFormProps) {
+export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }: EnfermeiroFormProps) {
   const form = useForm<EnfermeiroFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,10 +99,12 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
         });
     }
   }, [enfermeiro, form]);
+  
+  const formId = "enfermeiro-form";
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
+      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
@@ -295,12 +299,16 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting }: Enfermeir
                 )}
             />
         </div>
-        <div className="flex justify-end gap-2 pt-4">
-           <Button type="submit" disabled={isSubmitting}>
-             {isSubmitting ? "Salvando..." : "Salvar"}
-           </Button>
-        </div>
       </form>
+       <DialogFooter>
+          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button type="submit" form={formId} disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? 'Salvando...' : 'Salvar'}
+          </Button>
+      </DialogFooter>
     </Form>
   );
 }

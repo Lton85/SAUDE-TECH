@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { UserPlus, Pencil } from "lucide-react";
+import { UserPlus, Pencil, Loader2 } from "lucide-react";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import { EnfermeiroForm } from "./enfermeiro-form";
 import { addEnfermeiro, updateEnfermeiro } from "@/services/enfermeirosService";
@@ -67,6 +67,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
           onSubmit={handleSubmit}
           enfermeiro={enfermeiro}
           isSubmitting={isSubmitting}
+          onCancel={() => onOpenChange(false)}
         />
       </DialogContent>
     </Dialog>
