@@ -35,7 +35,7 @@ const formSchema = z.object({
   numero: z.string().min(1, { message: "O número é obrigatório." }),
   bairro: z.string().min(2, { message: "O bairro é obrigatório." }),
   cidade: z.string().min(2, { message: "A cidade é obrigatória." }),
-  uf: z.string().length(2, { message: "UF deve ter 2 caracteres." }),
+  uf: z.string().length(2, { message: "Selecione uma UF." }),
   nacionalidade: z.string().min(3, { message: "A nacionalidade é obrigatória." }),
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
@@ -49,6 +49,11 @@ interface PatientFormProps {
   defaultValues?: Partial<PatientFormValues>;
   isSubmitting: boolean;
 }
+
+const ufs = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+    'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
 
 export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFormProps) {
   const form = useForm<PatientFormValues>({
@@ -69,7 +74,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       bairro: "",
       cidade: "",
       uf: "",
-      nacionalidade: "",
+      nacionalidade: "Brasileira",
       email: "",
       telefone: "",
       observacoes: "",
@@ -94,7 +99,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
             bairro: defaultValues.bairro || "",
             cidade: defaultValues.cidade || "",
             uf: defaultValues.uf || "",
-            nacionalidade: defaultValues.nacionalidade || "",
+            nacionalidade: defaultValues.nacionalidade || "Brasileira",
             email: defaultValues.email || "",
             telefone: defaultValues.telefone || "",
             observacoes: defaultValues.observacoes || "",
@@ -376,18 +381,27 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         )}
                         />
                     <FormField
-                        control={form.control}
-                        name="uf"
-                        render={({ field }) => (
-                            <FormItem className="col-span-12 sm:col-span-2">
-                            <FormLabel>UF *</FormLabel>
+                      control={form.control}
+                      name="uf"
+                      render={({ field }) => (
+                        <FormItem className="col-span-12 sm:col-span-2">
+                          <FormLabel>UF *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <Input className="bg-muted/40" placeholder="SP" {...field} />
+                              <SelectTrigger className="bg-muted/40">
+                                <SelectValue placeholder="UF" />
+                              </SelectTrigger>
                             </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                            <SelectContent>
+                              {ufs.map(uf => (
+                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                 </div>
 
                 <FormField
