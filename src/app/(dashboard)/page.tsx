@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ClipboardList, Clock, Tv2 } from "lucide-react";
-import { ArrowUpRight } from "lucide-react";
 
 export default function DashboardPage() {
   const features = [
@@ -33,21 +32,21 @@ export default function DashboardPage() {
       icon: Tv2,
       target: "_blank"
     },
-  ]
+  ];
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {features.map((feature) => (
-        <Link href={feature.href} key={feature.title} target={feature.target}>
-          <Card className="hover:border-primary/80 hover:shadow-lg transition-all h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{feature.title}</CardTitle>
-              <feature.icon className="h-5 w-5 text-muted-foreground" />
+        <Link href={feature.href} key={feature.title} target={feature.target} className="flex">
+          <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
+            <CardHeader className="p-0 mb-4">
+              <feature.icon className="h-8 w-8 text-primary mx-auto" />
             </CardHeader>
-            <CardContent className="flex-grow">
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="p-0 flex-grow">
+              <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
+              <CardDescription className="text-sm">
                 {feature.description}
-              </p>
+              </CardDescription>
             </CardContent>
           </Card>
         </Link>
