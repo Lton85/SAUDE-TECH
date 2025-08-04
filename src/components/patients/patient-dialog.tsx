@@ -100,6 +100,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             };
         }
         return {
+            id: undefined, // ensure id is undefined for new patient
             pai: '',
             cep: '',
             endereco: '',

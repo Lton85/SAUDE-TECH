@@ -43,7 +43,7 @@ type PatientFormValues = z.infer<typeof formSchema>;
 
 interface PatientFormProps {
   onSubmit: (values: PatientFormValues) => void;
-  defaultValues?: Partial<PatientFormValues>;
+  defaultValues?: Partial<PatientFormValues & { id?: string }>;
   isSubmitting: boolean;
 }
 
@@ -89,17 +89,18 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
 
   React.useEffect(() => {
     if (defaultValues) {
-        form.reset({
-            ...defaultValues,
-            uf: defaultValues.uf || "",
-            cidade: defaultValues.cidade || "",
-        });
-    } else {
-        // Only focus if it's a new patient form
+      form.reset({
+        ...defaultValues,
+        uf: defaultValues.uf || "",
+        cidade: defaultValues.cidade || "",
+      });
+      // Only focus if it's a new patient form (no ID)
+      if (!defaultValues.id) {
         const timer = setTimeout(() => {
-            nameInputRef.current?.focus();
-        }, 100); // Small delay to ensure the dialog is fully rendered
+          nameInputRef.current?.focus();
+        }, 100);
         return () => clearTimeout(timer);
+      }
     }
   }, [defaultValues, form]);
   
@@ -488,5 +489,3 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     </Form>
   );
 }
-
-    
