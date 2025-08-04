@@ -282,9 +282,15 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </div>
             </div>
 
-             <div className={cn("space-y-2 text-center transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-0")}>
-                <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
-                <Input id="senha" value={ticket} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" />
+             <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-0")}>
+                <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
+                <Input 
+                  id="senha" 
+                  value={ticket} 
+                  onChange={(e) => setTicket(e.target.value.toUpperCase())}
+                  className="font-bold text-lg"
+                  disabled={!selectedPaciente}
+                />
             </div>
         </div>
 
