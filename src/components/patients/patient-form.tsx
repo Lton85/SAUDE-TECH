@@ -217,38 +217,39 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     render={({ field }) => (
                       <FormItem className="flex flex-col justify-end">
                         <FormLabel>Data de Nascimento *</FormLabel>
-                         <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              className="bg-muted/40 pr-10"
+                              placeholder="DD/MM/AAAA"
+                              {...field}
+                            />
+                          </FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
                               <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal bg-muted/40",
-                                  !field.value && "text-muted-foreground"
-                                )}
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 h-full px-3"
+                                aria-label="Abrir calendário"
                               >
-                                {field.value ? (
-                                  format(parse(field.value, 'dd/MM/yyyy', new Date()), "PPP", { locale: ptBR })
-                                ) : (
-                                  <span>Escolha uma data</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                <CalendarIcon className="h-4 w-4" />
                               </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
-                              onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
+                                onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                              locale={ptBR}
-                            />
-                          </PopoverContent>
-                        </Popover>
+                                }
+                                initialFocus
+                                locale={ptBR}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
