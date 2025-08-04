@@ -23,3 +23,18 @@ export const createChamada = async (chamadaData: Chamada) => {
         throw new Error("Não foi possível registrar a chamada no Firestore.");
     }
 };
+
+export const clearPainel = async () => {
+    try {
+        await addDoc(chamadasCollection, {
+            senha: '----',
+            departamentoNome: 'Aguardando...',
+            pacienteNome: 'Aguardando paciente...',
+            profissionalNome: 'Aguardando profissional...',
+            timestamp: serverTimestamp() 
+        });
+    } catch (error) {
+        console.error("Erro ao limpar painel: ", error);
+        throw new Error("Não foi possível limpar o painel no Firestore.");
+    }
+};

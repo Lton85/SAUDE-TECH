@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus, Broom } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,8 @@ import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { cn } from "@/lib/utils";
+import { clearPainel } from "@/services/chamadasService";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -174,6 +176,22 @@ export default function AtendimentoPage() {
         setPatientToAdd(newPatient); // Store the new patient
         setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
     };
+    
+    const handleClearPainel = async () => {
+        try {
+            await clearPainel();
+            toast({
+                title: "Painel Zerado!",
+                description: "As informações do painel foram redefinidas.",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao zerar o painel",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
 
     const handleChamarPaciente = async (item: FilaDeEsperaItem) => {
         try {
@@ -270,7 +288,7 @@ export default function AtendimentoPage() {
     };
     
     return (
-        <>
+        <TooltipProvider>
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -278,10 +296,22 @@ export default function AtendimentoPage() {
                         <CardTitle>Fila de Atendimento</CardTitle>
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
-                    <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Adicionar Paciente à Fila
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={handleClearPainel} variant="outline" size="icon" className="h-9 w-9">
+                                    <Broom className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Zerar Painel</p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Adicionar Paciente à Fila
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                      <Table>
@@ -515,6 +545,6 @@ export default function AtendimentoPage() {
                 itemName={itemToDelete.pacienteNome}
             />
         )}
-        </>
+        </TooltipProvider>
     );
 }
