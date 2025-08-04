@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -90,18 +91,18 @@ export default function PainelPage() {
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className={`w-full transition-all duration-300 ${isBlinking ? 'animate-pulse' : ''}`}>
                 <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-yellow-400 uppercase tracking-widest">Senha</h2>
-                <p className="text-[12rem] md:text-[16rem] lg:text-[20rem] leading-none font-black text-white tracking-tighter my-2 drop-shadow-lg">{currentCall.ticket}</p>
+                <p className="text-[12rem] md:text-[16rem] lg:text-[22rem] leading-none font-black text-white tracking-tighter my-2 drop-shadow-lg">{currentCall.ticket}</p>
                 <p className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white/90">{currentCall.room}</p>
             </div>
             
             <div className="flex-grow"></div>
 
-            <div className="flex justify-between w-full mt-8 text-left">
-                <div className="w-1/2 pr-4">
+            <div className="flex flex-col items-center justify-center w-full mt-8 text-center">
+                <div className="mb-6">
                     <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Paciente</h3>
                     <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.patientName}</p>
                 </div>
-                 <div className="w-1/2 pl-4 text-left">
+                 <div>
                     <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Profissional</h3>
                     <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.doctor}</p>
                 </div>
