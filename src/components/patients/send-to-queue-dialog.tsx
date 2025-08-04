@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, IdCard } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -15,6 +16,8 @@ import type { Medico } from "@/types/medico"
 import type { Enfermeiro } from "@/types/enfermeiro"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
+import { Badge } from "../ui/badge"
+import { Card, CardContent } from "../ui/card"
 
 interface Profissional {
   id: string;
@@ -134,45 +137,65 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
             Enviar para Fila de Atendimento
           </DialogTitle>
           <DialogDescription>
-            Encaminhe o paciente <span className="font-bold text-primary">{paciente.nome}</span> para o departamento e profissional desejado.
+            Encaminhe o paciente para o departamento e profissional desejado.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="departamento" className="flex items-center gap-2 text-muted-foreground"><Building className="h-4 w-4" />Departamento</Label>
-              <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
-                <SelectTrigger id="departamento">
-                  <SelectValue placeholder="Selecione um departamento..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {departamentos.map((depto) => (
-                    <SelectItem key={depto.id} value={depto.id}>
-                      {depto.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+        <div className="py-4 space-y-6">
+            <Card className="bg-muted/30">
+                <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Label htmlFor="paciente" className="text-muted-foreground">Paciente</Label>
+                            <p id="paciente" className="font-semibold text-lg text-card-foreground">{paciente.nome}</p>
+                        </div>
+                         <div className="flex items-center gap-2">
+                            <IdCard className="h-4 w-4 text-muted-foreground" />
+                            <Badge variant="outline">{paciente.codigo}</Badge>
+                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
+                  <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
+                    <SelectTrigger id="departamento">
+                      <SelectValue placeholder="Selecione um departamento..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departamentos.map((depto) => (
+                        <SelectItem key={depto.id} value={depto.id}>
+                          {depto.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
+                  <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId} disabled={isLoading}>
+                    <SelectTrigger id="profissional">
+                      <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione um profissional..."} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profissionais.map((prof) => (
+                        <SelectItem key={prof.id} value={prof.id}>
+                          {prof.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
             </div>
-             <div className="space-y-2">
-              <Label htmlFor="profissional" className="flex items-center gap-2 text-muted-foreground"><User className="h-4 w-4" />Profissional</Label>
-              <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId} disabled={isLoading}>
-                <SelectTrigger id="profissional">
-                  <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione um profissional..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {profissionais.map((prof) => (
-                    <SelectItem key={prof.id} value={prof.id}>
-                      {prof.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-             <div className="space-y-2">
-              <Label htmlFor="senha" className="flex items-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha</Label>
-                <Input id="senha" value={ticket} readOnly className="font-bold text-lg bg-muted/50 text-center" />
+
+             <div className="space-y-2 text-center">
+              <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
+                <Input id="senha" value={ticket} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" />
             </div>
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
