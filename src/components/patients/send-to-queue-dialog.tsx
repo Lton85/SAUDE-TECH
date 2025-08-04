@@ -49,29 +49,11 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
-  const [ticketNumber, setTicketNumber] = useState<number | null>(null);
-  const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
   
-  const generateTicket = useCallback(async () => {
-      if(!paciente) return;
-      try {
-        const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-        const newTicketNumber = await getNextCounter(counterName);
-        setTicketNumber(newTicketNumber);
-      } catch (error) {
-        toast({
-          title: "Erro ao gerar senha",
-          description: "Não foi possível obter a próxima senha sequencial.",
-          variant: "destructive",
-        });
-        setTicket("");
-        setTicketNumber(null);
-      }
-  }, [toast, paciente, classification]);
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -94,24 +76,14 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     
     if (isOpen) {
       fetchProfissionais();
-      generateTicket();
     }
-  }, [isOpen, toast, generateTicket]);
-
-  useEffect(() => {
-    if (ticketNumber !== null) {
-      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
-      const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-      setTicket(formattedTicket);
-    }
-  }, [classification, ticketNumber]);
-
+  }, [isOpen, toast]);
 
   const handleSubmit = async () => {
-    if (!selectedDepartamentoId || !paciente || !selectedProfissionalId || !ticket) {
+    if (!selectedDepartamentoId || !paciente || !selectedProfissionalId) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, selecione departamento, profissional e verifique a senha.",
+        description: "Por favor, selecione departamento e profissional.",
         variant: "destructive",
       })
       return
@@ -119,6 +91,11 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
 
     setIsSubmitting(true)
     try {
+      const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+      const ticketNumber = await getNextCounter(counterName);
+      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+
       const departamento = departamentos.find(d => d.id === selectedDepartamentoId)
       if (!departamento) throw new Error("Departamento não encontrado")
 
@@ -157,7 +134,6 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       setIsSubmitting(false)
       setSelectedDepartamentoId("");
       setSelectedProfissionalId("");
-      setTicket("");
     }
   }
   
@@ -166,8 +142,6 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         setSelectedDepartamentoId("");
         setSelectedProfissionalId("");
         setClassification('Normal');
-        setTicketNumber(null);
-        setTicket("");
     }
     onOpenChange(open);
   }
@@ -224,7 +198,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                 </div>
                  <div className="space-y-2 text-center">
                     <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
-                    <Input id="senha" value={ticket} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" />
+                    <Input id="senha" readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" placeholder="Será gerada ao confirmar" />
                 </div>
             </div>
 
@@ -269,7 +243,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedDepartamentoId || !selectedProfissionalId || !ticket}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedDepartamentoId || !selectedProfissionalId}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar Envio
           </Button>

@@ -41,8 +41,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
-  const [ticketNumber, setTicketNumber] = useState<number | null>(null);
-  const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,33 +62,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     );
   }, [searchQuery, pacientes]);
 
-  const generateTicket = useCallback(async (pacienteSelecionado: Paciente, classif: 'Normal' | 'Emergência') => {
-      try {
-        const counterName = classif === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-        const newTicketNumber = await getNextCounter(counterName);
-        setTicketNumber(newTicketNumber);
-        const ticketPrefix = classif === 'Emergência' ? 'E' : 'N';
-        const formattedTicket = `${ticketPrefix}-${String(newTicketNumber).padStart(3, '0')}`;
-        setTicket(formattedTicket);
-      } catch (error) {
-        toast({
-          title: "Erro ao gerar senha",
-          description: "Não foi possível obter a próxima senha sequencial.",
-          variant: "destructive",
-        });
-        setTicket(""); // Clear ticket on error
-        setTicketNumber(null);
-      }
-  }, [toast]);
-  
-
   const resetState = () => {
     setSelectedPaciente(null);
     setSelectedDepartamentoId("");
     setSelectedProfissionalId("");
     setClassification('Normal');
-    setTicket("");
-    setTicketNumber(null);
     setIsSubmitting(false);
     setSearchQuery("");
     setShowPatientList(false);
@@ -124,14 +100,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   }, [isOpen, toast]);
 
-  useEffect(() => {
-    if (ticketNumber !== null) {
-      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
-      const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-      setTicket(formattedTicket);
-    }
-  }, [classification, ticketNumber]);
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -156,10 +124,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   }, [highlightedIndex]);
 
   const handleSubmit = async () => {
-    if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId || !ticket) {
+    if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, selecione paciente, departamento, profissional e verifique a senha.",
+        description: "Por favor, selecione paciente, departamento e profissional.",
         variant: "destructive",
       })
       return
@@ -167,6 +135,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
     setIsSubmitting(true)
     try {
+      const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+      const ticketNumber = await getNextCounter(counterName);
+      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+
       if (!selectedDepartamento) throw new Error("Departamento não encontrado")
 
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
@@ -219,7 +192,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery(paciente.nome);
     setShowPatientList(false);
     setHighlightedIndex(-1);
-    generateTicket(paciente, classification);
   }
   
   useEffect(() => {
@@ -281,8 +253,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                       } else {
                          setShowPatientList(false)
                          setSelectedPaciente(null)
-                         setTicketNumber(null);
-                         setTicket("");
                       }
                     }}
                     onFocus={() => { if(searchQuery) setShowPatientList(true) }}
@@ -290,7 +260,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     className="pl-10"
                   />
                   {searchQuery && (
-                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); setTicket(''); setTicketNumber(null); }}>
+                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
@@ -386,15 +356,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         </SelectContent>
                     </Select>
                 </div>
-                <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-0")}>
+                <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-50")}>
                     <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
                     <Input 
                     id="senha" 
-                    value={ticket} 
                     readOnly
                     className="font-bold text-lg bg-muted/30"
                     disabled={!selectedPaciente}
-                    placeholder="Gerando senha..."
+                    placeholder="Será gerada ao confirmar"
                     />
                 </div>
             </div>
@@ -404,7 +373,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedPaciente || !selectedDepartamentoId || !selectedProfissionalId || !ticket}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedPaciente || !selectedDepartamentoId || !selectedProfissionalId}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar Envio
           </Button>
