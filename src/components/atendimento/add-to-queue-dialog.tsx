@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -117,6 +118,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         description: `${selectedPaciente.nome} foi enviado para a fila de ${selectedDepartamento.nome}.`,
         className: "bg-green-500 text-white",
       })
+      resetState();
       onOpenChange(false)
     } catch (error) {
       console.error("Erro ao enviar paciente para a fila:", error)
@@ -257,3 +259,5 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    
