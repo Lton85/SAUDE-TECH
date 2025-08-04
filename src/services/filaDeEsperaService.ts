@@ -104,6 +104,8 @@ export const getAtendimentosEmAndamento = (
         console.error("Error fetching in-progress appointments: ", error);
         onError("Não foi possível buscar os atendimentos em andamento.");
     });
+
+    return unsubscribe;
 }
 
 
