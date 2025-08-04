@@ -1,8 +1,7 @@
-
 "use client"
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp, orderBy, deleteDoc, writeBatch } from 'firebase/firestore';
 import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
@@ -212,4 +211,29 @@ export const retornarPacienteParaFila = async (id: string): Promise<void> => {
         status: "aguardando",
         chamadaEm: null // Reseta o horário da chamada
     });
+};
+
+export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
+    try {
+        const q = query(
+            collection(db, "filaDeEspera"),
+            where("status", "==", "finalizado")
+        );
+
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return 0; // Nenhum documento para excluir
+        }
+
+        const batch = writeBatch(db);
+        querySnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        return querySnapshot.size;
+    } catch (error) {
+        console.error("Erro ao limpar o histórico de atendimentos:", error);
+        throw new Error("Não foi possível limpar o prontuário dos pacientes.");
+    }
 };

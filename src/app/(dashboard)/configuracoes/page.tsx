@@ -1,25 +1,33 @@
-
 "use client";
 
 import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, RefreshCw } from "lucide-react";
+import { Settings, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { resetCounterByName } from "@/services/countersService";
+import { clearAllHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
+import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
+
 
 export default function ConfiguracoesPage() {
     const { toast } = useToast();
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
+    const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
     const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
 
     const handleResetRequest = (type: 'Normal' | 'Emergência') => {
         setResetType(type);
         setDialogOpen(true);
+    };
+    
+    const handleProntuarioResetRequest = () => {
+        setProntuarioDialogOpen(true);
     };
 
     const handleConfirmReset = async () => {
@@ -51,6 +59,29 @@ export default function ConfiguracoesPage() {
             setResetType(null);
         }
     };
+    
+    const handleConfirmProntuarioReset = async () => {
+        setIsProntuarioResetting(true);
+        setProntuarioDialogOpen(false);
+
+        try {
+            const count = await clearAllHistoricoAtendimentos();
+            toast({
+                title: "Prontuários Zerados!",
+                description: `${count} registros de atendimentos finalizados foram excluídos.`,
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao zerar prontuários",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsProntuarioResetting(false);
+        }
+    };
+
 
   return (
     <>
@@ -61,7 +92,7 @@ export default function ConfiguracoesPage() {
             <CardTitle>Configurações do Sistema</CardTitle>
         </div>
         <CardDescription>
-          Ajuste as configurações gerais do sistema nesta área.
+          Ajuste as configurações gerais e perigosas do sistema nesta área.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -108,6 +139,20 @@ export default function ConfiguracoesPage() {
                             </Button>
                         </TableCell>
                     </TableRow>
+                    <TableRow>
+                        <TableCell className="font-medium">Zerar Prontuário de Pacientes</TableCell>
+                        <TableCell className="text-right">
+                            <Button 
+                                onClick={handleProntuarioResetRequest}
+                                variant="destructive" 
+                                size="sm"
+                                disabled={isProntuarioResetting}
+                            >
+                                <Trash2 className={`mr-2 h-4 w-4 ${isProntuarioResetting ? 'animate-spin' : ''}`} />
+                                {isProntuarioResetting ? 'Zerando...' : 'Zerar Prontuários'}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </CardContent>
@@ -128,6 +173,11 @@ export default function ConfiguracoesPage() {
             tipoSenha={resetType}
         />
      )}
+      <ResetProntuarioDialog
+            isOpen={prontuarioDialogOpen}
+            onOpenChange={setProntuarioDialogOpen}
+            onConfirm={handleConfirmProntuarioReset}
+        />
     </>
   );
 }
