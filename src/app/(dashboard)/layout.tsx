@@ -24,10 +24,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/cadastros", label: "Cadastros", icon: Users },
-  { href: "/triagem", label: "Departamentos", icon: ClipboardList },
-  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
+  { href: "/", label: "Início", icon: Home, target: "_self" },
+  { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
+  { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
+  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_self" },
+  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" },
 ];
 
 export default function DashboardLayout({
@@ -38,26 +39,14 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    const currentPath = "/" + (pathname.split('/')[1] || "");
-    const currentItem = menuItems.find(item => item.href === currentPath);
-    
-    if (currentItem) {
-      return currentItem.label;
-    }
-    
-    if (pathname.startsWith('/atendimento')) {
-      return "Fila de Atendimento";
-    }
-    if (pathname.startsWith('/triagem')) {
-      return "Departamentos";
-    }
-    if (pathname.startsWith('/cadastros')) {
-      return "Cadastros";
-    }
-    if (pathname === "/") {
-      return "Dashboard";
-    }
+    // Check for exact match or child routes for title
+    const currentItem = menuItems.find(item => item.href !== '/' && pathname.startsWith(item.href));
+    if (currentItem) return currentItem.label;
 
+    // Handle root dashboard page
+    if (pathname === "/") return "Dashboard";
+    
+    // Fallback title
     return "Saúde Fácil";
   }
 
@@ -78,24 +67,13 @@ export default function DashboardLayout({
                   asChild
                   isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} target={item.target}>
                     <item.icon />
                     {item.label}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-             <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/painel')}
-                >
-                  <Link href={'/painel'} target={'_blank'}>
-                    <Tv2 />
-                    {'Abrir Painel'}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
