@@ -16,7 +16,7 @@ export const seedDepartamentos = async () => {
             for (const depto of departamentosData) {
                 const docRef = doc(departamentosCollection);
                 const nextId = await getNextCounter('departamentos');
-                const codigo = String(nextId).padStart(3, '0');
+                const codigo = String(nextId).padStart(2, '0');
                 batch.set(docRef, { ...depto, codigo });
             }
             await batch.commit();
@@ -35,7 +35,7 @@ export const getDepartamentos = async (): Promise<Departamento[]> => {
 
 export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo'>): Promise<string> => {
     const nextId = await getNextCounter('departamentos');
-    const codigo = String(nextId).padStart(3, '0');
+    const codigo = String(nextId).padStart(2, '0');
     const docRef = await addDoc(departamentosCollection, { ...departamento, codigo });
     return docRef.id;
 };
