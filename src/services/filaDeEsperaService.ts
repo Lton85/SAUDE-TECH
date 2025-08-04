@@ -109,10 +109,10 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
 
     // 2. Register the call on the public panel
     await createChamada({
-        ticket: item.senha,
-        room: sala,
-        doctor: item.profissionalNome,
-        patientName: item.pacienteNome,
+        senha: item.senha,
+        departamentoNome: sala,
+        profissionalNome: item.profissionalNome,
+        pacienteNome: item.pacienteNome,
     });
     
     // 3. Update the patient's status in the queue

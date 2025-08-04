@@ -1,12 +1,13 @@
+
 "use client"
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface Chamada {
-    ticket: string;
-    room: string;
-    doctor: string;
-    patientName: string;
+    senha: string;
+    departamentoNome: string;
+    pacienteNome: string;
+    profissionalNome: string;
 }
 
 const chamadasCollection = collection(db, 'chamadas');
