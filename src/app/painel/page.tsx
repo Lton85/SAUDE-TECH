@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { HeartPulse } from 'lucide-react';
+import { HeartPulse, PlayCircle } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
@@ -21,6 +21,7 @@ export default function PainelPage() {
   const [isBlinking, setIsBlinking] = useState(false);
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -35,7 +36,7 @@ export default function PainelPage() {
   }, [isClient]);
 
   useEffect(() => {
-    if(!isClient) return;
+    if(!isClient || !hasInteracted) return;
 
     const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(1));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -63,7 +64,11 @@ export default function PainelPage() {
     });
 
     return () => unsubscribe();
-  }, [currentCall.id, isClient]);
+  }, [currentCall.id, isClient, hasInteracted]);
+  
+  const handleInteraction = () => {
+    setHasInteracted(true);
+  };
 
   if (!isClient) {
     return (
@@ -88,6 +93,23 @@ export default function PainelPage() {
 
   return (
     <div className="flex flex-col h-screen bg-blue-900 text-white font-headline select-none">
+        
+        {!hasInteracted && (
+             <div className="absolute inset-0 z-50 bg-black/70 flex flex-col items-center justify-center backdrop-blur-sm">
+                <div className="text-center">
+                    <h1 className="text-5xl font-bold text-white mb-4">Bem-vindo ao Painel</h1>
+                    <p className="text-xl text-white/80 mb-8">Clique para iniciar e habilitar as notificações sonoras.</p>
+                    <button
+                        onClick={handleInteraction}
+                        className="flex items-center gap-3 bg-yellow-400 text-blue-900 font-bold text-xl px-8 py-4 rounded-full shadow-lg hover:bg-yellow-300 transition-all transform hover:scale-105"
+                    >
+                        <PlayCircle className="h-8 w-8" />
+                        Iniciar Painel
+                    </button>
+                </div>
+            </div>
+        )}
+
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className={`w-full transition-all duration-300 ${isBlinking ? 'animate-pulse' : ''}`}>
                 <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-yellow-400 uppercase tracking-widest">Senha</h2>
