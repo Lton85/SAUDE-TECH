@@ -297,6 +297,10 @@ export default function AtendimentoPage() {
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Adicionar Paciente à Fila
+                        </Button>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button onClick={handleClearPainel} variant="destructive" size="icon" className="h-9 w-9">
@@ -307,10 +311,6 @@ export default function AtendimentoPage() {
                                 <p>Zerar Painel</p>
                             </TooltipContent>
                         </Tooltip>
-                        <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Adicionar Paciente à Fila
-                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
