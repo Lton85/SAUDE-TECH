@@ -2,13 +2,11 @@
 
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Loader2, Send, Building, User, Tag, ChevronsUpDown, Check } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -18,6 +16,7 @@ import { getEnfermeiros } from "@/services/enfermeirosService"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Profissional {
   id: string;
@@ -38,10 +37,23 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isPatientPopoverOpen, setIsPatientPopoverOpen] = useState(false)
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showPatientList, setShowPatientList] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
   const { toast } = useToast()
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
+
+  const filteredPacientes = useMemo(() => {
+    if (!searchQuery) return [];
+    return pacientes.filter(p => 
+      p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.cpf && p.cpf.includes(searchQuery)) ||
+      (p.cns && p.cns.includes(searchQuery))
+    );
+  }, [searchQuery, pacientes]);
 
   const resetState = () => {
     setSelectedPaciente(null);
@@ -49,6 +61,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedProfissionalId("");
     setTicket("");
     setIsSubmitting(false);
+    setSearchQuery("");
+    setShowPatientList(false);
   }
 
   useEffect(() => {
@@ -84,6 +98,19 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         setTicket("");
     }
   }, [selectedPaciente]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowPatientList(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId || !ticket) {
@@ -140,6 +167,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     onOpenChange(open);
   }
 
+  const handleSelectPatient = (paciente: Paciente) => {
+    setSelectedPaciente(paciente);
+    setSearchQuery(paciente.nome);
+    setShowPatientList(false);
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -154,56 +187,63 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         </DialogHeader>
 
         <div className="py-4 space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="paciente" className="flex items-center gap-2"><User className="h-4 w-4" />Paciente</Label>
-                <Popover open={isPatientPopoverOpen} onOpenChange={setIsPatientPopoverOpen}>
-                    <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isPatientPopoverOpen}
-                        className="w-full justify-between font-normal"
-                    >
-                        {selectedPaciente
-                        ? selectedPaciente.nome
-                        : "Selecione um paciente..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[450px] p-0">
-                    <Command>
-                        <CommandInput placeholder="Buscar paciente por nome, CPF ou CNS..." />
-                        <CommandEmpty>Nenhum paciente encontrado.</CommandEmpty>
-                        <CommandList>
-                        <CommandGroup>
-                            {pacientes.map((paciente) => (
-                            <CommandItem
-                                key={paciente.id}
-                                value={paciente.nome}
-                                onSelect={(currentValue) => {
-                                    const patient = pacientes.find((p) => p.nome.toLowerCase() === currentValue.toLowerCase());
-                                    setSelectedPaciente(patient || null);
-                                    setIsPatientPopoverOpen(false);
-                                }}
-                                className="cursor-pointer"
-                            >
-                                <Check
-                                    className={cn(
-                                    "mr-2 h-4 w-4",
-                                    selectedPaciente?.id === paciente.id ? "opacity-100" : "opacity-0"
-                                    )}
-                                />
-                                <div className="flex-grow">
-                                    <span>{paciente.nome}</span>
-                                    <span className="text-xs text-muted-foreground block">CNS: {paciente.cns}</span>
-                                </div>
-                            </CommandItem>
-                            ))}
-                        </CommandGroup>
-                        </CommandList>
-                    </Command>
-                    </PopoverContent>
-                </Popover>
+            <div className="space-y-2" ref={searchRef}>
+              <Label htmlFor="paciente-search" className="flex items-center gap-2"><User className="h-4 w-4" />Paciente</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="paciente-search"
+                  placeholder="Buscar paciente por nome, CPF ou CNS..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    if(e.target.value) {
+                       setShowPatientList(true)
+                    } else {
+                       setShowPatientList(false)
+                       setSelectedPaciente(null)
+                    }
+                  }}
+                  onFocus={() => { if(searchQuery) setShowPatientList(true) }}
+                  className="pl-10"
+                />
+                {searchQuery && (
+                  <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+
+              {showPatientList && filteredPacientes.length > 0 && (
+                <div className="relative">
+                  <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
+                    <ScrollArea className="h-auto max-h-60">
+                      <div className="p-1">
+                        {filteredPacientes.map((paciente) => (
+                          <Button
+                            key={paciente.id}
+                            variant="ghost"
+                            className="w-full justify-start h-auto py-2 px-2 text-left"
+                            onClick={() => handleSelectPatient(paciente)}
+                          >
+                             <div>
+                                <p className="font-semibold">{paciente.nome}</p>
+                                <p className="text-xs text-muted-foreground">CNS: {paciente.cns}</p>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                </div>
+              )}
+               {showPatientList && filteredPacientes.length === 0 && searchQuery && (
+                 <div className="relative">
+                  <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg p-4 text-center text-sm text-muted-foreground">
+                    Nenhum paciente encontrado.
+                  </div>
+                </div>
+               )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
