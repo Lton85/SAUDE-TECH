@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Loader2, Send, Building, User, Tag, ChevronsUpDown } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, ChevronsUpDown, Check } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -177,11 +177,18 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                             {pacientes.map((paciente) => (
                             <CommandItem
                                 key={paciente.id}
+                                className="cursor-pointer"
                                 onSelect={() => {
-                                setSelectedPaciente(paciente)
-                                setIsPatientPopoverOpen(false)
+                                    setSelectedPaciente(paciente)
+                                    setIsPatientPopoverOpen(false)
                                 }}
                             >
+                                <Check
+                                    className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedPaciente?.id === paciente.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                />
                                 <div>
                                     <span>{paciente.nome}</span>
                                     <span className="text-xs text-muted-foreground block">CNS: {paciente.cns}</span>
