@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PlusCircle, Trash2, Pencil, Venus, Mars, Eye, History } from "lucide-react";
+import { PlusCircle, Trash2, Pencil, Venus, Mars, Eye, History, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getMedicos, deleteMedico } from "@/services/medicosService";
 import type { Medico } from "@/types/medico";
@@ -14,16 +14,19 @@ import { MedicoDialog } from "@/components/medicos/medico-dialog";
 import { DeleteConfirmationDialog } from "@/components/medicos/delete-dialog";
 import { ViewMedicoDialog } from "@/components/medicos/view-dialog";
 import { HistoryMedicoDialog } from "@/components/medicos/history-dialog";
+import { Input } from "@/components/ui/input";
 
 
 export default function MedicosPage() {
   const [medicos, setMedicos] = useState<Medico[]>([]);
+  const [filteredMedicos, setFilteredMedicos] = useState<Medico[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMedico, setSelectedMedico] = useState<Medico | null>(null);
   const [medicoToDelete, setMedicoToDelete] = useState<Medico | null>(null);
   const [medicoToView, setMedicoToView] = useState<Medico | null>(null);
   const [medicoToHistory, setMedicoToHistory] = useState<Medico | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const fetchMedicos = async () => {
@@ -31,6 +34,7 @@ export default function MedicosPage() {
     try {
       const data = await getMedicos();
       setMedicos(data);
+      setFilteredMedicos(data);
     } catch (error) {
       toast({
         title: "Erro ao buscar médicos",
@@ -45,6 +49,19 @@ export default function MedicosPage() {
   useEffect(() => {
     fetchMedicos();
   }, []);
+
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase();
+    const filteredData = medicos.filter((item) => {
+      return (
+        item.nome.toLowerCase().includes(lowercasedFilter) ||
+        (item.cpf && item.cpf.includes(searchTerm)) ||
+        (item.cns && item.cns.includes(searchTerm)) ||
+        (item.crm && item.crm.toLowerCase().includes(lowercasedFilter))
+      );
+    });
+    setFilteredMedicos(filteredData);
+  }, [searchTerm, medicos]);
 
   const handleSuccess = () => {
     fetchMedicos();
@@ -103,10 +120,21 @@ export default function MedicosPage() {
             <CardTitle>Médicos</CardTitle>
             <CardDescription>Gerencie a equipe médica.</CardDescription>
           </div>
-          <Button onClick={handleAddNew}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Novo Médico
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, CPF, CNS ou CRM..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <Button onClick={handleAddNew}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Novo Médico
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -133,8 +161,8 @@ export default function MedicosPage() {
                   ))}
                 </TableRow>
               ))
-            ) : medicos.length > 0 ? (
-              medicos.map((medico) => (
+            ) : filteredMedicos.length > 0 ? (
+              filteredMedicos.map((medico) => (
                 <TableRow key={medico.id}>
                    <TableCell className="font-mono px-2 py-1 text-xs"><Badge variant="outline">{medico.codigo}</Badge></TableCell>
                   <TableCell className="font-medium px-2 py-1 text-xs">{medico.nome}</TableCell>
@@ -178,7 +206,7 @@ export default function MedicosPage() {
             ) : (
                 <TableRow>
                     <TableCell colSpan={9} className="h-24 text-center">
-                    Nenhum médico cadastrado.
+                    Nenhum médico encontrado.
                     </TableCell>
                 </TableRow>
             )}

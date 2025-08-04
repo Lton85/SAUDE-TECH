@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PlusCircle, Pencil, Trash2, Venus, Mars, Eye, History } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Venus, Mars, Eye, History, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getEnfermeiros, deleteEnfermeiro } from "@/services/enfermeirosService";
 import type { Enfermeiro } from "@/types/enfermeiro";
@@ -14,15 +14,18 @@ import { DeleteEnfermeiroDialog } from "@/components/enfermeiros/delete-dialog";
 import { ViewEnfermeiroDialog } from "@/components/enfermeiros/view-dialog";
 import { HistoryEnfermeiroDialog } from "@/components/enfermeiros/history-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 export default function EnfermeirosPage() {
   const [enfermeiros, setEnfermeiros] = useState<Enfermeiro[]>([]);
+  const [filteredEnfermeiros, setFilteredEnfermeiros] = useState<Enfermeiro[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEnfermeiro, setSelectedEnfermeiro] = useState<Enfermeiro | null>(null);
   const [enfermeiroToDelete, setEnfermeiroToDelete] = useState<Enfermeiro | null>(null);
   const [enfermeiroToView, setEnfermeiroToView] = useState<Enfermeiro | null>(null);
   const [enfermeiroToHistory, setEnfermeiroToHistory] = useState<Enfermeiro | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { toast } = useToast();
 
@@ -31,6 +34,7 @@ export default function EnfermeirosPage() {
     try {
       const data = await getEnfermeiros();
       setEnfermeiros(data);
+      setFilteredEnfermeiros(data);
     } catch (error) {
       console.error("Erro ao buscar enfermeiros:", error);
       toast({
@@ -47,6 +51,19 @@ export default function EnfermeirosPage() {
     fetchEnfermeiros();
   }, []);
   
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase();
+    const filteredData = enfermeiros.filter((item) => {
+      return (
+        item.nome.toLowerCase().includes(lowercasedFilter) ||
+        (item.cpf && item.cpf.includes(searchTerm)) ||
+        (item.cns && item.cns.includes(searchTerm)) ||
+        (item.coren && item.coren.toLowerCase().includes(lowercasedFilter))
+      );
+    });
+    setFilteredEnfermeiros(filteredData);
+  }, [searchTerm, enfermeiros]);
+
   const handleSuccess = () => {
     fetchEnfermeiros();
     setSelectedEnfermeiro(null);
@@ -104,10 +121,21 @@ export default function EnfermeirosPage() {
               <CardTitle>Enfermeiros</CardTitle>
               <CardDescription>Gerencie a equipe de enfermagem.</CardDescription>
             </div>
-            <Button onClick={handleAddNew}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Enfermeiro
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="relative w-full max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nome, CPF, CNS ou COREN..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+              </div>
+              <Button onClick={handleAddNew}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Novo Enfermeiro
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -134,8 +162,8 @@ export default function EnfermeirosPage() {
                     ))}
                   </TableRow>
                 ))
-              ) : enfermeiros.length > 0 ? (
-                enfermeiros.map((enfermeiro) => (
+              ) : filteredEnfermeiros.length > 0 ? (
+                filteredEnfermeiros.map((enfermeiro) => (
                   <TableRow key={enfermeiro.id}>
                     <TableCell className="font-mono px-2 py-1 text-xs"><Badge variant="outline">{enfermeiro.codigo}</Badge></TableCell>
                     <TableCell className="font-medium px-2 py-1 text-xs">{enfermeiro.nome}</TableCell>
@@ -179,7 +207,7 @@ export default function EnfermeirosPage() {
               ) : (
                 <TableRow>
                     <TableCell colSpan={9} className="h-24 text-center">
-                    Nenhum enfermeiro cadastrado.
+                    Nenhum enfermeiro encontrado.
                     </TableCell>
                 </TableRow>
               )}
