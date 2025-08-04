@@ -367,20 +367,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                             </FormItem>
                         )}
                         />
-                    <FormField
-                        control={form.control}
-                        name="cidade"
-                        render={({ field }) => (
-                            <FormItem className="col-span-12 sm:col-span-5">
-                            <FormLabel>Cidade *</FormLabel>
-                            <FormControl>
-                                <Input className="bg-muted/40" placeholder="Ex: São Paulo" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    <FormField
+                     <FormField
                       control={form.control}
                       name="uf"
                       render={({ field }) => (
@@ -402,6 +389,19 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         </FormItem>
                       )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="cidade"
+                        render={({ field }) => (
+                            <FormItem className="col-span-12 sm:col-span-5">
+                            <FormLabel>Cidade *</FormLabel>
+                            <FormControl>
+                                <Input className="bg-muted/40" placeholder="Ex: São Paulo" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                 </div>
 
                 <FormField
