@@ -68,7 +68,7 @@ export default function AtendimentoPage() {
             });
 
         const unsubscribePacientes = getPacientesRealtime(
-            setPacientes,
+            (data) => setPacientes(data),
             (error) => {
                 toast({
                     title: "Erro ao carregar pacientes",
@@ -180,19 +180,19 @@ export default function AtendimentoPage() {
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <TempoDeEspera chegadaEm={item.chegadaEm}/>
+                                            <Button size="sm" onClick={() => handleChamarPaciente(item)}>
+                                                <Megaphone className="mr-2 h-4 w-4" />
+                                                Chamar
+                                            </Button>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Abrir menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Abrir menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleChamarPaciente(item)}>
-                                                        <Megaphone className="mr-2 h-4 w-4" />
-                                                        <span>Chamar Paciente</span>
-                                                    </DropdownMenuItem>
+                                                    <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
                                                     <DropdownMenuItem>
                                                         <Pencil className="mr-2 h-4 w-4" />
                                                         <span>Editar</span>
