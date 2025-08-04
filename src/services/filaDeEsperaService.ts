@@ -10,14 +10,25 @@ import { getDoc } from 'firebase/firestore';
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
     try {
-        const q = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "!=", "finalizado"));
-        const activeQueueEntries = await getDocs(q);
-        if (!activeQueueEntries.empty) {
-            throw new Error("Este paciente já está na fila de atendimento ou em atendimento.");
+        // Check for 'aguardando' status
+        const qAguardando = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "==", "aguardando"));
+        const aguardandoSnapshot = await getDocs(qAguardando);
+        if (!aguardandoSnapshot.empty) {
+            throw new Error("Este paciente já está na fila de atendimento.");
         }
+
+        // Check for 'em-atendimento' status
+        const qEmAtendimento = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "==", "em-atendimento"));
+        const emAtendimentoSnapshot = await getDocs(qEmAtendimento);
+        if (!emAtendimentoSnapshot.empty) {
+            throw new Error("Este paciente já está em atendimento.");
+        }
+        
+        const prioridade = item.classificacao === 'Emergência' ? 1 : 2;
 
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
+            prioridade,
             chegadaEm: serverTimestamp(),
             chamadaEm: null,
             finalizadaEm: null
@@ -46,6 +57,17 @@ export const getFilaDeEspera = (
             ...doc.data()
         } as FilaDeEsperaItem));
         
+        // Order by priority then by time
+        data.sort((a, b) => {
+            if (a.prioridade !== b.prioridade) {
+                return a.prioridade - b.prioridade;
+            }
+            if(a.chegadaEm && b.chegadaEm) {
+                return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
+            }
+            return 0;
+        });
+
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching queue: ", error);
@@ -69,14 +91,19 @@ export const getAtendimentosEmAndamento = (
             id: doc.id,
             ...doc.data()
         } as FilaDeEsperaItem));
+
+        data.sort((a, b) => {
+            if (a.chamadaEm && b.chamadaEm) {
+                return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
+            }
+            return 0;
+        });
         
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching in-progress appointments: ", error);
         onError("Não foi possível buscar os atendimentos em andamento.");
     });
-
-    return unsubscribe;
 }
 
 
