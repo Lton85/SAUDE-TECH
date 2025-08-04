@@ -182,3 +182,15 @@ export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>
     const filaDocRef = doc(db, "filaDeEspera", id);
     await updateDoc(filaDocRef, data);
 };
+
+export const retornarPacienteParaFila = async (id: string): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await updateDoc(filaDocRef, {
+        status: "aguardando",
+        chamadaEm: null // Reseta o horário da chamada
+    });
+};

@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass } from "lucide-react";
-import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento } from "@/services/filaDeEsperaService";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
+import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -165,6 +165,23 @@ export default function AtendimentoPage() {
         } catch (error) {
              toast({
                 title: "Erro ao finalizar",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleRetornarParaFila = async (item: FilaDeEsperaItem) => {
+        try {
+            await retornarPacienteParaFila(item.id);
+            toast({
+                title: "Paciente Retornou para a Fila!",
+                description: `O atendimento de ${item.pacienteNome} foi retornado para a fila de espera.`,
+                 variant: "default"
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao retornar paciente",
                 description: (error as Error).message,
                 variant: "destructive",
             });
@@ -335,10 +352,16 @@ export default function AtendimentoPage() {
                                         <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
                                         <TableCell className="text-right px-2 py-1 text-xs">
-                                            <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
-                                                <CheckCircle className="mr-2 h-3 w-3" />
-                                                Finalizar Atendimento
-                                            </Button>
+                                           <div className="flex items-center justify-end gap-2">
+                                                <Button size="sm" variant="outline" onClick={() => handleRetornarParaFila(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
+                                                    <Undo2 className="mr-2 h-3 w-3" />
+                                                    Retornar à Fila
+                                                </Button>
+                                                <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
+                                                    <CheckCircle className="mr-2 h-3 w-3" />
+                                                    Finalizar Atendimento
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))
