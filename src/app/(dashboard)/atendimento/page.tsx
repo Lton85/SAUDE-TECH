@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText } from "lucide-react";
-import { getFilaDeEspera, deleteFilaItem, chamarPaciente } from "@/services/filaDeEsperaService";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass } from "lucide-react";
+import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +59,7 @@ interface Profissional {
 
 export default function AtendimentoPage() {
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
+    const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -119,10 +120,21 @@ export default function AtendimentoPage() {
             });
             setIsLoading(false);
         });
+        
+        const unsubscribeEmAtendimento = getAtendimentosEmAndamento((data) => {
+            setEmAtendimento(data);
+        }, (error) => {
+             toast({
+                title: "Erro ao carregar atendimentos",
+                description: error,
+                variant: "destructive",
+            });
+        });
 
         return () => {
             unsubscribePacientes();
             unsubscribeFila();
+            unsubscribeEmAtendimento();
         };
     }, [toast]);
 
@@ -137,6 +149,22 @@ export default function AtendimentoPage() {
         } catch (error) {
              toast({
                 title: "Erro ao chamar paciente",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
+        try {
+            await finalizarAtendimento(item.id);
+             toast({
+                title: "Atendimento Finalizado!",
+                description: `O atendimento de ${item.pacienteNome} foi concluído.`,
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao finalizar",
                 description: (error as Error).message,
                 variant: "destructive",
             });
@@ -181,100 +209,151 @@ export default function AtendimentoPage() {
     
     return (
         <>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Fila de Atendimento</CardTitle>
-                    <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
-                </div>
-                <Button onClick={() => setIsAddToQueueDialogOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Adicionar Paciente à Fila
-                </Button>
-            </CardHeader>
-            <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                            <TableHead className="px-2 py-2 text-xs w-[100px]">Senha</TableHead>
-                            <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                            <TableHead className="px-2 py-2 text-xs">Médico</TableHead>
-                            <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            [...Array(3)].map((_, i) => (
-                                <TableRow key={i}>
-                                    {[...Array(5)].map((_, j) => (
-                                        <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : fila.length > 0 ? (
-                            fila.map((item) => (
-                                <TableRow key={item.id} className="hover:bg-muted/50">
-                                    <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
-                                    <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
-                                    <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
-                                    <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
-                                    <TableCell className="text-right px-2 py-1 text-xs">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <TempoDeEspera chegadaEm={item.chegadaEm}/>
-                                            <Button size="sm" onClick={() => handleChamarPaciente(item)} className="h-7 px-2 text-xs">
-                                                <Megaphone className="mr-2 h-3 w-3" />
-                                                Chamar
-                                            </Button>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-7 w-7 p-0">
-                                                        <span className="sr-only">Abrir menu</span>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleEdit(item)}>
-                                                        <Pencil className="mr-2 h-4 w-4" />
-                                                        <span>Editar</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleProntuario(item)}>
-                                                        <FileText className="mr-2 h-4 w-4" />
-                                                        <span>Prontuário</span>
-                                                    </DropdownMenuItem>
-                                                     <DropdownMenuItem onClick={() => handleHistory(item)}>
-                                                        <History className="mr-2 h-4 w-4" />
-                                                        <span>Histórico</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        <span>Excluir da Fila</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+        <div className="space-y-6">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Fila de Atendimento</CardTitle>
+                        <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
+                    </div>
+                    <Button onClick={() => setIsAddToQueueDialogOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Adicionar Paciente à Fila
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                <TableHead className="px-2 py-2 text-xs w-[100px]">Senha</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Médico</TableHead>
+                                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                [...Array(3)].map((_, i) => (
+                                    <TableRow key={i}>
+                                        {[...Array(5)].map((_, j) => (
+                                            <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : fila.length > 0 ? (
+                                fila.map((item) => (
+                                    <TableRow key={item.id} className="hover:bg-muted/50">
+                                        <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                        <TableCell className="text-right px-2 py-1 text-xs">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <TempoDeEspera chegadaEm={item.chegadaEm}/>
+                                                <Button size="sm" onClick={() => handleChamarPaciente(item)} className="h-7 px-2 text-xs">
+                                                    <Megaphone className="mr-2 h-3 w-3" />
+                                                    Chamar
+                                                </Button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-7 w-7 p-0">
+                                                            <span className="sr-only">Abrir menu</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
+                                                        <DropdownMenuItem onClick={() => handleEdit(item)}>
+                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                            <span>Editar</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleProntuario(item)}>
+                                                            <FileText className="mr-2 h-4 w-4" />
+                                                            <span>Prontuário</span>
+                                                        </DropdownMenuItem>
+                                                         <DropdownMenuItem onClick={() => handleHistory(item)}>
+                                                            <History className="mr-2 h-4 w-4" />
+                                                            <span>Histórico</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            <span>Excluir da Fila</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-64 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-4">
+                                            <Users className="h-16 w-16 text-muted-foreground/30" />
+                                            <div className="space-y-1">
+                                                <h3 className="text-lg font-semibold text-muted-foreground">Fila Vazia</h3>
+                                                <p className="text-sm text-muted-foreground">Nenhum paciente aguardando atendimento no momento.</p>
+                                            </div>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Hourglass className="h-5 w-5 text-primary" />
+                        Atendimentos em Andamento
+                    </CardTitle>
+                    <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={5} className="h-64 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-4">
-                                        <Users className="h-16 w-16 text-muted-foreground/30" />
-                                        <div className="space-y-1">
-                                            <h3 className="text-lg font-semibold text-muted-foreground">Fila Vazia</h3>
-                                            <p className="text-sm text-muted-foreground">Nenhum paciente aguardando atendimento no momento.</p>
-                                        </div>
-                                    </div>
-                                </TableCell>
+                                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                </TableRow>
+                            ) : emAtendimento.length > 0 ? (
+                                emAtendimento.map((item) => (
+                                    <TableRow key={item.id} className="hover:bg-muted/50">
+                                        <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                        <TableCell className="text-right px-2 py-1 text-xs">
+                                            <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
+                                                <CheckCircle className="mr-2 h-3 w-3" />
+                                                Finalizar Atendimento
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center">
+                                        Nenhum paciente em atendimento no momento.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
 
 
         <AddToQueueDialog

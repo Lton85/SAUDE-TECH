@@ -61,6 +61,38 @@ export const getFilaDeEspera = (
     return unsubscribe;
 };
 
+export const getAtendimentosEmAndamento = (
+    onUpdate: (data: FilaDeEsperaItem[]) => void,
+    onError: (error: string) => void
+) => {
+     const q = query(
+        collection(db, "filaDeEspera"), 
+        where("status", "==", "em-atendimento")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem)).filter(item => item.chamadaEm); 
+        
+        data.sort((a, b) => {
+            if (a.chamadaEm && b.chamadaEm) {
+                return a.chamadaEm.toMillis() - b.chamadaEm.toMillis();
+            }
+            return 0;
+        });
+        
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching in-progress appointments: ", error);
+        onError("Não foi possível buscar os atendimentos em andamento.");
+    });
+
+    return unsubscribe;
+}
+
+
 export const chamarPaciente = async (item: FilaDeEsperaItem) => {
     if (!item.id) {
         throw new Error("ID do item da fila não encontrado.");
@@ -89,6 +121,18 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
     await updateDoc(filaDocRef, {
         status: "em-atendimento",
         chamadaEm: serverTimestamp()
+    });
+};
+
+export const finalizarAtendimento = async (id: string) => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await updateDoc(filaDocRef, {
+        status: "finalizado",
+        finalizadaEm: serverTimestamp()
     });
 };
 
