@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, User, Building, Loader2, Info, CheckCircle } from "lucide-react";
+import { FileText, Calendar, User, Building, Loader2, Info, CheckCircle, LogIn, Megaphone, Check } from "lucide-react";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 interface ProntuarioDialogProps {
   isOpen: boolean;
@@ -17,47 +19,68 @@ interface ProntuarioDialogProps {
   item: FilaDeEsperaItem | null;
 }
 
-const AtendimentoTimelineItem = ({ atendimento, isLast }: { atendimento: FilaDeEsperaItem, isLast: boolean }) => {
+const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
+    <div className="flex items-center gap-3">
+        <Icon className="h-4 w-4 text-primary/80" />
+        <div className="flex justify-between w-full">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="font-mono text-xs font-medium">{time}</span>
+        </div>
+    </div>
+);
+
+const AtendimentoTimelineItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : '';
-    const horaFormatada = dataFinalizacao ? format(dataFinalizacao, "HH:mm", { locale: ptBR }) : '';
+    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : '';
+    
+    const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     return (
-       <div className="relative flex items-start gap-4">
-            <div className="flex flex-col items-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Calendar className="h-4 w-4" />
-                </div>
-                {!isLast && <div className="w-px flex-1 bg-border/70 my-2"></div>}
-            </div>
-            <div className="flex-1 pt-1.5">
-                <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-foreground">
-                        {dataFormatada} <span className="text-xs font-normal text-muted-foreground">às {horaFormatada}h</span>
-                    </p>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado
-                    </Badge>
-                </div>
-                 <div className="mt-2 space-y-2 text-sm rounded-md border bg-muted/20 p-3">
-                    <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-primary" />
-                        <div>
-                            <p className="text-xs text-muted-foreground">Departamento</p>
-                            <p className="font-medium">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</p>
+       <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value={atendimento.id} className="border-b-0">
+                 <div className="flex gap-4">
+                    <div className="flex flex-col items-center pt-1">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary ring-4 ring-background">
+                            <Calendar className="h-4 w-4" />
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
-                        <div>
-                            <p className="text-xs text-muted-foreground">Profissional</p>
-                            <p className="font-medium">{atendimento.profissionalNome}</p>
-                        </div>
+                    <div className="flex-1 pb-4">
+                        <AccordionTrigger className="p-0 hover:no-underline">
+                             <div className="flex-1 text-left">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-semibold text-foreground">
+                                        {dataFormatada}
+                                    </p>
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 mr-2">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Finalizado
+                                    </Badge>
+                                </div>
+                                <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                                     <div className="flex items-center gap-2">
+                                        <Building className="h-3 w-3" />
+                                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <User className="h-3 w-3" />
+                                        <span>{atendimento.profissionalNome}</span>
+                                    </div>
+                                </div>
+                             </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="mt-4 space-y-3 rounded-md border bg-muted/30 p-3">
+                                <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
+                                <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
+                                <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
+                            </div>
+                        </AccordionContent>
                     </div>
                 </div>
-            </div>
-        </div>
+            </AccordionItem>
+       </Accordion>
     )
 }
 
@@ -100,7 +123,8 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
           </DialogDescription>
         </DialogHeader>
         
-         <div className="py-4">
+         <div className="py-4 relative">
+            {historico.length > 1 && <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-border -z-10"></div>}
             <ScrollArea className="h-[450px] pr-4">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full">
@@ -108,9 +132,9 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
                         <p className="mt-4 text-muted-foreground">Carregando histórico...</p>
                     </div>
                 ) : historico.length > 0 ? (
-                    <div className="space-y-1">
+                    <div className="space-y-0">
                         {historico.map((atendimento, index) => (
-                           <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento} isLast={index === historico.length - 1}/>
+                           <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento}/>
                         ))}
                     </div>
                 ) : (
