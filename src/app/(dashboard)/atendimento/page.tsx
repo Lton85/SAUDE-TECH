@@ -119,13 +119,13 @@ export default function AtendimentoPage() {
 
         const unsubscribeFila = getFilaDeEspera((data) => {
             const sortedData = data.sort((a, b) => {
-                if (a.prioridade === b.prioridade) {
-                    if(a.chegadaEm && b.chegadaEm) {
-                        return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
-                    }
-                    return 0;
+                if (a.prioridade !== b.prioridade) {
+                    return a.prioridade - b.prioridade;
                 }
-                return a.prioridade - b.prioridade;
+                if(a.chegadaEm && b.chegadaEm) {
+                    return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
+                }
+                return 0;
             });
             setFila(sortedData);
             setIsLoading(false);

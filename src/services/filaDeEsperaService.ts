@@ -8,7 +8,7 @@ import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'>) => {
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
     try {
         const q = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "!=", "finalizado"));
         const activeQueueEntries = await getDocs(q);
@@ -18,7 +18,6 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
 
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
-            prioridade: item.classificacao === 'Emergência' ? 1 : 2,
             chegadaEm: serverTimestamp(),
             chamadaEm: null,
             finalizadaEm: null
@@ -38,8 +37,7 @@ export const getFilaDeEspera = (
 ) => {
     const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "aguardando"),
-        orderBy("chegadaEm", "asc")
+        where("status", "==", "aguardando")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
