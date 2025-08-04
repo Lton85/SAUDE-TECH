@@ -69,7 +69,6 @@ export function EnfermeirosList() {
   const handleSuccess = () => {
     fetchEnfermeiros();
     setSelectedEnfermeiro(null);
-    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -251,5 +250,3 @@ export function EnfermeirosList() {
     </>
   );
 }
-
-    

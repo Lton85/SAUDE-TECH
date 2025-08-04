@@ -69,7 +69,6 @@ export function MedicosList() {
   const handleSuccess = () => {
     fetchMedicos();
     setSelectedMedico(null);
-    router.push('/');
   };
   
   const handleAddNew = () => {
@@ -253,5 +252,3 @@ export function MedicosList() {
     </>
   );
 }
-
-    

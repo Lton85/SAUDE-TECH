@@ -54,7 +54,6 @@ export default function DepartamentosPage() {
     fetchData();
     setIsDialogOpen(false);
     setSelectedDepartamento(null);
-    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -228,5 +227,3 @@ export default function DepartamentosPage() {
     </>
   );
 }
-
-    

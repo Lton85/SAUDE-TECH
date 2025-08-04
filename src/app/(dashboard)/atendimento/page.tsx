@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,7 @@ import { getDepartamentos } from "@/services/departamentosService";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
-import { HistoryQueueItemDialog } from "@/components/atendimento/history-dialog";
+import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
@@ -121,8 +121,9 @@ export default function AtendimentoPage() {
 
         const unsubscribeFila = getFilaDeEspera((data) => {
             const sortedData = data.sort((a, b) => {
-                if (a.prioridade !== b.prioridade) {
-                    return a.prioridade - b.prioridade;
+                const priorityOrder = a.prioridade - b.prioridade;
+                if (priorityOrder !== 0) {
+                    return priorityOrder;
                 }
                 if(a.chegadaEm && b.chegadaEm) {
                     return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
@@ -290,7 +291,7 @@ export default function AtendimentoPage() {
                                 <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Médico</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
                                 <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -310,9 +311,9 @@ export default function AtendimentoPage() {
                                         <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
                                         <TableCell className="px-2 py-1 text-xs">
                                              <Badge
-                                                variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
                                                 className={cn(
                                                     'text-xs',
+                                                    item.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
                                                     item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >
@@ -342,8 +343,8 @@ export default function AtendimentoPage() {
                                                             <span>Editar</span>
                                                         </DropdownMenuItem>
                                                          <DropdownMenuItem onClick={() => handleHistory(item)}>
-                                                            <History className="mr-2 h-4 w-4" />
-                                                            <span>Histórico</span>
+                                                            <FilePlus className="mr-2 h-4 w-4" />
+                                                            <span>Prontuário</span>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
@@ -410,10 +411,10 @@ export default function AtendimentoPage() {
                                         <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">
                                              <Badge
-                                                variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
                                                 className={cn(
                                                     'text-xs',
-                                                     item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    item.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                                                    item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >
                                                 {item.classificacao}
@@ -467,7 +468,7 @@ export default function AtendimentoPage() {
             departamentos={departamentos}
             onAddNewPatient={handleOpenNewPatientDialog}
             patientToAdd={patientToAdd}
-            onSuccess={() => router.push('/')}
+            onSuccess={() => {}}
         />
 
         <PatientDialog
@@ -499,7 +500,7 @@ export default function AtendimentoPage() {
         )}
         
         {itemToHistory && (
-             <HistoryQueueItemDialog
+             <ProntuarioDialog
                 isOpen={!!itemToHistory}
                 onOpenChange={() => setItemToHistory(null)}
                 item={itemToHistory}
@@ -517,5 +518,3 @@ export default function AtendimentoPage() {
         </>
     );
 }
-
-    
