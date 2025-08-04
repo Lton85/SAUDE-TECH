@@ -26,7 +26,7 @@ const menuItems = [
   { href: "/", label: "Início", icon: Home, target: "_self" },
   { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
   { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
-  { href: "/atendimento", label: "Atendimento", icon: Clock, target: "_self" },
+  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_self" },
 ];
 
 export default function DashboardLayout({
@@ -37,14 +37,14 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    if (pathname === "/") return "Dashboard";
-    if (pathname.startsWith("/atendimento")) return "Fila de Atendimento";
-    if (pathname.startsWith("/cadastros")) return "Cadastros";
-    if (pathname.startsWith("/triagem")) return "Departamentos";
+    const currentPath = "/" + (pathname.split('/')[1] || "");
+    const currentItem = menuItems.find(item => item.href === currentPath);
     
-    const mainRoute = "/" + (pathname.split('/')[1] || "");
-    const current = menuItems.find(item => item.href === mainRoute);
-    if (current) return current.label;
+    if (currentItem) {
+      return currentItem.label;
+    }
+    
+    if (pathname === "/") return "Dashboard";
 
     return "Saúde Fácil";
   }
