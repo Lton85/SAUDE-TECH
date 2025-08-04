@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Pencil, Trash2, Eye, Megaphone } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Pencil, Trash2, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { getDepartamentos, deleteDepartamento } from "@/services/departamentosService";
@@ -14,13 +14,9 @@ import { DepartamentoDialog } from "@/components/departamentos/departamento-dial
 import { DeleteDepartamentoDialog } from "@/components/departamentos/delete-dialog";
 import { ViewDepartamentoDialog } from "@/components/departamentos/view-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { getMedicos } from "@/services/medicosService";
-import type { Medico } from "@/types/medico";
-import { createChamada } from "@/services/chamadasService";
 
 export default function DepartamentosPage() {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [medicos, setMedicos] = useState<Medico[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -32,17 +28,13 @@ export default function DepartamentosPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [deptosData, medicosData] = await Promise.all([
-        getDepartamentos(),
-        getMedicos()
-      ]);
+      const deptosData = await getDepartamentos();
       setDepartamentos(deptosData);
-      setMedicos(medicosData);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
       toast({
         title: "Erro ao carregar dados",
-        description: "Não foi possível carregar a lista de departamentos ou médicos.",
+        description: "Não foi possível carregar a lista de departamentos.",
         variant: "destructive",
       });
     } finally {
@@ -102,42 +94,6 @@ export default function DepartamentosPage() {
     }
   };
 
-  const handleCallPatient = async (departamento: Departamento) => {
-    if (medicos.length === 0) {
-      toast({
-        title: "Nenhum médico disponível",
-        description: "Cadastre um médico antes de chamar um paciente.",
-        variant: "destructive",
-      });
-      return;
-    }
-    try {
-      const randomMedico = medicos[Math.floor(Math.random() * medicos.length)];
-      const ticketPrefix = ['A', 'B', 'P'][Math.floor(Math.random() * 3)];
-      const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-      const newCall = {
-        ticket: `${ticketPrefix}${ticketNumber}`,
-        room: `${departamento.nome} ${departamento.numero || ''}`.trim(),
-        doctor: randomMedico.nome,
-        timestamp: new Date(),
-      };
-      await createChamada(newCall);
-      toast({
-        title: "Paciente Chamado!",
-        description: `A senha ${newCall.ticket} está sendo exibida no painel.`,
-        className: "bg-green-500 text-white"
-      });
-    } catch (error) {
-      console.error("Erro ao chamar paciente:", error);
-      toast({
-        title: "Erro ao chamar paciente",
-        description: "Não foi possível realizar a chamada.",
-        variant: "destructive",
-      });
-    }
-  };
-
-
   return (
     <>
       <Card>
@@ -145,7 +101,7 @@ export default function DepartamentosPage() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Departamentos</CardTitle>
-              <CardDescription>Gerencie os locais de atendimento e chame os pacientes.</CardDescription>
+              <CardDescription>Gerencie os locais de atendimento.</CardDescription>
             </div>
             <Button onClick={handleAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -178,15 +134,11 @@ export default function DepartamentosPage() {
                     <TableCell className="font-medium">{departamento.nome}</TableCell>
                     <TableCell>{departamento.numero || "N/A"}</TableCell>
                     <TableCell>
-                      <Badge variant={departamento.situacao === 'Ativo' ? "default" : "destructive"} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
+                      <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                       <Button size="sm" onClick={() => handleCallPatient(departamento)} disabled={departamento.situacao === 'Inativo'}>
-                        <Megaphone className="mr-2 h-4 w-4" />
-                        Chamar Paciente
-                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0 ml-2">
