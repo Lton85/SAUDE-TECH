@@ -113,10 +113,10 @@ export default function DepartamentosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-3 py-2">Nome</TableHead>
-                <TableHead className="px-3 py-2">Nº da Sala</TableHead>
-                <TableHead className="px-3 py-2">Situação</TableHead>
-                <TableHead className="text-right px-3 py-2">Ações</TableHead>
+                <TableHead className="px-2 py-2">Nome</TableHead>
+                <TableHead className="px-2 py-2">Nº da Sala</TableHead>
+                <TableHead className="px-2 py-2">Situação</TableHead>
+                <TableHead className="text-right px-2 py-2">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,45 +124,46 @@ export default function DepartamentosPage() {
                 [...Array(3)].map((_, i) => (
                   <TableRow key={i}>
                     {[...Array(4)].map((_, j) => (
-                      <TableCell key={j} className="px-3 py-2"><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell key={j} className="px-2 py-2"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : departamentos.length > 0 ? (
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
-                    <TableCell className="font-medium px-3 py-2">{departamento.nome}</TableCell>
-                    <TableCell className="px-3 py-2">{departamento.numero || "N/A"}</TableCell>
-                    <TableCell className="px-3 py-2">
+                    <TableCell className="font-medium px-2 py-2">{departamento.nome}</TableCell>
+                    <TableCell className="px-2 py-2">{departamento.numero || "N/A"}</TableCell>
+                    <TableCell className="px-2 py-2">
                       <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right px-3 py-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 ml-2">
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Opções</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleView(departamento)}>
-                            <Eye className="mr-2 h-3 w-3" />
-                            Visualizar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEdit(departamento)}>
-                            <Pencil className="mr-2 h-3 w-3" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(departamento)}>
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell className="text-right px-2 py-2">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleView(departamento)}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">Visualizar</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(departamento)}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Abrir menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Opções</DropdownMenuLabel>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(departamento)}>
+                              <Trash2 className="mr-2 h-3 w-3" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
