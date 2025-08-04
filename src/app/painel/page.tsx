@@ -105,19 +105,19 @@ export default function PainelPage() {
                     className="w-full h-full flex flex-col justify-between bg-slate-950/50 rounded-2xl shadow-2xl p-8"
                 >
                     <div className="text-center flex-1 flex flex-col justify-center">
-                        <h2 className="text-5xl md:text-6xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
+                        <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
                         <p className="font-display font-extrabold text-white tracking-tighter my-4 text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
-                        <p className="text-5xl md:text-7xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
+                        <p className="text-5xl md:text-6xl lg:text-8xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
                     </div>
 
                     <div className="flex justify-between items-center border-t-2 border-slate-700/50 pt-6 mt-6">
                         <div className="text-left">
-                            <h3 className="flex items-center gap-2 text-xl md:text-2xl font-bold text-amber-400 uppercase"><User className="w-5 h-5"/>Paciente</h3>
-                            <p className="text-2xl md:text-3xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
+                            <h3 className="flex items-center gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><User className="w-6 h-6 md:w-7 md:h-7"/>Paciente</h3>
+                            <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
                         </div>
                         <div className="text-right">
-                            <h3 className="flex items-center justify-end gap-2 text-xl md:text-2xl font-bold text-amber-400 uppercase"><Stethoscope className="w-5 h-5"/>Profissional</h3>
-                            <p className="text-2xl md:text-3xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
+                            <h3 className="flex items-center justify-end gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><Stethoscope className="w-6 h-6 md:w-7 md:h-7"/>Profissional</h3>
+                            <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
                         </div>
                     </div>
                 </motion.div>
