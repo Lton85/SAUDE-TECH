@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -193,47 +194,49 @@ export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) 
             />
 
              <FormField
-                    control={form.control}
-                    name="dataNascimento"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col justify-end">
-                        <FormLabel>Data de Nascimento</FormLabel>
+                  control={form.control}
+                  name="dataNascimento"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col justify-end">
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            placeholder="DD/MM/AAAA"
+                            {...field}
+                            onChange={(e) => handleDateChange(e, field.onChange)}
+                            maxLength={10}
+                          />
+                        </FormControl>
                         <Popover>
-                            <PopoverTrigger asChild>
-                                <FormControl>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                    )}
-                                >
-                                    {field.value ? (
-                                    format(parse(field.value, 'dd/MM/yyyy', new Date()), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                                    ) : (
-                                    <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                                </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
-                                onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                                locale={ptBR}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3"
+                              aria-label="Abrir calendário"
+                            >
+                              <CalendarIcon className="h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value && /^\d{2}\/\d{2}\/\d{4}$/.test(field.value) ? parse(field.value, 'dd/MM/yyyy', new Date()) : undefined}
+                              onSelect={(date) => field.onChange(date ? format(date, 'dd/MM/yyyy') : '')}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                              locale={ptBR}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
             <FormField
               control={form.control}
