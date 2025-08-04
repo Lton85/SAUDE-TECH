@@ -109,7 +109,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
         senha: ticket,
-        chegadaEm: new Date(),
         status: "aguardando",
       })
 
