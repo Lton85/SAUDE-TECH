@@ -8,39 +8,36 @@ import { Settings, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { resetCounterByName } from "@/services/countersService";
+import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
 
 export default function ConfiguracoesPage() {
     const { toast } = useToast();
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
 
-    const handleResetNormal = async () => {
-        setIsNormalResetting(true);
-        try {
-            await resetCounterByName('senha_normal');
-            toast({
-                title: "Senhas Normais Reiniciadas!",
-                description: "A contagem de senhas normais foi redefinida para N-001.",
-                className: "bg-green-500 text-white",
-            });
-        } catch (error) {
-            toast({
-                title: "Erro ao reiniciar senhas",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        } finally {
-            setIsNormalResetting(false);
-        }
+    const handleResetRequest = (type: 'Normal' | 'Emergência') => {
+        setResetType(type);
+        setDialogOpen(true);
     };
-    
-    const handleResetEmergencia = async () => {
-        setIsEmergenciaResetting(true);
+
+    const handleConfirmReset = async () => {
+        if (!resetType) return;
+
+        const isNormal = resetType === 'Normal';
+        const setLoading = isNormal ? setIsNormalResetting : setIsEmergenciaResetting;
+        const counterName = isNormal ? 'senha_normal' : 'senha_emergencia';
+        const ticketExample = isNormal ? 'N-001' : 'U-001';
+
+        setLoading(true);
+        setDialogOpen(false);
+
         try {
-            await resetCounterByName('senha_emergencia');
+            await resetCounterByName(counterName);
             toast({
-                title: "Senhas de Emergência Reiniciadas!",
-                description: "A contagem de senhas de emergência foi redefinida para U-001.",
+                title: `Senhas de Classificação ${resetType} Reiniciadas!`,
+                description: `A contagem de senhas foi redefinida para ${ticketExample}.`,
                 className: "bg-green-500 text-white",
             });
         } catch (error) {
@@ -50,11 +47,13 @@ export default function ConfiguracoesPage() {
                 variant: "destructive",
             });
         } finally {
-            setIsEmergenciaResetting(false);
+            setLoading(false);
+            setResetType(null);
         }
     };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
@@ -85,7 +84,7 @@ export default function ConfiguracoesPage() {
                         <TableCell className="font-medium">Zerar Senha de Classificação Normal</TableCell>
                         <TableCell className="text-right">
                            <Button 
-                             onClick={handleResetNormal} 
+                             onClick={() => handleResetRequest('Normal')}
                              variant="destructive" 
                              size="sm"
                              disabled={isNormalResetting}
@@ -99,7 +98,7 @@ export default function ConfiguracoesPage() {
                         <TableCell className="font-medium">Zerar Senha de Classificação Emergência</TableCell>
                         <TableCell className="text-right">
                             <Button 
-                                onClick={handleResetEmergencia}
+                                onClick={() => handleResetRequest('Emergência')}
                                 variant="destructive" 
                                 size="sm"
                                 disabled={isEmergenciaResetting}
@@ -121,5 +120,14 @@ export default function ConfiguracoesPage() {
         </div>
       </CardContent>
     </Card>
+     {resetType && (
+        <ResetSenhaDialog
+            isOpen={dialogOpen}
+            onOpenChange={setDialogOpen}
+            onConfirm={handleConfirmReset}
+            tipoSenha={resetType}
+        />
+     )}
+    </>
   );
 }
