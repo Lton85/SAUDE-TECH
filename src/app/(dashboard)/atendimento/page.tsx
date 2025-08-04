@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
-import { getPacientes } from "@/services/pacientesService";
+import { getPacientesRealtime } from "@/services/pacientesService";
 import { getDepartamentos } from "@/services/departamentosService";
 
 
@@ -82,26 +82,32 @@ export default function AtendimentoPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { toast } = useToast();
 
-    const fetchInitialData = async () => {
-        try {
-            const [pacientesData, departamentosData] = await Promise.all([
-                getPacientes(),
-                getDepartamentos()
-            ]);
-            setPacientes(pacientesData);
-            setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
-        } catch (error) {
-             toast({
-                title: "Erro ao carregar dados",
-                description: "Não foi possível carregar a lista de pacientes e departamentos.",
-                variant: "destructive",
-            });
-        }
-    };
-
     useEffect(() => {
-        fetchInitialData();
-        const unsubscribe = getFilaDeEspera((data) => {
+        // Fetch departamentos once
+        getDepartamentos()
+            .then(data => setDepartamentos(data.filter(d => d.situacao === 'Ativo')))
+            .catch(error => {
+                toast({
+                    title: "Erro ao carregar departamentos",
+                    description: "Não foi possível carregar a lista de departamentos.",
+                    variant: "destructive",
+                });
+            });
+
+        // Subscribe to real-time updates for pacientes
+        const unsubscribePacientes = getPacientesRealtime(
+            setPacientes,
+            (error) => {
+                toast({
+                    title: "Erro ao carregar pacientes",
+                    description: error,
+                    variant: "destructive",
+                });
+            }
+        );
+
+        // Subscribe to real-time updates for the waiting list
+        const unsubscribeFila = getFilaDeEspera((data) => {
             setFila(data);
             setIsLoading(false);
         }, (error) => {
@@ -113,7 +119,10 @@ export default function AtendimentoPage() {
             setIsLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribePacientes();
+            unsubscribeFila();
+        };
     }, [toast]);
 
     const handleChamarPaciente = async (item: FilaDeEsperaItem) => {

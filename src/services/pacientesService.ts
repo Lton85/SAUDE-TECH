@@ -1,6 +1,6 @@
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
 import { getNextCounter } from './countersService';
 
@@ -38,6 +38,31 @@ export const getPacientes = async (): Promise<Paciente[]> => {
     const snapshot = await getDocs(pacientesCollection);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente)).sort((a, b) => a.nome.localeCompare(b.nome));
 };
+
+
+// Obtém todos os pacientes em tempo real.
+export const getPacientesRealtime = (
+    onUpdate: (data: Paciente[]) => void,
+    onError: (error: string) => void
+) => {
+    const q = collection(db, "pacientes");
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: Paciente[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Paciente));
+        
+        data.sort((a, b) => a.nome.localeCompare(b.nome));
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching pacientes in realtime: ", error);
+        onError("Não foi possível buscar a lista de pacientes.");
+    });
+
+    return unsubscribe;
+};
+
 
 // Adiciona um novo paciente ao banco de dados.
 export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo'>): Promise<string> => {
