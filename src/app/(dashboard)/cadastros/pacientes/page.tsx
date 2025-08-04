@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,30 +16,36 @@ import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { getPacientes, deletePaciente } from "@/services/pacientesService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
+import { getDepartamentos } from "@/services/departamentosService";
+import type { Departamento } from "@/types/departamento";
 
 
 export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
+  const [selectedPatientForQueue, setSelectedPatientForQueue] = useState<Paciente | null>(null);
   const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchPacientes = async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
-      const data = await getPacientes();
-      setPacientes(data);
-      setFilteredPacientes(data);
+      const [pacientesData, departamentosData] = await Promise.all([getPacientes(), getDepartamentos()]);
+      setPacientes(pacientesData);
+      setFilteredPacientes(pacientesData);
+      setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
     } catch (error) {
       toast({
-        title: "Erro ao buscar pacientes",
-        description: "Não foi possível carregar a lista de pacientes.",
+        title: "Erro ao buscar dados",
+        description: "Não foi possível carregar a lista de pacientes ou departamentos.",
         variant: "destructive",
       });
     } finally {
@@ -48,7 +54,7 @@ export default function PacientesPage() {
   };
 
   useEffect(() => {
-    fetchPacientes();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -66,7 +72,7 @@ export default function PacientesPage() {
   }, [searchTerm, pacientes]);
 
   const handleSuccess = () => {
-    fetchPacientes();
+    fetchData();
     setSelectedPatient(null);
   };
 
@@ -83,12 +89,16 @@ export default function PacientesPage() {
   const handleDelete = (paciente: Paciente) => {
     setPatientToDelete(paciente);
   };
+  
+  const handleSendToQueue = (paciente: Paciente) => {
+    setSelectedPatientForQueue(paciente);
+  }
 
   const handleDeleteConfirm = async () => {
     if (patientToDelete) {
       try {
         await deletePaciente(patientToDelete.id);
-        fetchPacientes();
+        fetchData();
         toast({
           title: "Paciente Excluído!",
           description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
@@ -203,6 +213,10 @@ export default function PacientesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                             <DropdownMenuItem onClick={() => handleSendToQueue(paciente)}>
+                                <Send className="mr-2 h-3 w-3" />
+                                <span>Enviar para Fila</span>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setSelectedPatientForHistory(paciente)}>
                                 <History className="mr-2 h-3 w-3" />
                                 <span>Histórico</span>
@@ -255,6 +269,14 @@ export default function PacientesPage() {
                 onOpenChange={() => setPatientToDelete(null)}
                 onConfirm={handleDeleteConfirm}
                 patientName={patientToDelete?.nome || ''}
+            />
+        )}
+        {selectedPatientForQueue && (
+            <EnviarParaFilaDialog
+                isOpen={!!selectedPatientForQueue}
+                onOpenChange={() => setSelectedPatientForQueue(null)}
+                paciente={selectedPatientForQueue}
+                departamentos={departamentos}
             />
         )}
     </>
