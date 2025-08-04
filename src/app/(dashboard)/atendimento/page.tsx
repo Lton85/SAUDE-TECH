@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus, Broom } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus, Eraser } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -300,7 +299,7 @@ export default function AtendimentoPage() {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button onClick={handleClearPainel} variant="outline" size="icon" className="h-9 w-9">
-                                    <Broom className="h-4 w-4" />
+                                    <Eraser className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
