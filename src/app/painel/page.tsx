@@ -36,14 +36,14 @@ export default function PainelPage() {
   }, [isClient]);
 
   useEffect(() => {
-    if(!isClient || !hasInteracted) return;
+    if(!isClient) return;
 
     const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(1));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       if (!querySnapshot.empty) {
         const newCall = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Call;
         
-        if (currentCall.id !== newCall.id && newCall.id) {
+        if (hasInteracted && currentCall.id !== newCall.id && newCall.id) {
             try {
                 const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
                 audio.play();
