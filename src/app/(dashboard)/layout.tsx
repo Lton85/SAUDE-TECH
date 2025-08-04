@@ -39,10 +39,13 @@ export default function DashboardLayout({
   const getPageTitle = () => {
     if (pathname === "/") return "Dashboard";
     if (pathname.startsWith("/atendimento")) return "Fila de Atendimento";
+    if (pathname.startsWith("/cadastros")) return "Cadastros";
+    if (pathname.startsWith("/triagem")) return "Departamentos";
+    
     const mainRoute = "/" + (pathname.split('/')[1] || "");
     const current = menuItems.find(item => item.href === mainRoute);
     if (current) return current.label;
-    if (pathname.startsWith("/cadastros")) return "Cadastros";
+
     return "Saúde Fácil";
   }
 
