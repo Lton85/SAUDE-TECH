@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,6 +23,8 @@ import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
 import { HistoryQueueItemDialog } from "@/components/atendimento/history-dialog";
 import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
+import { getMedicos } from "@/services/medicosService";
+import { getEnfermeiros } from "@/services/enfermeirosService";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -49,10 +52,16 @@ function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm']
     );
 }
 
+interface Profissional {
+  id: string;
+  nome: string;
+}
+
 export default function AtendimentoPage() {
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+    const [profissionais, setProfissionais] = useState<Profissional[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
@@ -63,15 +72,30 @@ export default function AtendimentoPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        getDepartamentos()
-            .then(data => setDepartamentos(data.filter(d => d.situacao === 'Ativo')))
-            .catch(error => {
-                toast({
-                    title: "Erro ao carregar departamentos",
-                    description: "Não foi possível carregar a lista de departamentos.",
+        const fetchData = async () => {
+             try {
+                const [deptoData, medicosData, enfermeirosData] = await Promise.all([
+                    getDepartamentos(),
+                    getMedicos(),
+                    getEnfermeiros(),
+                ]);
+
+                setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
+                
+                const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+                const enfermeirosList = enfermeirosData.map(e => ({ id: e.id, nome: `Enf. ${e.nome}` }));
+                setProfissionais([...medicosList, ...enfermeirosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+
+             } catch (error) {
+                  toast({
+                    title: "Erro ao carregar dados de apoio",
+                    description: "Não foi possível carregar departamentos ou profissionais.",
                     variant: "destructive",
                 });
-            });
+             }
+        }
+
+        fetchData();
 
         const unsubscribePacientes = getPacientesRealtime(
             (data) => setPacientes(data),
@@ -265,6 +289,8 @@ export default function AtendimentoPage() {
                 isOpen={!!itemToEdit}
                 onOpenChange={() => setItemToEdit(null)}
                 item={itemToEdit}
+                departamentos={departamentos}
+                profissionais={profissionais}
             />
         )}
         

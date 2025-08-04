@@ -1,3 +1,4 @@
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -128,4 +129,12 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
         console.error("Erro ao buscar histórico de atendimentos:", error);
         throw new Error("Não foi possível carregar o histórico do paciente.");
     }
+};
+
+export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await updateDoc(filaDocRef, data);
 };
