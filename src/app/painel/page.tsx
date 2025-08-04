@@ -19,14 +19,23 @@ export default function PainelPage() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [isBlinking, setIsBlinking] = useState(false);
   const [time, setTime] = useState<Date | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  useEffect(() => {
+    if(!isClient) return;
+
     setTime(new Date()); 
     const timeInterval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timeInterval);
-  }, []);
+  }, [isClient]);
 
   useEffect(() => {
+    if(!isClient) return;
+
     const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const calls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
@@ -55,7 +64,39 @@ export default function PainelPage() {
     });
 
     return () => unsubscribe();
-  }, [currentCall.id]);
+  }, [currentCall.id, isClient]);
+
+  if (!isClient) {
+    return (
+      <div className="flex h-screen font-headline select-none animate-pulse">
+        <main className="flex flex-[3] flex-col items-center justify-center bg-blue-900/90 p-8">
+          <div className="w-full text-center">
+            <div className="h-24 bg-yellow-300/20 rounded w-3/4 mx-auto"></div>
+            <div className="h-80 bg-white/20 rounded w-full my-4"></div>
+          </div>
+          <div className="flex w-full items-center justify-between">
+            <div className="h-16 bg-white/20 rounded w-1/3"></div>
+            <div className="h-16 bg-white/20 rounded w-1/3"></div>
+          </div>
+        </main>
+        <aside className="flex flex-[1] flex-col bg-gray-800/90 p-8">
+          <div className="h-10 bg-gray-300/20 rounded w-3/4 mx-auto mb-8"></div>
+          <div className="flex flex-col gap-6 text-center flex-grow">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 rounded-lg bg-gray-700/50 h-24"></div>
+            ))}
+          </div>
+          <div className="mt-auto flex items-center justify-between pt-8 border-t border-gray-700/50">
+            <div className="h-9 w-48 bg-gray-700/50 rounded"></div>
+            <div className="flex flex-col items-end">
+              <div className="h-9 w-36 bg-gray-700/50 rounded-md"></div>
+              <div className="h-6 w-48 bg-gray-700/50 rounded-md mt-2"></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen font-headline select-none">

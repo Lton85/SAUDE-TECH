@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Clock } from "lucide-react";
 
 const initialSessions = [
-  { patient: "João da Silva", doctor: "Dr. Ricardo Alves", room: "Sala 01", startTime: new Date(Date.now() - 5 * 60 * 1000) },
-  { patient: "Maria Oliveira", doctor: "Dra. Ana Costa", room: "Sala 02", startTime: new Date(Date.now() - 12 * 60 * 1000) },
-  { patient: "Carlos Pereira", doctor: "Dr. Lucas Martins", room: "Sala 03", startTime: new Date(Date.now() - 25 * 60 * 1000) },
+  { patient: "João da Silva", doctor: "Dr. Ricardo Alves", room: "Sala 01", startTime: Date.now() - 5 * 60 * 1000 },
+  { patient: "Maria Oliveira", doctor: "Dra. Ana Costa", room: "Sala 02", startTime: Date.now() - 12 * 60 * 1000 },
+  { patient: "Carlos Pereira", doctor: "Dr. Lucas Martins", room: "Sala 03", startTime: Date.now() - 25 * 60 * 1000 },
 ];
 
 function formatDuration(seconds: number) {
@@ -17,13 +17,13 @@ function formatDuration(seconds: number) {
   return `${h}:${m}:${s}`;
 }
 
-function SessionCard({ session }: { session: typeof initialSessions[0] }) {
+function SessionCard({ session }: { session: { patient: string; doctor: string; room: string; startTime: number } }) {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
     const updateElapsedTime = () => {
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - session.startTime.getTime()) / 1000);
+      const now = Date.now();
+      const diff = Math.floor((now - session.startTime) / 1000);
       setElapsedTime(diff);
     };
 
@@ -56,7 +56,7 @@ export default function AtendimentoPage() {
   if (!isClient) {
     // Render skeleton or null on the server
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
