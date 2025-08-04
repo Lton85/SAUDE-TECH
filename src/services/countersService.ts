@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { doc, runTransaction, increment } from 'firebase/firestore';
+import { doc, runTransaction, increment, writeBatch } from 'firebase/firestore';
 
 // Obtém o próximo número do contador para um contador específico
 export const getNextCounter = async (counterName: string): Promise<number> => {
@@ -25,5 +25,21 @@ export const getNextCounter = async (counterName: string): Promise<number> => {
     } catch (error) {
         console.error("Transaction failed: ", error);
         throw error;
+    }
+};
+
+// Reinicia os contadores de senha para 1
+export const resetCounters = async (): Promise<void> => {
+    const normalCounterRef = doc(db, 'counters', 'senha_normal');
+    const emergenciaCounterRef = doc(db, 'counters', 'senha_emergencia');
+
+    try {
+        const batch = writeBatch(db);
+        batch.set(normalCounterRef, { nextId: 1 });
+        batch.set(emergenciaCounterRef, { nextId: 1 });
+        await batch.commit();
+    } catch (error) {
+        console.error("Error resetting counters: ", error);
+        throw new Error("Não foi possível reiniciar os contadores de senha.");
     }
 };

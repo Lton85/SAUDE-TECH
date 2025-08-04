@@ -30,6 +30,7 @@ import { PatientDialog } from "@/components/patients/patient-dialog";
 import { cn } from "@/lib/utils";
 import { clearPainel } from "@/services/chamadasService";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { resetCounters } from "@/services/countersService";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -180,9 +181,10 @@ export default function AtendimentoPage() {
     const handleClearPainel = async () => {
         try {
             await clearPainel();
+            await resetCounters();
             toast({
-                title: "Painel Zerado!",
-                description: "As informações do painel foram redefinidas.",
+                title: "Painel e Senhas Reiniciados!",
+                description: "As informações do painel e a contagem de senhas foram redefinidas.",
             });
         } catch (error) {
             toast({
@@ -308,7 +310,7 @@ export default function AtendimentoPage() {
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Zerar Painel</p>
+                                <p>Zerar Painel e Reiniciar Senhas</p>
                             </TooltipContent>
                         </Tooltip>
                     </div>
