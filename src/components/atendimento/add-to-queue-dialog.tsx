@@ -70,8 +70,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     
     if (isOpen) {
       fetchProfissionais();
-    } else {
-      resetState();
     }
   }, [isOpen, toast]);
 
@@ -178,10 +176,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                             {pacientes.map((paciente) => (
                             <CommandItem
                                 key={paciente.id}
+                                value={paciente.nome}
                                 className="cursor-pointer"
-                                onSelect={() => {
-                                    setSelectedPaciente(paciente)
-                                    setIsPatientPopoverOpen(false)
+                                onSelect={(currentValue) => {
+                                    const pacienteSelecionado = pacientes.find(p => p.nome.toLowerCase() === currentValue.toLowerCase());
+                                    setSelectedPaciente(pacienteSelecionado || null);
+                                    setIsPatientPopoverOpen(false);
                                 }}
                             >
                                 <Check
