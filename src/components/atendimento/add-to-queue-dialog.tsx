@@ -122,44 +122,46 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   }, [isOpen, toast]);
 
+  const generateTicketPreview = useCallback(async (currentClassification: 'Normal' | 'Emergência') => {
+    if (selectedPaciente) {
+        try {
+            const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+            // Use a different state for the ticket number to avoid re-fetching
+            if (senhaNumero === null) {
+                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+                setSenhaNumero(ticketNumber);
+            }
+        } catch (error) {
+            console.error("Erro ao gerar senha:", error);
+            setSenha("Erro");
+            toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+        }
+    }
+  }, [selectedPaciente, toast, senhaNumero]);
+
   useEffect(() => {
-      const updateTicketDisplay = () => {
+    if(selectedPaciente) {
+        generateTicketPreview(classification);
+    } else {
+        setSenha("");
+        setSenhaNumero(null);
+    }
+  }, [selectedPaciente, generateTicketPreview, classification]);
+
+  useEffect(() => {
+    const updateTicketDisplay = () => {
         if (senhaNumero !== null) {
             const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
             const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
             setSenha(ticket);
-        } else if(selectedPaciente) {
+        } else if (selectedPaciente) {
             setSenha("Gerando...");
         } else {
-             setSenha("");
+            setSenha("");
         }
     };
     updateTicketDisplay();
   }, [classification, senhaNumero, selectedPaciente]);
-
-
-  const generateTicketPreview = useCallback(async (currentClassification: 'Normal' | 'Emergência') => {
-     if (selectedPaciente) {
-            try {
-                const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                setSenhaNumero(ticketNumber);
-            } catch (error) {
-                console.error("Erro ao gerar senha:", error);
-                setSenha("Erro");
-                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
-            }
-        }
-  }, [selectedPaciente, toast]);
-
-   useEffect(() => {
-        if(selectedPaciente) {
-            generateTicketPreview(classification);
-        } else {
-            setSenha("");
-            setSenhaNumero(null);
-        }
-    }, [selectedPaciente, generateTicketPreview, classification]);
 
 
 
@@ -305,7 +307,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="paciente-search"
-                    placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
+                    placeholder="Buscar por nome, mãe, CPF, CNS, endereço ou nº..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value)
