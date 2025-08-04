@@ -90,14 +90,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   }, [isOpen, toast]);
 
   useEffect(() => {
-    if (selectedPaciente) {
+    if (selectedPaciente && !ticket) {
         const ticketPrefix = ['C', 'P'][Math.floor(Math.random() * 2)];
         const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
         setTicket(`${ticketPrefix}-${ticketNumber}`);
-    } else {
+    } else if (!selectedPaciente) {
         setTicket("");
     }
-  }, [selectedPaciente]);
+  }, [selectedPaciente, ticket]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -172,6 +172,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedPaciente(paciente);
     setSearchQuery(paciente.nome);
     setShowPatientList(false);
+    setTicket(''); // Reset ticket to allow regeneration
   }
 
   return (
@@ -290,6 +291,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                   onChange={(e) => setTicket(e.target.value.toUpperCase())}
                   className="font-bold text-lg"
                   disabled={!selectedPaciente}
+                  placeholder="Senha gerada ou manual"
                 />
             </div>
         </div>

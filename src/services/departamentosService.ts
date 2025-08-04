@@ -38,15 +38,18 @@ const checkSalaExists = async (numero: string, currentId?: string): Promise<bool
     const q = query(departamentosCollection, where("numero", "==", numero));
     const snapshot = await getDocs(q);
     if (snapshot.empty) return false;
+    
     // If we are updating, we need to check if the found doc is the same as the one being updated
     if (currentId) {
         return snapshot.docs.some(doc => doc.id !== currentId);
     }
+    
+    // If we are creating, any found doc means it exists
     return true;
 };
 
 export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo'>): Promise<string> => {
-    if (await checkSalaExists(departamento.numero || '')) {
+    if (departamento.numero && await checkSalaExists(departamento.numero)) {
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
     const nextId = await getNextCounter('departamentos_v2');
@@ -65,15 +68,20 @@ export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'c
     return docRef.id;
 };
 
-export const updateDepartamento = async (id: string, departamento: Partial<Omit<Departamento, 'id' | 'codigo'>>): Promise<void> => {
-    if (await checkSalaExists(departamento.numero || '', id)) {
+export const updateDepartamento = async (id: string, departamento: Partial<Omit<Departamento, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
+    if (departamento.numero && await checkSalaExists(departamento.numero, id)) {
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
     const departamentoDoc = doc(db, 'departamentos', id);
     const existingDocSnap = await getDoc(departamentoDoc);
+
+    if(!existingDocSnap.exists()) {
+        throw new Error("Departamento não encontrado.");
+    }
+
     const existingData = existingDocSnap.data() as Departamento;
 
-    const updatedDepartamento = {
+    const updatedDepartamento: Partial<Departamento> = {
         ...departamento,
         historico: {
             ...existingData.historico,
