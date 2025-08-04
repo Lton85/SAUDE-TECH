@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -11,7 +12,22 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts, dismiss } = useToast()
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        dismiss();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dismiss]);
+
 
   return (
     <ToastProvider>
