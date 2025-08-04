@@ -84,7 +84,7 @@ export default function DashboardLayout({
             {getPageTitle()}
           </h1>
         </header>
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-2">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
