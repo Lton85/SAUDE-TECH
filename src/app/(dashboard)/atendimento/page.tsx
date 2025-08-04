@@ -298,7 +298,7 @@ export default function AtendimentoPage() {
                     <div className="flex items-center gap-2">
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button onClick={handleClearPainel} variant="outline" size="icon" className="h-9 w-9">
+                                <Button onClick={handleClearPainel} variant="outline" size="icon" className="h-9 w-9 text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
                                     <Eraser className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
