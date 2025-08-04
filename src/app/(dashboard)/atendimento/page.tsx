@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Megaphone, Clock, User, Building, Stethoscope, PlusCircle } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Megaphone, Clock, PlusCircle, User, Users } from "lucide-react";
 import { getFilaDeEspera, chamarPaciente } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -18,13 +20,13 @@ import { getPacientesRealtime } from "@/services/pacientesService";
 import { getDepartamentos } from "@/services/departamentosService";
 
 
-function FilaDeEsperaCard({ item, onChamar }: { item: FilaDeEsperaItem; onChamar: (item: FilaDeEsperaItem) => Promise<void> }) {
+function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
     const [tempoDeEspera, setTempoDeEspera] = useState("");
 
     useEffect(() => {
         const updateTempo = () => {
-             if (item.chegadaEm) {
-                const chegada = item.chegadaEm.toDate(); // Convert Firestore Timestamp to JS Date
+             if (chegadaEm) {
+                const chegada = chegadaEm.toDate(); // Convert Firestore Timestamp to JS Date
                 setTempoDeEspera(formatDistanceToNow(chegada, { addSuffix: true, locale: ptBR }));
             }
         };
@@ -33,46 +35,15 @@ function FilaDeEsperaCard({ item, onChamar }: { item: FilaDeEsperaItem; onChamar
         const interval = setInterval(updateTempo, 60000); // Update every minute
 
         return () => clearInterval(interval);
-    }, [item.chegadaEm]);
+    }, [chegadaEm]);
 
     return (
-        <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <User className="h-5 w-5 text-primary" /> {item.pacienteNome}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
-                            <Badge variant="secondary" className="font-mono text-base">{item.senha}</Badge>
-                        </CardDescription>
-                    </div>
-                    <Button size="sm" onClick={() => onChamar(item)}>
-                        <Megaphone className="mr-2 h-4 w-4" />
-                        Chamar
-                    </Button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4" />
-                        <span>{item.departamentoNome}</span>
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4" />
-                        <span>{item.profissionalNome}</span>
-                    </div>
-                    <div className="flex items-center gap-2 pt-1">
-                        <Clock className="h-4 w-4" />
-                        <span>Aguardando {tempoDeEspera}</span>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>Aguardando {tempoDeEspera}</span>
+        </div>
     );
 }
-
 
 export default function AtendimentoPage() {
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
@@ -83,7 +54,6 @@ export default function AtendimentoPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        // Fetch departamentos once
         getDepartamentos()
             .then(data => setDepartamentos(data.filter(d => d.situacao === 'Ativo')))
             .catch(error => {
@@ -94,7 +64,6 @@ export default function AtendimentoPage() {
                 });
             });
 
-        // Subscribe to real-time updates for pacientes
         const unsubscribePacientes = getPacientesRealtime(
             setPacientes,
             (error) => {
@@ -106,7 +75,6 @@ export default function AtendimentoPage() {
             }
         );
 
-        // Subscribe to real-time updates for the waiting list
         const unsubscribeFila = getFilaDeEspera((data) => {
             setFila(data);
             setIsLoading(false);
@@ -144,47 +112,73 @@ export default function AtendimentoPage() {
     
     return (
         <>
-        <div className="flex justify-end mb-6">
-            <Button onClick={() => setIsDialogOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Adicionar Paciente à Fila
-            </Button>
-        </div>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Fila de Atendimento</CardTitle>
+                    <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
+                </div>
+                <Button onClick={() => setIsDialogOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Adicionar Paciente à Fila
+                </Button>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[30%]">Nome</TableHead>
+                            <TableHead>Senha</TableHead>
+                            <TableHead>Departamento</TableHead>
+                            <TableHead>Médico</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            [...Array(3)].map((_, i) => (
+                                <TableRow key={i}>
+                                    {[...Array(5)].map((_, j) => (
+                                        <TableCell key={j} className="py-4"><Skeleton className="h-5 w-full" /></TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : fila.length > 0 ? (
+                            fila.map((item) => (
+                                <TableRow key={item.id} className="hover:bg-muted/50">
+                                    <TableCell className="font-medium">{item.pacienteNome}</TableCell>
+                                    <TableCell><Badge variant="secondary">{item.senha}</Badge></TableCell>
+                                    <TableCell>{item.departamentoNome}</TableCell>
+                                    <TableCell>{item.profissionalNome}</TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex items-center justify-end gap-4">
+                                            <TempoDeEspera chegadaEm={item.chegadaEm}/>
+                                            <Button size="sm" onClick={() => handleChamarPaciente(item)}>
+                                                <Megaphone className="mr-2 h-4 w-4" />
+                                                Chamar
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-64 text-center">
+                                    <div className="flex flex-col items-center justify-center gap-4">
+                                        <Users className="h-16 w-16 text-muted-foreground/30" />
+                                        <div className="space-y-1">
+                                            <h3 className="text-lg font-semibold text-muted-foreground">Fila Vazia</h3>
+                                            <p className="text-sm text-muted-foreground">Nenhum paciente aguardando atendimento no momento.</p>
+                                        </div>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
 
-        {isLoading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {[...Array(8)].map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                        <CardHeader className="pb-3">
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-6 w-48" />
-                                    <Skeleton className="h-5 w-20" />
-                                </div>
-                                <Skeleton className="h-9 w-28 rounded-md" />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3 pt-4">
-                             <Skeleton className="h-4 w-full" />
-                             <Skeleton className="h-4 w-3/4" />
-                             <Skeleton className="h-4 w-2/3" />
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        ) : fila.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {fila.map((item) => (
-                    <FilaDeEsperaCard key={item.id} item={item} onChamar={handleChamarPaciente} />
-                ))}
-            </div>
-        ) : (
-            <Card className="col-span-full flex flex-col items-center justify-center p-12 border-dashed">
-                    <Megaphone className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h2 className="text-xl font-semibold text-muted-foreground">Fila de Atendimento Vazia</h2>
-                <p className="text-muted-foreground mt-2">Nenhum paciente aguardando atendimento no momento.</p>
-            </Card>
-        )}
 
         <AddToQueueDialog
             isOpen={isDialogOpen}
@@ -195,3 +189,4 @@ export default function AtendimentoPage() {
         </>
     );
 }
+
