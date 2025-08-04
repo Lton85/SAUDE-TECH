@@ -182,7 +182,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
