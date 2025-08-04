@@ -2,26 +2,31 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { HeartPulse, PlayCircle } from 'lucide-react';
+import { HeartPulse, PlayCircle, User, Stethoscope, DoorOpen } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface Call {
   id?: string;
-  ticket: string;
-  room: string;
-  patientName: string;
-  doctor: string;
+  senha: string;
+  departamentoNome: string;
+  pacienteNome: string;
+  profissionalNome: string;
 }
 
-const emptyCall: Call = { ticket: '----', room: '-------', patientName: 'Aguardando paciente...', doctor: 'Aguardando profissional...' };
+const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', pacienteNome: 'Aguardando paciente...', profissionalNome: 'Aguardando profissional...' };
 
 export default function PainelPage() {
-  const [currentCall, setCurrentCall] = useState<Call>(emptyCall);
-  const [isBlinking, setIsBlinking] = useState(false);
+  const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+
+  const currentCall = callHistory[0] || emptyCall;
+  const previousCalls = callHistory.slice(1, 5);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -38,33 +43,31 @@ export default function PainelPage() {
   useEffect(() => {
     if(!isClient || !hasInteracted) return;
 
-    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(1));
+    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const calls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
+      const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
       
-      if (calls.length > 0) {
-        const newCall = calls[0];
+       const latestCall = newCalls.length > 0 ? newCalls[0] : emptyCall;
+       const currentLatestCall = callHistory.length > 0 ? callHistory[0] : emptyCall;
 
-        // Only trigger animation if it's a new call
-        if (newCall.id !== currentCall.id) {
-          setCurrentCall(newCall);
-          
-          setIsBlinking(true);
-          try {
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play();
-          } catch (error) {
-            console.error("Error playing sound:", error);
-          }
-          setTimeout(() => setIsBlinking(false), 2500);
+        if (latestCall.id !== currentLatestCall.id) {
+            try {
+                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                audio.play();
+            } catch (error) {
+                console.error("Error playing sound:", error);
+            }
         }
-      } else {
-        setCurrentCall(emptyCall);
-      }
+      
+      setCallHistory(newCalls);
+
+    }, (error) => {
+        console.error("Firebase snapshot error:", error);
+        setCallHistory([emptyCall]);
     });
 
     return () => unsubscribe();
-  }, [currentCall.id, isClient, hasInteracted]);
+  }, [isClient, hasInteracted, callHistory]);
   
   const handleInteraction = () => {
     setHasInteracted(true);
@@ -72,27 +75,22 @@ export default function PainelPage() {
 
   if (!isClient) {
     return (
-       <div className="flex flex-col h-screen bg-blue-900 text-white font-headline select-none">
-            <main className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-pulse">
-                <div className="h-16 bg-yellow-300/20 rounded w-1/4 mx-auto mb-4"></div>
-                <div className="h-64 bg-white/20 rounded w-3/4 my-4"></div>
-                <div className="h-10 bg-white/20 rounded w-1/3 mx-auto mt-4"></div>
-                <div className="flex-grow"></div>
-                <div className="flex justify-between w-full mt-8">
-                    <div className="w-1/3 h-20 bg-white/20 rounded"></div>
-                    <div className="w-1/3 h-20 bg-white/20 rounded"></div>
-                </div>
-            </main>
-            <footer className="bg-black text-gray-300 p-4 flex justify-between items-center text-lg">
-                <div className="h-6 bg-gray-700/50 rounded w-1/4"></div>
-                <div className="h-6 bg-gray-700/50 rounded w-1/4"></div>
-            </footer>
+       <div className="flex h-screen bg-slate-900 font-headline text-white overflow-hidden">
+            <div className="flex-1 p-8 flex flex-col items-center justify-center animate-pulse">
+                <div className="w-full h-1/2 bg-slate-800/50 rounded-lg"></div>
+                <div className="w-full h-1/4 bg-slate-800/50 rounded-lg mt-8"></div>
+            </div>
+            <div className="w-1/3 bg-slate-950/50 p-8 space-y-4">
+                {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-24 bg-slate-800/50 rounded-lg"></div>
+                ))}
+            </div>
         </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-blue-900 text-white font-headline select-none">
+    <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none">
         
         {!hasInteracted && (
              <div className="absolute inset-0 z-50 bg-black/70 flex flex-col items-center justify-center backdrop-blur-sm">
@@ -101,7 +99,7 @@ export default function PainelPage() {
                     <p className="text-xl text-white/80 mb-8">Clique para iniciar e habilitar as notificações sonoras.</p>
                     <button
                         onClick={handleInteraction}
-                        className="flex items-center gap-3 bg-yellow-400 text-blue-900 font-bold text-xl px-8 py-4 rounded-full shadow-lg hover:bg-yellow-300 transition-all transform hover:scale-105"
+                        className="flex items-center gap-3 bg-amber-400 text-slate-900 font-bold text-xl px-8 py-4 rounded-full shadow-lg hover:bg-amber-300 transition-all transform hover:scale-105"
                     >
                         <PlayCircle className="h-8 w-8" />
                         Iniciar Painel
@@ -110,30 +108,72 @@ export default function PainelPage() {
             </div>
         )}
 
-        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div className={`w-full transition-all duration-300 ${isBlinking ? 'animate-pulse' : ''}`}>
-                <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-yellow-400 uppercase tracking-widest">Senha</h2>
-                <p className="text-[12rem] md:text-[16rem] lg:text-[30rem] leading-none font-black text-white tracking-tighter my-2 drop-shadow-lg">{currentCall.ticket}</p>
-                <p className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white/90">{currentCall.room}</p>
+        <main className="flex flex-1 overflow-hidden">
+            {/* Main Call Section */}
+            <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12">
+                 <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentCall.id || 'empty'}
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -50, scale: 0.9 }}
+                        transition={{ duration: 0.5, type: "spring" }}
+                        className="w-full h-full flex flex-col justify-center bg-slate-950/50 rounded-2xl shadow-2xl p-8"
+                    >
+                        <div className="text-center flex-1 flex flex-col justify-center">
+                            <h2 className="text-5xl md:text-6xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
+                            <p className="font-black text-white tracking-tighter my-4 text-8xl md:text-9xl lg:text-[12rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
+                            <p className="text-5xl md:text-7xl font-semibold text-white/90 uppercase">{currentCall.departamentoNome}</p>
+                        </div>
+
+                         <div className="flex justify-between items-center border-t-2 border-slate-700/50 pt-6 mt-6">
+                            <div className="text-left">
+                                <h3 className="flex items-center gap-2 text-xl md:text-2xl font-bold text-amber-400 uppercase"><User className="w-5 h-5"/>Paciente</h3>
+                                <p className="text-2xl md:text-3xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
+                            </div>
+                            <div className="text-right">
+                                <h3 className="flex items-center justify-end gap-2 text-xl md:text-2xl font-bold text-amber-400 uppercase"><Stethoscope className="w-5 h-5"/>Profissional</h3>
+                                <p className="text-2xl md:text-3xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </div>
             
-            <div className="flex-grow"></div>
-
-            <div className="flex justify-between w-full mt-8">
-                <div className="text-left w-2/5">
-                    <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Paciente</h3>
-                    <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.patientName}</p>
+            {/* History Section */}
+            <aside className="w-full md:w-1/3 lg:w-1/4 bg-slate-950/50 h-full flex flex-col p-4">
+                <h3 className="text-2xl font-bold text-center text-amber-400 p-4">ÚLTIMAS CHAMADAS</h3>
+                <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                    <AnimatePresence>
+                        {previousCalls.map((call, index) => (
+                            <motion.div
+                                key={call.id}
+                                layout
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                className={cn(
+                                    "p-4 rounded-lg shadow-md border-l-4",
+                                    call.id === currentCall.id ? "bg-amber-400/10 border-amber-400" : "bg-slate-800/60 border-slate-600"
+                                )}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <span className="text-4xl font-bold text-cyan-400">{call.senha}</span>
+                                    <span className="text-lg font-semibold uppercase">{call.departamentoNome}</span>
+                                </div>
+                                <p className="text-lg text-white/80 truncate mt-2">{call.pacienteNome}</p>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
-                 <div className="text-right w-2/5">
-                    <h3 className="text-2xl md:text-3xl font-bold text-yellow-400 uppercase">Profissional</h3>
-                    <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.doctor}</p>
-                </div>
-            </div>
+            </aside>
         </main>
-        <footer className="bg-black text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
+        
+        <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
-                <HeartPulse className="h-6 w-6 md:h-7 md:w-7 text-blue-400" />
-                <span className="font-bold">UNIDADE BÁSICA DE SAÚDE</span>
+                <HeartPulse className="h-6 w-6 md:h-7 md:w-7 text-cyan-400" />
+                <span className="font-bold">SAÚDE FÁCIL | UNIDADE BÁSICA DE SAÚDE</span>
             </div>
             {time ? (
                 <div className="text-right">
@@ -146,3 +186,5 @@ export default function PainelPage() {
     </div>
   );
 }
+
+    
