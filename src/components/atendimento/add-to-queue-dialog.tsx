@@ -177,7 +177,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                             {pacientes.map((paciente) => (
                             <CommandItem
                                 key={paciente.id}
-                                value={`${paciente.nome} ${paciente.cpf} ${paciente.cns}`}
                                 onSelect={() => {
                                 setSelectedPaciente(paciente)
                                 setIsPatientPopoverOpen(false)
