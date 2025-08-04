@@ -91,7 +91,7 @@ export default function PainelPage() {
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className={`w-full transition-all duration-300 ${isBlinking ? 'animate-pulse' : ''}`}>
                 <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-yellow-400 uppercase tracking-widest">Senha</h2>
-                <p className="text-[12rem] md:text-[16rem] lg:text-[28rem] leading-none font-black text-white tracking-tighter my-2 drop-shadow-lg">{currentCall.ticket}</p>
+                <p className="text-[12rem] md:text-[16rem] lg:text-[30rem] leading-none font-black text-white tracking-tighter my-2 drop-shadow-lg">{currentCall.ticket}</p>
                 <p className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white/90">{currentCall.room}</p>
             </div>
             
