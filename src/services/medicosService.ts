@@ -7,11 +7,7 @@ import { getNextCounter } from './countersService';
 const medicosCollection = collection(db, 'medicos');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
-const medicosData: Omit<Medico, 'id' | 'codigo'>[] = [
-    { nome: "Dr. Ricardo Alves", crm: "123456/SP", especialidade: "Clínico Geral" },
-    { nome: "Dra. Ana Costa", crm: "654321/RJ", especialidade: "Cardiologista" },
-    { nome: "Dr. Lucas Martins", crm: "112233/MG", especialidade: "Ortopedista" },
-];
+const medicosData: Omit<Medico, 'id' | 'codigo'>[] = [];
 
 // Popula a coleção de médicos se ela estiver vazia.
 export const seedMedicos = async () => {
@@ -21,7 +17,7 @@ export const seedMedicos = async () => {
             const batch = writeBatch(db);
             for (const medico of medicosData) {
                 const docRef = doc(medicosCollection);
-                const nextId = await getNextCounter('medicos_v1');
+                const nextId = await getNextCounter('medicos_v2');
                 const codigo = String(nextId).padStart(3, '0');
                 batch.set(docRef, { ...medico, codigo });
             }
@@ -42,7 +38,7 @@ export const getMedicos = async (): Promise<Medico[]> => {
 
 // Adiciona um novo médico ao banco de dados.
 export const addMedico = async (medico: Omit<Medico, 'id' | 'codigo'>): Promise<string> => {
-    const nextId = await getNextCounter('medicos_v1');
+    const nextId = await getNextCounter('medicos_v2');
     const codigo = String(nextId).padStart(3, '0');
     const docRef = await addDoc(medicosCollection, { ...medico, codigo });
     return docRef.id;
