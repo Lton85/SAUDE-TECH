@@ -37,10 +37,6 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    if (pathname === '/atendimento') {
-      return "Fila de Atendimento";
-    }
-
     const currentPath = "/" + (pathname.split('/')[1] || "");
     const currentItem = menuItems.find(item => item.href === currentPath);
     
@@ -48,7 +44,18 @@ export default function DashboardLayout({
       return currentItem.label;
     }
     
-    if (pathname === "/") return "Dashboard";
+    if (pathname.startsWith('/atendimento')) {
+      return "Fila de Atendimento";
+    }
+    if (pathname.startsWith('/triagem')) {
+      return "Departamentos";
+    }
+    if (pathname.startsWith('/cadastros')) {
+      return "Cadastros";
+    }
+    if (pathname === "/") {
+      return "Dashboard";
+    }
 
     return "Saúde Fácil";
   }
