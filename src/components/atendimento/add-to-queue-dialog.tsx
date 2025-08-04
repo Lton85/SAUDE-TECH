@@ -179,7 +179,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                             <CommandItem
                                 key={paciente.id}
                                 value={paciente.nome}
-                                className="cursor-pointer"
                                 onSelect={(currentValue) => {
                                     const pacienteSelecionado = pacientes.find(p => p.nome.toLowerCase() === currentValue.toLowerCase());
                                     setSelectedPaciente(pacienteSelecionado || null);
@@ -193,7 +192,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                     )}
                                 />
                                 <div>
-                                    <span>{paciente.nome}</span>
+                                    <span className="cursor-pointer">{paciente.nome}</span>
                                     <span className="text-xs text-muted-foreground block">CNS: {paciente.cns}</span>
                                 </div>
                             </CommandItem>
@@ -259,5 +258,3 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
-
-    
