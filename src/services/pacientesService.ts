@@ -1,6 +1,6 @@
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot, getDoc } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
 import { getNextCounter } from './countersService';
 
@@ -65,17 +65,45 @@ export const getPacientesRealtime = (
 
 
 // Adiciona um novo paciente ao banco de dados.
-export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo'>): Promise<string> => {
+export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('pacientes_v2');
     const codigo = String(nextId).padStart(3, '0');
-    const docRef = await addDoc(pacientesCollection, { ...paciente, codigo });
+    
+    const newPatient = {
+        ...paciente,
+        codigo,
+        historico: {
+            criadoEm: new Date().toISOString(),
+            criadoPor: 'Recepção (Cadastro)',
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Recepção (Cadastro)',
+        }
+    }
+    const docRef = await addDoc(pacientesCollection, newPatient);
     return docRef.id;
 };
 
 // Atualiza um paciente existente no banco de dados.
-export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id'>>): Promise<void> => {
+export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
-    await updateDoc(pacienteDoc, paciente);
+    const docSnap = await getDoc(pacienteDoc);
+
+    if (!docSnap.exists()) {
+        throw new Error("Paciente não encontrado");
+    }
+
+    const existingData = docSnap.data() as Paciente;
+    
+    const updatedData: Partial<Paciente> = {
+        ...paciente,
+        historico: {
+            ...existingData.historico,
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Recepção (Edição)',
+        }
+    }
+
+    await updateDoc(pacienteDoc, updatedData);
 };
 
 // Exclui um paciente do banco de dados.

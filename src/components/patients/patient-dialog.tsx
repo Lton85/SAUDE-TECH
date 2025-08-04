@@ -31,36 +31,21 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             const age = new Date().getFullYear() - birthDate.getFullYear();
 
             const patientData = {
-                ...values
+                ...values,
+                idade: `${age}a`,
             };
 
-            if (isEditMode) {
-                 const updatedPatient: Partial<Paciente> = {
-                    ...patientData,
-                    idade: `${age}a`,
-                    historico: {
-                        ...paciente.historico,
-                        alteradoEm: new Date().toISOString(),
-                        alteradoPor: 'Recepção (Edição)',
-                    }
-                };
-                await updatePaciente(paciente.id, updatedPatient);
+            if (isEditMode && paciente) {
+                await updatePaciente(paciente.id, patientData);
                 toast({
                     title: "Paciente Atualizado!",
                     description: `Os dados de ${values.nome} foram atualizados.`,
                     className: "bg-green-500 text-white"
                 });
             } else {
-                 const newPatient: Omit<Paciente, 'id' | 'codigo'> = {
+                 const newPatient: Omit<Paciente, 'id' | 'codigo' | 'historico'> = {
                     ...patientData,
-                    idade: `${age}a`,
                     situacao: 'Ativo',
-                    historico: {
-                        criadoEm: new Date().toISOString(),
-                        criadoPor: 'Recepção',
-                        alteradoEm: new Date().toISOString(),
-                        alteradoPor: 'Recepção',
-                    }
                 };
                 await addPaciente(newPatient);
                 toast({
@@ -75,7 +60,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
         } catch (error) {
              toast({
                 title: "Erro ao salvar paciente",
-                description: "Não foi possível salvar os dados. Verifique e tente novamente.",
+                description: (error as Error).message || "Não foi possível salvar os dados. Verifique e tente novamente.",
                 variant: "destructive",
             });
         } finally {
@@ -97,7 +82,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             bairro: '',
             cidade: '',
             uf: '',
-            nacionalidade: '',
+            nacionalidade: 'Brasileira',
             email: '',
             telefone: '',
             observacoes: '',
