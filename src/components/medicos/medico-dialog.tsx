@@ -53,7 +53,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <Stethoscope />}

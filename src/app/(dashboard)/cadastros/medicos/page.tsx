@@ -106,14 +106,15 @@ export default function MedicosPage() {
               <TableHead>Nome</TableHead>
               <TableHead>CRM</TableHead>
               <TableHead>Especialidade</TableHead>
+              <TableHead>Situação</TableHead>
               <TableHead><span className="sr-only">Ações</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              [...Array(3)].map((_, i) => (
+              [...Array(5)].map((_, i) => (
                 <TableRow key={i}>
-                  {[...Array(5)].map((_, j) => (
+                  {[...Array(6)].map((_, j) => (
                     <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                   ))}
                 </TableRow>
@@ -125,6 +126,11 @@ export default function MedicosPage() {
                   <TableCell className="font-medium">{medico.nome}</TableCell>
                   <TableCell>{medico.crm}</TableCell>
                   <TableCell><Badge variant="secondary">{medico.especialidade}</Badge></TableCell>
+                   <TableCell>
+                      <Badge variant={medico.situacao === 'Ativo' ? "default" : "destructive"} className={medico.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
+                        {medico.situacao}
+                      </Badge>
+                    </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -152,7 +158,7 @@ export default function MedicosPage() {
               ))
             ) : (
                 <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                     Nenhum médico cadastrado.
                     </TableCell>
                 </TableRow>
