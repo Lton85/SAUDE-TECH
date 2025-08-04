@@ -118,13 +118,7 @@ export default function AtendimentoPage() {
         const unsubscribePacientes = fetchPacientes();
 
         const unsubscribeFila = getFilaDeEspera((data) => {
-            // Prioritize 'Emergência' on the client-side
-            const sortedData = [...data].sort((a, b) => {
-              if (a.classificacao === 'Emergência' && b.classificacao !== 'Emergência') return -1;
-              if (a.classificacao !== 'Emergência' && b.classificacao === 'Emergência') return 1;
-              return 0; // Keep original order for items with same classification
-            });
-            setFila(sortedData);
+            setFila(data);
             setIsLoading(false);
         }, (error) => {
             toast({

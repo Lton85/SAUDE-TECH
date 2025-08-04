@@ -39,6 +39,7 @@ export const getFilaDeEspera = (
     const q = query(
         collection(db, "filaDeEspera"), 
         where("status", "==", "aguardando"),
+        orderBy("prioridade", "asc"),
         orderBy("chegadaEm", "asc")
     );
 
@@ -51,7 +52,7 @@ export const getFilaDeEspera = (
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching queue: ", error);
-        onError("Não foi possível buscar a fila de atendimento.");
+        onError("Não foi possível buscar a fila de atendimento. Pode ser necessário criar um índice no Firestore. Verifique o console para um link de criação.");
     });
 
     return unsubscribe;
