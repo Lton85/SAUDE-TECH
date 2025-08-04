@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Trash2, Pencil, Venus, Mars } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Pencil, Venus, Mars, Eye, History } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { getMedicos, deleteMedico } from "@/services/medicosService";
@@ -13,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { MedicoDialog } from "@/components/medicos/medico-dialog";
 import { DeleteConfirmationDialog } from "@/components/medicos/delete-dialog";
+import { ViewMedicoDialog } from "@/components/medicos/view-dialog";
+import { HistoryMedicoDialog } from "@/components/medicos/history-dialog";
 
 
 export default function MedicosPage() {
@@ -21,6 +23,8 @@ export default function MedicosPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMedico, setSelectedMedico] = useState<Medico | null>(null);
   const [medicoToDelete, setMedicoToDelete] = useState<Medico | null>(null);
+  const [medicoToView, setMedicoToView] = useState<Medico | null>(null);
+  const [medicoToHistory, setMedicoToHistory] = useState<Medico | null>(null);
   const { toast } = useToast();
 
   const fetchMedicos = async () => {
@@ -56,6 +60,14 @@ export default function MedicosPage() {
   const handleEdit = (medico: Medico) => {
     setSelectedMedico(medico);
     setIsDialogOpen(true);
+  };
+  
+  const handleView = (medico: Medico) => {
+    setMedicoToView(medico);
+  };
+  
+  const handleHistory = (medico: Medico) => {
+    setMedicoToHistory(medico);
   };
 
   const handleDelete = (medico: Medico) => {
@@ -144,14 +156,33 @@ export default function MedicosPage() {
                     </TableCell>
                   <TableCell className="text-right px-2 py-1">
                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleView(medico)}>
+                            <Eye className="h-3 w-3" />
+                            <span className="sr-only">Visualizar</span>
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(medico)}>
                             <Pencil className="h-3 w-3" />
                             <span className="sr-only">Editar</span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => handleDelete(medico)}>
-                            <Trash2 className="h-3 w-3" />
-                            <span className="sr-only">Excluir</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleHistory(medico)}>
+                            <History className="h-3 w-3" />
+                            <span className="sr-only">Histórico</span>
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-6 w-6 p-0">
+                              <span className="sr-only">Abrir menu</span>
+                              <MoreHorizontal className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(medico)}>
+                                <Trash2 className="mr-2 h-3 w-3" />
+                                <span>Excluir</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -181,6 +212,22 @@ export default function MedicosPage() {
             onOpenChange={() => setMedicoToDelete(null)}
             onConfirm={handleDeleteConfirm}
             medicoName={medicoToDelete?.nome || ''}
+        />
+    )}
+    
+    {medicoToView && (
+        <ViewMedicoDialog
+            isOpen={!!medicoToView}
+            onOpenChange={() => setMedicoToView(null)}
+            medico={medicoToView}
+        />
+    )}
+
+    {medicoToHistory && (
+        <HistoryMedicoDialog
+            isOpen={!!medicoToHistory}
+            onOpenChange={() => setMedicoToHistory(null)}
+            medico={medicoToHistory}
         />
     )}
     </>

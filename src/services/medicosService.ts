@@ -1,6 +1,6 @@
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
 import { getNextCounter } from './countersService';
 
@@ -19,7 +19,17 @@ export const seedMedicos = async () => {
                 const docRef = doc(medicosCollection);
                 const nextId = await getNextCounter('medicos_v2');
                 const codigo = String(nextId).padStart(3, '0');
-                batch.set(docRef, { ...medico, codigo });
+                const medicoWithHistory = {
+                    ...medico,
+                    codigo,
+                    historico: {
+                        criadoEm: new Date().toISOString(),
+                        criadoPor: 'Admin (Seed)',
+                        alteradoEm: new Date().toISOString(),
+                        alteradoPor: 'Admin (Seed)',
+                    }
+                }
+                batch.set(docRef, medicoWithHistory);
             }
             await batch.commit();
             console.log('Medicos collection has been seeded.');
@@ -37,17 +47,41 @@ export const getMedicos = async (): Promise<Medico[]> => {
 };
 
 // Adiciona um novo médico ao banco de dados.
-export const addMedico = async (medico: Omit<Medico, 'id' | 'codigo'>): Promise<string> => {
+export const addMedico = async (medico: Omit<Medico, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('medicos_v2');
     const codigo = String(nextId).padStart(3, '0');
-    const docRef = await addDoc(medicosCollection, { ...medico, codigo });
+    const newMedico = {
+        ...medico,
+        codigo,
+        historico: {
+            criadoEm: new Date().toISOString(),
+            criadoPor: 'Admin (Cadastro)',
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Admin (Cadastro)',
+        }
+    }
+    const docRef = await addDoc(medicosCollection, newMedico);
     return docRef.id;
 };
 
 // Atualiza um médico existente no banco de dados.
-export const updateMedico = async (id: string, medico: Partial<Omit<Medico, 'id'>>): Promise<void> => {
-    const medicoDoc = doc(db, 'medicos', id);
-    await updateDoc(medicoDoc, medico);
+export const updateMedico = async (id: string, medico: Partial<Omit<Medico, 'id' | 'codigo'>>): Promise<void> => {
+    const medicoDocRef = doc(db, 'medicos', id);
+    const medicoSnap = await getDoc(medicoDocRef);
+    if (!medicoSnap.exists()) {
+        throw new Error("Médico não encontrado");
+    }
+    const existingMedico = medicoSnap.data() as Medico;
+
+    const medicoToUpdate = {
+        ...medico,
+        historico: {
+            ...existingMedico.historico,
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Admin (Edição)',
+        }
+    }
+    await updateDoc(medicoDocRef, medicoToUpdate);
 };
 
 // Exclui um médico do banco de dados.

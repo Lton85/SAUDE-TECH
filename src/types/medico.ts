@@ -11,4 +11,10 @@ export interface Medico {
     telefone: string;
     cargaHoraria: string;
     situacao: 'Ativo' | 'Inativo';
+    historico: {
+        criadoEm: string;
+        criadoPor: string;
+        alteradoEm: string;
+        alteradoPor: string;
+    }
 }
