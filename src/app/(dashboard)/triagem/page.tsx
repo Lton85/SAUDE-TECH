@@ -113,10 +113,10 @@ export default function DepartamentosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4 py-2">Nome</TableHead>
-                <TableHead className="px-4 py-2">Nº da Sala</TableHead>
-                <TableHead className="px-4 py-2">Situação</TableHead>
-                <TableHead className="text-right px-4 py-2">Ações</TableHead>
+                <TableHead className="px-2 py-2">Nome</TableHead>
+                <TableHead className="px-2 py-2">Nº da Sala</TableHead>
+                <TableHead className="px-2 py-2">Situação</TableHead>
+                <TableHead className="text-right px-2 py-2">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,21 +124,21 @@ export default function DepartamentosPage() {
                 [...Array(3)].map((_, i) => (
                   <TableRow key={i}>
                     {[...Array(4)].map((_, j) => (
-                      <TableCell key={j} className="px-4 py-1"><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : departamentos.length > 0 ? (
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
-                    <TableCell className="font-medium px-4 py-1">{departamento.nome}</TableCell>
-                    <TableCell className="px-4 py-1">{departamento.numero || "N/A"}</TableCell>
-                    <TableCell className="px-4 py-1">
+                    <TableCell className="font-medium px-2 py-1">{departamento.nome}</TableCell>
+                    <TableCell className="px-2 py-1">{departamento.numero || "N/A"}</TableCell>
+                    <TableCell className="px-2 py-1">
                       <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''}>
                         {departamento.situacao}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right px-4 py-1">
+                    <TableCell className="text-right px-2 py-1">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleView(departamento)}>
                           <Eye className="h-4 w-4" />
