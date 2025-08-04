@@ -35,7 +35,6 @@ const formSchema = z.object({
   bairro: z.string().optional(),
   cidade: z.string().optional(),
   uf: z.string().optional(),
-  nacionalidade: z.string().optional(),
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
   observacoes: z.string().optional(),
@@ -81,7 +80,6 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       bairro: "",
       cidade: "",
       uf: "",
-      nacionalidade: "Brasileira",
       email: "",
       telefone: "",
       observacoes: "",
@@ -346,19 +344,6 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                           <SelectItem value="Não declarada">Não declarada</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="nacionalidade"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-4">
-                      <FormLabel>Nacionalidade</FormLabel>
-                      <FormControl>
-                        <Input className="bg-muted/40" placeholder="Ex: Brasileira" {...field} />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

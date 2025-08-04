@@ -61,7 +61,6 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                     <InfoRow icon={Calendar} label="Idade" value={paciente.idade} />
                     <InfoRow icon={VenetianMask} label="Raça/Cor" value={paciente.raca} />
                     <InfoRow icon={Heart} label="Estado Civil" value={paciente.estadoCivil} />
-                     <InfoRow icon={Globe} label="Nacionalidade" value={paciente.nacionalidade} />
                 </div>
             </div>
 

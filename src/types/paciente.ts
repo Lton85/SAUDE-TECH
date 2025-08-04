@@ -18,7 +18,6 @@ export interface Paciente {
     bairro: string;
     cidade: string;
     uf: string;
-    nacionalidade: string;
     email?: string;
     telefone?: string;
     observacoes?: string;

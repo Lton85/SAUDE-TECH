@@ -86,7 +86,6 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             bairro: '',
             cidade: '',
             uf: '',
-            nacionalidade: 'Brasileira',
             email: '',
             telefone: '',
             observacoes: '',
