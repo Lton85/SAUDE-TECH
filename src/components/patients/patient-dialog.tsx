@@ -13,7 +13,7 @@ import { parse } from "date-fns";
 interface PatientDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (paciente: Paciente) => void;
   paciente?: Paciente | null;
 }
 
@@ -30,8 +30,12 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
         try {
             let age = "";
             if (values.nascimento) {
-                const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
-                age = `${new Date().getFullYear() - birthDate.getFullYear()}a`;
+                try {
+                    const birthDate = parse(values.nascimento, 'dd/MM/yyyy', new Date());
+                    if(!isNaN(birthDate.getTime())) {
+                        age = `${new Date().getFullYear() - birthDate.getFullYear()}a`;
+                    }
+                } catch(e) { /* ignore parse error */ }
             }
 
             // Sanitize optional fields to be empty strings instead of undefined
@@ -62,20 +66,21 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                     description: `Os dados de ${values.nome} foram atualizados.`,
                     className: "bg-green-500 text-white"
                 });
+                onSuccess({ ...paciente, ...patientData });
             } else {
                  const newPatient: Omit<Paciente, 'id' | 'codigo' | 'historico'> = {
                     ...patientData,
                     situacao: 'Ativo',
                 };
-                await addPaciente(newPatient);
+                const newPatientId = await addPaciente(newPatient);
                 toast({
                     title: "Paciente Cadastrado!",
                     description: `O paciente ${values.nome} foi adicionado com sucesso.`,
                     className: "bg-green-500 text-white"
                 });
+                 onSuccess({ ...newPatient, id: newPatientId, codigo: "", historico: {} as any }); // Pass back the new patient
             }
             
-            onSuccess();
             onOpenChange(false);
         } catch (error) {
              toast({

@@ -28,9 +28,10 @@ interface AddToQueueDialogProps {
   pacientes: Paciente[]
   departamentos: Departamento[]
   onAddNewPatient: () => void;
+  patientToAdd?: Paciente | null;
 }
 
-export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient }: AddToQueueDialogProps) {
+export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
@@ -87,8 +88,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     
     if (isOpen) {
       fetchProfissionais();
+      if (patientToAdd) {
+        handleSelectPatient(patientToAdd);
+      }
     }
-  }, [isOpen, toast]);
+  }, [isOpen, toast, patientToAdd]);
 
   useEffect(() => {
     if (selectedPaciente && !ticket) {

@@ -73,6 +73,7 @@ export default function AtendimentoPage() {
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToProntuario, setItemToProntuario] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
+    const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
 
     const { toast } = useToast();
     
@@ -151,10 +152,9 @@ export default function AtendimentoPage() {
         setIsPatientDialogOpen(true);
     };
 
-    const handlePatientDialogSuccess = () => {
-        // No need to call fetchPacientes here as getPacientesRealtime will update automatically
+    const handlePatientDialogSuccess = (newPatient: Paciente) => {
         setIsPatientDialogOpen(false);
-        // Optionally, reopen the queue dialog
+        setPatientToAdd(newPatient); // Store the new patient
         setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
     };
 
@@ -265,7 +265,7 @@ export default function AtendimentoPage() {
                         <CardTitle>Fila de Atendimento</CardTitle>
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
-                    <Button onClick={() => setIsAddToQueueDialogOpen(true)}>
+                    <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Adicionar Paciente à Fila
                     </Button>
@@ -424,6 +424,7 @@ export default function AtendimentoPage() {
             pacientes={pacientes}
             departamentos={departamentos}
             onAddNewPatient={handleOpenNewPatientDialog}
+            patientToAdd={patientToAdd}
         />
 
         <PatientDialog
