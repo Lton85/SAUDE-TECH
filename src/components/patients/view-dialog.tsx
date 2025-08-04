@@ -50,7 +50,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={IdCard} label="Código" value={paciente.codigo} />
-                    <InfoRow icon={User} label="Nome Completo" value={paciente.nome} className="lg:col-span-2" />
+                    <InfoRow icon={User} label="Nome Completo" value={paciente.nome} />
                     <InfoRow icon={Hand} label="Nome da Mãe" value={paciente.mae} />
                     {paciente.pai && <InfoRow icon={Hand} label="Nome do Pai" value={paciente.pai} />}
                     <InfoRow icon={paciente.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
