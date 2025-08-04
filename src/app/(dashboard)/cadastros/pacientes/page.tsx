@@ -63,8 +63,8 @@ export default function PacientesPage() {
       return (
         item.nome.toLowerCase().includes(lowercasedFilter) ||
         item.mae.toLowerCase().includes(lowercasedFilter) ||
-        item.cpf.includes(searchTerm) ||
-        item.cns.includes(searchTerm) ||
+        (item.cpf && item.cpf.includes(searchTerm)) ||
+        (item.cns && item.cns.includes(searchTerm)) ||
         (item.endereco && item.endereco.toLowerCase().includes(lowercasedFilter))
       );
     });

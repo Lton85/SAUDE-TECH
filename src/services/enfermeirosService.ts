@@ -6,8 +6,11 @@ import type { Enfermeiro } from '@/types/enfermeiro';
 const enfermeirosCollection = collection(db, 'enfermeiros');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
-// Deixar vazio se não quiser dados iniciais.
-const enfermeirosData: Omit<Enfermeiro, 'id'>[] = [];
+const enfermeirosData: Omit<Enfermeiro, 'id'>[] = [
+    { nome: "Mariana Silva", coren: "111222/SP", turno: "Manhã" },
+    { nome: "Pedro Costa", coren: "333444/SP", turno: "Tarde" },
+    { nome: "Beatriz Oliveira", coren: "555666/SP", turno: "Noite" },
+];
 
 // Popula a coleção de enfermeiros se ela estiver vazia.
 export const seedEnfermeiros = async () => {

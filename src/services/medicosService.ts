@@ -6,8 +6,11 @@ import type { Medico } from '@/types/medico';
 const medicosCollection = collection(db, 'medicos');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
-// Deixar vazio se não quiser dados iniciais.
-const medicosData: Omit<Medico, 'id'>[] = [];
+const medicosData: Omit<Medico, 'id'>[] = [
+    { nome: "Dr. Ricardo Alves", crm: "123456/SP", especialidade: "Clínico Geral" },
+    { nome: "Dra. Ana Costa", crm: "654321/RJ", especialidade: "Cardiologista" },
+    { nome: "Dr. Lucas Martins", crm: "112233/MG", especialidade: "Ortopedista" },
+];
 
 // Popula a coleção de médicos se ela estiver vazia.
 export const seedMedicos = async () => {
