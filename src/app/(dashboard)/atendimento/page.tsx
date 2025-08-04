@@ -302,7 +302,7 @@ export default function AtendimentoPage() {
                                                 variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
                                                 className={cn(
                                                     'text-xs',
-                                                    item.classificacao === 'Emergência' ? '' : 'bg-green-500 hover:bg-green-600'
+                                                    item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >
                                                 {item.classificacao}
@@ -402,7 +402,7 @@ export default function AtendimentoPage() {
                                                 variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
                                                 className={cn(
                                                     'text-xs',
-                                                    item.classificacao === 'Emergência' ? '' : 'bg-green-500 hover:bg-green-600'
+                                                     item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >
                                                 {item.classificacao}
