@@ -106,7 +106,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         throw new Error("Departamento não encontrado.");
     }
     const departamentoData = departamentoSnap.data();
-    const sala = departamentoData.numero ? `Sala ${departamentoData.numero}` : 'Recepção';
+    const sala = departamentoData.numero ? `SALA ${departamentoData.numero}` : item.departamentoNome.toUpperCase();
 
 
     // 2. Register the call on the public panel
@@ -114,6 +114,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         ticket: item.senha,
         room: sala,
         doctor: item.profissionalNome,
+        patientName: item.pacienteNome,
     });
     
     // 3. Update the patient's status in the queue

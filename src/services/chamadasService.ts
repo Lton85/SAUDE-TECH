@@ -6,6 +6,7 @@ interface Chamada {
     ticket: string;
     room: string;
     doctor: string;
+    patientName: string;
 }
 
 const chamadasCollection = collection(db, 'chamadas');
