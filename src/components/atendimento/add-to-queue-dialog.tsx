@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -118,6 +119,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         className: "bg-green-500 text-white",
       })
       
+      resetState();
       onOpenChange(false)
     } catch (error) {
       console.error("Erro ao enviar paciente para a fila:", error)
@@ -179,9 +181,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 key={paciente.id}
                                 value={paciente.nome}
                                 onSelect={(currentValue) => {
-                                    setSelectedPaciente(
-                                        pacientes.find((p) => p.nome.toLowerCase() === currentValue.toLowerCase()) || null
-                                    );
+                                    const patient = pacientes.find((p) => p.nome.toLowerCase() === currentValue.toLowerCase());
+                                    setSelectedPaciente(patient || null);
                                     setIsPatientPopoverOpen(false);
                                 }}
                                 className="cursor-pointer"
