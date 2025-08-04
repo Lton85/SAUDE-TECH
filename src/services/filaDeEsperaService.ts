@@ -9,15 +9,6 @@ import { getDoc } from 'firebase/firestore';
 
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
-    // Verifica se o paciente já está na fila de qualquer departamento
-    const q = query(collection(db, "filaDeEspera"), where("pacienteId", "==", item.pacienteId), where("status", "in", ["aguardando", "em-atendimento"]));
-    const existing = await getDocs(q);
-    
-    if (!existing.empty) {
-        const existingItem = existing.docs[0].data();
-        throw new Error(`Este paciente já está na fila de ${existingItem.departamentoNome}.`);
-    }
-
     try {
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
