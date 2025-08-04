@@ -5,20 +5,19 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, IdCard, VenetianMask, Cake, BadgeInfo } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, IdCard, VenetianMask, Cake, BadgeInfo, ShieldQuestion } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
 import { addPacienteToFila } from "@/services/filaDeEsperaService"
 import { getMedicos } from "@/services/medicosService"
 import { getEnfermeiros } from "@/services/enfermeirosService"
-import type { Medico } from "@/types/medico"
-import type { Enfermeiro } from "@/types/enfermeiro"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Badge } from "../ui/badge"
 import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
+import type { FilaDeEsperaItem } from "@/types/fila"
 
 interface Profissional {
   id: string;
@@ -31,20 +30,23 @@ interface EnviarParaFilaDialogProps {
   departamentos: Departamento[]
 }
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string }) => (
-    <div className="flex items-center gap-2 text-sm">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <span className="text-muted-foreground">{label}:</span>
-        <span className="font-semibold text-card-foreground">{value}</span>
-    </div>
-);
-
+const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) => {
+    if(!value) return null;
+    return (
+        <div className="flex items-center gap-2 text-sm">
+            <Icon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{label}:</span>
+            <span className="font-semibold text-card-foreground">{value}</span>
+        </div>
+    );
+}
 
 export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
+  const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
   const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -72,11 +74,16 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     
     if (isOpen) {
       fetchProfissionais();
-      const ticketPrefix = ['C', 'P'][Math.floor(Math.random() * 2)];
-      const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-      setTicket(`${ticketPrefix}-${ticketNumber}`);
     }
   }, [isOpen, toast]);
+  
+  useEffect(() => {
+     if (isOpen) {
+        const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+        const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        setTicket(`${ticketPrefix}-${ticketNumber}`);
+     }
+  }, [isOpen, classification]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId || !ticket) {
@@ -96,7 +103,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      await addPacienteToFila({
+      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
@@ -105,9 +112,11 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
         senha: ticket,
-        chegadaEm: new Date(),
         status: "aguardando",
-      })
+        classificacao: classification,
+      }
+      
+      await addPacienteToFila(newItem)
 
       toast({
         title: "Paciente Enviado!",
@@ -134,6 +143,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     if (!open) {
         setSelectedDepartamentoId("");
         setSelectedProfissionalId("");
+        setClassification('Normal');
         setTicket("");
     }
     onOpenChange(open);
@@ -175,6 +185,25 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                     </div>
                 </CardContent>
             </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
+                    <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')}>
+                        <SelectTrigger id="classification">
+                            <SelectValue placeholder="Selecione a classificação" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Normal">Normal</SelectItem>
+                            <SelectItem value="Emergência">Emergência</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="space-y-2 text-center">
+                    <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
+                    <Input id="senha" value={ticket} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" />
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -211,10 +240,6 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                 </div>
             </div>
 
-             <div className="space-y-2 text-center">
-              <Label htmlFor="senha" className="flex items-center justify-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Senha Gerada</Label>
-                <Input id="senha" value={ticket} readOnly className="font-bold text-2xl bg-transparent border-none text-center h-auto p-0 tracking-wider" />
-            </div>
         </div>
 
         <DialogFooter>

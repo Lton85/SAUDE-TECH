@@ -39,6 +39,11 @@ export const getFilaDeEspera = (
         
         // Ordena os dados no lado do cliente
         data.sort((a, b) => {
+            // Prioritize 'Emergência'
+            if (a.classificacao === 'Emergência' && b.classificacao !== 'Emergência') return -1;
+            if (a.classificacao !== 'Emergência' && b.classificacao === 'Emergência') return 1;
+
+            // Then sort by arrival time
             if (a.chegadaEm && b.chegadaEm) {
                 return a.chegadaEm.toMillis() - b.chegadaEm.toMillis();
             }

@@ -27,6 +27,7 @@ import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 import { PatientDialog } from "@/components/patients/patient-dialog";
+import { cn } from "@/lib/utils";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -275,7 +276,8 @@ export default function AtendimentoPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                                <TableHead className="px-2 py-2 text-xs w-[100px]">Senha</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Médico</TableHead>
                                 <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
@@ -285,7 +287,7 @@ export default function AtendimentoPage() {
                             {isLoading ? (
                                 [...Array(3)].map((_, i) => (
                                     <TableRow key={i}>
-                                        {[...Array(5)].map((_, j) => (
+                                        {[...Array(6)].map((_, j) => (
                                             <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
                                         ))}
                                     </TableRow>
@@ -295,6 +297,17 @@ export default function AtendimentoPage() {
                                     <TableRow key={item.id} className="hover:bg-muted/50">
                                         <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">
+                                             <Badge
+                                                variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
+                                                className={cn(
+                                                    'text-xs',
+                                                    item.classificacao === 'Emergência' ? '' : 'bg-green-500 hover:bg-green-600'
+                                                )}
+                                            >
+                                                {item.classificacao}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
                                         <TableCell className="text-right px-2 py-1 text-xs">
@@ -338,7 +351,7 @@ export default function AtendimentoPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-64 text-center">
+                                    <TableCell colSpan={6} className="h-64 text-center">
                                         <div className="flex flex-col items-center justify-center gap-4">
                                             <Users className="h-16 w-16 text-muted-foreground/30" />
                                             <div className="space-y-1">
@@ -372,6 +385,7 @@ export default function AtendimentoPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
@@ -381,12 +395,23 @@ export default function AtendimentoPage() {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                    <TableCell colSpan={6} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
                                 </TableRow>
                             ) : emAtendimento.length > 0 ? (
                                 emAtendimento.map((item) => (
                                     <TableRow key={item.id} className="hover:bg-muted/50">
                                         <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">
+                                             <Badge
+                                                variant={item.classificacao === 'Emergência' ? 'destructive' : 'default'}
+                                                className={cn(
+                                                    'text-xs',
+                                                    item.classificacao === 'Emergência' ? '' : 'bg-green-500 hover:bg-green-600'
+                                                )}
+                                            >
+                                                {item.classificacao}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">
@@ -411,7 +436,7 @@ export default function AtendimentoPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
+                                    <TableCell colSpan={6} className="h-24 text-center">
                                         Nenhum paciente em atendimento no momento.
                                     </TableCell>
                                 </TableRow>

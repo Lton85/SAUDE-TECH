@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { Undo2, Loader2, Building, User } from "lucide-react";
+import { Undo2, Loader2, Building, User, ShieldQuestion } from "lucide-react";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +35,7 @@ interface ReturnToQueueDialogProps {
 export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm }: ReturnToQueueDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
+    const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
 
@@ -42,6 +43,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
         if (item) {
             setSelectedDepartamentoId(item.departamentoId);
             setSelectedProfissionalId(item.profissionalId);
+            setClassification(item.classificacao || 'Normal');
         }
     }, [item]);
 
@@ -70,6 +72,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                 departamentoNumero: selectedDepto.numero,
                 profissionalId: selectedProf.id,
                 profissionalNome: selectedProf.nome,
+                classificacao: classification,
             };
             
             await onConfirm(item, updates);
@@ -129,6 +132,18 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                         {prof.nome}
                         </SelectItem>
                     ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
+                <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')}>
+                    <SelectTrigger id="classification">
+                        <SelectValue placeholder="Selecione a classificação" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Normal">Normal</SelectItem>
+                        <SelectItem value="Emergência">Emergência</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

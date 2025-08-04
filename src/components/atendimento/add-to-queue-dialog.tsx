@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X, UserPlus } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -37,6 +37,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
+  const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
   const [ticket, setTicket] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -63,6 +64,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedPaciente(null);
     setSelectedDepartamentoId("");
     setSelectedProfissionalId("");
+    setClassification('Normal');
     setTicket("");
     setIsSubmitting(false);
     setSearchQuery("");
@@ -99,13 +101,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   useEffect(() => {
     if (selectedPaciente && !ticket) {
-        const ticketPrefix = ['C', 'P'][Math.floor(Math.random() * 2)];
+        const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
         const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
         setTicket(`${ticketPrefix}-${ticketNumber}`);
     } else if (!selectedPaciente) {
         setTicket("");
     }
-  }, [selectedPaciente, ticket]);
+  }, [selectedPaciente, ticket, classification]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -156,6 +158,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         profissionalNome: profissional.nome,
         senha: ticket,
         status: "aguardando",
+        classificacao: classification,
       })
 
       toast({
@@ -335,16 +338,30 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </div>
             </div>
 
-             <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-0")}>
-                <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
-                <Input 
-                  id="senha" 
-                  value={ticket} 
-                  onChange={(e) => setTicket(e.target.value.toUpperCase())}
-                  className="font-bold text-lg"
-                  disabled={!selectedPaciente}
-                  placeholder="Senha gerada ou manual"
-                />
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
+                    <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')} disabled={!selectedPaciente}>
+                        <SelectTrigger id="classification">
+                            <SelectValue placeholder="Selecione a classificação" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Normal">Normal</SelectItem>
+                            <SelectItem value="Emergência">Emergência</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-0")}>
+                    <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
+                    <Input 
+                    id="senha" 
+                    value={ticket} 
+                    onChange={(e) => setTicket(e.target.value.toUpperCase())}
+                    className="font-bold text-lg"
+                    disabled={!selectedPaciente}
+                    placeholder="Senha gerada ou manual"
+                    />
+                </div>
             </div>
         </div>
 
