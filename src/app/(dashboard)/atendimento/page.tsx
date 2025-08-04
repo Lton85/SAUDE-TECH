@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
@@ -352,6 +352,11 @@ export default function AtendimentoPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
+                 <CardFooter className="py-3 px-6 border-t">
+                    <div className="text-xs text-muted-foreground">
+                        Exibindo <strong>{fila.length}</strong> {fila.length === 1 ? 'registro' : 'registros'}
+                    </div>
+                </CardFooter>
             </Card>
 
             <Card>
@@ -414,6 +419,11 @@ export default function AtendimentoPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
+                 <CardFooter className="py-3 px-6 border-t">
+                    <div className="text-xs text-muted-foreground">
+                        Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
+                    </div>
+                </CardFooter>
             </Card>
         </div>
 
