@@ -1,0 +1,151 @@
+
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+import { Undo2, Loader2, Building, User } from "lucide-react";
+import type { FilaDeEsperaItem } from "@/types/fila";
+import type { Departamento } from "@/types/departamento";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+interface Profissional {
+  id: string;
+  nome: string;
+}
+
+interface ReturnToQueueDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  item: FilaDeEsperaItem | null;
+  departamentos: Departamento[];
+  profissionais: Profissional[];
+  onConfirm: (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => Promise<void>;
+}
+
+export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm }: ReturnToQueueDialogProps) {
+    const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
+    const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (item) {
+            setSelectedDepartamentoId(item.departamentoId);
+            setSelectedProfissionalId(item.profissionalId);
+        }
+    }, [item]);
+
+    const handleConfirm = async () => {
+        if (!item || !selectedDepartamentoId || !selectedProfissionalId) {
+            toast({
+                title: "Campos inválidos",
+                description: "Selecione um departamento e um profissional.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const selectedDepto = departamentos.find(d => d.id === selectedDepartamentoId);
+            const selectedProf = profissionais.find(p => p.id === selectedProfissionalId);
+
+            if (!selectedDepto || !selectedProf) {
+                throw new Error("Departamento ou profissional não encontrado.");
+            }
+
+            const updates: Partial<FilaDeEsperaItem> = {
+                departamentoId: selectedDepto.id,
+                departamentoNome: selectedDepto.nome,
+                departamentoNumero: selectedDepto.numero,
+                profissionalId: selectedProf.id,
+                profissionalNome: selectedProf.nome,
+            };
+            
+            await onConfirm(item, updates);
+
+        } catch (error) {
+            toast({
+                title: "Erro ao retornar",
+                description: (error as Error).message,
+                variant: "destructive"
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+
+  if (!item) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Undo2 className="h-5 w-5" />
+            Retornar Paciente para a Fila
+          </DialogTitle>
+          <DialogDescription>
+            Edite o departamento ou profissional, se necessário, e confirme para retornar <span className="font-semibold text-primary">{item.pacienteNome}</span> para a fila.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="py-4 space-y-4">
+             <div className="space-y-2">
+                  <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
+                  <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
+                    <SelectTrigger id="departamento">
+                      <SelectValue placeholder="Selecione o departamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departamentos.map((depto) => (
+                        <SelectItem key={depto.id} value={depto.id}>
+                          {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
+                <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId}>
+                    <SelectTrigger id="profissional">
+                    <SelectValue placeholder="Selecione o profissional" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {profissionais.map((prof) => (
+                        <SelectItem key={prof.id} value={prof.id}>
+                        {prof.nome}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+
+        <DialogFooter className="sm:justify-end">
+           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button type="button" onClick={handleConfirm} disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600 text-white">
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar e Retornar à Fila
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+    

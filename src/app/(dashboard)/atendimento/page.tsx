@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
-import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import { HistoryQueueItemDialog } from "@/components/atendimento/history-dialog"
 import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
+import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -69,6 +70,7 @@ export default function AtendimentoPage() {
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToProntuario, setItemToProntuario] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
 
     const { toast } = useToast();
 
@@ -170,14 +172,23 @@ export default function AtendimentoPage() {
             });
         }
     };
+    
+    const handleReturnToQueue = (item: FilaDeEsperaItem) => {
+        setItemToReturn(item);
+    };
 
-    const handleRetornarParaFila = async (item: FilaDeEsperaItem) => {
+    const handleReturnToQueueConfirm = async (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => {
         try {
+            // First, update the item with any changes
+            await updateFilaItem(item.id, updates);
+
+            // Then, return the patient to the queue
             await retornarPacienteParaFila(item.id);
+
             toast({
                 title: "Paciente Retornou para a Fila!",
-                description: `O atendimento de ${item.pacienteNome} foi retornado para a fila de espera.`,
-                 variant: "default"
+                description: `${item.pacienteNome} foi retornado para a fila de espera.`,
+                variant: "default"
             });
         } catch (error) {
             toast({
@@ -185,8 +196,11 @@ export default function AtendimentoPage() {
                 description: (error as Error).message,
                 variant: "destructive",
             });
+        } finally {
+            setItemToReturn(null);
         }
     };
+
     
     const handleEdit = (item: FilaDeEsperaItem) => {
         setItemToEdit(item);
@@ -360,7 +374,7 @@ export default function AtendimentoPage() {
                                         </TableCell>
                                         <TableCell className="text-right px-2 py-1 text-xs">
                                            <div className="flex items-center justify-end gap-2">
-                                                <Button size="sm" variant="outline" onClick={() => handleRetornarParaFila(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
+                                                <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
                                                     <Undo2 className="mr-2 h-3 w-3" />
                                                     Retornar à Fila
                                                 </Button>
@@ -403,6 +417,17 @@ export default function AtendimentoPage() {
             />
         )}
         
+        {itemToReturn && (
+            <ReturnToQueueDialog
+                isOpen={!!itemToReturn}
+                onOpenChange={() => setItemToReturn(null)}
+                item={itemToReturn}
+                departamentos={departamentos}
+                profissionais={profissionais}
+                onConfirm={handleReturnToQueueConfirm}
+            />
+        )}
+
         {itemToProntuario && (
             <ProntuarioDialog
                 isOpen={!!itemToProntuario}
@@ -430,3 +455,5 @@ export default function AtendimentoPage() {
         </>
     );
 }
+
+    
