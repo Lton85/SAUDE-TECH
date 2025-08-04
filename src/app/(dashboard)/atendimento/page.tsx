@@ -130,7 +130,13 @@ export default function AtendimentoPage() {
         });
         
         const unsubscribeEmAtendimento = getAtendimentosEmAndamento((data) => {
-            setEmAtendimento(data);
+            const sortedData = data.sort((a, b) => {
+                if (a.chamadaEm && b.chamadaEm) {
+                    return a.chamadaEm.toDate().getTime() - b.chamadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+            setEmAtendimento(sortedData);
         }, (error) => {
              toast({
                 title: "Erro ao carregar atendimentos",
