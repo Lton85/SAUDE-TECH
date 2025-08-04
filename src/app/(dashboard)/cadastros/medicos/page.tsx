@@ -168,21 +168,10 @@ export default function MedicosPage() {
                             <History className="h-3 w-3" />
                             <span className="sr-only">Histórico</span>
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-6 w-6 p-0">
-                              <span className="sr-only">Abrir menu</span>
-                              <MoreHorizontal className="h-3 w-3" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(medico)}>
-                                <Trash2 className="mr-2 h-3 w-3" />
-                                <span>Excluir</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => handleDelete(medico)}>
+                            <Trash2 className="h-3 w-3" />
+                            <span className="sr-only">Excluir</span>
+                        </Button>
                     </div>
                   </TableCell>
                 </TableRow>
