@@ -10,6 +10,12 @@ import { getDoc } from 'firebase/firestore';
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
     try {
+        const q = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "!=", "finalizado"));
+        const activeQueueEntries = await getDocs(q);
+        if (!activeQueueEntries.empty) {
+            throw new Error("Este paciente já está na fila de atendimento ou em atendimento.");
+        }
+
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
             chegadaEm: serverTimestamp(),
@@ -18,6 +24,9 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
         });
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);
+        if (error instanceof Error) {
+            throw error;
+        }
         throw new Error("Não foi possível adicionar o paciente à fila no Firestore.");
     }
 };

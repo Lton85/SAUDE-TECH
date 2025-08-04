@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -17,6 +17,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { getNextCounter } from "@/services/countersService"
 
 interface Profissional {
   id: string;
@@ -60,6 +61,24 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     );
   }, [searchQuery, pacientes]);
 
+  const generateTicket = useCallback(async (classificationType: 'Normal' | 'Emergência') => {
+      try {
+        const counterName = classificationType === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+        const ticketNumber = await getNextCounter(counterName);
+        const ticketPrefix = classificationType === 'Emergência' ? 'E' : 'N';
+        const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+        setTicket(formattedTicket);
+      } catch (error) {
+        toast({
+          title: "Erro ao gerar senha",
+          description: "Não foi possível obter a próxima senha sequencial.",
+          variant: "destructive",
+        });
+        setTicket(""); // Clear ticket on error
+      }
+  }, [toast]);
+  
+
   const resetState = () => {
     setSelectedPaciente(null);
     setSelectedDepartamentoId("");
@@ -100,14 +119,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   }, [isOpen, toast, patientToAdd]);
 
   useEffect(() => {
-    if (selectedPaciente && !ticket) {
-        const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
-        const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-        setTicket(`${ticketPrefix}-${ticketNumber}`);
+    if (selectedPaciente && isOpen) {
+        generateTicket(classification);
     } else if (!selectedPaciente) {
         setTicket("");
     }
-  }, [selectedPaciente, ticket, classification]);
+  }, [selectedPaciente, classification, isOpen, generateTicket]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -192,7 +209,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedPaciente(paciente);
     setSearchQuery(paciente.nome);
     setShowPatientList(false);
-    setTicket(''); // Reset ticket to allow regeneration
     setHighlightedIndex(-1);
   }
   
@@ -356,10 +372,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     <Input 
                     id="senha" 
                     value={ticket} 
-                    onChange={(e) => setTicket(e.target.value.toUpperCase())}
-                    className="font-bold text-lg"
+                    readOnly
+                    className="font-bold text-lg bg-muted/30"
                     disabled={!selectedPaciente}
-                    placeholder="Senha gerada ou manual"
+                    placeholder="Gerando senha..."
                     />
                 </div>
             </div>
@@ -369,7 +385,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedPaciente || !selectedDepartamentoId || !selectedProfissionalId}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedPaciente || !selectedDepartamentoId || !selectedProfissionalId || !ticket}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar Envio
           </Button>

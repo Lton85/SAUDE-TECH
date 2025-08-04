@@ -1,10 +1,11 @@
+
 "use client"
 import { db } from '@/lib/firebase';
 import { doc, runTransaction, increment } from 'firebase/firestore';
 
-// Obtém o próximo número do contador para uma coleção específica
-export const getNextCounter = async (collectionName: string): Promise<number> => {
-    const counterDocRef = doc(db, 'counters', collectionName);
+// Obtém o próximo número do contador para um contador específico
+export const getNextCounter = async (counterName: string): Promise<number> => {
+    const counterDocRef = doc(db, 'counters', counterName);
 
     try {
         const nextId = await runTransaction(db, async (transaction) => {

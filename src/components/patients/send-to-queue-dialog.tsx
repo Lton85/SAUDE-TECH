@@ -1,7 +1,8 @@
 
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,6 +19,7 @@ import { Badge } from "../ui/badge"
 import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
 import type { FilaDeEsperaItem } from "@/types/fila"
+import { getNextCounter } from "@/services/countersService"
 
 interface Profissional {
   id: string;
@@ -52,6 +54,23 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const { toast } = useToast()
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
+  
+  const generateTicket = useCallback(async (classificationType: 'Normal' | 'Emergência') => {
+      try {
+        const counterName = classificationType === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+        const ticketNumber = await getNextCounter(counterName);
+        const ticketPrefix = classificationType === 'Emergência' ? 'E' : 'N';
+        const formattedTicket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+        setTicket(formattedTicket);
+      } catch (error) {
+        toast({
+          title: "Erro ao gerar senha",
+          description: "Não foi possível obter a próxima senha sequencial.",
+          variant: "destructive",
+        });
+        setTicket(""); // Clear ticket on error
+      }
+  }, [toast]);
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -77,13 +96,11 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     }
   }, [isOpen, toast]);
   
-  useEffect(() => {
+   useEffect(() => {
      if (isOpen) {
-        const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
-        const ticketNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-        setTicket(`${ticketPrefix}-${ticketNumber}`);
+        generateTicket(classification);
      }
-  }, [isOpen, classification]);
+  }, [isOpen, classification, generateTicket]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId || !ticket) {
@@ -246,7 +263,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedDepartamentoId || !selectedProfissionalId}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedDepartamentoId || !selectedProfissionalId || !ticket}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar Envio
           </Button>
