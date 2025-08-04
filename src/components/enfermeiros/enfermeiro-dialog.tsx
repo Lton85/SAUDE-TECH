@@ -20,10 +20,10 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
   const { toast } = useToast();
   const isEditMode = !!enfermeiro;
 
-  const handleSubmit = async (values: Omit<Enfermeiro, 'id'>) => {
+  const handleSubmit = async (values: Omit<Enfermeiro, 'id' | 'codigo' | 'historico'>) => {
     setIsSubmitting(true);
     try {
-      if (isEditMode) {
+      if (isEditMode && enfermeiro) {
         await updateEnfermeiro(enfermeiro.id, values);
         toast({
           title: "Enfermeiro(a) Atualizado(a)!",
@@ -53,7 +53,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <UserPlus />}

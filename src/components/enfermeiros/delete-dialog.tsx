@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2 } from "lucide-react"
 
-interface DeleteConfirmationDialogProps {
+interface DeleteEnfermeiroDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: () => void
   enfermeiroName: string
 }
 
-export function DeleteEnfermeiroDialog({ isOpen, onOpenChange, onConfirm, enfermeiroName }: DeleteConfirmationDialogProps) {
+export function DeleteEnfermeiroDialog({ isOpen, onOpenChange, onConfirm, enfermeiroName }: DeleteEnfermeiroDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
