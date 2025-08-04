@@ -184,6 +184,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                     setSelectedPaciente(pacienteSelecionado || null);
                                     setIsPatientPopoverOpen(false);
                                 }}
+                                className="cursor-pointer"
                             >
                                 <Check
                                     className={cn(
@@ -191,8 +192,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                     selectedPaciente?.id === paciente.id ? "opacity-100" : "opacity-0"
                                     )}
                                 />
-                                <div>
-                                    <span className="cursor-pointer">{paciente.nome}</span>
+                                <div className="flex-grow">
+                                    <span>{paciente.nome}</span>
                                     <span className="text-xs text-muted-foreground block">CNS: {paciente.cns}</span>
                                 </div>
                             </CommandItem>
