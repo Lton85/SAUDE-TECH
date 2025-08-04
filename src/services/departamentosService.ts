@@ -45,13 +45,23 @@ const checkSalaExists = async (numero: string, currentId?: string): Promise<bool
     return true;
 };
 
-export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo'>): Promise<string> => {
+export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     if (await checkSalaExists(departamento.numero || '')) {
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
     const nextId = await getNextCounter('departamentos_v2');
     const codigo = String(nextId).padStart(3, '0');
-    const docRef = await addDoc(departamentosCollection, { ...departamento, codigo });
+     const newDepartamento: Omit<Departamento, 'id'> = {
+        ...departamento,
+        codigo,
+        historico: {
+            criadoEm: new Date().toISOString(),
+            criadoPor: 'Admin (Cadastro)',
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Admin (Cadastro)',
+        }
+    };
+    const docRef = await addDoc(departamentosCollection, newDepartamento);
     return docRef.id;
 };
 
@@ -60,7 +70,19 @@ export const updateDepartamento = async (id: string, departamento: Partial<Omit<
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
     const departamentoDoc = doc(db, 'departamentos', id);
-    await updateDoc(departamentoDoc, departamento);
+    const existingDocSnap = await getDoc(departamentoDoc);
+    const existingData = existingDocSnap.data() as Departamento;
+
+    const updatedDepartamento = {
+        ...departamento,
+        historico: {
+            ...existingData.historico,
+            alteradoEm: new Date().toISOString(),
+            alteradoPor: 'Admin (Edição)',
+        }
+    };
+
+    await updateDoc(departamentoDoc, updatedDepartamento);
 };
 
 export const deleteDepartamento = async (id: string): Promise<void> => {
