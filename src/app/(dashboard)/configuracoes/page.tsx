@@ -1,9 +1,59 @@
 
+"use client";
+
+import { useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings } from "lucide-react";
+import { Settings, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { resetCounterByName } from "@/services/countersService";
 
 export default function ConfiguracoesPage() {
+    const { toast } = useToast();
+    const [isNormalResetting, setIsNormalResetting] = useState(false);
+    const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
+
+    const handleResetNormal = async () => {
+        setIsNormalResetting(true);
+        try {
+            await resetCounterByName('senha_normal');
+            toast({
+                title: "Senhas Normais Reiniciadas!",
+                description: "A contagem de senhas normais foi redefinida para N-001.",
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao reiniciar senhas",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsNormalResetting(false);
+        }
+    };
+    
+    const handleResetEmergencia = async () => {
+        setIsEmergenciaResetting(true);
+        try {
+            await resetCounterByName('senha_emergencia');
+            toast({
+                title: "Senhas de Emergência Reiniciadas!",
+                description: "A contagem de senhas de emergência foi redefinida para U-001.",
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao reiniciar senhas",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsEmergenciaResetting(false);
+        }
+    };
+
   return (
     <Card>
       <CardHeader>
@@ -27,21 +77,37 @@ export default function ConfiguracoesPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Parâmetro</TableHead>
-                      <TableHead>Valor</TableHead>
+                      <TableHead className="text-right">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium">Nome da Unidade</TableCell>
-                      <TableCell>UBS Central</TableCell>
+                        <TableCell className="font-medium">Zerar Senha de Classificação Normal</TableCell>
+                        <TableCell className="text-right">
+                           <Button 
+                             onClick={handleResetNormal} 
+                             variant="outline" 
+                             size="sm"
+                             disabled={isNormalResetting}
+                           >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isNormalResetting ? 'animate-spin' : ''}`} />
+                                {isNormalResetting ? 'Zerando...' : 'Zerar (N-001)'}
+                            </Button>
+                        </TableCell>
                     </TableRow>
                      <TableRow>
-                      <TableCell className="font-medium">Horário</TableCell>
-                      <TableCell>08:00 - 17:00</TableCell>
-                    </TableRow>
-                     <TableRow>
-                      <TableCell className="font-medium">Admin E-mail</TableCell>
-                      <TableCell>admin@saudefacil.com</TableCell>
+                        <TableCell className="font-medium">Zerar Senha de Classificação Emergência</TableCell>
+                        <TableCell className="text-right">
+                            <Button 
+                                onClick={handleResetEmergencia}
+                                variant="destructive" 
+                                size="sm"
+                                disabled={isEmergenciaResetting}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isEmergenciaResetting ? 'animate-spin' : ''}`} />
+                                {isEmergenciaResetting ? 'Zerando...' : 'Zerar (U-001)'}
+                            </Button>
+                        </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>

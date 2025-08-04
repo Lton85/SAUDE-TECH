@@ -28,18 +28,15 @@ export const getNextCounter = async (counterName: string): Promise<number> => {
     }
 };
 
-// Reinicia os contadores de senha para 1
-export const resetCounters = async (): Promise<void> => {
-    const normalCounterRef = doc(db, 'counters', 'senha_normal');
-    const emergenciaCounterRef = doc(db, 'counters', 'senha_emergencia');
-
+// Reinicia um contador específico para 1
+export const resetCounterByName = async (counterName: string): Promise<void> => {
+    const counterDocRef = doc(db, 'counters', counterName);
     try {
         const batch = writeBatch(db);
-        batch.set(normalCounterRef, { nextId: 1 });
-        batch.set(emergenciaCounterRef, { nextId: 1 });
+        batch.set(counterDocRef, { nextId: 1 });
         await batch.commit();
     } catch (error) {
-        console.error("Error resetting counters: ", error);
-        throw new Error("Não foi possível reiniciar os contadores de senha.");
+        console.error(`Error resetting counter ${counterName}: `, error);
+        throw new Error(`Não foi possível reiniciar o contador de senha ${counterName}.`);
     }
 };
