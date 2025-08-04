@@ -99,3 +99,24 @@ export const deleteFilaItem = async (id: string): Promise<void> => {
     const filaDocRef = doc(db, "filaDeEspera", id);
     await deleteDoc(filaDocRef);
 };
+
+
+export const getHistoricoAtendimentos = async (pacienteId: string): Promise<FilaDeEsperaItem[]> => {
+    if (!pacienteId) {
+        return [];
+    }
+    try {
+        const q = query(
+            collection(db, "filaDeEspera"),
+            where("pacienteId", "==", pacienteId),
+            where("status", "==", "finalizado"),
+            orderBy("finalizadaEm", "desc")
+        );
+
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+    } catch (error) {
+        console.error("Erro ao buscar histórico de atendimentos:", error);
+        throw new Error("Não foi possível carregar o histórico do paciente.");
+    }
+};
