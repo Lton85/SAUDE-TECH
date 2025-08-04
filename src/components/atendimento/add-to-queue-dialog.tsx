@@ -179,8 +179,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 key={paciente.id}
                                 value={paciente.nome}
                                 onSelect={(currentValue) => {
-                                    const pacienteSelecionado = pacientes.find(p => p.nome.toLowerCase() === currentValue.toLowerCase());
-                                    setSelectedPaciente(pacienteSelecionado || null);
+                                    setSelectedPaciente(
+                                        pacientes.find((p) => p.nome.toLowerCase() === currentValue.toLowerCase()) || null
+                                    );
                                     setIsPatientPopoverOpen(false);
                                 }}
                                 className="cursor-pointer"
