@@ -120,7 +120,6 @@ export default function EnfermeirosPage() {
                 <TableHead className="px-2 py-2 text-xs">COREN</TableHead>
                 <TableHead className="px-2 py-2 text-xs">CPF</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
-                <TableHead className="px-2 py-2 text-xs">Turno</TableHead>
                 <TableHead className="px-2 py-2 text-xs">Situação</TableHead>
                 <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
               </TableRow>
@@ -129,7 +128,7 @@ export default function EnfermeirosPage() {
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <TableRow key={i}>
-                    {[...Array(9)].map((_, j) => (
+                    {[...Array(8)].map((_, j) => (
                       <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
@@ -148,7 +147,6 @@ export default function EnfermeirosPage() {
                         <span>{enfermeiro.sexo}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{enfermeiro.turno}</Badge></TableCell>
                     <TableCell className="px-2 py-1 text-xs">
                       <Badge variant={enfermeiro.situacao === 'Ativo' ? "default" : "destructive"} className={enfermeiro.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
                         {enfermeiro.situacao}
@@ -178,7 +176,7 @@ export default function EnfermeirosPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={9} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum enfermeiro cadastrado.
                     </TableCell>
                 </TableRow>
