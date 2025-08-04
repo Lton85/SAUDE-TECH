@@ -86,7 +86,7 @@ export default function ConfiguracoesPage() {
                         <TableCell className="text-right">
                            <Button 
                              onClick={handleResetNormal} 
-                             variant="outline" 
+                             variant="destructive" 
                              size="sm"
                              disabled={isNormalResetting}
                            >
