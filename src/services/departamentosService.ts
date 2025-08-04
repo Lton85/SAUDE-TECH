@@ -49,7 +49,7 @@ const checkSalaExists = async (numero: string, currentId?: string): Promise<bool
     return true;
 };
 
-export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo'>): Promise<string> => {
+export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     if (departamento.numero && await checkSalaExists(departamento.numero)) {
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
@@ -106,4 +106,3 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
 
     await deleteDoc(departamentoDoc);
 };
-

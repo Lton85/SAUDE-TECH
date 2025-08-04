@@ -74,7 +74,7 @@ export const updateEnfermeiro = async (id: string, enfermeiro: Partial<Omit<Enfe
     }
     const existingEnfermeiro = enfermeiroSnap.data() as Enfermeiro;
 
-    const enfermeiroToUpdate = {
+    const enfermeiroToUpdate: Partial<Omit<Enfermeiro, 'id'>> = {
         ...enfermeiro,
         historico: {
             ...existingEnfermeiro.historico,

@@ -70,7 +70,7 @@ export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'hi
     const nextId = await getNextCounter('pacientes_v2');
     const codigo = String(nextId).padStart(3, '0');
     
-    const newPatient = {
+    const newPatient: Omit<Paciente, 'id'> = {
         ...paciente,
         codigo,
         historico: {
@@ -95,7 +95,7 @@ export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente
 
     const existingData = docSnap.data() as Paciente;
     
-    const updatedData: Partial<Paciente> = {
+    const updatedData: Partial<Omit<Paciente, 'id'>> = {
         ...paciente,
         historico: {
             ...existingData.historico,

@@ -26,7 +26,7 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
     setIsSubmitting(true);
     try {
       if (isEditMode && departamento) {
-         const updatedDepartamento: Partial<Departamento> = {
+         const updatedDepartamento: Partial<Omit<Departamento, 'id' | 'codigo' | 'historico'>> = {
             ...values,
             numero: values.numero || '',
         };
@@ -36,15 +36,9 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
           description: `Os dados de ${values.nome} foram atualizados.`,
         });
       } else {
-         const newDepartamento: Omit<Departamento, 'id' | 'codigo'> = {
+         const newDepartamento: Omit<Departamento, 'id' | 'codigo' | 'historico'> = {
             ...values,
             numero: values.numero || '',
-            historico: {
-                criadoEm: new Date().toISOString(),
-                criadoPor: 'Admin (Cadastro)',
-                alteradoEm: new Date().toISOString(),
-                alteradoPor: 'Admin (Cadastro)',
-            }
         };
         await addDepartamento(newDepartamento);
         toast({
