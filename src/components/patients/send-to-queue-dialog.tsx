@@ -49,6 +49,8 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
+  const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
+
   useEffect(() => {
     const fetchProfissionais = async () => {
       setIsLoading(true);
@@ -178,7 +180,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                   <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                   <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
                     <SelectTrigger id="departamento">
-                      <SelectValue placeholder="Selecione um departamento..." />
+                      <SelectValue placeholder="Selecione um departamento...">
+                        {selectedDepartamento ? `${selectedDepartamento.nome}${selectedDepartamento.numero ? ` (Sala: ${selectedDepartamento.numero})` : ''}` : 'Selecione um departamento...'}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {departamentos.map((depto) => (
