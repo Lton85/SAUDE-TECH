@@ -1,7 +1,7 @@
 "use client"
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp, orderBy } from 'firebase/firestore';
 import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
@@ -35,19 +35,15 @@ export const getFilaDeEspera = (
     const q = query(
         collection(db, "filaDeEspera"), 
         where("status", "==", "aguardando"),
-        where("chegadaEm", "!=", null)
+        orderBy("chegadaEm", "asc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        } as FilaDeEsperaItem)).sort((a, b) => {
-             // Handle cases where a.chegadaEm or b.chegadaEm might be null temporarily from server
-            if (!a.chegadaEm) return 1;
-            if (!b.chegadaEm) return -1;
-            return a.chegadaEm.toMillis() - b.chegadaEm.toMillis();
-        });
+        } as FilaDeEsperaItem)).filter(item => item.chegadaEm); // Garante que o campo 'chegadaEm' não seja nulo
+        
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching queue: ", error);
