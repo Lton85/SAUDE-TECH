@@ -182,9 +182,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 setIsPatientPopoverOpen(false)
                                 }}
                             >
-                                <div className="flex flex-col">
+                                <div>
                                     <span>{paciente.nome}</span>
-                                    <span className="text-xs text-muted-foreground">CNS: {paciente.cns}</span>
+                                    <span className="text-xs text-muted-foreground block">CNS: {paciente.cns}</span>
                                 </div>
                             </CommandItem>
                             ))}
