@@ -9,6 +9,9 @@ export interface FilaDeEsperaItem {
     pacienteNome: string;
     departamentoId: string;
     departamentoNome: string;
+    profissionalId: string;
+    profissionalNome: string;
+    senha: string;
     chegadaEm: Date;
     chamadaEm?: Date;
     finalizadaEm?: Date;
