@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Trash2, Pencil } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Pencil, Venus, Mars } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { getMedicos, deleteMedico } from "@/services/medicosService";
@@ -102,63 +102,63 @@ export default function MedicosPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Código</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>CRM</TableHead>
-              <TableHead>Especialidade</TableHead>
-              <TableHead>Situação</TableHead>
-              <TableHead><span className="sr-only">Ações</span></TableHead>
+                <TableHead className="px-2 py-2 text-xs">Código</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                <TableHead className="px-2 py-2 text-xs">CNS</TableHead>
+                <TableHead className="px-2 py-2 text-xs">CRM</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Especialidade</TableHead>
+                <TableHead className="px-2 py-2 text-xs">CPF</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Sexo</TableHead>
+                <TableHead className="px-2 py-2 text-xs">Situação</TableHead>
+                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               [...Array(5)].map((_, i) => (
                 <TableRow key={i}>
-                  {[...Array(6)].map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                  {[...Array(9)].map((_, j) => (
+                    <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
                   ))}
                 </TableRow>
               ))
             ) : medicos.length > 0 ? (
               medicos.map((medico) => (
                 <TableRow key={medico.id}>
-                   <TableCell className="font-mono"><Badge variant="outline">{medico.codigo}</Badge></TableCell>
-                  <TableCell className="font-medium">{medico.nome}</TableCell>
-                  <TableCell>{medico.crm}</TableCell>
-                  <TableCell><Badge variant="secondary">{medico.especialidade}</Badge></TableCell>
-                   <TableCell>
+                   <TableCell className="font-mono px-2 py-1 text-xs"><Badge variant="outline">{medico.codigo}</Badge></TableCell>
+                  <TableCell className="font-medium px-2 py-1 text-xs">{medico.nome}</TableCell>
+                  <TableCell className="px-2 py-1 text-xs">{medico.cns}</TableCell>
+                  <TableCell className="px-2 py-1 text-xs">{medico.crm}</TableCell>
+                  <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{medico.especialidade}</Badge></TableCell>
+                  <TableCell className="px-2 py-1 text-xs">{medico.cpf}</TableCell>
+                   <TableCell className="px-2 py-1 text-xs">
+                     <div className="flex items-center gap-1">
+                        {medico.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
+                        <span>{medico.sexo}</span>
+                      </div>
+                   </TableCell>
+                   <TableCell className="px-2 py-1 text-xs">
                       <Badge variant={medico.situacao === 'Ativo' ? "default" : "destructive"} className={medico.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600 text-xs' : 'text-xs'}>
                         {medico.situacao}
                       </Badge>
                     </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
+                  <TableCell className="text-right px-2 py-1">
+                     <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(medico)}>
+                            <Pencil className="h-3 w-3" />
+                            <span className="sr-only">Editar</span>
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEdit(medico)}>
-                            <Pencil className="mr-2 h-3 w-3" />
-                            <span>Editar</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Ver Agenda</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(medico)}>
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            <span>Excluir</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => handleDelete(medico)}>
+                            <Trash2 className="h-3 w-3" />
+                            <span className="sr-only">Excluir</span>
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
                 <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={9} className="h-24 text-center">
                     Nenhum médico cadastrado.
                     </TableCell>
                 </TableRow>
