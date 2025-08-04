@@ -10,7 +10,7 @@ import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndam
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
@@ -337,13 +337,14 @@ export default function AtendimentoPage() {
                                 <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
                                 <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
                                 <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                    <TableCell colSpan={5} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
                                 </TableRow>
                             ) : emAtendimento.length > 0 ? (
                                 emAtendimento.map((item) => (
@@ -351,6 +352,12 @@ export default function AtendimentoPage() {
                                         <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                        <TableCell className="px-2 py-1 text-xs">
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                <Clock className="h-3 w-3" />
+                                                {item.chamadaEm ? format(item.chamadaEm.toDate(), 'HH:mm:ss') : 'N/A'}
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="text-right px-2 py-1 text-xs">
                                            <div className="flex items-center justify-end gap-2">
                                                 <Button size="sm" variant="outline" onClick={() => handleRetornarParaFila(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
@@ -367,7 +374,7 @@ export default function AtendimentoPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">
+                                    <TableCell colSpan={5} className="h-24 text-center">
                                         Nenhum paciente em atendimento no momento.
                                     </TableCell>
                                 </TableRow>
