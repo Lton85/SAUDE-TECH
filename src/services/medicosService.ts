@@ -7,7 +7,7 @@ import { getNextCounter } from './countersService';
 const medicosCollection = collection(db, 'medicos');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
-const medicosData: Omit<Medico, 'id' | 'codigo'>[] = [];
+const medicosData: Omit<Medico, 'id' | 'codigo' | 'historico'>[] = [];
 
 // Popula a coleção de médicos se ela estiver vazia.
 export const seedMedicos = async () => {
