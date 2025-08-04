@@ -28,7 +28,7 @@ const menuItems = [
   { href: "/cadastros", label: "Cadastros", icon: Users },
   { href: "/triagem", label: "Departamentos", icon: ClipboardList },
   { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
-  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" },
+  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
 ];
 
 export default function DashboardLayout({
@@ -67,7 +67,7 @@ export default function DashboardLayout({
                   asChild
                   isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
                 >
-                  <Link href={item.href} {...(item.target && { target: item.target })}>
+                  <Link href={item.href} target={item.target}>
                     <item.icon />
                     {item.label}
                   </Link>
