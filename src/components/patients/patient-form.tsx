@@ -215,7 +215,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     )}
                   />
                 </div>
-                <div className="md:col-span-12 grid md:grid-cols-3 gap-4 items-end">
+                <div className="md:col-span-12 grid md:grid-cols-4 gap-4 items-end">
                   <FormField
                     control={form.control}
                     name="nascimento"
@@ -295,32 +295,31 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       </FormItem>
                     )}
                   />
+                   <FormField
+                    control={form.control}
+                    name="estadoCivil"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado Civil</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-muted/40">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem>
+                            <SelectItem value="Casado(a)">Casado(a)</SelectItem>
+                            <SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem>
+                            <SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem>
+                            <SelectItem value="União Estável">União Estável</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="estadoCivil"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-4">
-                      <FormLabel>Estado Civil</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-muted/40">
-                            <SelectValue placeholder="Selecione o estado civil" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Solteiro(a)">Solteiro(a)</SelectItem>
-                          <SelectItem value="Casado(a)">Casado(a)</SelectItem>
-                          <SelectItem value="Divorciado(a)">Divorciado(a)</SelectItem>
-                          <SelectItem value="Viúvo(a)">Viúvo(a)</SelectItem>
-                          <SelectItem value="União Estável">União Estável</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 
                  <div className="md:col-span-12 grid grid-cols-12 gap-4">
                     <FormField
