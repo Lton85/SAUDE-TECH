@@ -42,7 +42,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientList, setShowPatientList] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
   
   const { toast } = useToast()
 
@@ -65,6 +67,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setIsSubmitting(false);
     setSearchQuery("");
     setShowPatientList(false);
+    setHighlightedIndex(-1);
   }
 
   useEffect(() => {
@@ -116,6 +119,15 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (highlightedIndex >= 0 && resultsRef.current[highlightedIndex]) {
+      resultsRef.current[highlightedIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [highlightedIndex]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId || !ticket) {
@@ -178,7 +190,29 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery(paciente.nome);
     setShowPatientList(false);
     setTicket(''); // Reset ticket to allow regeneration
+    setHighlightedIndex(-1);
   }
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showPatientList && filteredPacientes.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedIndex(prev => (prev + 1) % filteredPacientes.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedIndex(prev => (prev - 1 + filteredPacientes.length) % filteredPacientes.length);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlightedIndex !== -1) {
+          handleSelectPatient(filteredPacientes[highlightedIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        setShowPatientList(false);
+        setHighlightedIndex(-1);
+      }
+    }
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -207,12 +241,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                       setSearchQuery(e.target.value)
                       if(e.target.value) {
                          setShowPatientList(true)
+                         setHighlightedIndex(-1);
                       } else {
                          setShowPatientList(false)
                          setSelectedPaciente(null)
                       }
                     }}
                     onFocus={() => { if(searchQuery) setShowPatientList(true) }}
+                    onKeyDown={handleKeyDown}
                     className="pl-10"
                   />
                   {searchQuery && (
@@ -232,12 +268,17 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                   <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
                     <ScrollArea className="h-auto max-h-60">
                       <div className="p-1">
-                        {filteredPacientes.map((paciente) => (
+                        {filteredPacientes.map((paciente, index) => (
                           <Button
+                            ref={el => resultsRef.current[index] = el}
                             key={paciente.id}
                             variant="ghost"
-                            className="w-full justify-start h-auto py-2 px-2 text-left"
+                            className={cn(
+                                "w-full justify-start h-auto py-2 px-2 text-left",
+                                highlightedIndex === index && "bg-accent"
+                            )}
                             onClick={() => handleSelectPatient(paciente)}
+                            onMouseEnter={() => setHighlightedIndex(index)}
                           >
                              <div>
                                 <p className="font-semibold">{paciente.nome}</p>
