@@ -155,7 +155,7 @@ export default function AtendimentoPage() {
                                 <Skeleton className="h-9 w-28 rounded-md" />
                             </div>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-3 pt-4">
                              <Skeleton className="h-4 w-full" />
                              <Skeleton className="h-4 w-3/4" />
                              <Skeleton className="h-4 w-2/3" />
