@@ -56,8 +56,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   const filteredPacientes = useMemo(() => {
     if (!searchQuery) return [];
+    const lowercasedQuery = searchQuery.toLowerCase();
     return pacientes.filter(p => 
-      p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.nome.toLowerCase().includes(lowercasedQuery) ||
+      (p.mae && p.mae.toLowerCase().includes(lowercasedQuery)) ||
+      (p.endereco && p.endereco.toLowerCase().includes(lowercasedQuery)) ||
       (p.cpf && p.cpf.includes(searchQuery)) ||
       (p.cns && p.cns.includes(searchQuery))
     );
@@ -266,7 +269,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="paciente-search"
-                    placeholder="Buscar paciente por nome, CPF ou CNS..."
+                    placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value)
