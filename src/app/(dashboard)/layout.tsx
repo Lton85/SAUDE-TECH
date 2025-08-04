@@ -37,6 +37,11 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
+    // Hard-code the title for the specific route causing issues
+    if (pathname.startsWith('/atendimento')) {
+      return "Fila de Atendimento";
+    }
+
     const currentPath = "/" + (pathname.split('/')[1] || "");
     const currentItem = menuItems.find(item => item.href === currentPath);
     
@@ -44,9 +49,6 @@ export default function DashboardLayout({
       return currentItem.label;
     }
     
-    if (pathname.startsWith('/atendimento')) {
-      return "Fila de Atendimento";
-    }
     if (pathname.startsWith('/triagem')) {
       return "Departamentos";
     }
