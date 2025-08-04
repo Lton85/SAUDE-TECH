@@ -163,7 +163,7 @@ export default function PacientesPage() {
                 filteredPacientes.map((paciente) => (
                   <TableRow key={paciente.id}>
                     <TableCell className="px-2 py-1 text-xs">
-                      <Badge variant="outline">{paciente.id.substring(0,5)}</Badge>
+                      <Badge variant="outline">{paciente.codigo}</Badge>
                     </TableCell>
                     <TableCell className="font-medium px-2 py-1 text-xs">
                       {paciente.nome}

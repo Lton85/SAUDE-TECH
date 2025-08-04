@@ -2,12 +2,13 @@
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
+import { getNextCounter } from './countersService';
 
 const pacientesCollection = collection(db, 'pacientes');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
 // Deixar vazio se não quiser dados iniciais.
-const pacientesData: Omit<Paciente, 'id'>[] = [];
+const pacientesData: Omit<Paciente, 'id' | 'codigo'>[] = [];
 
 // Popula a coleção de pacientes se ela estiver vazia.
 export const seedPacientes = async () => {
@@ -15,9 +16,11 @@ export const seedPacientes = async () => {
         const snapshot = await getDocs(pacientesCollection);
         if (snapshot.empty && pacientesData.length > 0) {
             const batch = writeBatch(db);
-            pacientesData.forEach(paciente => {
+            pacientesData.forEach(async (paciente) => {
                 const docRef = doc(pacientesCollection);
-                batch.set(docRef, paciente);
+                const nextId = await getNextCounter('pacientes');
+                const codigo = String(nextId).padStart(4, '0');
+                batch.set(docRef, { ...paciente, codigo });
             });
             await batch.commit();
             console.log('Pacientes collection has been seeded.');
@@ -35,8 +38,10 @@ export const getPacientes = async (): Promise<Paciente[]> => {
 };
 
 // Adiciona um novo paciente ao banco de dados.
-export const addPaciente = async (paciente: Omit<Paciente, 'id'>): Promise<string> => {
-    const docRef = await addDoc(pacientesCollection, paciente);
+export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo'>): Promise<string> => {
+    const nextId = await getNextCounter('pacientes');
+    const codigo = String(nextId).padStart(4, '0');
+    const docRef = await addDoc(pacientesCollection, { ...paciente, codigo });
     return docRef.id;
 };
 

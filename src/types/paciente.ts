@@ -1,5 +1,6 @@
 export interface Paciente {
     id: string;
+    codigo: string;
     nome: string;
     mae: string;
     pai?: string;

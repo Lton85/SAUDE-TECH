@@ -16,7 +16,7 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes' | 'endereco'> & {
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico' | 'pai' | 'cep' | 'numero' | 'nacionalidade' | 'email' | 'telefone' | 'observacoes' | 'endereco' | 'codigo'> & {
     pai?: string;
     cep?: string;
     endereco: string;
@@ -61,7 +61,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                     className: "bg-green-500 text-white"
                 });
             } else {
-                 const newPatient: Omit<Paciente, 'id'> = {
+                 const newPatient: Omit<Paciente, 'id' | 'codigo'> = {
                     ...patientData,
                     idade: `${age}a`,
                     situacao: 'Ativo',
