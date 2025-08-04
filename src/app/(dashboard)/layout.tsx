@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -23,10 +24,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, target: "_self" },
-  { href: "/cadastros", label: "Cadastros", icon: Users, target: "_self" },
-  { href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_self" },
-  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_self" },
+  { href: "/", label: "Início", icon: Home },
+  { href: "/cadastros", label: "Cadastros", icon: Users },
+  { href: "/triagem", label: "Departamentos", icon: ClipboardList },
+  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
 ];
 
 export default function DashboardLayout({
@@ -77,7 +78,7 @@ export default function DashboardLayout({
                   asChild
                   isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
                 >
-                  <Link href={item.href} target={item.target}>
+                  <Link href={item.href}>
                     <item.icon />
                     {item.label}
                   </Link>
