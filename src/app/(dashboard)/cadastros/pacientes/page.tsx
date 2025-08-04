@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
 import { getDepartamentos } from "@/services/departamentosService";
 import type { Departamento } from "@/types/departamento";
+import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
 
 
 export default function PacientesPage() {
@@ -29,6 +30,7 @@ export default function PacientesPage() {
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
   const [selectedPatientForQueue, setSelectedPatientForQueue] = useState<Paciente | null>(null);
+  const [selectedPatientForProntuario, setSelectedPatientForProntuario] = useState<Paciente | null>(null);
   const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
@@ -92,6 +94,10 @@ export default function PacientesPage() {
   
   const handleSendToQueue = (paciente: Paciente) => {
     setSelectedPatientForQueue(paciente);
+  }
+
+  const handleProntuario = (paciente: Paciente) => {
+    setSelectedPatientForProntuario(paciente);
   }
 
   const handleDeleteConfirm = async () => {
@@ -217,6 +223,10 @@ export default function PacientesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                             <DropdownMenuItem onClick={() => handleProntuario(paciente)}>
+                                <FileText className="mr-2 h-3 w-3" />
+                                <span>Prontuário</span>
+                            </DropdownMenuItem>
                              <DropdownMenuItem onClick={() => handleSendToQueue(paciente)}>
                                 <Send className="mr-2 h-3 w-3" />
                                 <span>Enviar para Fila</span>
@@ -277,6 +287,13 @@ export default function PacientesPage() {
                 onOpenChange={() => setSelectedPatientForQueue(null)}
                 paciente={selectedPatientForQueue}
                 departamentos={departamentos}
+            />
+        )}
+        {selectedPatientForProntuario && (
+            <ProntuarioDialog
+                isOpen={!!selectedPatientForProntuario}
+                onOpenChange={() => setSelectedPatientForProntuario(null)}
+                paciente={selectedPatientForProntuario}
             />
         )}
     </>
