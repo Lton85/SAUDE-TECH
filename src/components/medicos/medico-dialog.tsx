@@ -20,7 +20,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   const { toast } = useToast();
   const isEditMode = !!medico;
 
-  const handleSubmit = async (values: Omit<Medico, 'id'>) => {
+  const handleSubmit = async (values: Omit<Medico, 'id' | 'codigo'>) => {
     setIsSubmitting(true);
     try {
       if (isEditMode) {

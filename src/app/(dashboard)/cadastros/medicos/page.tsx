@@ -102,6 +102,7 @@ export default function MedicosPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Código</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>CRM</TableHead>
               <TableHead>Especialidade</TableHead>
@@ -112,7 +113,7 @@ export default function MedicosPage() {
             {isLoading ? (
               [...Array(3)].map((_, i) => (
                 <TableRow key={i}>
-                  {[...Array(4)].map((_, j) => (
+                  {[...Array(5)].map((_, j) => (
                     <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                   ))}
                 </TableRow>
@@ -120,6 +121,7 @@ export default function MedicosPage() {
             ) : medicos.length > 0 ? (
               medicos.map((medico) => (
                 <TableRow key={medico.id}>
+                   <TableCell className="font-mono"><Badge variant="outline">{medico.codigo}</Badge></TableCell>
                   <TableCell className="font-medium">{medico.nome}</TableCell>
                   <TableCell>{medico.crm}</TableCell>
                   <TableCell><Badge variant="secondary">{medico.especialidade}</Badge></TableCell>
@@ -150,7 +152,7 @@ export default function MedicosPage() {
               ))
             ) : (
                 <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                     Nenhum médico cadastrado.
                     </TableCell>
                 </TableRow>
