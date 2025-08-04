@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot, getDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot, getDoc, query, orderBy } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
 import { getNextCounter } from './countersService';
 
@@ -36,8 +36,9 @@ export const seedPacientes = async () => {
 // Obtém todos os pacientes do banco de dados.
 export const getPacientes = async (): Promise<Paciente[]> => {
     // await seedPacientes(); // Comentado para não popular
-    const snapshot = await getDocs(pacientesCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente)).sort((a, b) => a.nome.localeCompare(b.nome));
+    const q = query(pacientesCollection, orderBy("codigo"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente));
 };
 
 
@@ -46,7 +47,7 @@ export const getPacientesRealtime = (
     onUpdate: (data: Paciente[]) => void,
     onError: (error: string) => void
 ) => {
-    const q = collection(db, "pacientes");
+    const q = query(collection(db, "pacientes"), orderBy("codigo"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: Paciente[] = snapshot.docs.map(doc => ({
@@ -54,7 +55,6 @@ export const getPacientesRealtime = (
             ...doc.data()
         } as Paciente));
         
-        data.sort((a, b) => a.nome.localeCompare(b.nome));
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching pacientes in realtime: ", error);

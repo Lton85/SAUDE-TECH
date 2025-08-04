@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
 import type { Medico } from '@/types/medico';
 import { getNextCounter } from './countersService';
 
@@ -43,8 +43,9 @@ export const seedMedicos = async () => {
 // Obtém todos os médicos do banco de dados.
 export const getMedicos = async (): Promise<Medico[]> => {
     // await seedMedicos(); // Comentado para não popular
-    const snapshot = await getDocs(medicosCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
+    const q = query(medicosCollection, orderBy("codigo"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico));
 };
 
 // Adiciona um novo médico ao banco de dados.

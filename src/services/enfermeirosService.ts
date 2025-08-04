@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc, addDoc, updateDoc, deleteDoc, getDoc, query, orderBy } from 'firebase/firestore';
 import type { Enfermeiro } from '@/types/enfermeiro';
 import { getNextCounter } from './countersService';
 
@@ -43,8 +43,9 @@ export const seedEnfermeiros = async () => {
 // Obtém todos os enfermeiros do banco de dados.
 export const getEnfermeiros = async (): Promise<Enfermeiro[]> => {
     // await seedEnfermeiros(); // Comentado para não popular
-    const snapshot = await getDocs(enfermeirosCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enfermeiro)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
+    const q = query(enfermeirosCollection, orderBy("codigo"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enfermeiro));
 };
 
 // Adiciona um novo enfermeiro ao banco de dados.
