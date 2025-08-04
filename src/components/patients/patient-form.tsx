@@ -107,6 +107,25 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     }
   }, [defaultValues, form]);
 
+  const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, '');
+    if (cep.length !== 8) {
+      return;
+    }
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+      if (!data.erro) {
+        form.setValue('endereco', data.logradouro);
+        form.setValue('bairro', data.bairro);
+        form.setValue('cidade', data.localidade);
+        form.setValue('uf', data.uf);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar CEP:", error);
+    }
+  };
+
 
   return (
     <Form {...form}>
@@ -322,7 +341,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         <FormItem className="col-span-12 sm:col-span-2">
                           <FormLabel>CEP *</FormLabel>
                           <FormControl>
-                            <Input className="bg-muted/40" placeholder="00000-000" {...field} />
+                            <Input className="bg-muted/40" placeholder="00000-000" {...field} onBlur={handleCepBlur} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -373,7 +392,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                       render={({ field }) => (
                         <FormItem className="col-span-12 sm:col-span-2">
                           <FormLabel>UF *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="bg-muted/40">
                                 <SelectValue placeholder="UF" />
