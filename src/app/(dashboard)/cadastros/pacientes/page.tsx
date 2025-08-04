@@ -204,6 +204,10 @@ export default function PacientesPage() {
                             <Pencil className="h-3 w-3" />
                             <span className="sr-only">Editar</span>
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedPatientForHistory(paciente)}>
+                            <History className="h-3 w-3" />
+                            <span className="sr-only">Histórico</span>
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-6 w-6 p-0">
@@ -216,10 +220,6 @@ export default function PacientesPage() {
                              <DropdownMenuItem onClick={() => handleSendToQueue(paciente)}>
                                 <Send className="mr-2 h-3 w-3" />
                                 <span>Enviar para Fila</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setSelectedPatientForHistory(paciente)}>
-                                <History className="mr-2 h-3 w-3" />
-                                <span>Histórico</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(paciente)}>
