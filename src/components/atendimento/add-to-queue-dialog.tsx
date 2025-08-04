@@ -177,6 +177,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         senha: ticket,
         status: "aguardando",
         classificacao: classification,
+        prioridade: classification === 'Emergência' ? 1 : 2,
       })
 
       toast({
@@ -272,7 +273,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     className="pl-10"
                   />
                   {searchQuery && (
-                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
+                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); setTicket(''); }}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
