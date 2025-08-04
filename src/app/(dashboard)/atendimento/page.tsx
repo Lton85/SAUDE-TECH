@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Megaphone, Clock, User, Building, Stethoscope } from "lucide-react";
+import { Megaphone, Clock, User, Building, Stethoscope, PlusCircle } from "lucide-react";
 import { getFilaDeEspera, chamarPaciente } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
+import type { Paciente } from "@/types/paciente";
+import type { Departamento } from "@/types/departamento";
+import { getPacientes } from "@/services/pacientesService";
+import { getDepartamentos } from "@/services/departamentosService";
+
 
 function FilaDeEsperaCard({ item, onChamar }: { item: FilaDeEsperaItem; onChamar: (item: FilaDeEsperaItem) => Promise<void> }) {
     const [tempoDeEspera, setTempoDeEspera] = useState("");
@@ -71,10 +76,31 @@ function FilaDeEsperaCard({ item, onChamar }: { item: FilaDeEsperaItem; onChamar
 
 export default function AtendimentoPage() {
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
+    const [pacientes, setPacientes] = useState<Paciente[]>([]);
+    const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { toast } = useToast();
 
+    const fetchInitialData = async () => {
+        try {
+            const [pacientesData, departamentosData] = await Promise.all([
+                getPacientes(),
+                getDepartamentos()
+            ]);
+            setPacientes(pacientesData);
+            setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
+        } catch (error) {
+             toast({
+                title: "Erro ao carregar dados",
+                description: "Não foi possível carregar a lista de pacientes e departamentos.",
+                variant: "destructive",
+            });
+        }
+    };
+
     useEffect(() => {
+        fetchInitialData();
         const unsubscribe = getFilaDeEspera((data) => {
             setFila(data);
             setIsLoading(false);
@@ -107,8 +133,16 @@ export default function AtendimentoPage() {
         }
     };
     
-    if (isLoading) {
-        return (
+    return (
+        <>
+        <div className="flex justify-end mb-6">
+            <Button onClick={() => setIsDialogOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Adicionar Paciente à Fila
+            </Button>
+        </div>
+
+        {isLoading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {[...Array(8)].map((_, i) => (
                     <Card key={i} className="animate-pulse">
@@ -129,24 +163,26 @@ export default function AtendimentoPage() {
                     </Card>
                 ))}
             </div>
-        )
-    }
+        ) : fila.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {fila.map((item) => (
+                    <FilaDeEsperaCard key={item.id} item={item} onChamar={handleChamarPaciente} />
+                ))}
+            </div>
+        ) : (
+            <Card className="col-span-full flex flex-col items-center justify-center p-12 border-dashed">
+                    <Megaphone className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h2 className="text-xl font-semibold text-muted-foreground">Fila de Atendimento Vazia</h2>
+                <p className="text-muted-foreground mt-2">Nenhum paciente aguardando atendimento no momento.</p>
+            </Card>
+        )}
 
-    return (
-        <>
-            {fila.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {fila.map((item) => (
-                        <FilaDeEsperaCard key={item.id} item={item} onChamar={handleChamarPaciente} />
-                    ))}
-                </div>
-            ) : (
-                <Card className="col-span-full flex flex-col items-center justify-center p-12 border-dashed">
-                     <Megaphone className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                    <h2 className="text-xl font-semibold text-muted-foreground">Fila de Atendimento Vazia</h2>
-                    <p className="text-muted-foreground mt-2">Nenhum paciente aguardando atendimento no momento.</p>
-                </Card>
-            )}
+        <AddToQueueDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            pacientes={pacientes}
+            departamentos={departamentos}
+        />
         </>
     );
 }
