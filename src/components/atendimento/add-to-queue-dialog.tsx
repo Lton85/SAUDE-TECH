@@ -41,6 +41,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
 
+  const resetState = () => {
+    setSelectedPaciente(null);
+    setSelectedDepartamentoId("");
+    setSelectedProfissionalId("");
+    setTicket("");
+    setIsSubmitting(false);
+  }
+
   useEffect(() => {
     const fetchProfissionais = async () => {
       setIsLoadingProfissionais(true);
@@ -62,6 +70,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     
     if (isOpen) {
       fetchProfissionais();
+    } else {
+      resetState();
     }
   }, [isOpen, toast]);
 
@@ -74,15 +84,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         setTicket("");
     }
   }, [selectedPaciente]);
-
-
-  const resetState = () => {
-    setSelectedPaciente(null);
-    setSelectedDepartamentoId("");
-    setSelectedProfissionalId("");
-    setTicket("");
-    setIsSubmitting(false);
-  }
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId || !ticket) {
@@ -132,10 +133,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   }
   
   const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
     if (!open) {
        resetState();
     }
-    onOpenChange(open);
   }
 
   return (
