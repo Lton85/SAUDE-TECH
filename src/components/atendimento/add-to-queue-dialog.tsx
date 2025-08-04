@@ -217,7 +217,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     </Button>
                   )}
                 </div>
-                 <Button variant="outline" onClick={onAddNewPatient}>
+                 <Button onClick={onAddNewPatient}>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Novo
                  </Button>
