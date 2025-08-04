@@ -22,7 +22,6 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
 import { HistoryQueueItemDialog } from "@/components/atendimento/history-dialog";
-import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
@@ -72,7 +71,6 @@ export default function AtendimentoPage() {
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
-    const [itemToProntuario, setItemToProntuario] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
 
@@ -120,7 +118,13 @@ export default function AtendimentoPage() {
         const unsubscribePacientes = fetchPacientes();
 
         const unsubscribeFila = getFilaDeEspera((data) => {
-            setFila(data);
+            // Prioritize 'Emergência' on the client-side
+            const sortedData = [...data].sort((a, b) => {
+              if (a.classificacao === 'Emergência' && b.classificacao !== 'Emergência') return -1;
+              if (a.classificacao !== 'Emergência' && b.classificacao === 'Emergência') return 1;
+              return 0; // Keep original order for items with same classification
+            });
+            setFila(sortedData);
             setIsLoading(false);
         }, (error) => {
             toast({
@@ -225,10 +229,6 @@ export default function AtendimentoPage() {
         setItemToEdit(item);
     };
     
-    const handleProntuario = (item: FilaDeEsperaItem) => {
-        setItemToProntuario(item);
-    }
-
     const handleDelete = (item: FilaDeEsperaItem) => {
         setItemToDelete(item);
     };
@@ -329,10 +329,6 @@ export default function AtendimentoPage() {
                                                         <DropdownMenuItem onClick={() => handleEdit(item)}>
                                                             <Pencil className="mr-2 h-4 w-4" />
                                                             <span>Editar</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleProntuario(item)}>
-                                                            <FileText className="mr-2 h-4 w-4" />
-                                                            <span>Prontuário</span>
                                                         </DropdownMenuItem>
                                                          <DropdownMenuItem onClick={() => handleHistory(item)}>
                                                             <History className="mr-2 h-4 w-4" />
@@ -487,14 +483,6 @@ export default function AtendimentoPage() {
                 departamentos={departamentos}
                 profissionais={profissionais}
                 onConfirm={handleReturnToQueueConfirm}
-            />
-        )}
-
-        {itemToProntuario && (
-            <ProntuarioDialog
-                isOpen={!!itemToProntuario}
-                onOpenChange={() => setItemToProntuario(null)}
-                item={itemToProntuario}
             />
         )}
         
