@@ -62,14 +62,28 @@ export function PacientesList() {
   }, []);
 
   useEffect(() => {
-    const lowercasedFilter = searchTerm.toLowerCase();
+    const lowercasedQuery = searchTerm.toLowerCase();
+
+    // Specific filters
+    if (lowercasedQuery.startsWith("rua:")) {
+      const searchValue = lowercasedQuery.substring(4).trim();
+      setFilteredPacientes(pacientes.filter(p => p.endereco && p.endereco.toLowerCase().includes(searchValue)));
+      return;
+    }
+    if (lowercasedQuery.startsWith("numero:")) {
+      const searchValue = lowercasedQuery.substring(7).trim();
+      setFilteredPacientes(pacientes.filter(p => p.numero && p.numero.toLowerCase().includes(searchValue)));
+      return;
+    }
+    
+    // General filter
     const filteredData = pacientes.filter((item) => {
       return (
-        item.nome.toLowerCase().includes(lowercasedFilter) ||
-        (item.mae && item.mae.toLowerCase().includes(lowercasedFilter)) ||
+        item.nome.toLowerCase().includes(lowercasedQuery) ||
+        (item.mae && item.mae.toLowerCase().includes(lowercasedQuery)) ||
         (item.cpf && item.cpf.includes(searchTerm)) ||
         (item.cns && item.cns.includes(searchTerm)) ||
-        (item.endereco && item.endereco.toLowerCase().includes(lowercasedFilter))
+        (item.endereco && item.endereco.toLowerCase().includes(lowercasedQuery))
       );
     });
     setFilteredPacientes(filteredData);

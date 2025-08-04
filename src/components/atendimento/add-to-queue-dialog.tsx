@@ -43,6 +43,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [senha, setSenha] = useState("");
+  const [senhaNumero, setSenhaNumero] = useState<number | null>(null);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientList, setShowPatientList] = useState(false);
@@ -56,7 +57,21 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   const filteredPacientes = useMemo(() => {
     if (!searchQuery) return [];
+    
     const lowercasedQuery = searchQuery.toLowerCase();
+
+    // Check for specific filters like "rua:" or "numero:"
+    if (lowercasedQuery.startsWith("rua:")) {
+      const searchValue = lowercasedQuery.substring(4).trim();
+      return pacientes.filter(p => p.endereco && p.endereco.toLowerCase().includes(searchValue));
+    }
+
+    if (lowercasedQuery.startsWith("numero:")) {
+      const searchValue = lowercasedQuery.substring(7).trim();
+      return pacientes.filter(p => p.numero && p.numero.toLowerCase().includes(searchValue));
+    }
+    
+    // Default search across multiple fields
     return pacientes.filter(p => 
       p.nome.toLowerCase().includes(lowercasedQuery) ||
       (p.mae && p.mae.toLowerCase().includes(lowercasedQuery)) ||
@@ -76,6 +91,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setShowPatientList(false);
     setHighlightedIndex(-1);
     setSenha("");
+    setSenhaNumero(null);
   }
 
   useEffect(() => {
@@ -106,26 +122,47 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   }, [isOpen, toast]);
 
   useEffect(() => {
-    const generateTicket = async () => {
-        if (selectedPaciente) {
-            setSenha("Gerando senha...");
-            try {
-                const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
-                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-                setSenha(ticket);
-            } catch (error) {
-                console.error("Erro ao gerar senha:", error);
-                setSenha("Erro ao gerar");
-                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
-            }
+      const updateTicketDisplay = () => {
+        if (senhaNumero !== null) {
+            const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+            const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
+            setSenha(ticket);
         } else {
             setSenha("");
         }
     };
-    generateTicket();
-  }, [selectedPaciente, classification, toast]);
+    updateTicketDisplay();
+  }, [classification, senhaNumero]);
+
+
+  const generateTicketPreview = useCallback(async (currentClassification: 'Normal' | 'Emergência') => {
+     if (selectedPaciente) {
+            setSenha("Gerando...");
+            try {
+                const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+                setSenhaNumero(ticketNumber);
+                const ticketPrefix = currentClassification === 'Emergência' ? 'E' : 'N';
+                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+                setSenha(ticket);
+            } catch (error) {
+                console.error("Erro ao gerar senha:", error);
+                setSenha("Erro");
+                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+            }
+        }
+  }, [selectedPaciente, toast]);
+
+   useEffect(() => {
+        if(selectedPaciente) {
+            generateTicketPreview(classification);
+        } else {
+            setSenha("");
+            setSenhaNumero(null);
+        }
+    }, [selectedPaciente, generateTicketPreview, classification]);
+
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -409,5 +446,3 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
-
-    
