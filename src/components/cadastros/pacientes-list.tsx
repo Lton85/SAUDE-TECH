@@ -1,7 +1,9 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -35,6 +37,7 @@ export function PacientesList() {
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -75,6 +78,7 @@ export function PacientesList() {
   const handleSuccess = () => {
     fetchData();
     setSelectedPatient(null);
+    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -283,3 +287,5 @@ export function PacientesList() {
     </>
   );
 }
+
+    

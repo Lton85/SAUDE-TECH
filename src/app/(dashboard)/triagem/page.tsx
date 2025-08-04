@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -25,6 +27,7 @@ export default function DepartamentosPage() {
   const [selectedDepartamento, setSelectedDepartamento] = useState<Departamento | null>(null);
   const [departamentoToDelete, setDepartamentoToDelete] = useState<Departamento | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -51,6 +54,7 @@ export default function DepartamentosPage() {
     fetchData();
     setIsDialogOpen(false);
     setSelectedDepartamento(null);
+    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -138,7 +142,7 @@ export default function DepartamentosPage() {
               ) : departamentos.length > 0 ? (
                 departamentos.map((departamento) => (
                   <TableRow key={departamento.id}>
-                    <TableCell className="px-2 py-1 font-mono text-xs"><Badge variant="outline">{departamento.codigo}</Badge></TableCell>
+                    <TableCell className="font-mono px-2 py-1 text-xs"><Badge variant="outline">{departamento.codigo}</Badge></TableCell>
                     <TableCell className="font-medium px-2 py-1 text-xs">{departamento.nome}</TableCell>
                     <TableCell className="px-2 py-1 text-xs">{departamento.numero || "N/A"}</TableCell>
                     <TableCell className="px-2 py-1 text-xs">
@@ -224,3 +228,5 @@ export default function DepartamentosPage() {
     </>
   );
 }
+
+    

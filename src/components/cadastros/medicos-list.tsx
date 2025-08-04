@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -28,6 +30,7 @@ export function MedicosList() {
   const [medicoToHistory, setMedicoToHistory] = useState<Medico | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchMedicos = async () => {
     setIsLoading(true);
@@ -66,6 +69,7 @@ export function MedicosList() {
   const handleSuccess = () => {
     fetchMedicos();
     setSelectedMedico(null);
+    router.push('/');
   };
   
   const handleAddNew = () => {
@@ -249,3 +253,5 @@ export function MedicosList() {
     </>
   );
 }
+
+    

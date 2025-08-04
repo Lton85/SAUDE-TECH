@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -26,7 +28,7 @@ export function EnfermeirosList() {
   const [enfermeiroToView, setEnfermeiroToView] = useState<Enfermeiro | null>(null);
   const [enfermeiroToHistory, setEnfermeiroToHistory] = useState<Enfermeiro | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const router = useRouter();
   const { toast } = useToast();
 
   const fetchEnfermeiros = async () => {
@@ -67,6 +69,7 @@ export function EnfermeirosList() {
   const handleSuccess = () => {
     fetchEnfermeiros();
     setSelectedEnfermeiro(null);
+    router.push('/');
   };
 
   const handleAddNew = () => {
@@ -248,3 +251,5 @@ export function EnfermeirosList() {
     </>
   );
 }
+
+    

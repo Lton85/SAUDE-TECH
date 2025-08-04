@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -73,6 +74,7 @@ export default function AtendimentoPage() {
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
+    const router = useRouter();
 
     const { toast } = useToast();
     
@@ -157,7 +159,7 @@ export default function AtendimentoPage() {
         return () => {
             unsubscribePacientes();
             unsubscribeFila();
-            unsubscribeEmAtendimento();
+            if (unsubscribeEmAtendimento) unsubscribeEmAtendimento();
         };
     }, [toast]);
     
@@ -465,6 +467,7 @@ export default function AtendimentoPage() {
             departamentos={departamentos}
             onAddNewPatient={handleOpenNewPatientDialog}
             patientToAdd={patientToAdd}
+            onSuccess={() => router.push('/')}
         />
 
         <PatientDialog
@@ -514,3 +517,5 @@ export default function AtendimentoPage() {
         </>
     );
 }
+
+    

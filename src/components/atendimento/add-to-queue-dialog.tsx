@@ -31,9 +31,10 @@ interface AddToQueueDialogProps {
   departamentos: Departamento[]
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
+  onSuccess: () => void;
 }
 
-export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd }: AddToQueueDialogProps) {
+export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
@@ -187,7 +188,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       })
       
       resetState();
-      onOpenChange(false)
+      onOpenChange(false);
+      onSuccess();
     } catch (error) {
       console.error("Erro ao enviar paciente para a fila:", error)
       toast({
@@ -396,3 +398,5 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    
