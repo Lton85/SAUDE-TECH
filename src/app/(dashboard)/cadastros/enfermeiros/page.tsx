@@ -130,7 +130,7 @@ export default function EnfermeirosPage() {
                 [...Array(5)].map((_, i) => (
                   <TableRow key={i}>
                     {[...Array(9)].map((_, j) => (
-                      <TableCell key={j} className="px-2 py-1"><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell key={j} className="px-2 py-1 text-xs"><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -146,7 +146,7 @@ export default function EnfermeirosPage() {
                     <TableCell className="px-2 py-1 text-xs">
                      <div className="flex items-center gap-1">
                         {enfermeiro.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
-                        <span>{enfermeiro.sexo}</span>
+                        <span className="text-xs">{enfermeiro.sexo}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-2 py-1 text-xs">

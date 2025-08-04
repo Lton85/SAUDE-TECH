@@ -182,7 +182,7 @@ export default function PacientesPage() {
                     <TableCell className="px-2 py-1 text-xs">
                       <div className="flex items-center gap-1">
                         {paciente.sexo === 'Masculino' ? <Mars className="h-3 w-3 text-blue-500" /> : <Venus className="h-3 w-3 text-pink-500" />}
-                        <span>{paciente.sexo}</span>
+                        <span className="text-xs">{paciente.sexo}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-2 py-1 text-xs">{paciente.idade}</TableCell>
