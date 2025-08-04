@@ -1,7 +1,7 @@
 "use client"
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, updateDoc, doc, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
@@ -89,4 +89,13 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         status: "em-atendimento",
         chamadaEm: serverTimestamp()
     });
+};
+
+
+export const deleteFilaItem = async (id: string): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await deleteDoc(filaDocRef);
 };

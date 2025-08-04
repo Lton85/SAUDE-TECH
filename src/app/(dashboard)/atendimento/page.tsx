@@ -1,12 +1,11 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, User, Users } from "lucide-react";
-import { getFilaDeEspera, chamarPaciente } from "@/services/filaDeEsperaService";
+import { Megaphone, Clock, PlusCircle, User, Users, MoreHorizontal, Pencil, Trash2, History } from "lucide-react";
+import { getFilaDeEspera, chamarPaciente, deleteFilaItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +17,8 @@ import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
 import { getPacientesRealtime } from "@/services/pacientesService";
 import { getDepartamentos } from "@/services/departamentosService";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -50,7 +51,9 @@ export default function AtendimentoPage() {
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
+
     const { toast } = useToast();
 
     useEffect(() => {
@@ -109,6 +112,30 @@ export default function AtendimentoPage() {
             });
         }
     };
+
+    const handleDelete = (item: FilaDeEsperaItem) => {
+        setItemToDelete(item);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (itemToDelete) {
+            try {
+                await deleteFilaItem(itemToDelete.id);
+                toast({
+                    title: "Item removido da fila!",
+                    description: `${itemToDelete.pacienteNome} foi removido(a) da fila de atendimento.`,
+                });
+            } catch (error) {
+                toast({
+                    title: "Erro ao remover da fila",
+                    description: (error as Error).message,
+                    variant: "destructive",
+                });
+            } finally {
+                setItemToDelete(null);
+            }
+        }
+    };
     
     return (
         <>
@@ -118,7 +145,7 @@ export default function AtendimentoPage() {
                     <CardTitle>Fila de Atendimento</CardTitle>
                     <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                 </div>
-                <Button onClick={() => setIsDialogOpen(true)}>
+                <Button onClick={() => setIsAddToQueueDialogOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Adicionar Paciente à Fila
                 </Button>
@@ -151,12 +178,36 @@ export default function AtendimentoPage() {
                                     <TableCell>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                     <TableCell>{item.profissionalNome}</TableCell>
                                     <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-4">
+                                        <div className="flex items-center justify-end gap-2">
                                             <TempoDeEspera chegadaEm={item.chegadaEm}/>
-                                            <Button size="sm" onClick={() => handleChamarPaciente(item)}>
-                                                <Megaphone className="mr-2 h-4 w-4" />
-                                                Chamar
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <span className="sr-only">Abrir menu</span>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={() => handleChamarPaciente(item)}>
+                                                        <Megaphone className="mr-2 h-4 w-4" />
+                                                        <span>Chamar Paciente</span>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        <span>Editar</span>
+                                                    </DropdownMenuItem>
+                                                     <DropdownMenuItem>
+                                                        <History className="mr-2 h-4 w-4" />
+                                                        <span>Histórico</span>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        <span>Excluir da Fila</span>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -181,12 +232,20 @@ export default function AtendimentoPage() {
 
 
         <AddToQueueDialog
-            isOpen={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
+            isOpen={isAddToQueueDialogOpen}
+            onOpenChange={setIsAddToQueueDialogOpen}
             pacientes={pacientes}
             departamentos={departamentos}
         />
+
+        {itemToDelete && (
+            <DeleteQueueItemDialog
+                isOpen={!!itemToDelete}
+                onOpenChange={() => setItemToDelete(null)}
+                onConfirm={handleDeleteConfirm}
+                itemName={itemToDelete.pacienteNome}
+            />
+        )}
         </>
     );
 }
-
