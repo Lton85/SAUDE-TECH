@@ -4,8 +4,11 @@ export interface Medico {
     nome: string;
     crm: string;
     cns: string;
+    sexo: 'Masculino' | 'Feminino';
     especialidade: string;
-    cbo: string;
+    cpf: string;
+    dataNascimento: string;
+    telefone: string;
     cargaHoraria: string;
     situacao: 'Ativo' | 'Inativo';
 }
