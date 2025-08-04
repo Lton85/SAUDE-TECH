@@ -67,7 +67,7 @@ export default function DashboardLayout({
                   asChild
                   isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
                 >
-                  <Link href={item.href} target={item.target}>
+                  <Link href={item.href} {...(item.target && { target: item.target })}>
                     <item.icon />
                     {item.label}
                   </Link>
