@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -27,9 +27,10 @@ interface AddToQueueDialogProps {
   onOpenChange: (isOpen: boolean) => void
   pacientes: Paciente[]
   departamentos: Departamento[]
+  onAddNewPatient: () => void;
 }
 
-export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos }: AddToQueueDialogProps) {
+export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
@@ -191,29 +192,35 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         <div className="py-4 space-y-4">
             <div className="space-y-2" ref={searchRef}>
               <Label htmlFor="paciente-search" className="flex items-center gap-2"><User className="h-4 w-4" />Paciente</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="paciente-search"
-                  placeholder="Buscar paciente por nome, CPF ou CNS..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value)
-                    if(e.target.value) {
-                       setShowPatientList(true)
-                    } else {
-                       setShowPatientList(false)
-                       setSelectedPaciente(null)
-                    }
-                  }}
-                  onFocus={() => { if(searchQuery) setShowPatientList(true) }}
-                  className="pl-10"
-                />
-                {searchQuery && (
-                  <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+              <div className="flex gap-2">
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="paciente-search"
+                    placeholder="Buscar paciente por nome, CPF ou CNS..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                      if(e.target.value) {
+                         setShowPatientList(true)
+                      } else {
+                         setShowPatientList(false)
+                         setSelectedPaciente(null)
+                      }
+                    }}
+                    onFocus={() => { if(searchQuery) setShowPatientList(true) }}
+                    className="pl-10"
+                  />
+                  {searchQuery && (
+                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                 <Button variant="outline" onClick={onAddNewPatient}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Novo
+                 </Button>
               </div>
 
               {showPatientList && filteredPacientes.length > 0 && (

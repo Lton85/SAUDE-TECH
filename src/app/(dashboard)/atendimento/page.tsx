@@ -26,6 +26,7 @@ import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
+import { PatientDialog } from "@/components/patients/patient-dialog";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -66,6 +67,7 @@ export default function AtendimentoPage() {
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
@@ -73,6 +75,19 @@ export default function AtendimentoPage() {
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
 
     const { toast } = useToast();
+    
+    const fetchPacientes = () => {
+       return getPacientesRealtime(
+            (data) => setPacientes(data),
+            (error) => {
+                toast({
+                    title: "Erro ao carregar pacientes",
+                    description: error,
+                    variant: "destructive",
+                });
+            }
+        );
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -100,16 +115,7 @@ export default function AtendimentoPage() {
 
         fetchData();
 
-        const unsubscribePacientes = getPacientesRealtime(
-            (data) => setPacientes(data),
-            (error) => {
-                toast({
-                    title: "Erro ao carregar pacientes",
-                    description: error,
-                    variant: "destructive",
-                });
-            }
-        );
+        const unsubscribePacientes = fetchPacientes();
 
         const unsubscribeFila = getFilaDeEspera((data) => {
             setFila(data);
@@ -139,6 +145,18 @@ export default function AtendimentoPage() {
             unsubscribeEmAtendimento();
         };
     }, [toast]);
+    
+    const handleOpenNewPatientDialog = () => {
+        setIsAddToQueueDialogOpen(false);
+        setIsPatientDialogOpen(true);
+    };
+
+    const handlePatientDialogSuccess = () => {
+        // No need to call fetchPacientes here as getPacientesRealtime will update automatically
+        setIsPatientDialogOpen(false);
+        // Optionally, reopen the queue dialog
+        setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
+    };
 
     const handleChamarPaciente = async (item: FilaDeEsperaItem) => {
         try {
@@ -405,6 +423,14 @@ export default function AtendimentoPage() {
             onOpenChange={setIsAddToQueueDialogOpen}
             pacientes={pacientes}
             departamentos={departamentos}
+            onAddNewPatient={handleOpenNewPatientDialog}
+        />
+
+        <PatientDialog
+            isOpen={isPatientDialogOpen}
+            onOpenChange={setIsPatientDialogOpen}
+            onSuccess={handlePatientDialogSuccess}
+            paciente={null}
         />
 
         {itemToEdit && (
