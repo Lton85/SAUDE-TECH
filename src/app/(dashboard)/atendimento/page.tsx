@@ -196,8 +196,8 @@ export default function AtendimentoPage() {
                  <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[30%] px-2 py-2 text-xs">Nome</TableHead>
-                            <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                            <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                            <TableHead className="px-2 py-2 text-xs w-[100px]">Senha</TableHead>
                             <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
                             <TableHead className="px-2 py-2 text-xs">Médico</TableHead>
                             <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
