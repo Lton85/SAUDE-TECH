@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PlusCircle, Pencil, Trash2, Eye } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Eye, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getDepartamentos, deleteDepartamento } from "@/services/departamentosService";
 import type { Departamento } from "@/types/departamento";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DepartamentoDialog } from "@/components/departamentos/departamento-dialog";
 import { DeleteDepartamentoDialog } from "@/components/departamentos/delete-dialog";
 import { ViewDepartamentoDialog } from "@/components/departamentos/view-dialog";
+import { HistoryDepartamentoDialog } from "@/components/departamentos/history-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 export default function DepartamentosPage() {
@@ -20,6 +21,7 @@ export default function DepartamentosPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [selectedDepartamento, setSelectedDepartamento] = useState<Departamento | null>(null);
   const [departamentoToDelete, setDepartamentoToDelete] = useState<Departamento | null>(null);
   const { toast } = useToast();
@@ -65,6 +67,11 @@ export default function DepartamentosPage() {
     setSelectedDepartamento(departamento);
     setIsViewDialogOpen(true);
   };
+  
+  const handleHistory = (departamento: Departamento) => {
+    setSelectedDepartamento(departamento);
+    setIsHistoryDialogOpen(true);
+  };
 
   const handleDelete = (departamento: Departamento) => {
     setDepartamentoToDelete(departamento);
@@ -83,7 +90,7 @@ export default function DepartamentosPage() {
       } catch (error) {
         toast({
           title: "Erro ao excluir",
-          description: "Não foi possível remover o registro.",
+          description: (error as Error).message || "Não foi possível remover o registro.",
           variant: "destructive",
         });
       } finally {
@@ -149,6 +156,10 @@ export default function DepartamentosPage() {
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleHistory(departamento)}>
+                          <History className="h-4 w-4" />
+                          <span className="sr-only">Histórico</span>
+                        </Button>
                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(departamento)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Excluir</span>
@@ -181,6 +192,19 @@ export default function DepartamentosPage() {
           isOpen={isViewDialogOpen}
           onOpenChange={(isOpen) => {
             setIsViewDialogOpen(isOpen);
+            if (!isOpen) {
+              setSelectedDepartamento(null);
+            }
+          }}
+          departamento={selectedDepartamento}
+        />
+      )}
+      
+       {selectedDepartamento && (
+        <HistoryDepartamentoDialog
+          isOpen={isHistoryDialogOpen}
+          onOpenChange={(isOpen) => {
+            setIsHistoryDialogOpen(isOpen);
             if (!isOpen) {
               setSelectedDepartamento(null);
             }

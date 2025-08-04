@@ -4,4 +4,10 @@ export interface Departamento {
     nome: string;
     numero?: string;
     situacao: 'Ativo' | 'Inativo';
+    historico: {
+        criadoEm: string;
+        criadoPor: string;
+        alteradoEm: string;
+        alteradoPor: string;
+    }
 }

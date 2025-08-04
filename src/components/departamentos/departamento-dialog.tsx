@@ -22,23 +22,39 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
   const formId = "departamento-form";
   const isEditMode = !!departamento;
 
-  const handleSubmit = async (values: Omit<Departamento, 'id'>) => {
+  const handleSubmit = async (values: Omit<Departamento, 'id' | 'codigo' | 'historico'>) => {
     setIsSubmitting(true);
     try {
-      const dataToSave = { ...values, numero: values.numero || '' };
-      if (isEditMode) {
-        await updateDepartamento(departamento.id, dataToSave);
+      if (isEditMode && departamento) {
+         const updatedDepartamento: Partial<Departamento> = {
+            ...values,
+            numero: values.numero || '',
+            historico: {
+                ...departamento.historico,
+                alteradoEm: new Date().toISOString(),
+                alteradoPor: 'Admin (Edição)',
+            }
+        };
+        await updateDepartamento(departamento.id, updatedDepartamento);
         toast({
           title: "Departamento Atualizado!",
           description: `Os dados de ${values.nome} foram atualizados.`,
-          className: "bg-green-500 text-white"
         });
       } else {
-        await addDepartamento(dataToSave);
+         const newDepartamento: Omit<Departamento, 'id' | 'codigo'> = {
+            ...values,
+            numero: values.numero || '',
+            historico: {
+                criadoEm: new Date().toISOString(),
+                criadoPor: 'Admin (Cadastro)',
+                alteradoEm: new Date().toISOString(),
+                alteradoPor: 'Admin (Cadastro)',
+            }
+        };
+        await addDepartamento(newDepartamento);
         toast({
           title: "Departamento Cadastrado!",
           description: `${values.nome} foi adicionado com sucesso.`,
-          className: "bg-green-500 text-white"
         });
       }
       onSuccess();
@@ -46,7 +62,7 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
       console.error("Erro ao salvar departamento:", error);
       toast({
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'}`,
-        description: `Não foi possível salvar os dados. Tente novamente.`,
+        description: (error as Error).message || `Não foi possível salvar os dados. Tente novamente.`,
         variant: "destructive",
       });
     } finally {
