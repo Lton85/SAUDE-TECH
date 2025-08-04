@@ -83,7 +83,8 @@ export function PacientesList() {
         (item.mae && item.mae.toLowerCase().includes(lowercasedQuery)) ||
         (item.cpf && item.cpf.includes(searchTerm)) ||
         (item.cns && item.cns.includes(searchTerm)) ||
-        (item.endereco && item.endereco.toLowerCase().includes(lowercasedQuery))
+        (item.endereco && item.endereco.toLowerCase().includes(lowercasedQuery)) ||
+        (item.numero && item.numero.toLowerCase().includes(lowercasedQuery))
       );
     });
     setFilteredPacientes(filteredData);

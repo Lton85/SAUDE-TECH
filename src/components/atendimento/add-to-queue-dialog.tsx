@@ -76,6 +76,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       p.nome.toLowerCase().includes(lowercasedQuery) ||
       (p.mae && p.mae.toLowerCase().includes(lowercasedQuery)) ||
       (p.endereco && p.endereco.toLowerCase().includes(lowercasedQuery)) ||
+      (p.numero && p.numero.toLowerCase().includes(lowercasedQuery)) ||
       (p.cpf && p.cpf.includes(searchQuery)) ||
       (p.cns && p.cns.includes(searchQuery))
     );
@@ -127,24 +128,22 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
             const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
             setSenha(ticket);
+        } else if(selectedPaciente) {
+            setSenha("Gerando...");
         } else {
-            setSenha("");
+             setSenha("");
         }
     };
     updateTicketDisplay();
-  }, [classification, senhaNumero]);
+  }, [classification, senhaNumero, selectedPaciente]);
 
 
   const generateTicketPreview = useCallback(async (currentClassification: 'Normal' | 'Emergência') => {
      if (selectedPaciente) {
-            setSenha("Gerando...");
             try {
                 const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
                 const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
                 setSenhaNumero(ticketNumber);
-                const ticketPrefix = currentClassification === 'Emergência' ? 'E' : 'N';
-                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-                setSenha(ticket);
             } catch (error) {
                 console.error("Erro ao gerar senha:", error);
                 setSenha("Erro");
