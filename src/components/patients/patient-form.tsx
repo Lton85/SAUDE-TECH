@@ -26,7 +26,7 @@ const formSchema = z.object({
   cns: z.string().min(15, { message: "O CNS deve ter pelo menos 15 dígitos." }),
   cpf: z.string().optional(),
   nascimento: z.string().optional(),
-  sexo: z.enum(['Masculino', 'Feminino']).optional(),
+  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável', '']).optional(),
   cep: z.string().optional(),
   endereco: z.string().optional(),
