@@ -66,7 +66,7 @@ export function PacientesList() {
     const filteredData = pacientes.filter((item) => {
       return (
         item.nome.toLowerCase().includes(lowercasedFilter) ||
-        item.mae.toLowerCase().includes(lowercasedFilter) ||
+        (item.mae && item.mae.toLowerCase().includes(lowercasedFilter)) ||
         (item.cpf && item.cpf.includes(searchTerm)) ||
         (item.cns && item.cns.includes(searchTerm)) ||
         (item.endereco && item.endereco.toLowerCase().includes(lowercasedFilter))
@@ -133,7 +133,7 @@ export function PacientesList() {
               <div className="relative w-full max-w-md min-w-[350px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nome, mãe, CPF ou CNS..."
+                  placeholder="Buscar por nome, mãe, CPF, CNS ou endereço..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
