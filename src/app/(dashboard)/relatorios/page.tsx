@@ -21,11 +21,19 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 
 export default function RelatoriosPage() {
   const { toast } = useToast();
-  const [dateFrom, setDateFrom] = React.useState<Date | undefined>(new Date());
-  const [dateTo, setDateTo] = React.useState<Date | undefined>(new Date());
+  const [dateFrom, setDateFrom] = React.useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = React.useState<Date | undefined>(undefined);
   const [reportData, setReportData] = React.useState<FilaDeEsperaItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [hasSearched, setHasSearched] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+    // Set initial dates only on the client-side
+    setDateFrom(new Date());
+    setDateTo(new Date());
+  }, []);
 
   const handleSearch = async () => {
     // Placeholder for search functionality
@@ -42,6 +50,10 @@ export default function RelatoriosPage() {
         title: "Funcionalidade em desenvolvimento",
         description: "A impressão de relatórios será implementada em breve.",
     });
+  }
+
+  if (!isMounted) {
+    return null; // or a loading skeleton
   }
 
   return (
