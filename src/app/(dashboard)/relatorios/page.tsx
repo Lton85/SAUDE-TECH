@@ -49,17 +49,15 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     
     const handlePrintItem = () => {
         const cardElement = cardRef.current;
-        const mainContainer = document.querySelector('.print-container');
-        
-        if (cardElement && mainContainer) {
-            mainContainer.classList.add('printing-single-item');
+        if (cardElement) {
+            document.body.classList.add('printing-single-item');
             cardElement.classList.add('print-this');
             
             window.print();
             
             // Use a timeout to ensure the print dialog has opened before removing classes
             setTimeout(() => {
-                mainContainer.classList.remove('printing-single-item');
+                document.body.classList.remove('printing-single-item');
                 cardElement.classList.remove('print-this');
             }, 500);
         }
@@ -292,7 +290,7 @@ export default function RelatoriosPage() {
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 h-full print-container">
-            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 print-hide">
+            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 print-hide print-hide-on-single">
                 <FiltrosRelatorio
                     pacientes={pacientes}
                     medicos={medicos}
@@ -310,7 +308,7 @@ export default function RelatoriosPage() {
                 />
             </aside>
             <main className="flex-1 min-w-0 flex flex-col gap-4">
-                 <div className="print-hide">
+                 <div className="print-hide print-hide-on-single">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <h2 className="text-lg font-semibold">Relatórios de Atendimento</h2>
@@ -366,7 +364,7 @@ export default function RelatoriosPage() {
                 </div>
 
                 {hasSearched && filteredReportData.length > 0 && (
-                    <Card>
+                    <Card className="print-hide-on-single">
                         <AtendimentosChart data={filteredReportData} />
                     </Card>
                 )}
@@ -386,7 +384,7 @@ export default function RelatoriosPage() {
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-grow">
+                                <ScrollArea className="flex-grow print-expand-on-print">
                                     <div className="space-y-0">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
@@ -405,7 +403,7 @@ export default function RelatoriosPage() {
                     </CardContent>
 
                     {hasSearched && filteredReportData.length > 0 && (
-                        <CardFooter className="py-3 px-6 border-t print-hide bg-card rounded-b-lg">
+                        <CardFooter className="py-3 px-6 border-t print-hide print-hide-on-single bg-card rounded-b-lg">
                             <div className="text-sm text-muted-foreground">
                                 Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span>
                             </div>
@@ -416,4 +414,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-

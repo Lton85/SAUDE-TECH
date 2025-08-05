@@ -98,21 +98,37 @@
   .print\:hidden { 
     display: none !important; 
   }
+  
+  /* When printing the whole report, expand the scroll area */
+  .print-expand-on-print {
+      height: auto !important;
+      overflow-y: visible !important;
+  }
+  
+  .print-expand-on-print > div[data-radix-scroll-area-viewport] {
+      height: auto !important;
+      overflow-y: visible !important;
+  }
 
   /* When printing a single item */
-  .printing-single-item > * {
-    display: none !important;
+  body.printing-single-item .print-hide-on-single {
+      display: none !important;
   }
-  .printing-single-item .print-this {
+  
+  body.printing-single-item .print-item-card:not(.print-this) {
+      display: none !important;
+  }
+  
+  body.printing-single-item .print-this {
     display: block !important;
     position: absolute;
     top: 1rem;
     left: 1rem;
-    width: calc(100% - 2rem);
+    right: 1rem;
     border: none;
     box-shadow: none;
+    page-break-inside: avoid;
     -webkit-print-color-adjust: exact; 
     print-color-adjust: exact;
   }
-
 }
