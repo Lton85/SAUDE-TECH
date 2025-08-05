@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Settings, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +16,7 @@ import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ResetMedicoDialog } from "@/components/configuracoes/reset-medico-dialog";
 import { ResetEnfermeiroDialog } from "@/components/configuracoes/reset-enfermeiro-dialog";
+import { Separator } from "@/components/ui/separator";
 
 
 export default function ConfiguracoesPage() {
@@ -223,10 +223,34 @@ export default function ConfiguracoesPage() {
         }
     };
 
+    const ActionRow = ({ label, buttonText, onClick, isResetting, disabled, icon: Icon, title }: {
+        label: string;
+        buttonText: string;
+        onClick: () => void;
+        isResetting: boolean;
+        disabled?: boolean;
+        icon: React.ElementType;
+        title?: string;
+    }) => (
+        <div className="flex items-center justify-between border-b py-4">
+            <p className="font-medium text-sm text-gray-700">{label}</p>
+            <Button 
+                onClick={onClick}
+                variant="destructive" 
+                size="sm"
+                className="h-8"
+                disabled={isResetting || disabled}
+                title={title}
+            >
+                <Icon className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
+                {isResetting ? 'Zerando...' : buttonText}
+            </Button>
+        </div>
+    );
 
   return (
     <>
-    <Card>
+    <Card className="max-w-3xl mx-auto">
       <CardHeader>
         <div className="flex items-center gap-3">
             <Settings className="h-6 w-6" />
@@ -237,109 +261,57 @@ export default function ConfiguracoesPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Parâmetro</TableHead>
-                      <TableHead className="text-right">Ação</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                        <TableCell className="font-medium">Zerar Senha de Classificação Normal</TableCell>
-                        <TableCell className="text-right">
-                           <Button 
-                             onClick={() => handleResetRequest('Normal')}
-                             variant="destructive" 
-                             size="sm"
-                             className="h-8"
-                             disabled={isNormalResetting}
-                           >
-                                <RefreshCw className={`mr-2 h-4 w-4 ${isNormalResetting ? 'animate-spin' : ''}`} />
-                                {isNormalResetting ? 'Zerando...' : 'Zerar (N-001)'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                     <TableRow>
-                        <TableCell className="font-medium">Zerar Senha de Classificação Emergência</TableCell>
-                        <TableCell className="text-right">
-                            <Button 
-                                onClick={() => handleResetRequest('Emergência')}
-                                variant="destructive" 
-                                size="sm"
-                                className="h-8"
-                                disabled={isEmergenciaResetting}
-                            >
-                                <RefreshCw className={`mr-2 h-4 w-4 ${isEmergenciaResetting ? 'animate-spin' : ''}`} />
-                                {isEmergenciaResetting ? 'Zerando...' : 'Zerar (E-001)'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Pacientes</TableCell>
-                        <TableCell className="text-right">
-                            <Button 
-                                onClick={handlePacienteResetRequest}
-                                variant="destructive" 
-                                size="sm"
-                                className="h-8"
-                                disabled={isPacienteResetting || pacientesCount === null}
-                                title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
-                            >
-                                <RefreshCw className={`mr-2 h-4 w-4 ${isPacienteResetting ? 'animate-spin' : ''}`} />
-                                {isPacienteResetting ? 'Zerando...' : 'Zerar (001)'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                     <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Médicos</TableCell>
-                        <TableCell className="text-right">
-                            <Button 
-                                onClick={handleMedicoResetRequest}
-                                variant="destructive" 
-                                size="sm"
-                                className="h-8"
-                                disabled={isMedicoResetting || medicosCount === null}
-                                title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
-                            >
-                                <RefreshCw className={`mr-2 h-4 w-4 ${isMedicoResetting ? 'animate-spin' : ''}`} />
-                                {isMedicoResetting ? 'Zerando...' : 'Zerar (001)'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                     <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
-                        <TableCell className="text-right">
-                            <Button 
-                                onClick={handleEnfermeiroResetRequest}
-                                variant="destructive" 
-                                size="sm"
-                                className="h-8"
-                                disabled={isEnfermeiroResetting || enfermeirosCount === null}
-                                title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
-                            >
-                                <RefreshCw className={`mr-2 h-4 w-4 ${isEnfermeiroResetting ? 'animate-spin' : ''}`} />
-                                {isEnfermeiroResetting ? 'Zerando...' : 'Zerar (001)'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell className="font-medium">Zerar Prontuário de Pacientes</TableCell>
-                        <TableCell className="text-right">
-                            <Button 
-                                onClick={handleProntuarioResetRequest}
-                                variant="destructive" 
-                                size="sm"
-                                className="h-8"
-                                disabled={isProntuarioResetting}
-                            >
-                                <Trash2 className={`mr-2 h-4 w-4 ${isProntuarioResetting ? 'animate-spin' : ''}`} />
-                                {isProntuarioResetting ? 'Zerando...' : 'Zerar Prontuários'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+        <div className="text-sm font-medium text-muted-foreground pb-2">Parâmetro</div>
+        <div className="space-y-0">
+            <ActionRow
+                label="Zerar Senha de Classificação Normal"
+                buttonText="Zerar (N-001)"
+                onClick={() => handleResetRequest('Normal')}
+                isResetting={isNormalResetting}
+                icon={RefreshCw}
+            />
+            <ActionRow
+                label="Zerar Senha de Classificação Emergência"
+                buttonText="Zerar (E-001)"
+                onClick={() => handleResetRequest('Emergência')}
+                isResetting={isEmergenciaResetting}
+                icon={RefreshCw}
+            />
+            <ActionRow
+                label="Zerar Códigos de Cadastro de Pacientes"
+                buttonText="Zerar (001)"
+                onClick={handlePacienteResetRequest}
+                isResetting={isPacienteResetting}
+                disabled={pacientesCount === null}
+                title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
+                icon={RefreshCw}
+            />
+            <ActionRow
+                label="Zerar Códigos de Cadastro de Médicos"
+                buttonText="Zerar (001)"
+                onClick={handleMedicoResetRequest}
+                isResetting={isMedicoResetting}
+                disabled={medicosCount === null}
+                title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
+                icon={RefreshCw}
+            />
+            <ActionRow
+                label="Zerar Códigos de Cadastro de Enfermeiros"
+                buttonText="Zerar (001)"
+                onClick={handleEnfermeiroResetRequest}
+                isResetting={isEnfermeiroResetting}
+                disabled={enfermeirosCount === null}
+                title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
+                icon={RefreshCw}
+            />
+            <ActionRow
+                label="Zerar Prontuário de Pacientes"
+                buttonText="Zerar Prontuários"
+                onClick={handleProntuarioResetRequest}
+                isResetting={isProntuarioResetting}
+                icon={Trash2}
+            />
+        </div>
       </CardContent>
     </Card>
      {resetType && (
