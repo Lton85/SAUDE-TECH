@@ -145,14 +145,14 @@
   }
   
   .print-container.printing-single-item .print-this {
-    display: block !important;
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
+    display: flex !important;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     border: none;
     box-shadow: none;
-    page-break-inside: avoid;
     -webkit-print-color-adjust: exact; 
     print-color-adjust: exact;
   }
