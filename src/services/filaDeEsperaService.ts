@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot,
 import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
+import { startOfDay, endOfDay } from 'date-fns';
 
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
@@ -194,6 +195,32 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
     } catch (error) {
         console.error("Erro ao buscar histórico de atendimentos:", error);
         throw new Error("Não foi possível carregar o histórico do paciente.");
+    }
+};
+
+export const getHistoricoAtendimentosPorPeriodo = async (
+    dateFrom: Date,
+    dateTo: Date
+): Promise<FilaDeEsperaItem[]> => {
+    try {
+        const start = startOfDay(dateFrom);
+        const end = endOfDay(dateTo);
+        
+        const q = query(
+            collection(db, "historico_atendimentos"),
+            where("finalizadaEm", ">=", Timestamp.fromDate(start)),
+            where("finalizadaEm", "<=", Timestamp.fromDate(end)),
+            orderBy("finalizadaEm", "desc")
+        );
+
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        
+        return data;
+
+    } catch (error) {
+        console.error("Erro ao buscar histórico de atendimentos por período:", error);
+        throw new Error("Não foi possível carregar o relatório de atendimentos. Pode ser necessário criar um índice no Firestore. Verifique o console para um link de criação.");
     }
 };
 

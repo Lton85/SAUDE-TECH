@@ -1,10 +1,9 @@
-
 "use client";
 
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
+import { getHistoricoAtendimentosPorPeriodo } from "@/services/filaDeEsperaService";
 
 export default function RelatoriosPage() {
   const { toast } = useToast();
@@ -31,17 +31,37 @@ export default function RelatoriosPage() {
   React.useEffect(() => {
     setIsMounted(true);
     // Set initial dates only on the client-side
-    setDateFrom(new Date());
-    setDateTo(new Date());
+    const today = new Date();
+    setDateFrom(today);
+    setDateTo(today);
   }, []);
 
   const handleSearch = async () => {
-    // Placeholder for search functionality
-    toast({
-        title: "Funcionalidade em desenvolvimento",
-        description: "A busca de relatórios será implementada em breve.",
-    });
+    if (!dateFrom || !dateTo) {
+        toast({
+            title: "Período inválido",
+            description: "Por favor, selecione as datas de início e fim.",
+            variant: "destructive"
+        });
+        return;
+    }
+
+    setIsLoading(true);
     setHasSearched(true);
+    try {
+        const data = await getHistoricoAtendimentosPorPeriodo(dateFrom, dateTo);
+        setReportData(data);
+    } catch (error) {
+        console.error("Erro ao buscar relatório: ", error);
+        toast({
+            title: "Erro ao buscar relatório",
+            description: (error as Error).message,
+            variant: "destructive"
+        });
+        setReportData([]);
+    } finally {
+        setIsLoading(false);
+    }
   };
   
   const handlePrint = () => {
@@ -68,10 +88,10 @@ export default function RelatoriosPage() {
             </div>
              <div className="flex items-center gap-2">
                 <Button onClick={handleSearch} disabled={isLoading}>
-                    <Search className="mr-2 h-4 w-4" />
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                     {isLoading ? "Consultando..." : "Consultar"}
                 </Button>
-                 <Button variant="outline" onClick={handlePrint}>
+                 <Button variant="outline" onClick={handlePrint} disabled={reportData.length === 0}>
                     <Printer className="mr-2 h-4 w-4" />
                     Imprimir
                 </Button>
@@ -148,7 +168,12 @@ export default function RelatoriosPage() {
                 <TableBody>
                 {isLoading ? (
                     <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">Carregando...</TableCell>
+                        <TableCell colSpan={5} className="h-60 text-center">
+                            <div className="flex justify-center items-center">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                <span className="ml-2">Carregando...</span>
+                            </div>
+                        </TableCell>
                     </TableRow>
                 ) : reportData.length > 0 ? (
                     reportData.map((item) => (
