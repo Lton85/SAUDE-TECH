@@ -23,6 +23,11 @@ import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog
 import { getDepartamentos } from "@/services/departamentosService";
 import type { Departamento } from "@/types/departamento";
 import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
+import { EditQueueItemDialog } from "../atendimento/edit-dialog";
+import { FilaDeEsperaItem } from "@/types/fila";
+import { getMedicos } from "@/services/medicosService";
+import { getEnfermeiros } from "@/services/enfermeirosService";
+import { updateHistoricoItem } from "@/services/filaDeEsperaService";
 
 
 export function PacientesList() {
@@ -30,13 +35,19 @@ export function PacientesList() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [profissionais, setProfissionais] = useState<{id: string, nome: string}[]>([]);
+  
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
   const [selectedPatientForQueue, setSelectedPatientForQueue] = useState<Paciente | null>(null);
   const [selectedPatientForProntuario, setSelectedPatientForProntuario] = useState<Paciente | null>(null);
+  
   const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
+  
+  const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
@@ -44,10 +55,20 @@ export function PacientesList() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [pacientesData, departamentosData] = await Promise.all([getPacientes(), getDepartamentos()]);
+      const [pacientesData, departamentosData, medicosData, enfermeirosData] = await Promise.all([
+        getPacientes(), 
+        getDepartamentos(),
+        getMedicos(),
+        getEnfermeiros()
+      ]);
       setPacientes(pacientesData);
       setFilteredPacientes(pacientesData);
       setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
+      
+      const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+      const enfermeirosList = enfermeirosData.map(e => ({ id: e.id, nome: `Enf. ${e.nome}` }));
+      setProfissionais([...medicosList, ...enfermeirosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+
     } catch (error) {
       toast({
         title: "Erro ao buscar dados",
@@ -106,6 +127,11 @@ export function PacientesList() {
   const handleEdit = (paciente: Paciente) => {
     setSelectedPatient(paciente);
     setIsPatientDialogOpen(true);
+  };
+  
+  const handleEditFromHistory = (item: FilaDeEsperaItem) => {
+    setSelectedPatientForProntuario(null); // Close history dialog
+    setItemToEditFromHistory(item); // Open edit dialog for history item
   };
 
   const handleDelete = (paciente: Paciente) => {
@@ -314,6 +340,18 @@ export function PacientesList() {
                 isOpen={!!selectedPatientForProntuario}
                 onOpenChange={() => setSelectedPatientForProntuario(null)}
                 paciente={selectedPatientForProntuario}
+                onEdit={handleEditFromHistory}
+            />
+        )}
+        {itemToEditFromHistory && (
+             <EditQueueItemDialog
+                isOpen={!!itemToEditFromHistory}
+                onOpenChange={() => setItemToEditFromHistory(null)}
+                item={itemToEditFromHistory}
+                departamentos={departamentos}
+                profissionais={profissionais}
+                onSave={updateHistoricoItem}
+                isHistory={true}
             />
         )}
     </>
