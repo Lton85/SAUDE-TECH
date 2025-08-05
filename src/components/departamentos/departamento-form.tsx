@@ -59,7 +59,7 @@ export const DepartamentoForm = ({ onSubmit, departamento, ...props }: Departame
               <FormItem>
                 <FormLabel>Nome do Departamento</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ex: Consultório" {...field} />
+                  <Input placeholder="Ex: Consultório" {...field} className="bg-muted/40" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,7 +72,7 @@ export const DepartamentoForm = ({ onSubmit, departamento, ...props }: Departame
               <FormItem>
                 <FormLabel>Nº da Sala</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ex: 01" {...field} />
+                  <Input placeholder="Ex: 01" {...field} className="bg-muted/40" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -86,7 +86,7 @@ export const DepartamentoForm = ({ onSubmit, departamento, ...props }: Departame
                 <FormLabel>Situação</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-muted/40">
                       <SelectValue placeholder="Selecione a situação" />
                     </SelectTrigger>
                   </FormControl>
