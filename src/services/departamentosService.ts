@@ -98,10 +98,10 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
     const departamentoDoc = doc(db, 'departamentos', id);
     
     // Check if there are any patients in the queue for this department
-    const q = query(collection(db, "filaDeEspera"), where("departamentoId", "==", id), where("status", "!=", "finalizado"));
+    const q = query(collection(db, "filaDeEspera"), where("departamentoId", "==", id));
     const activePatientsInQueue = await getDocs(q);
     if (!activePatientsInQueue.empty) {
-        throw new Error(`Não é possível excluir. Existem ${activePatientsInQueue.size} pacientes na fila deste departamento.`);
+        throw new Error(`Não é possível excluir. Existem ${activePatientsInQueue.size} pacientes na fila ou em atendimento neste departamento.`);
     }
 
     await deleteDoc(departamentoDoc);

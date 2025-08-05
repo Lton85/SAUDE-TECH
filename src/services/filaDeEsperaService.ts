@@ -31,7 +31,8 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
             prioridade,
             chegadaEm: serverTimestamp(),
             chamadaEm: null,
-            finalizadaEm: null
+            finalizadaEm: null,
+            status: 'aguardando' // Explicitly set status
         });
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);
@@ -137,15 +138,25 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
 };
 
 export const finalizarAtendimento = async (id: string) => {
-    if (!id) {
-        throw new Error("ID do item da fila não encontrado.");
-    }
+    if (!id) throw new Error("ID do item da fila não encontrado.");
 
     const filaDocRef = doc(db, "filaDeEspera", id);
-    await updateDoc(filaDocRef, {
+    const filaDocSnap = await getDoc(filaDocRef);
+
+    if (!filaDocSnap.exists()) throw new Error("Atendimento não encontrado na fila.");
+    
+    const atendimentoData = filaDocSnap.data() as FilaDeEsperaItem;
+
+    // Create a new document in historico_atendimentos
+    const historicoCollectionRef = collection(db, 'historico_atendimentos');
+    await addDoc(historicoCollectionRef, {
+        ...atendimentoData,
         status: "finalizado",
         finalizadaEm: serverTimestamp()
     });
+
+    // Delete the document from filaDeEspera
+    await deleteDoc(filaDocRef);
 };
 
 
@@ -164,15 +175,14 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
     }
     try {
         const q = query(
-            collection(db, "filaDeEspera"),
-            where("pacienteId", "==", pacienteId),
-            where("status", "==", "finalizado")
+            collection(db, "historico_atendimentos"),
+            where("pacienteId", "==", pacienteId)
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
         
-        // Sort in-memory after fetching
+        // Sort in-memory after fetching to show most recent first
         data.sort((a, b) => {
             const timeA = a.finalizadaEm?.toMillis() || 0;
             const timeB = b.finalizadaEm?.toMillis() || 0;
@@ -214,8 +224,7 @@ export const retornarPacienteParaFila = async (id: string): Promise<void> => {
 export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
     try {
         const q = query(
-            collection(db, "filaDeEspera"),
-            where("status", "==", "finalizado")
+            collection(db, "historico_atendimentos")
         );
 
         const querySnapshot = await getDocs(q);
