@@ -70,9 +70,53 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
         }
     }
 
+    const PrintedContent = () => (
+        <>
+            <div className="flex items-center justify-between mb-2">
+                <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
+                <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
+                    <Badge
+                        className={cn(
+                            'text-xs text-white',
+                            atendimento.classificacao === 'Urgência' && 'bg-red-500',
+                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
+                            atendimento.classificacao === 'Normal' && 'bg-green-500'
+                        )}
+                    >
+                        {atendimento.classificacao}
+                    </Badge>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Finalizado
+                    </Badge>
+                </div>
+            </div>
+
+            <Separator className="mb-4 bg-gray-300" />
+            
+            <div className="space-y-2 mb-4 text-sm">
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold w-28">Departamento:</span>
+                    <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold w-28">Profissional:</span>
+                    <span>{atendimento.profissionalNome}</span>
+                </div>
+            </div>
+
+            <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
+                <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
+                <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
+                <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+            </div>
+        </>
+    );
+
     return (
-        <div ref={cardRef} className="print-item-card w-full border-b">
-             <div className="flex items-center justify-between w-full text-sm p-3 print-hide-in-single">
+        <div ref={cardRef} className="print-item-card w-full border-b print:border-b-2 print:border-dashed print:py-4">
+            <div className="flex items-center justify-between w-full text-sm p-3 print-hide-in-single print:hidden">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />
@@ -111,49 +155,13 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
             </div>
 
-
             <div className="hidden print:block print-only-content text-black w-full">
-                <div className="border rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
-                            <Badge
-                                className={cn(
-                                    'text-xs text-white',
-                                    atendimento.classificacao === 'Urgência' && 'bg-red-500',
-                                    atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
-                                    atendimento.classificacao === 'Normal' && 'bg-green-500'
-                                )}
-                            >
-                                {atendimento.classificacao}
-                            </Badge>
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Finalizado
-                            </Badge>
-                        </div>
-                    </div>
-
-                    <Separator className="mb-4 bg-gray-300" />
-                    
-                    <div className="space-y-2 mb-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold w-28">Departamento:</span>
-                            <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold w-28">Profissional:</span>
-                            <span>{atendimento.profissionalNome}</span>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
-                        <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
-                        <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
-                        <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
-                    </div>
-                </div>
+                 <div className="print-in-card">
+                    <PrintedContent />
+                 </div>
+                 <div className="print-no-card">
+                     <PrintedContent />
+                 </div>
             </div>
         </div>
     )
@@ -432,8 +440,8 @@ export default function RelatoriosPage() {
                     </Card>
                 )}
 
-                 <Card className="flex flex-col flex-1 min-h-0">
-                    <CardContent className="p-0 flex-1 flex flex-col">
+                 <Card className="flex flex-col flex-1 min-h-0 print:shadow-none print:border-none">
+                    <CardContent className="p-0 flex-1 flex flex-col print:p-0">
                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
@@ -448,14 +456,14 @@ export default function RelatoriosPage() {
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
                                 <ScrollArea className="flex-grow print-expand-on-print">
-                                    <div className="space-y-0">
+                                    <div className="space-y-0 print:space-y-4">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
                                         ))}
                                     </div>
                                 </ScrollArea>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 m-4">
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 m-4 print:hidden">
                                     <Filter className="h-10 w-10 text-muted-foreground/50" />
                                     <p className="mt-4 text-center text-muted-foreground">
                                         Use os filtros para gerar o relatório.

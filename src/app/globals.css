@@ -84,19 +84,18 @@
 }
 
 @media print {
-  .print-header {
-      display: none;
-  }
-
   @page {
       size: auto;
       margin: 1cm;
   }
 
   body {
-    background: #fff;
-    color: #000;
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
   }
+
   .print-hide {
     display: none !important;
   }
@@ -131,19 +130,22 @@
       overflow-y: visible !important;
   }
 
-  /* When printing a single item */
-  .print-container.printing-single-item .print-hide-on-single {
-      display: none !important;
-  }
-  
+  /* --- Single Item Printing Logic --- */
+
+  /* Hide everything except the item being printed */
   .print-container.printing-single-item .print-item-card:not(.print-this) {
       display: none !important;
   }
-
-  .print-container.printing-single-item .print-hide-in-single {
+  /* Hide the header of the full report */
+   .print-container.printing-single-item .print-header {
+      display: none !important;
+  }
+  /* Hide the filters and other UI elements */
+   .print-container.printing-single-item .print-hide {
       display: none !important;
   }
   
+  /* Position the single item for printing */
   .print-container.printing-single-item .print-this {
     display: flex !important;
     position: fixed;
@@ -152,12 +154,30 @@
     justify-content: center;
     padding-top: 2cm;
     width: 100%;
-    border: none;
-    box-shadow: none;
-    -webkit-print-color-adjust: exact; 
-    print-color-adjust: exact;
+    border: none !important;
+    box-shadow: none !important;
   }
+
   .print-container.printing-single-item .print-this .print-only-content {
       display: block !important;
   }
+
+  .print-container.printing-single-item .print-in-card {
+      display: block !important;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+  }
+   .print-container.printing-single-item .print-no-card {
+      display: none !important;
+  }
+
+  /* --- General Report Printing Logic --- */
+  .print-container:not(.printing-single-item) .print-item-card .print-in-card {
+      display: none !important;
+  }
+  .print-container:not(.printing-single-item) .print-item-card .print-no-card {
+      display: block !important;
+  }
 }
+
