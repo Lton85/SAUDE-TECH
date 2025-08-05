@@ -303,80 +303,81 @@ export default function RelatoriosPage() {
                 />
             </aside>
             <main className="flex-1 min-w-0 flex flex-col gap-4">
-                <Card id="report-content">
-                    <CardHeader className="p-4 print-hide">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <CardTitle className="text-lg">Relatórios de Atendimento</CardTitle>
-                                <CardDescription className="text-xs">
-                                    Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
-                                </CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
-                                <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
-                                <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
-                            
-                                 <Popover>
-                                    <PopoverTrigger asChild>
-                                    <Button
-                                        id="date"
-                                        variant={"outline"}
-                                        size="sm"
-                                        className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !dateRange.from && "text-muted-foreground"
-                                        )}
-                                        disabled={isLoading}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {dateRange.from && dateRange.to ? (
-                                             `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
-                                        ) : <span>Escolha um período</span>
-                                        }
-                                    </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="end">
-                                    <Calendar
-                                        initialFocus
-                                        mode="range"
-                                        defaultMonth={dateRange.from}
-                                        selected={dateRange}
-                                        onSelect={handleManualDateSearch}
-                                        numberOfMonths={2}
-                                        locale={ptBR}
-                                        captionLayout="dropdown-buttons"
-                                        fromYear={new Date().getFullYear() - 10}
-                                        toYear={new Date().getFullYear() + 10}
-                                    />
-                                    </PopoverContent>
-                                </Popover>
-                                 <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
-                                    <Printer className="mr-2 h-4 w-4" />
-                                    Imprimir Relatório
-                                </Button>
-                            </div>
+                 <div className="print-hide">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-semibold">Relatórios de Atendimento</h2>
+                            <p className="text-xs text-muted-foreground">
+                                Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
+                            </p>
                         </div>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                        {hasSearched && filteredReportData.length > 0 && (
-                            <AtendimentosChart data={filteredReportData} />
-                        )}
+                        <div className="flex items-center gap-2">
+                            <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
+                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
+                            <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
+                        
+                                <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    id="date"
+                                    variant={"outline"}
+                                    size="sm"
+                                    className={cn(
+                                    "w-[240px] justify-start text-left font-normal",
+                                    !dateRange.from && "text-muted-foreground"
+                                    )}
+                                    disabled={isLoading}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateRange.from && dateRange.to ? (
+                                            `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
+                                    ) : <span>Escolha um período</span>
+                                    }
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                <Calendar
+                                    initialFocus
+                                    mode="range"
+                                    defaultMonth={dateRange.from}
+                                    selected={dateRange}
+                                    onSelect={handleManualDateSearch}
+                                    numberOfMonths={2}
+                                    locale={ptBR}
+                                    captionLayout="dropdown-buttons"
+                                    fromYear={new Date().getFullYear() - 10}
+                                    toYear={new Date().getFullYear() + 10}
+                                />
+                                </PopoverContent>
+                            </Popover>
+                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
+                                <Printer className="mr-2 h-4 w-4" />
+                                Imprimir Relatório
+                            </Button>
+                        </div>
+                    </div>
+                </div>
 
-                        <div className="mt-4 flex-1 flex flex-col min-h-0">
+                {hasSearched && filteredReportData.length > 0 && (
+                     <AtendimentosChart data={filteredReportData} />
+                )}
+
+                <Card>
+                    <CardContent className="p-0">
+                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                     <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
                                 </div>
                             ) : hasSearched && filteredReportData.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 m-4">
                                     <p className="text-muted-foreground">
                                         Nenhum resultado encontrado para os filtros selecionados.
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-1 -mx-2">
+                                <ScrollArea className="flex-1">
                                     <div className="space-y-0">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
@@ -384,7 +385,7 @@ export default function RelatoriosPage() {
                                     </div>
                                 </ScrollArea>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 m-4">
                                     <Filter className="h-10 w-10 text-muted-foreground/50" />
                                     <p className="mt-4 text-center text-muted-foreground">
                                         Use os filtros para gerar o relatório.
@@ -406,4 +407,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
