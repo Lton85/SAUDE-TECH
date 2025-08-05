@@ -1,3 +1,4 @@
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -47,7 +48,9 @@ export const getFilaDeEspera = (
 ) => {
     const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "aguardando")
+        where("status", "==", "aguardando"),
+        orderBy("prioridade"),
+        orderBy("chegadaEm")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -56,17 +59,6 @@ export const getFilaDeEspera = (
             ...doc.data()
         } as FilaDeEsperaItem));
         
-        // Order by priority then by time
-        data.sort((a, b) => {
-            if (a.prioridade !== b.prioridade) {
-                return a.prioridade - b.prioridade;
-            }
-            if(a.chegadaEm && b.chegadaEm) {
-                return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
-            }
-            return 0;
-        });
-
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching queue: ", error);

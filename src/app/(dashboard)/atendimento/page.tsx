@@ -122,17 +122,7 @@ export default function AtendimentoPage() {
         const unsubscribePacientes = fetchPacientes();
 
         const unsubscribeFila = getFilaDeEspera((data) => {
-            const sortedData = data.sort((a, b) => {
-                const priorityOrder = a.prioridade - b.prioridade;
-                if (priorityOrder !== 0) {
-                    return priorityOrder;
-                }
-                if(a.chegadaEm && b.chegadaEm) {
-                    return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
-                }
-                return 0;
-            });
-            setFila(sortedData);
+            setFila(data);
             setIsLoading(false);
         }, (error) => {
             toast({
