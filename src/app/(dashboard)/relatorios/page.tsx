@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
 
@@ -92,8 +92,6 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
 export default function RelatoriosPage() {
     const { toast } = useToast();
-    const [date, setDate] = React.useState<Date | undefined>(new Date());
-    
     const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
     const [medicos, setMedicos] = React.useState<Medico[]>([]);
     const [enfermeiros, setEnfermeiros] = React.useState<Enfermeiro[]>([]);
@@ -152,6 +150,21 @@ export default function RelatoriosPage() {
         }
     }, [viewMode]);
 
+    const applyClientSideFilters = React.useCallback((data: FilaDeEsperaItem[]) => {
+        let filteredData = [...data];
+
+        if (selectedPacienteId !== 'todos') {
+            filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
+        }
+
+        const professionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : (selectedEnfermeiroId !== 'todos' ? selectedEnfermeiroId : null);
+        if (professionalId) {
+            filteredData = filteredData.filter(item => item.profissionalId === professionalId);
+        }
+
+        setFilteredReportData(filteredData);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
+
     const handleSearch = React.useCallback(async () => {
         if (!dateRange.from || !dateRange.to) {
             toast({
@@ -167,6 +180,7 @@ export default function RelatoriosPage() {
         try {
             const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
             setAllReportData(data);
+            applyClientSideFilters(data);
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             toast({
@@ -175,25 +189,19 @@ export default function RelatoriosPage() {
                 variant: "destructive"
             });
             setAllReportData([]);
+            setFilteredReportData([]);
         } finally {
             setIsLoading(false);
         }
-    }, [dateRange, toast]);
-
-    React.useEffect(() => {
-        let data = [...allReportData];
-
-        if (selectedPacienteId !== 'todos') {
-            data = data.filter(item => item.pacienteId === selectedPacienteId);
+    }, [dateRange, toast, applyClientSideFilters]);
+    
+     React.useEffect(() => {
+        // Re-apply filters whenever they change
+        if (hasSearched) {
+            applyClientSideFilters(allReportData);
         }
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, allReportData, hasSearched, applyClientSideFilters]);
 
-        const professionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : (selectedEnfermeiroId !== 'todos' ? selectedEnfermeiroId : null);
-        if (professionalId) {
-            data = data.filter(item => item.profissionalId === professionalId);
-        }
-
-        setFilteredReportData(data);
-    }, [allReportData, selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
 
     React.useEffect(() => {
         if (selectedMedicoId !== 'todos') {
@@ -206,6 +214,25 @@ export default function RelatoriosPage() {
             setSelectedMedicoId('todos');
         }
     }, [selectedEnfermeiroId]);
+
+    const handleClearFilters = () => {
+        setSelectedPacienteId('todos');
+        setSelectedMedicoId('todos');
+        setSelectedEnfermeiroId('todos');
+        setViewMode('diario');
+        setDateRange({ from: new Date(), to: new Date() });
+    };
+
+    const hasActiveFilters = React.useMemo(() => {
+        const isDefaultDateRange = dateRange.from && dateRange.to && isToday(dateRange.from) && isToday(dateRange.to);
+        return (
+            selectedPacienteId !== 'todos' ||
+            selectedMedicoId !== 'todos' ||
+            selectedEnfermeiroId !== 'todos' ||
+            !isDefaultDateRange
+        );
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, dateRange]);
+
 
     const handlePrint = () => {
         toast({
@@ -233,6 +260,8 @@ export default function RelatoriosPage() {
                     onEnfermeiroChange={setSelectedEnfermeiroId}
                     onSearch={handleSearch}
                     isLoading={isLoading}
+                    onClearFilters={handleClearFilters}
+                    hasActiveFilters={hasActiveFilters}
                 />
             </aside>
             <main className="flex-1 min-w-0">
@@ -258,9 +287,9 @@ export default function RelatoriosPage() {
                         </div>
                         <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg bg-muted/40">
                              <div className="flex items-center gap-2">
-                                <Button variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')}>Diário</Button>
-                                <Button variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')}>Semanal</Button>
-                                <Button variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')}>Mensal</Button>
+                                <Button variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
+                                <Button variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
+                                <Button variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
                             </div>
                              <Separator orientation="vertical" className="h-6 hidden sm:block" />
                             <div className="flex items-center gap-2">
@@ -273,6 +302,7 @@ export default function RelatoriosPage() {
                                         "w-[260px] justify-start text-left font-normal",
                                         !dateRange.from && "text-muted-foreground"
                                         )}
+                                        disabled={isLoading}
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
                                         {dateRange.from && dateRange.to ? (
@@ -287,7 +317,12 @@ export default function RelatoriosPage() {
                                         mode="range"
                                         defaultMonth={dateRange.from}
                                         selected={dateRange}
-                                        onSelect={setDateRange}
+                                        onSelect={(range) => {
+                                            setDateRange(range || {from: undefined, to: undefined});
+                                            if (range?.from && range.to && format(range.from, 'yyyy-MM-dd') !== format(new Date(), 'yyyy-MM-dd') && format(range.from, 'yyyy-MM-dd') !== format(startOfWeek(new Date()), 'yyyy-MM-dd')) {
+                                                setViewMode('diario'); // Reset view mode if a custom range is selected
+                                            }
+                                        }}
                                         numberOfMonths={2}
                                         locale={ptBR}
                                         captionLayout="dropdown-buttons"
@@ -330,5 +365,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    

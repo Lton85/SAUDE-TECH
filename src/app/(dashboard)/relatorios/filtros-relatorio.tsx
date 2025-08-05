@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, User, Stethoscope, UserPlus } from "lucide-react";
+import { Filter, Loader2, User, Stethoscope, UserPlus, X } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import type { Paciente } from "@/types/paciente";
@@ -23,6 +23,8 @@ interface FiltrosRelatorioProps {
     onEnfermeiroChange: (id: string) => void;
     onSearch: () => void;
     isLoading: boolean;
+    onClearFilters: () => void;
+    hasActiveFilters: boolean;
 }
 
 export function FiltrosRelatorio({
@@ -37,6 +39,8 @@ export function FiltrosRelatorio({
     onEnfermeiroChange,
     onSearch,
     isLoading,
+    onClearFilters,
+    hasActiveFilters,
 }: FiltrosRelatorioProps) {
     return (
         <Card>
@@ -50,6 +54,7 @@ export function FiltrosRelatorio({
                     <Select
                         value={selectedPacienteId}
                         onValueChange={onPacienteChange}
+                        disabled={isLoading}
                     >
                         <SelectTrigger id="paciente-filter">
                             <SelectValue placeholder="Filtrar por paciente" />
@@ -67,6 +72,7 @@ export function FiltrosRelatorio({
                     <Select
                         value={selectedMedicoId}
                         onValueChange={onMedicoChange}
+                        disabled={isLoading}
                     >
                         <SelectTrigger id="medico-filter">
                             <SelectValue placeholder="Filtrar por médico" />
@@ -85,6 +91,7 @@ export function FiltrosRelatorio({
                     <Select
                         value={selectedEnfermeiroId}
                         onValueChange={onEnfermeiroChange}
+                        disabled={isLoading}
                     >
                         <SelectTrigger id="enfermeiro-filter">
                             <SelectValue placeholder="Filtrar por enfermeiro" />
@@ -98,14 +105,22 @@ export function FiltrosRelatorio({
                     </Select>
                 </div>
 
-
-                <Button onClick={onSearch} className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Aplicar Filtros
-                </Button>
+                <div className="flex flex-col gap-2">
+                    <Button onClick={onSearch} className="w-full" disabled={isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Aplicar Filtros
+                    </Button>
+                     <Button
+                        variant="outline"
+                        onClick={onClearFilters}
+                        className="w-full"
+                        disabled={!hasActiveFilters || isLoading}
+                    >
+                        <X className="mr-2 h-4 w-4" />
+                        Limpar Filtros
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );
 }
-
-    
