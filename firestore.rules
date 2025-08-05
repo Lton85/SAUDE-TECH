@@ -2,54 +2,8 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral: Permite acesso de leitura e escrita para qualquer usuário autenticado.
-    // Isso é adequado para o desenvolvimento e prototipagem.
-    // Para produção, você pode querer refinar essas regras para serem mais restritivas.
     match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Regras específicas por coleção para maior clareza,
-    // embora a regra geral acima já cubra estes casos.
-
-    // Coleção de pacientes
-    match /pacientes/{pacienteId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Coleção de médicos
-    match /medicos/{medicoId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Coleção de enfermeiros
-    match /enfermeiros/{enfermeiroId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Coleção de departamentos
-    match /departamentos/{departamentoId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Fila de espera e atendimentos em andamento
-    match /filaDeEspera/{filaId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Histórico de atendimentos (prontuários/relatórios)
-    match /relatorios_atendimentos/{relatorioId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Chamadas para o painel de senhas
-    match /chamadas/{chamadaId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Contadores para senhas e códigos
-    match /counters/{counterId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }
