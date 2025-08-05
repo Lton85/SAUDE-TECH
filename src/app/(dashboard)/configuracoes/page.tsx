@@ -249,99 +249,99 @@ export default function ConfiguracoesPage() {
     );
 
   return (
-    <>
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-            <Settings className="h-6 w-6" />
-            <CardTitle>Configurações do Sistema</CardTitle>
-        </div>
-        <CardDescription>
-          Ajuste as configurações gerais e perigosas do sistema nesta área.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-sm font-medium text-muted-foreground pb-2">Parâmetro</div>
-        <div className="space-y-0">
-            <ActionRow
-                label="Zerar Senha de Classificação Normal"
-                buttonText="Zerar (N-001)"
-                onClick={() => handleResetRequest('Normal')}
-                isResetting={isNormalResetting}
-                icon={RefreshCw}
-            />
-            <ActionRow
-                label="Zerar Senha de Classificação Emergência"
-                buttonText="Zerar (E-001)"
-                onClick={() => handleResetRequest('Emergência')}
-                isResetting={isEmergenciaResetting}
-                icon={RefreshCw}
-            />
-            <ActionRow
-                label="Zerar Códigos de Cadastro de Pacientes"
-                buttonText="Zerar (001)"
-                onClick={handlePacienteResetRequest}
-                isResetting={isPacienteResetting}
-                disabled={pacientesCount === null}
-                title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
-                icon={RefreshCw}
-            />
-            <ActionRow
-                label="Zerar Códigos de Cadastro de Médicos"
-                buttonText="Zerar (001)"
-                onClick={handleMedicoResetRequest}
-                isResetting={isMedicoResetting}
-                disabled={medicosCount === null}
-                title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
-                icon={RefreshCw}
-            />
-            <ActionRow
-                label="Zerar Códigos de Cadastro de Enfermeiros"
-                buttonText="Zerar (001)"
-                onClick={handleEnfermeiroResetRequest}
-                isResetting={isEnfermeiroResetting}
-                disabled={enfermeirosCount === null}
-                title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
-                icon={RefreshCw}
-            />
-            <ActionRow
-                label="Zerar Prontuário de Pacientes"
-                buttonText="Zerar Prontuários"
-                onClick={handleProntuarioResetRequest}
-                isResetting={isProntuarioResetting}
-                icon={Trash2}
-            />
-        </div>
-      </CardContent>
-    </Card>
-     {resetType && (
-        <ResetSenhaDialog
-            isOpen={senhaDialogOpen}
-            onOpenChange={setSenhaDialogOpen}
-            onConfirm={handleConfirmSenhaReset}
-            tipoSenha={resetType}
-        />
-     )}
-      <ResetProntuarioDialog
-            isOpen={prontuarioDialogOpen}
-            onOpenChange={setProntuarioDialogOpen}
-            onConfirm={handleConfirmProntuarioReset}
-        />
-       <ResetPacienteDialog
-            isOpen={pacienteDialogOpen}
-            onOpenChange={setPacienteDialogOpen}
-            onConfirm={handleConfirmPacienteReset}
-        />
-        <ResetMedicoDialog
-            isOpen={medicoDialogOpen}
-            onOpenChange={setMedicoDialogOpen}
-            onConfirm={handleConfirmMedicoReset}
-        />
-        <ResetEnfermeiroDialog
-            isOpen={enfermeiroDialogOpen}
-            onOpenChange={setEnfermeiroDialogOpen}
-            onConfirm={handleConfirmEnfermeiroReset}
-        />
-    </>
+    <div className="flex gap-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+              <Settings className="h-6 w-6" />
+              <CardTitle>Configurações do Sistema</CardTitle>
+          </div>
+          <CardDescription>
+            Ajuste as configurações gerais e perigosas do sistema nesta área.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm font-medium text-muted-foreground pb-2">Parâmetro</div>
+          <div className="space-y-0">
+              <ActionRow
+                  label="Zerar Senha de Classificação Normal"
+                  buttonText="Zerar (N-001)"
+                  onClick={() => handleResetRequest('Normal')}
+                  isResetting={isNormalResetting}
+                  icon={RefreshCw}
+              />
+              <ActionRow
+                  label="Zerar Senha de Classificação Emergência"
+                  buttonText="Zerar (E-001)"
+                  onClick={() => handleResetRequest('Emergência')}
+                  isResetting={isEmergenciaResetting}
+                  icon={RefreshCw}
+              />
+              <ActionRow
+                  label="Zerar Códigos de Cadastro de Pacientes"
+                  buttonText="Zerar (001)"
+                  onClick={handlePacienteResetRequest}
+                  isResetting={isPacienteResetting}
+                  disabled={pacientesCount === null}
+                  title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
+                  icon={RefreshCw}
+              />
+              <ActionRow
+                  label="Zerar Códigos de Cadastro de Médicos"
+                  buttonText="Zerar (001)"
+                  onClick={handleMedicoResetRequest}
+                  isResetting={isMedicoResetting}
+                  disabled={medicosCount === null}
+                  title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
+                  icon={RefreshCw}
+              />
+              <ActionRow
+                  label="Zerar Códigos de Cadastro de Enfermeiros"
+                  buttonText="Zerar (001)"
+                  onClick={handleEnfermeiroResetRequest}
+                  isResetting={isEnfermeiroResetting}
+                  disabled={enfermeirosCount === null}
+                  title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
+                  icon={RefreshCw}
+              />
+              <ActionRow
+                  label="Zerar Prontuário de Pacientes"
+                  buttonText="Zerar Prontuários"
+                  onClick={handleProntuarioResetRequest}
+                  isResetting={isProntuarioResetting}
+                  icon={Trash2}
+              />
+          </div>
+        </CardContent>
+      </Card>
+       {resetType && (
+          <ResetSenhaDialog
+              isOpen={senhaDialogOpen}
+              onOpenChange={setSenhaDialogOpen}
+              onConfirm={handleConfirmSenhaReset}
+              tipoSenha={resetType}
+          />
+       )}
+        <ResetProntuarioDialog
+              isOpen={prontuarioDialogOpen}
+              onOpenChange={setProntuarioDialogOpen}
+              onConfirm={handleConfirmProntuarioReset}
+          />
+         <ResetPacienteDialog
+              isOpen={pacienteDialogOpen}
+              onOpenChange={setPacienteDialogOpen}
+              onConfirm={handleConfirmPacienteReset}
+          />
+          <ResetMedicoDialog
+              isOpen={medicoDialogOpen}
+              onOpenChange={setMedicoDialogOpen}
+              onConfirm={handleConfirmMedicoReset}
+          />
+          <ResetEnfermeiroDialog
+              isOpen={enfermeiroDialogOpen}
+              onOpenChange={setEnfermeiroDialogOpen}
+              onConfirm={handleConfirmEnfermeiroReset}
+          />
+    </div>
   );
 }
