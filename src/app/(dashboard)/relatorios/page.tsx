@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, Clock, Megaphone, CheckCircle, LogIn, Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,75 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentosPorPeriodo } from "@/services/filaDeEsperaService";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
+    <div className="flex items-center gap-3">
+        <Icon className="h-4 w-4 text-primary/80" />
+        <div className="flex justify-between w-full">
+            <span className="text-muted-foreground text-sm">{label}</span>
+            <span className="font-mono text-sm font-medium">{time}</span>
+        </div>
+    </div>
+);
+
+
+const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+    const dataFinalizacao = atendimento.finalizadaEm?.toDate();
+    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : 'N/A';
+
+    const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
+
+    return (
+      <Card className="hover:border-primary/20 transition-colors">
+        <CardHeader className="p-4">
+            <div className="flex justify-between items-start">
+                <div>
+                     <CardTitle className="text-base font-semibold flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        {atendimento.pacienteNome}
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                        Atendimento em <span className="font-medium">{dataFormatada}</span>
+                    </CardDescription>
+                </div>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Finalizado
+                </Badge>
+            </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+             <Separator className="mb-4" />
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div className="space-y-3">
+                     <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Departamento:</span>
+                        <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Profissional:</span>
+                        <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
+                    </div>
+                </div>
+                 <div className="space-y-2 rounded-md border bg-muted/40 p-3">
+                    <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
+                    <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
+                    <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
+                </div>
+             </div>
+        </CardContent>
+      </Card>
+    )
+}
 
 export default function RelatoriosPage() {
   const { toast } = useToast();
@@ -154,46 +219,25 @@ export default function RelatoriosPage() {
             </div>
         </div>
 
-        <div className="border rounded-md">
-            <Table>
-                <TableHeader>
-                <TableRow>
-                    <TableHead>Paciente</TableHead>
-                    <TableHead>Data do Atendimento</TableHead>
-                    <TableHead>Departamento</TableHead>
-                    <TableHead>Profissional</TableHead>
-                    <TableHead>Status</TableHead>
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {isLoading ? (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-60 text-center">
-                            <div className="flex justify-center items-center">
-                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                                <span className="ml-2">Carregando...</span>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                ) : reportData.length > 0 ? (
-                    reportData.map((item) => (
-                    <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.pacienteNome}</TableCell>
-                        <TableCell>{item.finalizadaEm ? format(item.finalizadaEm.toDate(), "dd/MM/yyyy HH:mm") : 'N/A'}</TableCell>
-                        <TableCell>{item.departamentoNome}</TableCell>
-                        <TableCell>{item.profissionalNome}</TableCell>
-                         <TableCell>{item.status}</TableCell>
-                    </TableRow>
-                    ))
-                ) : (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-60 text-center text-muted-foreground">
-                            {hasSearched ? "Nenhum resultado encontrado para o período selecionado." : "Selecione um período e clique em 'Consultar' para gerar o relatório."}
-                        </TableCell>
-                    </TableRow>
-                )}
-                </TableBody>
-            </Table>
+        <div className="space-y-4">
+            {isLoading ? (
+                <div className="flex flex-col items-center justify-center h-60">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
+                </div>
+            ) : reportData.length > 0 ? (
+                 <div className="space-y-3">
+                    {reportData.map((item) => (
+                        <ReportItemCard key={item.id} atendimento={item} />
+                    ))}
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center h-60 rounded-md border border-dashed">
+                    <p className="text-muted-foreground">
+                        {hasSearched ? "Nenhum resultado encontrado para o período selecionado." : "Selecione um período e clique em 'Consultar' para gerar o relatório."}
+                    </p>
+                </div>
+            )}
         </div>
       </CardContent>
     </Card>
