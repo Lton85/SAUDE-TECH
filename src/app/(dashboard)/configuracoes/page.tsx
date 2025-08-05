@@ -232,7 +232,7 @@ export default function ConfiguracoesPage() {
         icon: React.ElementType;
         title?: string;
     }) => (
-        <div className="flex items-center justify-between border-b py-3 last:border-b-0">
+        <div className="flex items-center justify-between border-b py-2 last:border-b-0">
             <p className="font-medium text-sm text-gray-700">{label}</p>
             <Button 
                 onClick={onClick}
@@ -249,7 +249,7 @@ export default function ConfiguracoesPage() {
     );
 
   return (
-    <div className="flex gap-4">
+    <div className="flex">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex items-center gap-3">
