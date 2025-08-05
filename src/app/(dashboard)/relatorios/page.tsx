@@ -136,21 +136,23 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
                 <Separator className="mb-4 bg-gray-300" />
                 
-                <div className="space-y-1 mb-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <span className="font-semibold w-28">Departamento:</span>
-                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                <div className="border rounded-md p-4">
+                    <div className="space-y-1 mb-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold w-28">Departamento:</span>
+                            <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold w-28">Profissional:</span>
+                            <span>{atendimento.profissionalNome}</span>
+                        </div>
                     </div>
-                     <div className="flex items-center gap-2">
-                        <span className="font-semibold w-28">Profissional:</span>
-                        <span>{atendimento.profissionalNome}</span>
-                    </div>
-                </div>
 
-                <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
-                    <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
-                    <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
-                    <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+                    <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
+                        <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
+                        <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
+                        <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+                    </div>
                 </div>
             </div>
         </div>
