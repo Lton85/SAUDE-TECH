@@ -2,32 +2,49 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral para permitir leitura e escrita em todas as coleções.
-    // Em um ambiente de produção, é altamente recomendável definir
-    // regras mais granulares e seguras para cada coleção.
+    // Regra geral para desenvolvimento - permite acesso a todas as coleções
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // Acesso à coleção de pacientes
     match /pacientes/{pacienteId} {
       allow read, write: if true;
     }
-     match /medicos/{medicoId} {
+
+    // Acesso à coleção de médicos
+    match /medicos/{medicoId} {
       allow read, write: if true;
     }
-     match /enfermeiros/{enfermeiroId} {
+    
+    // Acesso à coleção de enfermeiros
+    match /enfermeiros/{enfermeiroId} {
       allow read, write: if true;
     }
-     match /departamentos/{deptoId} {
+
+    // Acesso à coleção de departamentos
+    match /departamentos/{departamentoId} {
       allow read, write: if true;
     }
+
+    // Acesso à fila de espera
     match /filaDeEspera/{filaId} {
       allow read, write: if true;
     }
+
+    // Acesso à coleção de chamadas do painel
     match /chamadas/{chamadaId} {
-       allow read, write: if true;
+      allow read, write: if true;
     }
+    
+    // Acesso aos contadores
     match /counters/{counterId} {
-       allow read, write: if true;
+      allow read, write: if true;
     }
+    
+    // Acesso aos relatórios de atendimentos (histórico)
     match /relatorios_atendimentos/{relatorioId} {
-       allow read, write: if true;
+      allow read, write: if true;
     }
   }
 }
