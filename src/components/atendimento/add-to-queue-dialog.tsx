@@ -411,8 +411,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             </Card>
 
             <div className="md:col-span-3 space-y-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                 <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                     <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
                         <SelectTrigger id="departamento">
@@ -444,9 +443,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         </SelectContent>
                     </Select>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <div className="space-y-2">
                         <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
                         <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')} disabled={!selectedPaciente}>
@@ -488,5 +486,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    
 
     
