@@ -61,20 +61,24 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     return (
         <div ref={cardRef} className="print-item-card w-full">
              <div className="bg-card border rounded-lg hover:border-primary/20 transition-colors p-3 print-hide">
-                 <div className="flex items-center justify-between w-full text-sm gap-2">
-                    <div className="flex items-center gap-2 font-semibold truncate flex-1 min-w-0">
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="truncate">{atendimento.pacienteNome}</span>
+                <div className="flex items-center justify-between w-full text-sm">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 font-medium truncate">
+                            <User className="h-4 w-4 text-primary" />
+                            <span className="truncate">{atendimento.pacienteNome}</span>
+                        </div>
+                        <Separator orientation="vertical" className="h-5" />
+                        <div className="flex items-center gap-2 text-muted-foreground truncate">
+                            <Building className="h-4 w-4" />
+                            <span className="truncate">{atendimento.departamentoNome}</span>
+                        </div>
+                        <Separator orientation="vertical" className="h-5" />
+                        <div className="flex items-center gap-2 text-muted-foreground truncate">
+                            <User className="h-4 w-4" />
+                            <span className="truncate">{atendimento.profissionalNome}</span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate flex-1 min-w-0">
-                        <Building className="h-4 w-4" />
-                        <span className="truncate">{atendimento.departamentoNome}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate flex-1 min-w-0">
-                        <User className="h-4 w-4" />
-                        <span className="truncate">{atendimento.profissionalNome}</span>
-                    </div>
-                    <div className="flex items-center justify-end gap-2 ml-auto pl-2 flex-shrink-0">
+                    <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
                         <span className="text-muted-foreground text-xs">{dataFormatada}</span>
                         <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
                             <CheckCircle className="h-3 w-3 mr-1" />
@@ -86,6 +90,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                     </div>
                 </div>
             </div>
+
 
             <div className="hidden print:block p-4">
                  <div className="flex justify-between items-center mb-4">
@@ -399,3 +404,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
