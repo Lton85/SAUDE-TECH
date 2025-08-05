@@ -48,7 +48,6 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     const handlePrintItem = (e: React.MouseEvent) => {
-        e.stopPropagation();
         const cardElement = cardRef.current;
         if (cardElement) {
             document.body.classList.add('printing-single-item');
@@ -62,7 +61,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     return (
         <div ref={cardRef} className="print-item-card w-full bg-card border rounded-lg hover:border-primary/20 transition-colors p-3">
             {/* Visible part on screen */}
-            <div className="flex items-center gap-2 text-sm print-hide">
+            <div className="flex items-center gap-4 text-sm print-hide">
                 <span className="flex items-center gap-2 font-semibold truncate w-1/3">
                     <User className="h-4 w-4 text-primary" />
                     {atendimento.pacienteNome}
@@ -317,7 +316,7 @@ export default function RelatoriosPage() {
                                 </Button>
                             </div>
                         </div>
-                        <div className="mt-2 flex flex-col sm:flex-row items-center gap-2 p-3 border rounded-lg bg-muted/40 print-hide">
+                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2 print-hide">
                              <div className="flex items-center gap-2">
                                 <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                                 <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
