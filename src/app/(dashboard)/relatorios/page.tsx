@@ -25,6 +25,7 @@ import type { Paciente } from "@/types/paciente";
 import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from "@/components/ui/accordion"
 
 const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
     <div className="flex items-center gap-3">
@@ -36,57 +37,68 @@ const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, 
     </div>
 );
 
-
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : 'N/A';
+    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
 
     const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     return (
-      <Card className="hover:border-primary/20 transition-colors">
-        <CardHeader className="p-4">
-            <div className="flex justify-between items-start">
-                <div>
-                     <CardTitle className="text-base font-semibold flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
-                        {atendimento.pacienteNome}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-1">
-                        Atendimento em <span className="font-medium">{dataFormatada}</span>
-                    </CardDescription>
-                </div>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Finalizado
-                </Badge>
-            </div>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-             <Separator className="mb-4" />
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <div className="space-y-3">
-                     <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Departamento:</span>
-                        <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors">
+            <AccordionItem value={atendimento.id} className="border-b-0">
+                <AccordionTrigger className="p-4 text-sm hover:no-underline">
+                    <div className="w-full flex justify-between items-center">
+                        <div className="flex items-center gap-6">
+                            <span className="flex items-center gap-2 font-semibold w-56 truncate">
+                                <User className="h-4 w-4 text-primary" />
+                                {atendimento.pacienteNome}
+                            </span>
+                            <span className="flex items-center gap-2 text-muted-foreground w-40 truncate">
+                                <Building className="h-4 w-4" />
+                                {atendimento.departamentoNome}
+                            </span>
+                            <span className="flex items-center gap-2 text-muted-foreground w-56 truncate">
+                                <User className="h-4 w-4" />
+                                {atendimento.profissionalNome}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                             <span className="text-muted-foreground">{dataFormatada}</span>
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Finalizado
+                            </Badge>
+                        </div>
                     </div>
-                     <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Profissional:</span>
-                        <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
+                </AccordionTrigger>
+                <AccordionContent>
+                    <div className="px-4 pb-4">
+                        <Separator className="mb-4" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                             <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">Departamento:</span>
+                                    <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">Profissional:</span>
+                                    <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2 rounded-md border bg-muted/40 p-3">
+                                <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
+                                <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
+                                <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
+                            </div>
+                        </div>
                     </div>
-                </div>
-                 <div className="space-y-2 rounded-md border bg-muted/40 p-3">
-                    <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
-                    <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
-                    <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
-                </div>
-             </div>
-        </CardContent>
-      </Card>
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
     )
 }
 
@@ -158,11 +170,11 @@ export default function RelatoriosPage() {
         }
 
         if (selectedMedicoId !== 'todos') {
-             filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
+            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
         }
         
         if (selectedEnfermeiroId !== 'todos') {
-             filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
         }
         
         setFilteredReportData(filteredData);
@@ -357,3 +369,4 @@ export default function RelatoriosPage() {
     );
 
     
+
