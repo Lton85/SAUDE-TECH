@@ -148,9 +148,9 @@ export const finalizarAtendimento = async (id: string) => {
     
     const atendimentoData = filaDocSnap.data() as FilaDeEsperaItem;
 
-    // Create a new document in historico_atendimentos
-    const historicoCollectionRef = collection(db, 'historico_atendimentos');
-    await addDoc(historicoCollectionRef, {
+    // Create a new document in relatorios_atendimentos
+    const relatoriosCollectionRef = collection(db, 'relatorios_atendimentos');
+    await addDoc(relatoriosCollectionRef, {
         ...atendimentoData,
         status: "finalizado",
         finalizadaEm: serverTimestamp()
@@ -176,7 +176,7 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
     }
     try {
         const q = query(
-            collection(db, "historico_atendimentos"),
+            collection(db, "relatorios_atendimentos"),
             where("pacienteId", "==", pacienteId)
         );
 
@@ -207,7 +207,7 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         const end = endOfDay(dateTo);
         
         const q = query(
-            collection(db, "historico_atendimentos"),
+            collection(db, "relatorios_atendimentos"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
             where("finalizadaEm", "<=", Timestamp.fromDate(end)),
             orderBy("finalizadaEm", "desc")
@@ -251,7 +251,7 @@ export const retornarPacienteParaFila = async (id: string): Promise<void> => {
 export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
     try {
         const q = query(
-            collection(db, "historico_atendimentos")
+            collection(db, "relatorios_atendimentos")
         );
 
         const querySnapshot = await getDocs(q);
