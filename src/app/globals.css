@@ -152,4 +152,10 @@
     -webkit-print-color-adjust: exact; 
     print-color-adjust: exact;
   }
+  .print-container.printing-single-item .print-this .print-only-content {
+      display: block !important;
+  }
+  .print-container.printing-single-item .print-this .print-hide-in-single {
+      display: none !important;
+  }
 }

@@ -5,7 +5,7 @@
 import * as React from "react";
 import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
-import { getHistoricoAtendimentosPorPeriodo } from "@/services/filaDeEsperaService";
+import { getHistoricoAtendimentosPorPeriodo, getHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getMedicos } from "@/services/medicosService";
@@ -27,18 +27,25 @@ import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
-    <div className="flex items-center gap-3">
-        <Icon className="h-4 w-4 text-primary/80" />
-        <div className="flex justify-between w-full">
-            <span className="text-muted-foreground text-sm">{label}</span>
-            <span className="font-mono text-sm font-medium">{time}</span>
-        </div>
-    </div>
-);
-
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const cardRef = React.useRef<HTMLDivElement>(null);
+    const [paciente, setPaciente] = React.useState<Paciente | null>(null);
+
+    React.useEffect(() => {
+        const fetchPaciente = async () => {
+            if (atendimento.pacienteId) {
+                // This assumes there's a function to get a single patient
+                // For now, we'll find it from the full list if needed, or better, fetch it
+                // As we don't have getPacienteById, let's assume we can get it from somewhere
+                // For this example, we'll mock it. In a real app, you'd fetch this.
+                const pacientes = await getPacientes();
+                const p = pacientes.find(p => p.id === atendimento.pacienteId);
+                setPaciente(p || null);
+            }
+        };
+        fetchPaciente();
+    }, [atendimento.pacienteId]);
+
 
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
@@ -105,34 +112,45 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
             </div>
 
 
-            <div className="hidden print:block p-4">
-                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-bold">Relatório de Atendimento</h2>
-                    <span className="text-sm">{dataFormatada}</span>
+            <div className="hidden print:block print-only-content p-4 text-black">
+                <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
+                    <div className="flex items-center gap-3">
+                         <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
+                         <Badge
+                            className={cn(
+                                'text-xs text-white',
+                                atendimento.classificacao === 'Urgência' && 'bg-red-500',
+                                atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
+                                atendimento.classificacao === 'Normal' && 'bg-green-500'
+                            )}
+                        >
+                            {atendimento.classificacao}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Finalizado
+                        </Badge>
+                    </div>
                 </div>
 
-                <Separator className="mb-4" />
+                <Separator className="mb-4 bg-gray-300" />
                 
-                <h3 className="font-semibold mb-2">Paciente: <span className="font-normal">{atendimento.pacienteNome}</span></h3>
+                <div className="space-y-1 mb-4 text-sm">
+                    <div className="flex items-center gap-2">
+                        <span className="font-semibold w-28">Departamento:</span>
+                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <span className="font-semibold w-28">Profissional:</span>
+                        <span>{atendimento.profissionalNome}</span>
+                    </div>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">Departamento:</span>
-                            <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">Profissional:</span>
-                            <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
-                        </div>
-                    </div>
-                    <div className="space-y-2 rounded-md border bg-muted/40 p-3">
-                        <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
-                        <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
-                        <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
-                    </div>
+                <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
+                    <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
+                    <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
+                    <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
                 </div>
             </div>
         </div>
@@ -171,11 +189,13 @@ export default function RelatoriosPage() {
         }
 
         if (selectedMedicoId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
+            const medico = medicos.find(m => m.id === selectedMedicoId);
+            if(medico) filteredData = filteredData.filter(item => item.profissionalNome === `Dr(a). ${medico.nome}`);
         }
         
         if (selectedEnfermeiroId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+             const enfermeiro = enfermeiros.find(e => e.id === selectedEnfermeiroId);
+            if(enfermeiro) filteredData = filteredData.filter(item => item.profissionalNome === `Enf. ${enfermeiro.nome}`);
         }
         
         if (selectedClassificacao !== 'todos') {
@@ -183,7 +203,7 @@ export default function RelatoriosPage() {
         }
 
         setFilteredReportData(filteredData);
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao]);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao, medicos, enfermeiros]);
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange.from || !dateRange.to) {
