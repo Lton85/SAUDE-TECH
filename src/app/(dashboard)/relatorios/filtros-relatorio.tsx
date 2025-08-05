@@ -45,11 +45,11 @@ export function FiltrosRelatorio({
 }: FiltrosRelatorioProps) {
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center gap-2">
+            <CardHeader className="flex flex-row items-center gap-2 p-4">
                 <Filter className="w-5 h-5" />
-                <CardTitle>Filtros</CardTitle>
+                <CardTitle className="text-base">Filtros de Refinamento</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4">
                  <div className="space-y-2">
                     <Label htmlFor="paciente-filter" className="flex items-center gap-2 text-sm"><User className="h-4 w-4"/>Paciente</Label>
                     <Select
@@ -106,11 +106,7 @@ export function FiltrosRelatorio({
                     </Select>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    <Button onClick={onSearch} className="w-full" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Aplicar Filtros
-                    </Button>
+                <div className="flex flex-col gap-2 pt-2">
                      <Button
                         variant="outline"
                         onClick={onClearFilters}
