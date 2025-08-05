@@ -11,9 +11,6 @@ import { startOfDay, endOfDay } from 'date-fns';
 interface SearchFilters {
     dateFrom: Date;
     dateTo: Date;
-    pacienteId?: string;
-    medicoId?: string;
-    enfermeiroId?: string;
 }
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
@@ -208,35 +205,15 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
 export const getHistoricoAtendimentosPorPeriodo = async (
     filters: SearchFilters
 ): Promise<FilaDeEsperaItem[]> => {
-    const { dateFrom, dateTo, pacienteId, medicoId, enfermeiroId } = filters;
+    const { dateFrom, dateTo } = filters;
     try {
         const start = startOfDay(dateFrom);
         const end = endOfDay(dateTo);
         
-        let constraints = [
-            where("finalizadaEm", ">=", Timestamp.fromDate(start)),
-            where("finalizadaEm", "<=", Timestamp.fromDate(end))
-        ];
-
-        if(pacienteId && pacienteId !== 'todos') {
-            constraints.push(where("pacienteId", "==", pacienteId));
-        }
-        
-        // Determine the professional ID to filter by
-        let professionalIdToFilter: string | undefined;
-        if (medicoId && medicoId !== 'todos') {
-            professionalIdToFilter = medicoId;
-        } else if (enfermeiroId && enfermeiroId !== 'todos') {
-            professionalIdToFilter = enfermeiroId;
-        }
-
-        if(professionalIdToFilter) {
-            constraints.push(where("profissionalId", "==", professionalIdToFilter));
-        }
-
         const q = query(
             collection(db, "relatorios_atendimentos"),
-            ...constraints
+            where("finalizadaEm", ">=", Timestamp.fromDate(start)),
+            where("finalizadaEm", "<=", Timestamp.fromDate(end))
         );
 
         const querySnapshot = await getDocs(q);

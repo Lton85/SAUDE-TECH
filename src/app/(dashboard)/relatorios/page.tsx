@@ -104,7 +104,8 @@ export default function RelatoriosPage() {
     const [selectedMedicoId, setSelectedMedicoId] = React.useState<string>("todos");
     const [selectedEnfermeiroId, setSelectedEnfermeiroId] = React.useState<string>("todos");
 
-    const [reportData, setReportData] = React.useState<FilaDeEsperaItem[]>([]);
+    const [allReportData, setAllReportData] = React.useState<FilaDeEsperaItem[]>([]);
+    const [filteredReportData, setFilteredReportData] = React.useState<FilaDeEsperaItem[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [hasSearched, setHasSearched] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
@@ -163,14 +164,8 @@ export default function RelatoriosPage() {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodo({
-                dateFrom, 
-                dateTo,
-                pacienteId: selectedPacienteId,
-                medicoId: selectedMedicoId,
-                enfermeiroId: selectedEnfermeiroId
-            });
-            setReportData(data);
+            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom, dateTo });
+            setAllReportData(data);
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             toast({
@@ -178,11 +173,38 @@ export default function RelatoriosPage() {
                 description: (error as Error).message,
                 variant: "destructive"
             });
-            setReportData([]);
+            setAllReportData([]);
         } finally {
             setIsLoading(false);
         }
-    }, [dateFrom, dateTo, selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, toast]);
+    }, [dateFrom, dateTo, toast]);
+
+    React.useEffect(() => {
+        let data = [...allReportData];
+
+        if (selectedPacienteId !== 'todos') {
+            data = data.filter(item => item.pacienteId === selectedPacienteId);
+        }
+
+        const professionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : (selectedEnfermeiroId !== 'todos' ? selectedEnfermeiroId : null);
+        if (professionalId) {
+            data = data.filter(item => item.profissionalId === professionalId);
+        }
+
+        setFilteredReportData(data);
+    }, [allReportData, selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
+
+    React.useEffect(() => {
+        if (selectedMedicoId !== 'todos') {
+            setSelectedEnfermeiroId('todos');
+        }
+    }, [selectedMedicoId]);
+
+    React.useEffect(() => {
+        if (selectedEnfermeiroId !== 'todos') {
+            setSelectedMedicoId('todos');
+        }
+    }, [selectedEnfermeiroId]);
 
     const handlePrint = () => {
         toast({
@@ -227,7 +249,7 @@ export default function RelatoriosPage() {
                                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                                     {isLoading ? "Consultando..." : "Consultar"}
                                 </Button>
-                                <Button variant="outline" onClick={handlePrint} disabled={reportData.length === 0}>
+                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0}>
                                     <Printer className="mr-2 h-4 w-4" />
                                     Imprimir
                                 </Button>
@@ -282,7 +304,7 @@ export default function RelatoriosPage() {
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                 <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
                             </div>
-                        ) : hasSearched && reportData.length === 0 ? (
+                        ) : hasSearched && filteredReportData.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed">
                                 <p className="text-muted-foreground">
                                     Nenhum resultado encontrado para os filtros selecionados.
@@ -290,11 +312,11 @@ export default function RelatoriosPage() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col gap-4 min-h-0">
-                                <AtendimentosChart data={reportData} />
-                                 <p className="text-sm text-muted-foreground">Total de Atendimentos no período: <span className="font-bold text-foreground">{reportData.length}</span></p>
+                                <AtendimentosChart data={filteredReportData} />
+                                 <p className="text-sm text-muted-foreground">Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span></p>
                                 <ScrollArea className="flex-1">
                                     <div className="space-y-3 pr-4">
-                                        {reportData.map((item) => (
+                                        {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
                                         ))}
                                     </div>
