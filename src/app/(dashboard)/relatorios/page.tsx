@@ -72,7 +72,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div ref={cardRef} className="print-item-card w-full border-b">
-             <div className="flex items-center justify-between w-full text-sm p-3">
+             <div className="flex items-center justify-between w-full text-sm p-3 print-hide-in-single">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />

@@ -139,6 +139,10 @@
   .print-container.printing-single-item .print-item-card:not(.print-this) {
       display: none !important;
   }
+
+  .print-container.printing-single-item .print-hide-in-single {
+      display: none !important;
+  }
   
   .print-container.printing-single-item .print-this {
     display: block !important;
@@ -154,8 +158,5 @@
   }
   .print-container.printing-single-item .print-this .print-only-content {
       display: block !important;
-  }
-  .print-container.printing-single-item .print-this .print-hide-in-single {
-      display: none !important;
   }
 }
