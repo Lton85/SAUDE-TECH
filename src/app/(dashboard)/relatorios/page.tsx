@@ -157,10 +157,11 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                     </Button>
                 </div>
             </div>
-
+            
             <div className="hidden print-only-content text-black w-full">
                 <PrintedContent />
             </div>
+
         </div>
     )
 }
