@@ -93,9 +93,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
             </div>
 
-            <Separator className="mb-4 bg-gray-300" />
-            
-            <div className="space-y-2 mb-4 text-sm">
+            <div className="space-y-2 mb-4 text-sm mt-4">
                 <div className="flex items-center gap-2">
                     <span className="font-semibold w-28">Departamento:</span>
                     <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
@@ -157,7 +155,11 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
             <div className="hidden print:block print-only-content text-black w-full">
                  <div className="print-in-card">
-                    <PrintedContent />
+                    <Card>
+                        <CardContent className="p-4">
+                            <PrintedContent />
+                        </CardContent>
+                    </Card>
                  </div>
                  <div className="print-no-card">
                      <PrintedContent />
@@ -485,4 +487,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
