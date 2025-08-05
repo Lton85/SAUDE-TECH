@@ -47,7 +47,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
 
-    const handlePrintItem = (e: React.MouseEvent) => {
+    const handlePrintItem = () => {
         const cardElement = cardRef.current;
         if (cardElement) {
             document.body.classList.add('printing-single-item');
@@ -360,7 +360,7 @@ export default function RelatoriosPage() {
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col min-h-0 p-4">
+                    <div className="flex-1 flex flex-col min-h-0 p-4 pt-0">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -375,8 +375,8 @@ export default function RelatoriosPage() {
                         ) : hasSearched && filteredReportData.length > 0 ? (
                             <div className="flex-1 flex flex-col gap-4 min-h-0">
                                 <AtendimentosChart data={filteredReportData} />
-                                <ScrollArea className="flex-1">
-                                    <div className="space-y-3 pr-4">
+                                <ScrollArea className="flex-1 -mx-4">
+                                    <div className="space-y-3 px-4">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
                                         ))}
@@ -391,7 +391,7 @@ export default function RelatoriosPage() {
                                 </p>
                             </div>
                         )}
-                    </CardContent>
+                    </div>
                     {hasSearched && filteredReportData.length > 0 && (
                         <CardFooter className="py-3 px-4 border-t print-hide">
                             <div className="text-sm text-muted-foreground">
