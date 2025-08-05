@@ -91,6 +91,10 @@
   .print-hide {
     display: none;
   }
+  .print-item-card {
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
+  }
   .print-container {
     display: block;
     width: 100%;
@@ -102,28 +106,24 @@
     border: none;
     box-shadow: none;
   }
-  .print-item-card {
-    -webkit-print-color-adjust: exact; 
-    print-color-adjust: exact;
-  }
-  .printing-single-item .print-hide-all {
+  
+  /* Individual item printing */
+  .printing-single-item .print-hide-all,
+  .printing-single-item body > *:not(.print-this) {
     display: none;
   }
+
   .printing-single-item .print-this {
     display: block !important;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    top: 1rem;
+    left: 1rem;
+    width: calc(100% - 2rem);
     border: none;
     box-shadow: none;
   }
 
-  body.printing-single-item > * {
-    display: none;
-  }
+  .print\:block { display: block !important; }
+  .print\:hidden { display: none !important; }
 
-  body.printing-single-item .print-this {
-    display: block;
-  }
 }

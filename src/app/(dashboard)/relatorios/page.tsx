@@ -26,7 +26,6 @@ import type { Paciente } from "@/types/paciente";
 import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from "@/components/ui/accordion"
 
 const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
     <div className="flex items-center gap-3">
@@ -39,90 +38,87 @@ const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, 
 );
 
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+    const cardRef = React.useRef<HTMLDivElement>(null);
+
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
 
     const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    
-    const [isAccordionOpen, setIsAccordionOpen] = React.useState(false);
-    const cardRef = React.useRef<HTMLDivElement>(null);
 
     const handlePrintItem = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsAccordionOpen(true);
-
-        setTimeout(() => {
-            const cardElement = cardRef.current;
-            if (cardElement) {
-                document.body.classList.add('printing-single-item');
-                cardElement.classList.add('print-this');
-                window.print();
-                cardElement.classList.remove('print-this');
-                document.body.classList.remove('printing-single-item');
-                setIsAccordionOpen(false); 
-            }
-        }, 100); 
+        const cardElement = cardRef.current;
+        if (cardElement) {
+            document.body.classList.add('printing-single-item');
+            cardElement.classList.add('print-this');
+            window.print();
+            cardElement.classList.remove('print-this');
+            document.body.classList.remove('printing-single-item');
+        }
     }
 
     return (
-        <Accordion ref={cardRef} type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card" value={isAccordionOpen ? atendimento.id : ''} onValueChange={(value) => setIsAccordionOpen(!!value)}>
-            <AccordionItem value={atendimento.id} className="border-b-0">
-                 <div className="flex items-center p-3 text-sm">
-                    <AccordionTrigger className="p-0 hover:no-underline flex-1">
-                        <div className="w-full flex items-center gap-4 text-left">
-                            <span className="flex items-center gap-2 font-semibold truncate w-1/3">
-                                <User className="h-4 w-4 text-primary" />
-                                {atendimento.pacienteNome}
-                            </span>
-                            <span className="flex items-center gap-2 text-muted-foreground truncate w-1/4">
-                                <Building className="h-4 w-4" />
-                                {atendimento.departamentoNome}
-                            </span>
-                            <span className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
-                                <User className="h-4 w-4" />
-                                {atendimento.profissionalNome}
-                            </span>
+        <div ref={cardRef} className="print-item-card w-full bg-card border rounded-lg hover:border-primary/20 transition-colors p-3">
+            {/* Visible part on screen */}
+            <div className="flex items-center gap-4 text-sm print-hide">
+                <span className="flex items-center gap-2 font-semibold truncate w-1/3">
+                    <User className="h-4 w-4 text-primary" />
+                    {atendimento.pacienteNome}
+                </span>
+                <span className="flex items-center gap-2 text-muted-foreground truncate w-1/4">
+                    <Building className="h-4 w-4" />
+                    {atendimento.departamentoNome}
+                </span>
+                <span className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
+                    <User className="h-4 w-4" />
+                    {atendimento.profissionalNome}
+                </span>
+                <div className="flex items-center justify-end gap-2 ml-auto pl-4">
+                    <span className="text-muted-foreground text-xs">{dataFormatada}</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Finalizado
+                    </Badge>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
+                        <Printer className="h-3 w-3" />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Hidden part, only for printing */}
+            <div className="hidden print:block p-4">
+                 <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-bold">Relatório de Atendimento</h2>
+                    <span className="text-sm">{dataFormatada}</span>
+                </div>
+
+                <Separator className="mb-4" />
+                
+                <h3 className="font-semibold mb-2">Paciente: <span className="font-normal">{atendimento.pacienteNome}</span></h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Departamento:</span>
+                            <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
                         </div>
-                    </AccordionTrigger>
-                    <div className="flex items-center justify-end gap-2 ml-auto pl-4">
-                            <span className="text-muted-foreground text-xs">{dataFormatada}</span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Finalizado
-                        </Badge>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
-                            <Printer className="h-3 w-3" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Profissional:</span>
+                            <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
+                        </div>
+                    </div>
+                    <div className="space-y-2 rounded-md border bg-muted/40 p-3">
+                        <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
+                        <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
+                        <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
                     </div>
                 </div>
-                <AccordionContent>
-                    <div className="px-4 pb-4">
-                        <Separator className="mb-4" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                             <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <Building className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">Departamento:</span>
-                                    <span className="font-semibold text-sm">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">Profissional:</span>
-                                    <span className="font-semibold text-sm">{atendimento.profissionalNome}</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2 rounded-md border bg-muted/40 p-3">
-                                <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
-                                <EventoTimeline icon={Megaphone} label="Chamada no Painel" time={horaChamada} />
-                                <EventoTimeline icon={Check} label="Finalização" time={horaFinalizacao} />
-                            </div>
-                        </div>
-                    </div>
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+            </div>
+        </div>
     )
 }
 
