@@ -46,7 +46,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     return (
-        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors">
+        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item">
             <AccordionItem value={atendimento.id} className="border-b-0">
                 <AccordionTrigger className="p-4 text-sm hover:no-underline">
                     <div className="w-full flex justify-between items-center">
@@ -168,13 +168,10 @@ export default function RelatoriosPage() {
         if (selectedPacienteId !== 'todos') {
             filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
         }
-
-        if (selectedMedicoId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
-        }
-        
-        if (selectedEnfermeiroId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+       
+        const profissionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : selectedEnfermeiroId;
+        if(profissionalId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === profissionalId);
         }
         
         return filteredData;
@@ -232,10 +229,7 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
-        toast({
-            title: "Funcionalidade em desenvolvimento",
-            description: "A impressão de relatórios será implementada em breve.",
-        });
+        window.print();
     }
 
     if (!isMounted) {
@@ -243,8 +237,8 @@ export default function RelatoriosPage() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-full">
-            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+        <div className="flex flex-col lg:flex-row gap-6 h-full print-container">
+            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 print-hide">
                 <FiltrosRelatorio
                     pacientes={pacientes}
                     medicos={medicos}
@@ -252,9 +246,15 @@ export default function RelatoriosPage() {
                     selectedPacienteId={selectedPacienteId}
                     onPacienteChange={setSelectedPacienteId}
                     selectedMedicoId={selectedMedicoId}
-                    onMedicoChange={setSelectedMedicoId}
+                    onMedicoChange={(id) => {
+                        setSelectedMedicoId(id);
+                        if (id !== 'todos') setSelectedEnfermeiroId('todos');
+                    }}
                     selectedEnfermeiroId={selectedEnfermeiroId}
-                    onEnfermeiroChange={setSelectedEnfermeiroId}
+                    onEnfermeiroChange={(id) => {
+                        setSelectedEnfermeiroId(id);
+                        if (id !== 'todos') setSelectedMedicoId('todos');
+                    }}
                     onSearch={handleSearch}
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
@@ -262,7 +262,7 @@ export default function RelatoriosPage() {
                 />
             </aside>
             <main className="flex-1 min-w-0">
-                <Card className="h-full flex flex-col">
+                <Card className="h-full flex flex-col" id="report-content">
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                             <div>
@@ -271,7 +271,7 @@ export default function RelatoriosPage() {
                                     Gere consultas precisas e seguras sobre os atendimentos realizados.
                                 </CardDescription>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 print-hide">
                                 <Button onClick={handleSearch} disabled={isLoading}>
                                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                                     {isLoading ? "Consultando..." : "Consultar"}
@@ -282,7 +282,7 @@ export default function RelatoriosPage() {
                                 </Button>
                             </div>
                         </div>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg bg-muted/40">
+                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg bg-muted/40 print-hide">
                              <div className="flex items-center gap-2">
                                 <Button variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                                 <Button variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>

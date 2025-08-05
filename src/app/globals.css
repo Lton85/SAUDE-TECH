@@ -82,3 +82,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .print-hide {
+    display: none;
+  }
+  .print-container {
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #report-content {
+    border: none;
+    box-shadow: none;
+  }
+  .print-item {
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
+  }
+}
