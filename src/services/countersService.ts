@@ -1,5 +1,4 @@
 
-
 "use client"
 import { db } from '@/lib/firebase';
 import { doc, runTransaction, increment, writeBatch, getDoc } from 'firebase/firestore';
@@ -47,11 +46,13 @@ export const resetCounterByName = async (counterName: string): Promise<void> => 
 
 export const resetCounters = async (): Promise<void> => {
     const normalCounterRef = doc(db, 'counters', 'senha_normal');
-    const emergenciaCounterRef = doc(db, 'counters', 'senha_emergencia');
+    const preferencialCounterRef = doc(db, 'counters', 'senha_preferencial');
+    const urgenciaCounterRef = doc(db, 'counters', 'senha_emergencia');
     try {
         const batch = writeBatch(db);
         batch.set(normalCounterRef, { nextId: 1 });
-        batch.set(emergenciaCounterRef, { nextId: 1 });
+        batch.set(preferencialCounterRef, { nextId: 1 });
+        batch.set(urgenciaCounterRef, { nextId: 1 });
         await batch.commit();
     } catch (error) {
         console.error("Error resetting counters: ", error);

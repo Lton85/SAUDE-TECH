@@ -15,7 +15,7 @@ interface ResetSenhaDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: () => void
-  tipoSenha: 'Normal' | 'Emergência'
+  tipoSenha: 'Normal' | 'Preferencial' | 'Urgência'
 }
 
 export function ResetSenhaDialog({ isOpen, onOpenChange, onConfirm, tipoSenha }: ResetSenhaDialogProps) {

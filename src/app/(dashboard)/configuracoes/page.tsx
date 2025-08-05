@@ -22,7 +22,8 @@ import { Separator } from "@/components/ui/separator";
 export default function ConfiguracoesPage() {
     const { toast } = useToast();
     const [isNormalResetting, setIsNormalResetting] = useState(false);
-    const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
+    const [isPreferencialResetting, setIsPreferencialResetting] = useState(false);
+    const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
     const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isMedicoResetting, setIsMedicoResetting] = useState(false);
@@ -34,7 +35,7 @@ export default function ConfiguracoesPage() {
     const [medicoDialogOpen, setMedicoDialogOpen] = useState(false);
     const [enfermeiroDialogOpen, setEnfermeiroDialogOpen] = useState(false);
     
-    const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
+    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [medicosCount, setMedicosCount] = useState<number | null>(null);
@@ -62,7 +63,7 @@ export default function ConfiguracoesPage() {
         fetchCounts();
     }, [toast]);
 
-    const handleResetRequest = (type: 'Normal' | 'Emergência') => {
+    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgência') => {
         setResetType(type);
         setSenhaDialogOpen(true);
     };
@@ -110,10 +111,30 @@ export default function ConfiguracoesPage() {
     const handleConfirmSenhaReset = async () => {
         if (!resetType) return;
 
-        const isNormal = resetType === 'Normal';
-        const setLoading = isNormal ? setIsNormalResetting : setIsEmergenciaResetting;
-        const counterName = isNormal ? 'senha_normal' : 'senha_emergencia';
-        const ticketExample = isNormal ? 'N-001' : 'E-001';
+        let setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+        let counterName: string;
+        let ticketExample: string;
+
+        switch (resetType) {
+            case 'Normal':
+                setLoading = setIsNormalResetting;
+                counterName = 'senha_normal';
+                ticketExample = 'N-001';
+                break;
+            case 'Preferencial':
+                setLoading = setIsPreferencialResetting;
+                counterName = 'senha_preferencial';
+                ticketExample = 'P-001';
+                break;
+            case 'Urgência':
+                setLoading = setIsUrgenciaResetting;
+                counterName = 'senha_emergencia';
+                ticketExample = 'E-001';
+                break;
+            default:
+                return;
+        }
+
 
         setLoading(true);
         setSenhaDialogOpen(false);
@@ -270,11 +291,18 @@ export default function ConfiguracoesPage() {
                   isResetting={isNormalResetting}
                   icon={RefreshCw}
               />
+               <ActionRow
+                  label="Zerar Senha de Classificação Preferencial"
+                  buttonText="Zerar (P-001)"
+                  onClick={() => handleResetRequest('Preferencial')}
+                  isResetting={isPreferencialResetting}
+                  icon={RefreshCw}
+              />
               <ActionRow
-                  label="Zerar Senha de Classificação Emergência"
-                  buttonText="Zerar (E-001)"
-                  onClick={() => handleResetRequest('Emergência')}
-                  isResetting={isEmergenciaResetting}
+                  label="Zerar Senha de Classificação Urgência"
+                  buttonText="Zerar (U-001)"
+                  onClick={() => handleResetRequest('Urgência')}
+                  isResetting={isUrgenciaResetting}
                   icon={RefreshCw}
               />
               <ActionRow
