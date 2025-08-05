@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, User, Stethoscope, UserPlus, X } from "lucide-react";
+import { Filter, Loader2, User, Stethoscope, UserPlus, X, Search } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import type { Paciente } from "@/types/paciente";
@@ -107,6 +107,10 @@ export function FiltrosRelatorio({
                 </div>
 
                 <div className="flex flex-col gap-2 pt-2">
+                    <Button onClick={onSearch} className="w-full" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                        Aplicar Filtros
+                    </Button>
                      <Button
                         variant="outline"
                         onClick={onClearFilters}
@@ -121,3 +125,5 @@ export function FiltrosRelatorio({
         </Card>
     );
 }
+
+    
