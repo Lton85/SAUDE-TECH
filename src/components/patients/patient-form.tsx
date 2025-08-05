@@ -1,9 +1,7 @@
 
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useFormContext } from "react-hook-form";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -18,35 +16,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
-
-const formSchema = z.object({
-  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
-  mae: z.string().optional(),
-  pai: z.string().optional(),
-  cns: z.string().min(15, { message: "O CNS deve ter pelo menos 15 dígitos." }),
-  cpf: z.string().optional(),
-  rg: z.string().optional(),
-  nascimento: z.string().optional(),
-  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
-  estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável', '']).optional(),
-  cep: z.string().optional(),
-  endereco: z.string().optional(),
-  numero: z.string().optional(),
-  bairro: z.string().optional(),
-  cidade: z.string().optional(),
-  uf: z.string().optional(),
-  email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
-  telefone: z.string().optional(),
-  observacoes: z.string().optional(),
-  situacao: z.boolean().default(true),
-});
-
-type PatientFormValues = z.infer<typeof formSchema>;
+import type { PatientFormValues } from "./patient-dialog";
 
 interface PatientFormProps {
-  onSubmit: (values: PatientFormValues) => void;
-  defaultValues?: Partial<PatientFormValues & { id?: string }>;
-  isSubmitting: boolean;
   isEditMode: boolean;
 }
 
@@ -60,55 +32,24 @@ interface IbgeCityResponse {
     nome: string;
 }
 
-export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode }: PatientFormProps) {
+export function PatientForm({ isEditMode }: PatientFormProps) {
   const [cities, setCities] = React.useState<string[]>([]);
   const [isCitiesLoading, setIsCitiesLoading] = React.useState(false);
   const nameInputRef = React.useRef<HTMLInputElement>(null);
-
-  const form = useForm<PatientFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nome: "",
-      mae: "",
-      pai: "",
-      cns: "",
-      cpf: "",
-      rg: "",
-      nascimento: "",
-      sexo: undefined,
-      estadoCivil: undefined,
-      cep: "",
-      endereco: "",
-      numero: "",
-      bairro: "",
-      cidade: "",
-      uf: "",
-      email: "",
-      telefone: "",
-      observacoes: "",
-      situacao: true,
-    },
-  });
+  
+  const form = useFormContext<PatientFormValues>();
 
   const selectedUf = form.watch('uf');
-
+  
   React.useEffect(() => {
-    if (defaultValues) {
-      form.reset({
-        ...defaultValues,
-        uf: defaultValues.uf || "",
-        cidade: defaultValues.cidade || "",
-        situacao: defaultValues.situacao,
-      });
-      // Only focus if it's a new patient form (no ID)
-      if (!defaultValues.id) {
-        const timer = setTimeout(() => {
-          nameInputRef.current?.focus();
-        }, 100);
-        return () => clearTimeout(timer);
-      }
+    // Only focus if it's a new patient form (no ID)
+    if (!isEditMode) {
+      const timer = setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [defaultValues, form]);
+  }, [isEditMode]);
   
   React.useEffect(() => {
     const fetchCities = async () => {
@@ -165,8 +106,6 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode 
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4">
            <div className="bg-card p-4 rounded-md border space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -486,38 +425,41 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode 
                     </FormItem>
                   )}
                 />
-                 {isEditMode && (
-                   <FormField
-                      control={form.control}
-                      name="situacao"
-                      render={({ field }) => (
-                        <FormItem className="md:col-span-12 flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
-                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Cadastro Ativo
-                            </FormLabel>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                 )}
               </div>
             </div>
         </div>
-        <div className="mt-4 pt-4 border-t flex justify-end gap-2">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? "Salvando..." : "Salvar Paciente"}
-          </Button>
-        </div>
-      </form>
-    </Form>
   );
 }
+
+const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
+    const form = useFormContext<PatientFormValues>();
+
+    if (!isEditMode) return null;
+
+    return (
+        <div className="flex-1 flex justify-start">
+             <FormField
+                control={form.control}
+                name="situacao"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0">
+                        <FormControl>
+                            <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                            <FormLabel>
+                                Cadastro Ativo
+                            </FormLabel>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
+    )
+};
+
+PatientForm.SituacaoCheckbox = SituacaoCheckbox;

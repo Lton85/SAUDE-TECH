@@ -1,9 +1,8 @@
+
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useFormContext } from "react-hook-form";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -11,52 +10,20 @@ import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { Enfermeiro } from "@/types/enfermeiro";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { DialogFooter } from "../ui/dialog";
 import { Checkbox } from "../ui/checkbox";
+import type { EnfermeiroFormValues } from "./enfermeiro-dialog";
 
-const formSchema = z.object({
-  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
-  cns: z.string().min(15, { message: "O CNS é obrigatório." }),
-  coren: z.string().min(4, { message: "O COREN é obrigatório." }),
-  especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
-  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
-  cpf: z.string().optional(),
-  dataNascimento: z.string().optional(),
-  telefone: z.string().optional(),
-  turno: z.enum(['Manhã', 'Tarde', 'Noite', '']).optional(),
-  situacao: z.boolean().default(true),
-});
-
-export type EnfermeiroFormValues = z.infer<typeof formSchema>;
 
 interface EnfermeiroFormProps {
-  onSubmit: (values: EnfermeiroFormValues) => void;
-  enfermeiro?: Partial<Enfermeiro> | null;
-  isSubmitting: boolean;
-  onCancel: () => void;
   isEditMode: boolean;
 }
 
-export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel, isEditMode }: EnfermeiroFormProps) {
-  const form = useForm<EnfermeiroFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nome: "",
-      cns: "",
-      coren: "",
-      especialidade: "",
-      sexo: undefined,
-      cpf: "",
-      dataNascimento: "",
-      telefone: "",
-      turno: "Manhã",
-      situacao: true,
-    },
-  });
+export function EnfermeiroForm({ isEditMode }: EnfermeiroFormProps) {
+  const form = useFormContext<EnfermeiroFormValues>();
   
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -69,42 +36,8 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel, i
     fieldChange(value);
   };
 
-
-  React.useEffect(() => {
-    if (enfermeiro) {
-      form.reset({
-        nome: enfermeiro.nome || "",
-        cns: enfermeiro.cns || "",
-        coren: enfermeiro.coren || "",
-        especialidade: enfermeiro.especialidade || "",
-        sexo: enfermeiro.sexo || undefined,
-        cpf: enfermeiro.cpf || "",
-        dataNascimento: enfermeiro.dataNascimento || "",
-        telefone: enfermeiro.telefone || "",
-        turno: enfermeiro.turno || "Manhã",
-        situacao: enfermeiro.situacao === 'Ativo',
-      });
-    } else {
-        form.reset({
-            nome: "",
-            cns: "",
-            coren: "",
-            especialidade: "",
-            sexo: undefined,
-            cpf: "",
-            dataNascimento: "",
-            telefone: "",
-            turno: "Manhã",
-            situacao: true,
-        });
-    }
-  }, [enfermeiro, form]);
-  
-  const formId = "enfermeiro-form";
-
   return (
-    <Form {...form}>
-      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
+      <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
@@ -276,40 +209,39 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel, i
                     </FormItem>
                 )}
             />
-
-            {isEditMode && (
-                <FormField
-                    control={form.control}
-                    name="situacao"
-                    render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                        <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                        />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                        <FormLabel>
-                            Cadastro Ativo
-                        </FormLabel>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-            )}
         </div>
-      </form>
-       <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
-            Cancelar
-          </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
-          </Button>
-      </DialogFooter>
-    </Form>
+      </div>
   );
 }
+
+
+const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
+    const form = useFormContext<EnfermeiroFormValues>();
+    if (!isEditMode) return null;
+    return (
+        <div className="flex-1 flex justify-start">
+            <FormField
+                control={form.control}
+                name="situacao"
+                render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0">
+                    <FormControl>
+                    <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                    />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                    <FormLabel>
+                        Cadastro Ativo
+                    </FormLabel>
+                    </div>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+    )
+}
+
+EnfermeiroForm.SituacaoCheckbox = SituacaoCheckbox;

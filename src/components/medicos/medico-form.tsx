@@ -1,9 +1,8 @@
+
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useFormContext } from "react-hook-form";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -11,52 +10,19 @@ import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { Medico } from "@/types/medico";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { DialogFooter } from "../ui/dialog";
 import { Checkbox } from "../ui/checkbox";
-
-const formSchema = z.object({
-  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
-  cns: z.string().min(15, { message: "O CNS é obrigatório." }),
-  crm: z.string().min(4, { message: "O CRM é obrigatório." }),
-  especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
-  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
-  cpf: z.string().optional(),
-  dataNascimento: z.string().optional(),
-  telefone: z.string().optional(),
-  cargaHoraria: z.string().optional(),
-  situacao: z.boolean().default(true),
-});
-
-export type MedicoFormValues = z.infer<typeof formSchema>;
+import type { MedicoFormValues } from "./medico-dialog";
 
 interface MedicoFormProps {
-  onSubmit: (values: MedicoFormValues) => void;
-  medico?: Partial<Medico> | null;
-  isSubmitting: boolean;
-  onCancel: () => void;
   isEditMode: boolean;
 }
 
-export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel, isEditMode }: MedicoFormProps) {
-  const form = useForm<MedicoFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nome: "",
-      cns: "",
-      crm: "",
-      sexo: undefined,
-      especialidade: "",
-      cpf: "",
-      dataNascimento: "",
-      telefone: "",
-      cargaHoraria: "",
-      situacao: true,
-    },
-  });
+export function MedicoForm({ isEditMode }: MedicoFormProps) {
+  const form = useFormContext<MedicoFormValues>();
   
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -69,43 +35,8 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel, isEditMod
     fieldChange(value);
   };
 
-
-  React.useEffect(() => {
-    if (medico) {
-      form.reset({
-        nome: medico.nome || "",
-        cns: medico.cns || "",
-        crm: medico.crm || "",
-        sexo: medico.sexo || undefined,
-        especialidade: medico.especialidade || "",
-        cpf: medico.cpf || "",
-        dataNascimento: medico.dataNascimento || "",
-        telefone: medico.telefone || "",
-        cargaHoraria: medico.cargaHoraria || "",
-        situacao: medico.situacao === 'Ativo',
-      });
-    } else {
-        form.reset({
-            nome: "",
-            cns: "",
-            crm: "",
-            sexo: undefined,
-            especialidade: "",
-            cpf: "",
-            dataNascimento: "",
-            telefone: "",
-            cargaHoraria: "",
-            situacao: true,
-        });
-    }
-  }, [medico, form]);
-  
-    const formId = "medico-form";
-
-
   return (
-    <Form {...form}>
-      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4  max-h-[70vh] overflow-y-auto pr-4">
+      <div className="space-y-4 py-4  max-h-[70vh] overflow-y-auto pr-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
@@ -267,39 +198,38 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel, isEditMod
                 </FormItem>
               )}
             />
-             {isEditMode && (
-                <FormField
-                    control={form.control}
-                    name="situacao"
-                    render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                        <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                        />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                        <FormLabel>
-                            Cadastro Ativo
-                        </FormLabel>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-            )}
         </div>
-      </form>
-      <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
-            Cancelar
-          </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
-          </Button>
-      </DialogFooter>
-    </Form>
+      </div>
   );
 }
+
+const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
+    const form = useFormContext<MedicoFormValues>();
+    if (!isEditMode) return null;
+    return (
+        <div className="flex-1 flex justify-start">
+             <FormField
+                control={form.control}
+                name="situacao"
+                render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0">
+                    <FormControl>
+                    <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                    />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                    <FormLabel>
+                        Cadastro Ativo
+                    </FormLabel>
+                    </div>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+    )
+}
+
+MedicoForm.SituacaoCheckbox = SituacaoCheckbox;

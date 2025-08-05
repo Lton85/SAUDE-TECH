@@ -1,12 +1,33 @@
+
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { UserPlus, Pencil, Loader2 } from "lucide-react";
 import type { Enfermeiro } from "@/types/enfermeiro";
-import { EnfermeiroForm, type EnfermeiroFormValues } from "./enfermeiro-form";
+import { EnfermeiroForm } from "./enfermeiro-form";
 import { addEnfermeiro, updateEnfermeiro } from "@/services/enfermeirosService";
 import { useToast } from "@/hooks/use-toast";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "../ui/button";
+
+const EnfermeiroFormSchema = z.object({
+  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
+  cns: z.string().min(15, { message: "O CNS é obrigatório." }),
+  coren: z.string().min(4, { message: "O COREN é obrigatório." }),
+  especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
+  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
+  cpf: z.string().optional(),
+  dataNascimento: z.string().optional(),
+  telefone: z.string().optional(),
+  turno: z.enum(['Manhã', 'Tarde', 'Noite', '']).optional(),
+  situacao: z.boolean().default(true),
+});
+
+export type EnfermeiroFormValues = z.infer<typeof EnfermeiroFormSchema>;
+
 
 interface EnfermeiroDialogProps {
   isOpen: boolean;
@@ -19,6 +40,52 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
   const isEditMode = !!enfermeiro;
+
+  const form = useForm<EnfermeiroFormValues>({
+    resolver: zodResolver(EnfermeiroFormSchema),
+    defaultValues: {
+      nome: "",
+      cns: "",
+      coren: "",
+      especialidade: "",
+      sexo: undefined,
+      cpf: "",
+      dataNascimento: "",
+      telefone: "",
+      turno: "Manhã",
+      situacao: true,
+    },
+  });
+
+  React.useEffect(() => {
+    if (enfermeiro) {
+      form.reset({
+        nome: enfermeiro.nome || "",
+        cns: enfermeiro.cns || "",
+        coren: enfermeiro.coren || "",
+        especialidade: enfermeiro.especialidade || "",
+        sexo: enfermeiro.sexo || undefined,
+        cpf: enfermeiro.cpf || "",
+        dataNascimento: enfermeiro.dataNascimento || "",
+        telefone: enfermeiro.telefone || "",
+        turno: enfermeiro.turno || "Manhã",
+        situacao: enfermeiro.situacao === 'Ativo',
+      });
+    } else {
+        form.reset({
+            nome: "",
+            cns: "",
+            coren: "",
+            especialidade: "",
+            sexo: undefined,
+            cpf: "",
+            dataNascimento: "",
+            telefone: "",
+            turno: "Manhã",
+            situacao: true,
+        });
+    }
+  }, [enfermeiro, isOpen, form]);
 
   const handleSubmit = async (values: EnfermeiroFormValues) => {
     setIsSubmitting(true);
@@ -73,13 +140,23 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
             {isEditMode ? "Altere os dados abaixo para atualizar o cadastro." : "Preencha os campos abaixo para adicionar um(a) novo(a) enfermeiro(a)."}
           </DialogDescription>
         </DialogHeader>
-        <EnfermeiroForm
-          onSubmit={handleSubmit}
-          enfermeiro={enfermeiro}
-          isSubmitting={isSubmitting}
-          onCancel={() => onOpenChange(false)}
-          isEditMode={isEditMode}
-        />
+        <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <EnfermeiroForm isEditMode={isEditMode} />
+                <DialogFooter className="mt-4 pt-4 border-t items-center">
+                    <EnfermeiroForm.SituacaoCheckbox isEditMode={isEditMode} />
+                    <div className="flex gap-2">
+                        <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting ? 'Salvando...' : 'Salvar'}
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );

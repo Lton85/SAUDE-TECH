@@ -2,13 +2,17 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { UserPlus, Pencil, Loader2 } from "lucide-react";
 import type { Paciente } from "@/types/paciente";
 import { PatientForm } from "./patient-form";
 import { addPaciente, updatePaciente } from "@/services/pacientesService";
 import { useToast } from "@/hooks/use-toast";
 import { parse } from "date-fns";
+import { Button } from "../ui/button";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PatientFormSchema } from "./patient-form-schema";
 
 interface PatientDialogProps {
   isOpen: boolean;
@@ -17,13 +21,69 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'historico'  | 'codigo' | 'situacao'> & { situacao: boolean };
-
+export type PatientFormValues = z.infer<typeof PatientFormSchema>;
 
 export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const { toast } = useToast();
     const isEditMode = !!paciente;
+
+    const form = useForm<PatientFormValues>({
+        resolver: zodResolver(PatientFormSchema),
+        defaultValues: {
+            nome: "",
+            mae: "",
+            pai: "",
+            cns: "",
+            cpf: "",
+            rg: "",
+            nascimento: "",
+            sexo: undefined,
+            estadoCivil: undefined,
+            cep: "",
+            endereco: "",
+            numero: "",
+            bairro: "",
+            cidade: "",
+            uf: "",
+            email: "",
+            telefone: "",
+            observacoes: "",
+            situacao: true,
+        },
+    });
+
+    React.useEffect(() => {
+        if (paciente) {
+            form.reset({
+                ...paciente,
+                situacao: paciente.situacao === 'Ativo',
+            });
+        } else {
+            form.reset({
+                nome: "",
+                mae: "",
+                pai: "",
+                cns: "",
+                cpf: "",
+                rg: "",
+                nascimento: "",
+                sexo: undefined,
+                estadoCivil: undefined,
+                cep: "",
+                endereco: "",
+                numero: "",
+                bairro: "",
+                cidade: "",
+                uf: "",
+                email: "",
+                telefone: "",
+                observacoes: "",
+                situacao: true,
+            });
+        }
+    }, [paciente, form, isOpen]);
+
 
     const handleSubmit = async (values: PatientFormValues) => {
         setIsSubmitting(true);
@@ -96,31 +156,6 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             setIsSubmitting(false);
         }
     }
-  
-    const defaultValues = React.useMemo(() => {
-        if (isEditMode && paciente) {
-            return {
-                ...paciente,
-                situacao: paciente.situacao === 'Ativo',
-            };
-        }
-        return {
-            id: undefined, // ensure id is undefined for new patient
-            pai: '',
-            cep: '',
-            endereco: '',
-            numero: '',
-            bairro: '',
-            cidade: '',
-            uf: '',
-            email: '',
-            telefone: '',
-            observacoes: '',
-            rg: '',
-            situacao: true,
-        };
-    }, [paciente, isEditMode]);
-
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!isSubmitting) onOpenChange(open) }}>
@@ -134,13 +169,23 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             {isEditMode ? `Altere os dados de ${paciente?.nome}.` : "Preencha os campos abaixo para adicionar um novo paciente."}
           </DialogDescription>
         </DialogHeader>
-        
-        <PatientForm
-          onSubmit={handleSubmit}
-          defaultValues={defaultValues}
-          isSubmitting={isSubmitting}
-          isEditMode={isEditMode}
-        />
+        <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <PatientForm isEditMode={isEditMode} />
+                 <DialogFooter className="mt-4 pt-4 border-t items-center">
+                    <PatientForm.SituacaoCheckbox isEditMode={isEditMode} />
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting} type="button">
+                          Cancelar
+                      </Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isSubmitting ? "Salvando..." : "Salvar Paciente"}
+                      </Button>
+                    </div>
+                </DialogFooter>
+            </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );

@@ -1,12 +1,33 @@
+
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Stethoscope, Pencil, Loader2 } from "lucide-react";
 import type { Medico } from "@/types/medico";
-import { MedicoForm, type MedicoFormValues } from "./medico-form";
+import { MedicoForm } from "./medico-form";
 import { addMedico, updateMedico } from "@/services/medicosService";
 import { useToast } from "@/hooks/use-toast";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "../ui/button";
+
+const MedicoFormSchema = z.object({
+  nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
+  cns: z.string().min(15, { message: "O CNS é obrigatório." }),
+  crm: z.string().min(4, { message: "O CRM é obrigatório." }),
+  especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
+  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
+  cpf: z.string().optional(),
+  dataNascimento: z.string().optional(),
+  telefone: z.string().optional(),
+  cargaHoraria: z.string().optional(),
+  situacao: z.boolean().default(true),
+});
+
+export type MedicoFormValues = z.infer<typeof MedicoFormSchema>;
+
 
 interface MedicoDialogProps {
   isOpen: boolean;
@@ -19,6 +40,52 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
   const isEditMode = !!medico;
+  
+  const form = useForm<MedicoFormValues>({
+    resolver: zodResolver(MedicoFormSchema),
+    defaultValues: {
+      nome: "",
+      cns: "",
+      crm: "",
+      sexo: undefined,
+      especialidade: "",
+      cpf: "",
+      dataNascimento: "",
+      telefone: "",
+      cargaHoraria: "",
+      situacao: true,
+    },
+  });
+
+  React.useEffect(() => {
+    if (medico) {
+      form.reset({
+        nome: medico.nome || "",
+        cns: medico.cns || "",
+        crm: medico.crm || "",
+        sexo: medico.sexo || undefined,
+        especialidade: medico.especialidade || "",
+        cpf: medico.cpf || "",
+        dataNascimento: medico.dataNascimento || "",
+        telefone: medico.telefone || "",
+        cargaHoraria: medico.cargaHoraria || "",
+        situacao: medico.situacao === 'Ativo',
+      });
+    } else {
+        form.reset({
+            nome: "",
+            cns: "",
+            crm: "",
+            sexo: undefined,
+            especialidade: "",
+            cpf: "",
+            dataNascimento: "",
+            telefone: "",
+            cargaHoraria: "",
+            situacao: true,
+        });
+    }
+  }, [medico, isOpen, form]);
 
   const handleSubmit = async (values: MedicoFormValues) => {
     setIsSubmitting(true);
@@ -60,10 +127,6 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
       setIsSubmitting(false);
     }
   };
-  
-    const onCancel = () => {
-        onOpenChange(false);
-    }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -77,13 +140,23 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
             {isEditMode ? "Altere os dados abaixo para atualizar o cadastro do médico." : "Preencha os campos abaixo para adicionar um novo médico ao sistema."}
           </DialogDescription>
         </DialogHeader>
-        <MedicoForm
-          onSubmit={handleSubmit}
-          medico={medico}
-          isSubmitting={isSubmitting}
-          onCancel={onCancel}
-          isEditMode={isEditMode}
-        />
+        <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <MedicoForm isEditMode={isEditMode}/>
+                <DialogFooter className="mt-4 pt-4 border-t items-center">
+                    <MedicoForm.SituacaoCheckbox isEditMode={isEditMode} />
+                    <div className="flex gap-2">
+                         <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting ? 'Salvando...' : 'Salvar'}
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );
