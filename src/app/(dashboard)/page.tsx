@@ -6,6 +6,13 @@ import { Users, ClipboardList, Clock, Tv2, Settings } from "lucide-react";
 export default function DashboardPage() {
   const features = [
     {
+      href: "/atendimento",
+      title: "Atendimento",
+      description: "Monitore o tempo de cada consulta.",
+      icon: Clock,
+      target: "_self"
+    },
+    {
       href: "/cadastros",
       title: "Cadastros",
       description: "Gerencie pacientes, médicos e enfermeiros.",
@@ -17,13 +24,6 @@ export default function DashboardPage() {
       title: "Departamentos",
       description: "Gerencie os departamentos e suas prioridades.",
       icon: ClipboardList,
-      target: "_self"
-    },
-    {
-      href: "/atendimento",
-      title: "Atendimento",
-      description: "Monitore o tempo de cada consulta.",
-      icon: Clock,
       target: "_self"
     },
      {
