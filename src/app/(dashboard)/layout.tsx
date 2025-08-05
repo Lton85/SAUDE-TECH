@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import * as React from "react";
 import {
   Home,
   Users,
@@ -14,6 +15,7 @@ import {
   BarChart3,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -27,6 +29,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
@@ -40,6 +43,16 @@ const menuItems = [
 
 const AppSidebar = () => {
     const { state } = useSidebar();
+    const [searchTerm, setSearchTerm] = React.useState("");
+
+    const filteredMenuItems = React.useMemo(() => {
+        if (!searchTerm) {
+            return menuItems;
+        }
+        return menuItems.filter(item => 
+            item.label.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm]);
     
     return (
         <Sidebar collapsible="icon">
@@ -55,8 +68,22 @@ const AppSidebar = () => {
              </SidebarTrigger>
           </SidebarHeader>
           <SidebarContent>
+            <div className="p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-2">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                    <Input 
+                        placeholder="Pesquisar..."
+                        className="pl-10 group-data-[collapsible=icon]:hidden"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                     <div className="items-center justify-center group-data-[collapsible=icon]:flex hidden">
+                        <Search className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                </div>
+            </div>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
@@ -84,14 +111,9 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    // Check for exact match or child routes for title
     const currentItem = menuItems.find(item => item.href !== '/' && pathname.startsWith(item.href));
     if (currentItem) return currentItem.label;
-
-    // Handle root dashboard page
     if (pathname === "/") return "Dashboard";
-    
-    // Fallback title
     return "Saúde Fácil";
   }
 
