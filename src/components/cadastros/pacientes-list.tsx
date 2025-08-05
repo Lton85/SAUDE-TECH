@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
 import { getDepartamentos } from "@/services/departamentosService";
 import type { Departamento } from "@/types/departamento";
+import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
 
 
 export function PacientesList() {
@@ -32,6 +33,7 @@ export function PacientesList() {
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
   const [selectedPatientForQueue, setSelectedPatientForQueue] = useState<Paciente | null>(null);
+  const [selectedPatientForProntuario, setSelectedPatientForProntuario] = useState<Paciente | null>(null);
   const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Paciente | null>(null);
@@ -111,6 +113,10 @@ export function PacientesList() {
   
   const handleSendToQueue = (paciente: Paciente) => {
     setSelectedPatientForQueue(paciente);
+  }
+  
+  const handleProntuario = (paciente: Paciente) => {
+    setSelectedPatientForProntuario(paciente);
   }
 
   const handleDeleteConfirm = async () => {
@@ -240,6 +246,10 @@ export function PacientesList() {
                                 <Send className="mr-2 h-3 w-3" />
                                 <span>Enviar para Fila</span>
                             </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => handleProntuario(paciente)}>
+                                <FileText className="mr-2 h-3 w-3" />
+                                <span>Prontuário</span>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(paciente)}>
                                 <Trash2 className="mr-2 h-3 w-3" />
@@ -296,6 +306,13 @@ export function PacientesList() {
                 onOpenChange={() => setSelectedPatientForQueue(null)}
                 paciente={selectedPatientForQueue}
                 departamentos={departamentos}
+            />
+        )}
+        {selectedPatientForProntuario && (
+            <ProntuarioDialog
+                isOpen={!!selectedPatientForProntuario}
+                onOpenChange={() => setSelectedPatientForProntuario(null)}
+                paciente={selectedPatientForProntuario}
             />
         )}
     </>
