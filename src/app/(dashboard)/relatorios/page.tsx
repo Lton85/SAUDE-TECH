@@ -137,7 +137,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 <Separator className="mb-4 bg-gray-300" />
                 
                 <div className="border rounded-md p-4">
-                    <div className="space-y-1 mb-4 text-sm">
+                    <div className="space-y-2 mb-4 text-sm">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold w-28">Departamento:</span>
                             <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
@@ -344,8 +344,8 @@ export default function RelatoriosPage() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-full print-container">
-            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 print-hide print-hide-on-single">
+        <div className="print-container flex flex-col lg:flex-row gap-6 h-full">
+            <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 print-hide">
                 <FiltrosRelatorio
                     pacientes={pacientes}
                     medicos={medicos}
@@ -365,7 +365,7 @@ export default function RelatoriosPage() {
                 />
             </aside>
             <main className="flex-1 min-w-0 flex flex-col gap-4">
-                 <div className="print-hide print-hide-on-single">
+                 <div className="print-hide">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <h2 className="text-lg font-semibold">Relatórios de Atendimento</h2>
@@ -427,7 +427,7 @@ export default function RelatoriosPage() {
 
 
                 {hasSearched && filteredReportData.length > 0 && (
-                     <Card className="print-hide print-hide-on-single">
+                     <Card className="print-hide">
                         <AtendimentosChart data={filteredReportData} />
                     </Card>
                 )}
@@ -466,7 +466,7 @@ export default function RelatoriosPage() {
                     </CardContent>
 
                     {hasSearched && filteredReportData.length > 0 && (
-                        <CardFooter className="py-3 px-6 border-t print-hide print-hide-on-single bg-card rounded-b-lg">
+                        <CardFooter className="py-3 px-6 border-t print-hide bg-card rounded-b-lg">
                             <div className="text-sm text-muted-foreground">
                                 Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span>
                             </div>
@@ -477,3 +477,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
