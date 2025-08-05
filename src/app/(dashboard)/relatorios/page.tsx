@@ -61,19 +61,19 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     return (
         <div ref={cardRef} className="print-item-card w-full bg-card border rounded-lg hover:border-primary/20 transition-colors p-3">
             {/* Visible part on screen */}
-            <div className="flex items-center gap-4 text-sm print-hide">
-                <span className="flex items-center gap-2 font-semibold truncate w-1/3">
+             <div className="flex items-center justify-between w-full text-sm print-hide">
+                <div className="flex items-center gap-2 font-semibold truncate">
                     <User className="h-4 w-4 text-primary" />
-                    {atendimento.pacienteNome}
-                </span>
-                <span className="flex items-center gap-2 text-muted-foreground truncate w-1/4">
+                    <span className="truncate">{atendimento.pacienteNome}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground truncate">
                     <Building className="h-4 w-4" />
-                    {atendimento.departamentoNome}
-                </span>
-                <span className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
+                    <span className="truncate">{atendimento.departamentoNome}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground truncate">
                     <User className="h-4 w-4" />
-                    {atendimento.profissionalNome}
-                </span>
+                    <span className="truncate">{atendimento.profissionalNome}</span>
+                </div>
                 <div className="flex items-center justify-end gap-2 ml-auto pl-2">
                     <span className="text-muted-foreground text-xs">{dataFormatada}</span>
                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
