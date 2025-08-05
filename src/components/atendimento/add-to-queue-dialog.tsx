@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -36,13 +36,13 @@ interface AddToQueueDialogProps {
   onSuccess: () => void;
 }
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) => {
+const InfoRow = ({ icon: Icon, label, value, className }: { icon: React.ElementType, label: string, value: string | undefined, className?: string }) => {
     if (!value) return null;
     return (
-        <div className="flex items-center gap-2 text-sm">
-            <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className={cn("flex items-center gap-2 text-sm", className)}>
+            <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-muted-foreground">{label}:</span>
-            <span className="font-semibold text-card-foreground">{value}</span>
+            <span className="font-semibold text-card-foreground truncate">{value}</span>
         </div>
     );
 }
@@ -300,7 +300,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
@@ -405,6 +405,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                             <InfoRow icon={BadgeInfo} label="CNS" value={selectedPaciente.cns} />
                             <InfoRow icon={VenetianMask} label="Sexo" value={selectedPaciente.sexo} />
                             <InfoRow icon={Cake} label="Idade" value={selectedPaciente.idade} />
+                            <InfoRow 
+                                icon={Home} 
+                                label="Endereço" 
+                                value={`${selectedPaciente.endereco || ''}, ${selectedPaciente.numero || ''}`}
+                                className="text-xs" 
+                            />
                         </div>
                     </>}
                 </CardContent>
@@ -414,7 +420,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                  <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                     <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
-                        <SelectTrigger id="departamento">
+                        <SelectTrigger id="departamento" className="w-full">
                         <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento"}>
                             {selectedDepartamento ? `${selectedDepartamento.nome}${selectedDepartamento.numero ? ` (Sala: ${selectedDepartamento.numero})` : ''}` : (!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento")}
                         </SelectValue>
@@ -431,7 +437,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                     <div className="space-y-2">
                     <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
                     <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId} disabled={isLoadingProfissionais || !selectedPaciente}>
-                        <SelectTrigger id="profissional">
+                        <SelectTrigger id="profissional" className="w-full">
                         <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : (isLoadingProfissionais ? "Carregando..." : "Selecione o profissional")} />
                         </SelectTrigger>
                         <SelectContent>
