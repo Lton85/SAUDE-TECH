@@ -385,13 +385,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         </div>
 
 
-        <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
-           <Card className="h-full bg-blue-50 border-blue-200">
+        <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
+           <Card className="h-full bg-card">
                 <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
-                        <div className="space-y-1">
+                        <div className="space-y-1 w-full pr-2">
                             <Label htmlFor="paciente" className="text-muted-foreground">Paciente</Label>
-                            <p id="paciente" className="font-semibold text-lg text-card-foreground">{selectedPaciente?.nome || 'Selecione um paciente'}</p>
+                            <p id="paciente" className="font-semibold text-lg text-card-foreground break-words">{selectedPaciente?.nome || 'Selecione um paciente'}</p>
                         </div>
                          <div className="flex items-center gap-2">
                              {selectedPaciente && <>
@@ -424,7 +424,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </CardContent>
             </Card>
 
-            <div className="space-y-4">
+            <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
                  <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                     <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
@@ -477,7 +477,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         id="senha" 
                         value={senha}
                         readOnly
-                        className="font-bold text-lg bg-muted/30 text-center tracking-wider"
+                        className="font-bold text-lg bg-background text-center tracking-wider"
                         disabled={!selectedPaciente}
                         placeholder="-"
                         />
