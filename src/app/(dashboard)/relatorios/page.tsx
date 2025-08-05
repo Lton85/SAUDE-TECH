@@ -55,26 +55,29 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     return (
         <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item">
             <AccordionItem value={atendimento.id} className="border-b-0">
-                <AccordionTrigger className="p-4 text-sm hover:no-underline">
-                    <div className="w-full grid grid-cols-12 items-center gap-4 text-left">
-                        <span className="col-span-4 flex items-center gap-2 font-semibold truncate">
+                <AccordionTrigger className="p-3 text-sm hover:no-underline">
+                    <div className="w-full flex items-center gap-4 text-left">
+                        <span className="flex items-center gap-2 font-semibold truncate w-1/3">
                             <User className="h-4 w-4 text-primary" />
                             {atendimento.pacienteNome}
                         </span>
-                        <span className="col-span-3 flex items-center gap-2 text-muted-foreground truncate">
+                        <span className="flex items-center gap-2 text-muted-foreground truncate w-1/4">
                             <Building className="h-4 w-4" />
                             {atendimento.departamentoNome}
                         </span>
-                        <span className="col-span-3 flex items-center gap-2 text-muted-foreground truncate">
+                        <span className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
                             <User className="h-4 w-4" />
                             {atendimento.profissionalNome}
                         </span>
-                        <div className="col-span-2 flex items-center justify-end gap-2">
-                             <span className="text-muted-foreground">{dataFormatada}</span>
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                        <div className="flex items-center justify-end gap-2 ml-auto">
+                             <span className="text-muted-foreground text-xs">{dataFormatada}</span>
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Finalizado
                             </Badge>
+                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
+                                <Printer className="h-3 w-3" />
+                            </Button>
                         </div>
                     </div>
                 </AccordionTrigger>
@@ -175,8 +178,10 @@ export default function RelatoriosPage() {
     // Initial data load for today
     React.useEffect(() => {
         setIsMounted(true);
-        handleSearch({ from: new Date(), to: new Date() });
-    }, []);
+        if(!hasSearched){
+            handleSearch({ from: new Date(), to: new Date() });
+        }
+    }, [hasSearched, handleSearch]);
 
     // Fetch filter options (pacientes, medicos, etc.)
     React.useEffect(() => {
@@ -201,7 +206,8 @@ export default function RelatoriosPage() {
         fetchFiltersData();
     }, [toast]);
     
-     React.useEffect(() => {
+    // This useEffect will run whenever a filter changes, triggering a new search
+    React.useEffect(() => {
         if (!isMounted) return;
         applyClientSideFilters(allReportData);
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, allReportData, isMounted, applyClientSideFilters]);
@@ -229,7 +235,7 @@ export default function RelatoriosPage() {
         setDateRange(newRange);
         handleSearch(newRange);
 
-    }, [viewMode, isMounted, handleSearch]);
+    }, [viewMode, isMounted]); // Removed handleSearch from dependency array to avoid re-running on every filter change
 
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
@@ -252,8 +258,12 @@ export default function RelatoriosPage() {
     }
     
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
-        setDateRange(range);
-        handleSearch(range);
+        if (range.from && range.to) {
+            setDateRange(range);
+            handleSearch(range);
+        } else {
+             setDateRange(range || { from: undefined, to: undefined });
+        }
     }
 
     if (!isMounted) {
@@ -333,13 +343,7 @@ export default function RelatoriosPage() {
                                         mode="range"
                                         defaultMonth={dateRange.from}
                                         selected={dateRange}
-                                        onSelect={(range) => {
-                                            if (range?.from && range?.to) {
-                                                handleManualDateSearch(range as { from: Date, to: Date });
-                                            } else {
-                                                setDateRange(range || { from: undefined, to: undefined });
-                                            }
-                                        }}
+                                        onSelect={handleManualDateSearch}
                                         numberOfMonths={2}
                                         locale={ptBR}
                                         captionLayout="dropdown-buttons"
@@ -395,5 +399,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-
