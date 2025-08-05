@@ -386,7 +386,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
 
         <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
-           <Card className="bg-muted/50 h-full">
+           <Card className="h-full bg-blue-50 border-blue-200">
                 <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
                         <div className="space-y-1">
