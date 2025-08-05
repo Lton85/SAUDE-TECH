@@ -1,8 +1,9 @@
 
+
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
 
@@ -124,6 +125,54 @@ export default function RelatoriosPage() {
     });
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
 
+    const applyClientSideFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[]) => {
+        let filteredData = [...dataToFilter];
+
+        if (selectedPacienteId !== 'todos') {
+            filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
+        }
+
+        if (selectedMedicoId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
+        }
+
+        if (selectedEnfermeiroId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+        }
+        
+        setFilteredReportData(filteredData);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
+
+    const handleSearch = React.useCallback(async () => {
+        if (!dateRange.from || !dateRange.to) {
+            toast({
+                title: "Período inválido",
+                description: "Por favor, selecione as datas de início e fim.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        setHasSearched(true);
+        try {
+            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
+            setAllReportData(data); // Store all data from the period
+            applyClientSideFilters(data); // Apply filters to the new data
+        } catch (error) {
+            console.error("Erro ao buscar relatório: ", error);
+            toast({
+                title: "Erro ao buscar relatório",
+                description: (error as Error).message,
+                variant: "destructive"
+            });
+            setAllReportData([]);
+            setFilteredReportData([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [dateRange, toast, applyClientSideFilters]);
+
     React.useEffect(() => {
         setIsMounted(true);
         handleSearch(); // Load initial data for today
@@ -152,69 +201,33 @@ export default function RelatoriosPage() {
     }, [toast]);
 
     React.useEffect(() => {
+        if (!isMounted) return; // Don't run on initial mount
         const today = new Date();
+        let newFrom, newTo;
+
         if (viewMode === 'diario') {
-            setDateRange({ from: today, to: today });
+            newFrom = today;
+            newTo = today;
         } else if (viewMode === 'semanal') {
-            setDateRange({ from: startOfWeek(today), to: endOfWeek(today) });
+            newFrom = startOfWeek(today, { locale: ptBR });
+            newTo = endOfWeek(today, { locale: ptBR });
         } else if (viewMode === 'mensal') {
-            setDateRange({ from: startOfMonth(today), to: endOfMonth(today) });
+            newFrom = startOfMonth(today);
+            newTo = endOfMonth(today);
         }
-    }, [viewMode]);
+        setDateRange({ from: newFrom, to: newTo });
 
-    const applyClientSideFilters = React.useCallback((data: FilaDeEsperaItem[]) => {
-        let filteredData = [...data];
+    }, [viewMode, isMounted]);
 
-        if (selectedPacienteId !== 'todos') {
-            filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
-        }
-       
-        const profissionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : selectedEnfermeiroId;
-        if(profissionalId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === profissionalId);
-        }
-        
-        return filteredData;
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
 
-    const handleSearch = React.useCallback(async () => {
-        if (!dateRange.from || !dateRange.to) {
-            toast({
-                title: "Período inválido",
-                description: "Por favor, selecione as datas de início e fim.",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        setIsLoading(true);
-        setHasSearched(true);
-        try {
-            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
-            setAllReportData(data);
-            const finalData = applyClientSideFilters(data);
-            setFilteredReportData(finalData);
-
-        } catch (error) {
-            console.error("Erro ao buscar relatório: ", error);
-            toast({
-                title: "Erro ao buscar relatório",
-                description: (error as Error).message,
-                variant: "destructive"
-            });
-            setAllReportData([]);
-            setFilteredReportData([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [dateRange, toast, applyClientSideFilters]);
-    
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
         setSelectedMedicoId('todos');
         setSelectedEnfermeiroId('todos');
         setViewMode('diario');
         setDateRange({ from: new Date(), to: new Date() });
+        // After clearing, re-apply filters on the existing data for the default date range.
+        applyClientSideFilters(allReportData.filter(d => d.finalizadaEm && isToday(d.finalizadaEm.toDate())));
     };
 
     const hasActiveFilters = React.useMemo(() => {
@@ -233,7 +246,11 @@ export default function RelatoriosPage() {
     }
 
     if (!isMounted) {
-        return null; // or a loading skeleton
+        return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
     }
 
     return (
@@ -246,16 +263,10 @@ export default function RelatoriosPage() {
                     selectedPacienteId={selectedPacienteId}
                     onPacienteChange={setSelectedPacienteId}
                     selectedMedicoId={selectedMedicoId}
-                    onMedicoChange={(id) => {
-                        setSelectedMedicoId(id);
-                        if (id !== 'todos') setSelectedEnfermeiroId('todos');
-                    }}
+                    onMedicoChange={setSelectedMedicoId}
                     selectedEnfermeiroId={selectedEnfermeiroId}
-                    onEnfermeiroChange={(id) => {
-                        setSelectedEnfermeiroId(id);
-                        if (id !== 'todos') setSelectedMedicoId('todos');
-                    }}
-                    onSearch={handleSearch}
+                    onEnfermeiroChange={setSelectedEnfermeiroId}
+                    onSearch={() => applyClientSideFilters(allReportData)} // Apply filters on existing data
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
                     hasActiveFilters={hasActiveFilters}
@@ -316,8 +327,17 @@ export default function RelatoriosPage() {
                                         selected={dateRange}
                                         onSelect={(range) => {
                                             setDateRange(range || {from: undefined, to: undefined});
-                                            if (range?.from && range.to && format(range.from, 'yyyy-MM-dd') !== format(new Date(), 'yyyy-MM-dd') && format(range.from, 'yyyy-MM-dd') !== format(startOfWeek(new Date()), 'yyyy-MM-dd')) {
-                                                setViewMode('diario'); // Reset view mode if a custom range is selected
+                                            if (range?.from && range.to) {
+                                                const today = new Date();
+                                                const fromDateStr = format(range.from, 'yyyy-MM-dd');
+                                                const todayStr = format(today, 'yyyy-MM-dd');
+                                                const startOfWeekStr = format(startOfWeek(today, { locale: ptBR }), 'yyyy-MM-dd');
+                                                const startOfMonthStr = format(startOfMonth(today), 'yyyy-MM-dd');
+
+                                                if (fromDateStr === todayStr) setViewMode('diario');
+                                                else if (fromDateStr === startOfWeekStr) setViewMode('semanal');
+                                                else if (fromDateStr === startOfMonthStr) setViewMode('mensal');
+                                                else setViewMode('diario'); // Fallback for custom range
                                             }
                                         }}
                                         numberOfMonths={2}
@@ -343,7 +363,7 @@ export default function RelatoriosPage() {
                                     Nenhum resultado encontrado para os filtros selecionados.
                                 </p>
                             </div>
-                        ) : (
+                        ) : hasSearched && filteredReportData.length > 0 ? (
                             <div className="flex-1 flex flex-col gap-4 min-h-0">
                                 <AtendimentosChart data={filteredReportData} />
                                  <p className="text-sm text-muted-foreground">Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span></p>
@@ -354,6 +374,13 @@ export default function RelatoriosPage() {
                                         ))}
                                     </div>
                                 </ScrollArea>
+                            </div>
+                        ) : (
+                             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed">
+                                <Filter className="h-10 w-10 text-muted-foreground/50" />
+                                <p className="mt-4 text-center text-muted-foreground">
+                                    Use os filtros e clique em "Consultar" para gerar o relatório.
+                                </p>
                             </div>
                         )}
                     </CardContent>

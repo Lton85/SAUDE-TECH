@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -80,7 +81,7 @@ function Calendar({
                 handleChange(value)
               }}
             >
-              <SelectTrigger className="pr-1.5 focus:ring-0 w-[80px]">
+              <SelectTrigger className="pr-1.5 focus:ring-0 w-auto min-w-[8ch]">
                 <SelectValue>{selected?.props?.children}</SelectValue>
               </SelectTrigger>
               <SelectContent position="popper">
