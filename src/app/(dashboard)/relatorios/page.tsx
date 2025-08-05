@@ -92,9 +92,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
 export default function RelatoriosPage() {
     const { toast } = useToast();
-    const [dateFrom, setDateFrom] = React.useState<Date | undefined>(new Date());
-    const [dateTo, setDateTo] = React.useState<Date | undefined>(new Date());
-    const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
+    const [date, setDate] = React.useState<Date | undefined>(new Date());
     
     const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
     const [medicos, setMedicos] = React.useState<Medico[]>([]);
@@ -109,6 +107,12 @@ export default function RelatoriosPage() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [hasSearched, setHasSearched] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
+
+    const [dateRange, setDateRange] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
+      from: new Date(),
+      to: new Date(),
+    });
+    const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
 
     React.useEffect(() => {
         setIsMounted(true);
@@ -140,19 +144,16 @@ export default function RelatoriosPage() {
     React.useEffect(() => {
         const today = new Date();
         if (viewMode === 'diario') {
-            setDateFrom(today);
-            setDateTo(today);
+            setDateRange({ from: today, to: today });
         } else if (viewMode === 'semanal') {
-            setDateFrom(startOfWeek(today));
-            setDateTo(endOfWeek(today));
+            setDateRange({ from: startOfWeek(today), to: endOfWeek(today) });
         } else if (viewMode === 'mensal') {
-            setDateFrom(startOfMonth(today));
-            setDateTo(endOfMonth(today));
+            setDateRange({ from: startOfMonth(today), to: endOfMonth(today) });
         }
     }, [viewMode]);
 
     const handleSearch = React.useCallback(async () => {
-        if (!dateFrom || !dateTo) {
+        if (!dateRange.from || !dateRange.to) {
             toast({
                 title: "Período inválido",
                 description: "Por favor, selecione as datas de início e fim.",
@@ -164,7 +165,7 @@ export default function RelatoriosPage() {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom, dateTo });
+            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
             setAllReportData(data);
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
@@ -177,7 +178,7 @@ export default function RelatoriosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [dateFrom, dateTo, toast]);
+    }, [dateRange, toast]);
 
     React.useEffect(() => {
         let data = [...allReportData];
@@ -270,12 +271,12 @@ export default function RelatoriosPage() {
                                         variant={"outline"}
                                         className={cn(
                                         "w-[260px] justify-start text-left font-normal",
-                                        !dateFrom && "text-muted-foreground"
+                                        !dateRange.from && "text-muted-foreground"
                                         )}
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {dateFrom && dateTo ? (
-                                             `${format(dateFrom, "dd 'de' MMM, y", { locale: ptBR })} - ${format(dateTo, "dd 'de' MMM, y", { locale: ptBR })}`
+                                        {dateRange.from && dateRange.to ? (
+                                             `${format(dateRange.from, "dd 'de' MMM, y", { locale: ptBR })} - ${format(dateRange.to, "dd 'de' MMM, y", { locale: ptBR })}`
                                         ) : <span>Escolha um período</span>
                                         }
                                     </Button>
@@ -284,14 +285,14 @@ export default function RelatoriosPage() {
                                     <Calendar
                                         initialFocus
                                         mode="range"
-                                        defaultMonth={dateFrom}
-                                        selected={{ from: dateFrom, to: dateTo }}
-                                        onSelect={(range) => {
-                                            setDateFrom(range?.from)
-                                            setDateTo(range?.to)
-                                        }}
+                                        defaultMonth={dateRange.from}
+                                        selected={dateRange}
+                                        onSelect={setDateRange}
                                         numberOfMonths={2}
                                         locale={ptBR}
+                                        captionLayout="dropdown-buttons"
+                                        fromYear={new Date().getFullYear() - 10}
+                                        toYear={new Date().getFullYear() + 10}
                                     />
                                     </PopoverContent>
                                 </Popover>
