@@ -60,7 +60,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
         if (cardElement && printContainer) {
             
             const originalTitle = document.title;
-            document.title = `Relatório Individual Paciente - ${atendimento.pacienteNome}`;
+            document.title = `Relatório Individual do Paciente - ${atendimento.pacienteNome}`;
 
             printContainer.classList.add('printing-single-item');
             cardElement.classList.add('print-this');
@@ -76,7 +76,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     }
 
     const PrintedContent = () => (
-         <div className="w-full border p-4">
+         <div className="w-full">
             <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
             </div>
 
-            <div className="flex items-start gap-8 mb-4">
+            <div className="flex items-start justify-between gap-8 mb-4">
                  <div className="flex items-center gap-2 text-sm">
                     <span className="font-semibold">Departamento:</span>
                     <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
@@ -321,13 +321,20 @@ export default function RelatoriosPage() {
 
     const handlePrint = () => {
         const originalTitle = document.title;
-        if (viewMode === 'diario') document.title = "Relatório Diário";
-        else if (viewMode === 'semanal') document.title = "Relatório Semanal";
-        else if (viewMode === 'mensal') document.title = "Relatório Mensal";
-        else if (dateRange.from && dateRange.to) {
-             const from = format(dateRange.from, 'dd/MM/yy');
-             const to = format(dateRange.to, 'dd/MM/yy');
-             document.title = from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
+        const printingSingleItem = document.querySelector('.printing-single-item');
+        
+        if (printingSingleItem) {
+             document.title = "Relatório Individual do Paciente";
+        } else if (viewMode === 'diario') {
+            document.title = "Relatório Diário";
+        } else if (viewMode === 'semanal') {
+            document.title = "Relatório Semanal";
+        } else if (viewMode === 'mensal') {
+            document.title = "Relatório Mensal";
+        } else if (dateRange.from && dateRange.to) {
+            const from = format(dateRange.from, 'dd/MM/yy');
+            const to = format(dateRange.to, 'dd/MM/yy');
+            document.title = from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
         }
         window.print();
         document.title = originalTitle;
