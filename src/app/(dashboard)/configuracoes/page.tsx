@@ -237,23 +237,17 @@ export default function ConfiguracoesPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-           <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Configurações Gerais</CardTitle>
-                <CardDescription>Parâmetros principais do sistema.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="py-2">Parâmetro</TableHead>
-                      <TableHead className="text-right py-2">Ação</TableHead>
+                      <TableHead>Parâmetro</TableHead>
+                      <TableHead className="text-right">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Senha de Classificação Normal</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Senha de Classificação Normal</TableCell>
+                        <TableCell className="text-right">
                            <Button 
                              onClick={() => handleResetRequest('Normal')}
                              variant="destructive" 
@@ -267,8 +261,8 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Senha de Classificação Emergência</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Senha de Classificação Emergência</TableCell>
+                        <TableCell className="text-right">
                             <Button 
                                 onClick={() => handleResetRequest('Emergência')}
                                 variant="destructive" 
@@ -282,8 +276,8 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Pacientes</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Pacientes</TableCell>
+                        <TableCell className="text-right">
                             <Button 
                                 onClick={handlePacienteResetRequest}
                                 variant="destructive" 
@@ -298,8 +292,8 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Médicos</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Médicos</TableCell>
+                        <TableCell className="text-right">
                             <Button 
                                 onClick={handleMedicoResetRequest}
                                 variant="destructive" 
@@ -314,8 +308,8 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
+                        <TableCell className="text-right">
                             <Button 
                                 onClick={handleEnfermeiroResetRequest}
                                 variant="destructive" 
@@ -330,8 +324,8 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell className="font-medium py-2">Zerar Prontuário de Pacientes</TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="font-medium">Zerar Prontuário de Pacientes</TableCell>
+                        <TableCell className="text-right">
                             <Button 
                                 onClick={handleProntuarioResetRequest}
                                 variant="destructive" 
@@ -346,8 +340,6 @@ export default function ConfiguracoesPage() {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </CardContent>
-           </Card>
       </CardContent>
     </Card>
      {resetType && (
@@ -381,5 +373,3 @@ export default function ConfiguracoesPage() {
     </>
   );
 }
-
-    
