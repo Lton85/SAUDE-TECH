@@ -10,6 +10,7 @@ import { resetCounterByName } from "@/services/countersService";
 import { clearAllHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
 import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
+import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
 
 
 export default function ConfiguracoesPage() {
@@ -17,20 +18,26 @@ export default function ConfiguracoesPage() {
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
     const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [isPacienteResetting, setIsPacienteResetting] = useState(false);
+    const [senhaDialogOpen, setSenhaDialogOpen] = useState(false);
     const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
+    const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
     const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
 
     const handleResetRequest = (type: 'Normal' | 'Emergência') => {
         setResetType(type);
-        setDialogOpen(true);
+        setSenhaDialogOpen(true);
     };
     
     const handleProntuarioResetRequest = () => {
         setProntuarioDialogOpen(true);
     };
 
-    const handleConfirmReset = async () => {
+    const handlePacienteResetRequest = () => {
+        setPacienteDialogOpen(true);
+    };
+
+    const handleConfirmSenhaReset = async () => {
         if (!resetType) return;
 
         const isNormal = resetType === 'Normal';
@@ -39,7 +46,7 @@ export default function ConfiguracoesPage() {
         const ticketExample = isNormal ? 'N-001' : 'E-001';
 
         setLoading(true);
-        setDialogOpen(false);
+        setSenhaDialogOpen(false);
 
         try {
             await resetCounterByName(counterName);
@@ -79,6 +86,28 @@ export default function ConfiguracoesPage() {
             });
         } finally {
             setIsProntuarioResetting(false);
+        }
+    };
+
+    const handleConfirmPacienteReset = async () => {
+        setIsPacienteResetting(true);
+        setPacienteDialogOpen(false);
+
+        try {
+            await resetCounterByName('pacientes_v2');
+            toast({
+                title: "Códigos de Paciente Zerados!",
+                description: "A contagem de códigos de cadastro de paciente foi reiniciada para 001.",
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao zerar códigos de paciente",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsPacienteResetting(false);
         }
     };
 
@@ -140,6 +169,20 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
+                        <TableCell className="font-medium">Zerar Códigos de Pacientes</TableCell>
+                        <TableCell className="text-right">
+                            <Button 
+                                onClick={handlePacienteResetRequest}
+                                variant="destructive" 
+                                size="sm"
+                                disabled={isPacienteResetting}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isPacienteResetting ? 'animate-spin' : ''}`} />
+                                {isPacienteResetting ? 'Zerando...' : 'Zerar (001)'}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
                         <TableCell className="font-medium">Zerar Prontuário de Pacientes</TableCell>
                         <TableCell className="text-right">
                             <Button 
@@ -167,9 +210,9 @@ export default function ConfiguracoesPage() {
     </Card>
      {resetType && (
         <ResetSenhaDialog
-            isOpen={dialogOpen}
-            onOpenChange={setDialogOpen}
-            onConfirm={handleConfirmReset}
+            isOpen={senhaDialogOpen}
+            onOpenChange={setSenhaDialogOpen}
+            onConfirm={handleConfirmSenhaReset}
             tipoSenha={resetType}
         />
      )}
@@ -177,6 +220,11 @@ export default function ConfiguracoesPage() {
             isOpen={prontuarioDialogOpen}
             onOpenChange={setProntuarioDialogOpen}
             onConfirm={handleConfirmProntuarioReset}
+        />
+       <ResetPacienteDialog
+            isOpen={pacienteDialogOpen}
+            onOpenChange={setPacienteDialogOpen}
+            onConfirm={handleConfirmPacienteReset}
         />
     </>
   );
