@@ -12,6 +12,8 @@ import {
   HeartPulse,
   Settings,
   BarChart3,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -23,6 +25,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -34,6 +37,44 @@ const menuItems = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
   { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
 ];
+
+const AppSidebar = () => {
+    const { state } = useSidebar();
+    
+    return (
+        <Sidebar collapsible="icon">
+          <SidebarHeader className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <HeartPulse className="h-8 w-8 text-primary" />
+              <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
+                  <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
+              </div>
+            </Link>
+             <SidebarTrigger className="hidden md:flex h-7 w-7">
+                {state === 'expanded' ? <PanelLeftClose /> : <PanelLeftOpen />}
+             </SidebarTrigger>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={usePathname() === "/" ? usePathname() === item.href : usePathname().startsWith(item.href)}
+                    tooltip={{children: item.label, side: "right"}}
+                  >
+                    <Link href={item.href} {...(item.target && { target: item.target })}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
+    );
+}
 
 export default function DashboardLayout({
   children,
@@ -57,31 +98,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex">
-        <Sidebar>
-          <SidebarHeader>
-            <Link href="/" className="flex items-center gap-2">
-              <HeartPulse className="h-8 w-8 text-primary" />
-              <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
-            </Link>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.href === "/" ? pathname === item.href : pathname.startsWith(item.href)}
-                  >
-                    <Link href={item.href} {...(item.target && { target: item.target })}>
-                      <item.icon />
-                      {item.label}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
+        <AppSidebar />
         <SidebarInset>
           <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
             <SidebarTrigger className="md:hidden"/>
