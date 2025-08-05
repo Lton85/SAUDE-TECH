@@ -309,21 +309,13 @@ export default function RelatoriosPage() {
                                     Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
                                 </CardDescription>
                             </div>
-                            <div className="flex items-center gap-2 print-hide">
-                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
-                                    <Printer className="mr-2 h-4 w-4" />
-                                    Imprimir Relatório
-                                </Button>
-                            </div>
                         </div>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2 print-hide">
+                        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-2 print-hide">
                              <div className="flex items-center gap-2">
                                 <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                                 <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
                                 <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
-                            </div>
-                             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-                            <div className="flex items-center gap-2">
+                            
                                  <Popover>
                                     <PopoverTrigger asChild>
                                     <Button
@@ -359,6 +351,10 @@ export default function RelatoriosPage() {
                                     </PopoverContent>
                                 </Popover>
                             </div>
+                            <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
+                                <Printer className="mr-2 h-4 w-4" />
+                                Imprimir Relatório
+                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 flex flex-col min-h-0 p-4">
