@@ -47,13 +47,14 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
     const [isAccordionOpen, setIsAccordionOpen] = React.useState(false);
+    const cardRef = React.useRef<HTMLDivElement>(null);
 
     const handlePrintItem = (e: React.MouseEvent) => {
         e.stopPropagation();
         setIsAccordionOpen(true);
 
         setTimeout(() => {
-            const cardElement = (e.currentTarget as HTMLElement).closest('.print-item-card');
+            const cardElement = cardRef.current;
             if (cardElement) {
                 document.body.classList.add('printing-single-item');
                 cardElement.classList.add('print-this');
@@ -66,7 +67,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     }
 
     return (
-        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card" value={isAccordionOpen ? atendimento.id : ''} onValueChange={(value) => setIsAccordionOpen(!!value)}>
+        <Accordion ref={cardRef} type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card" value={isAccordionOpen ? atendimento.id : ''} onValueChange={(value) => setIsAccordionOpen(!!value)}>
             <AccordionItem value={atendimento.id} className="border-b-0">
                  <div className="flex items-center p-3 text-sm">
                     <AccordionTrigger className="p-0 hover:no-underline flex-1">
