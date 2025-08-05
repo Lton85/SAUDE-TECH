@@ -8,6 +8,17 @@ import { DepartamentoForm } from "./departamento-form";
 import { addDepartamento, updateDepartamento } from "@/services/departamentosService";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const DepartamentoFormSchema = z.object({
+  nome: z.string().min(3, { message: "O nome é obrigatório." }),
+  numero: z.string().optional(),
+  situacao: z.boolean().default(true),
+});
+
+export type DepartamentoFormValues = z.infer<typeof DepartamentoFormSchema>;
 
 interface DepartamentoDialogProps {
   isOpen: boolean;
@@ -19,34 +30,59 @@ interface DepartamentoDialogProps {
 export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamento }: DepartamentoDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
-  const formId = "departamento-form";
   const isEditMode = !!departamento;
 
-  const handleSubmit = async (values: Omit<Departamento, 'id' | 'codigo' | 'historico'>) => {
+  const form = useForm<DepartamentoFormValues>({
+    resolver: zodResolver(DepartamentoFormSchema),
+    defaultValues: {
+      nome: "",
+      numero: "",
+      situacao: true,
+    },
+  });
+
+  React.useEffect(() => {
+    if (departamento) {
+      form.reset({
+        nome: departamento.nome || "",
+        numero: departamento.numero || "",
+        situacao: departamento.situacao === 'Ativo',
+      });
+    } else {
+        form.reset({
+            nome: "",
+            numero: "",
+            situacao: true,
+        });
+    }
+  }, [departamento, isOpen, form]);
+
+  const handleSubmit = async (values: DepartamentoFormValues) => {
     setIsSubmitting(true);
     try {
+       const departamentoData = {
+        nome: values.nome,
+        numero: values.numero || "",
+        situacao: values.situacao ? 'Ativo' : 'Inativo',
+      };
+
       if (isEditMode && departamento) {
-         const updatedDepartamento: Partial<Omit<Departamento, 'id' | 'codigo' | 'historico'>> = {
-            ...values,
-            numero: values.numero || '',
-        };
-        await updateDepartamento(departamento.id, updatedDepartamento);
+        await updateDepartamento(departamento.id, departamentoData);
         toast({
           title: "Departamento Atualizado!",
           description: `Os dados de ${values.nome} foram atualizados.`,
+          className: "bg-green-500 text-white"
         });
       } else {
-         const newDepartamento: Omit<Departamento, 'id' | 'codigo' | 'historico'> = {
-            ...values,
-            numero: values.numero || '',
-        };
-        await addDepartamento(newDepartamento);
+        await addDepartamento(departamentoData as Omit<Departamento, 'id' | 'codigo' | 'historico'>);
         toast({
           title: "Departamento Cadastrado!",
           description: `${values.nome} foi adicionado com sucesso.`,
+          className: "bg-green-500 text-white"
         });
       }
       onSuccess();
+      onOpenChange(false);
     } catch (error) {
       console.error("Erro ao salvar departamento:", error);
       toast({
@@ -71,20 +107,23 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
             {isEditMode ? "Altere os dados abaixo para atualizar o cadastro." : "Preencha os campos abaixo para adicionar um novo departamento."}
           </DialogDescription>
         </DialogHeader>
-        <DepartamentoForm
-          id={formId}
-          onSubmit={handleSubmit}
-          departamento={departamento}
-        />
-         <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-                Cancelar
-            </Button>
-            <Button type="submit" form={formId} disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
-            </Button>
-        </DialogFooter>
+        <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <DepartamentoForm />
+                <DialogFooter className="mt-4 pt-4 border-t items-center">
+                    <DepartamentoForm.SituacaoCheckbox isEditMode={isEditMode} />
+                    <div className="flex gap-2">
+                        <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting ? 'Salvando...' : 'Salvar'}
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );
