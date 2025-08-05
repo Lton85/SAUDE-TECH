@@ -148,8 +148,9 @@
     display: flex !important;
     position: fixed;
     inset: 0;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 2cm;
     width: 100%;
     border: none;
     box-shadow: none;
