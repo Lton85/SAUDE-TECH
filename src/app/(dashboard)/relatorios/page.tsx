@@ -60,34 +60,32 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div ref={cardRef} className="print-item-card w-full">
-             <div className="bg-card border rounded-lg hover:border-primary/20 transition-colors p-3 print-hide">
-                <div className="flex items-center justify-between w-full text-sm">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 font-medium truncate">
-                            <User className="h-4 w-4 text-primary" />
-                            <span className="truncate">{atendimento.pacienteNome}</span>
-                        </div>
-                        <Separator orientation="vertical" className="h-5" />
-                        <div className="flex items-center gap-2 text-muted-foreground truncate">
-                            <Building className="h-4 w-4" />
-                            <span className="truncate">{atendimento.departamentoNome}</span>
-                        </div>
-                        <Separator orientation="vertical" className="h-5" />
-                        <div className="flex items-center gap-2 text-muted-foreground truncate">
-                            <User className="h-4 w-4" />
-                            <span className="truncate">{atendimento.profissionalNome}</span>
-                        </div>
+             <div className="flex items-center justify-between w-full text-sm p-3 border-b print-hide">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex items-center gap-2 font-medium truncate">
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="truncate">{atendimento.pacienteNome}</span>
                     </div>
-                    <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
-                        <span className="text-muted-foreground text-xs">{dataFormatada}</span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Finalizado
-                        </Badge>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
-                            <Printer className="h-3 w-3" />
-                        </Button>
+                    <Separator orientation="vertical" className="h-5" />
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                        <Building className="h-4 w-4" />
+                        <span className="truncate">{atendimento.departamentoNome}</span>
                     </div>
+                    <Separator orientation="vertical" className="h-5" />
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                        <User className="h-4 w-4" />
+                        <span className="truncate">{atendimento.profissionalNome}</span>
+                    </div>
+                </div>
+                <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
+                    <span className="text-muted-foreground text-xs">{dataFormatada}</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Finalizado
+                    </Badge>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
+                        <Printer className="h-3 w-3" />
+                    </Button>
                 </div>
             </div>
 
@@ -305,7 +303,7 @@ export default function RelatoriosPage() {
                 />
             </aside>
             <main className="flex-1 min-w-0 flex flex-col gap-4">
-                <Card id="report-content-header">
+                <Card id="report-content">
                     <CardHeader className="p-4 print-hide">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
@@ -360,50 +358,50 @@ export default function RelatoriosPage() {
                             </div>
                         </div>
                     </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                        {hasSearched && filteredReportData.length > 0 && (
+                            <AtendimentosChart data={filteredReportData} />
+                        )}
+
+                        <div className="mt-4 flex-1 flex flex-col min-h-0">
+                            {isLoading ? (
+                                <div className="flex flex-col items-center justify-center h-full py-10">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
+                                </div>
+                            ) : hasSearched && filteredReportData.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                                    <p className="text-muted-foreground">
+                                        Nenhum resultado encontrado para os filtros selecionados.
+                                    </p>
+                                </div>
+                            ) : hasSearched && filteredReportData.length > 0 ? (
+                                <ScrollArea className="flex-1 -mx-2">
+                                    <div className="space-y-0">
+                                        {filteredReportData.map((item) => (
+                                            <ReportItemCard key={item.id} atendimento={item} />
+                                        ))}
+                                    </div>
+                                </ScrollArea>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                                    <Filter className="h-10 w-10 text-muted-foreground/50" />
+                                    <p className="mt-4 text-center text-muted-foreground">
+                                        Use os filtros para gerar o relatório.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+
                     {hasSearched && filteredReportData.length > 0 && (
-                        <CardContent className="p-4 pt-0">
-                           <AtendimentosChart data={filteredReportData} />
-                        </CardContent>
+                        <CardFooter className="py-3 px-6 border-t print-hide bg-card rounded-b-lg">
+                            <div className="text-sm text-muted-foreground">
+                                Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span>
+                            </div>
+                        </CardFooter>
                     )}
                 </Card>
-
-                <div className="flex-1 flex flex-col min-h-0">
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
-                        </div>
-                    ) : hasSearched && filteredReportData.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed">
-                            <p className="text-muted-foreground">
-                                Nenhum resultado encontrado para os filtros selecionados.
-                            </p>
-                        </div>
-                    ) : hasSearched && filteredReportData.length > 0 ? (
-                        <ScrollArea className="flex-1 -mx-2">
-                            <div className="space-y-3 px-2">
-                                {filteredReportData.map((item) => (
-                                    <ReportItemCard key={item.id} atendimento={item} />
-                                ))}
-                            </div>
-                        </ScrollArea>
-                    ) : (
-                         <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed">
-                            <Filter className="h-10 w-10 text-muted-foreground/50" />
-                            <p className="mt-4 text-center text-muted-foreground">
-                                Use os filtros para gerar o relatório.
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                {hasSearched && filteredReportData.length > 0 && (
-                    <div className="py-3 px-4 border-t print-hide bg-card rounded-b-lg">
-                        <div className="text-sm text-muted-foreground">
-                            Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span>
-                        </div>
-                    </div>
-                )}
             </main>
         </div>
     );
