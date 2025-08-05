@@ -22,14 +22,12 @@ const formSchema = z.object({
   cns: z.string().min(15, { message: "O CNS é obrigatório." }),
   coren: z.string().min(4, { message: "O COREN é obrigatório." }),
   especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
-  sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório." }),
-  dataNascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
-    message: "A data deve estar no formato DD/MM/AAAA.",
-  }),
-  telefone: z.string().min(10, { message: "O telefone é obrigatório." }),
-  turno: z.enum(['Manhã', 'Tarde', 'Noite'], { required_error: "O turno é obrigatório." }),
-  situacao: z.enum(['Ativo', 'Inativo'], { required_error: "A situação é obrigatória." }),
+  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
+  cpf: z.string().optional(),
+  dataNascimento: z.string().optional(),
+  telefone: z.string().optional(),
+  turno: z.enum(['Manhã', 'Tarde', 'Noite', '']).optional(),
+  situacao: z.enum(['Ativo', 'Inativo']),
 });
 
 type EnfermeiroFormValues = z.infer<typeof formSchema>;

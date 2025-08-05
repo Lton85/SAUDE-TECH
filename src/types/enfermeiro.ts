@@ -4,12 +4,12 @@ export interface Enfermeiro {
     nome: string;
     coren: string;
     cns: string;
-    sexo: 'Masculino' | 'Feminino';
+    sexo: 'Masculino' | 'Feminino' | '';
     especialidade: string;
     cpf: string;
     dataNascimento: string;
     telefone: string;
-    turno: 'Manhã' | 'Tarde' | 'Noite';
+    turno: 'Manhã' | 'Tarde' | 'Noite' | '';
     situacao: 'Ativo' | 'Inativo';
     historico: {
         criadoEm: string;

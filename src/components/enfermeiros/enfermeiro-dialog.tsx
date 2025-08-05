@@ -23,15 +23,24 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
   const handleSubmit = async (values: Omit<Enfermeiro, 'id' | 'codigo' | 'historico'>) => {
     setIsSubmitting(true);
     try {
+      const enfermeiroData = {
+          ...values,
+          sexo: values.sexo || "",
+          cpf: values.cpf || "",
+          dataNascimento: values.dataNascimento || "",
+          telefone: values.telefone || "",
+          turno: values.turno || "",
+      };
+
       if (isEditMode && enfermeiro) {
-        await updateEnfermeiro(enfermeiro.id, values);
+        await updateEnfermeiro(enfermeiro.id, enfermeiroData);
         toast({
           title: "Enfermeiro(a) Atualizado(a)!",
           description: `Os dados de ${values.nome} foram atualizados.`,
           className: "bg-green-500 text-white"
         });
       } else {
-        await addEnfermeiro(values);
+        await addEnfermeiro(enfermeiroData);
         toast({
           title: "Enfermeiro(a) Cadastrado(a)!",
           description: `${values.nome} foi adicionado(a) com sucesso.`,
