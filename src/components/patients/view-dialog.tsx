@@ -45,7 +45,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
         </DialogHeader>
         
         <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
-            <div className="p-4 border rounded-lg bg-muted/20">
+            <div className="p-4 border rounded-lg bg-card">
                 <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={BadgeInfo} label="Código" value={paciente.codigo} />
@@ -63,7 +63,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 </div>
             </div>
 
-             <div className="p-4 border rounded-lg bg-muted/20">
+             <div className="p-4 border rounded-lg bg-card">
                 <h3 className="font-semibold mb-4 text-primary">Documentos</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
                      <InfoRow icon={IdCard} label="CNS" value={paciente.cns} />
@@ -72,7 +72,7 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
                 </div>
             </div>
 
-            <div className="p-4 border rounded-lg bg-muted/20">
+            <div className="p-4 border rounded-lg bg-card">
                 <h3 className="font-semibold mb-4 text-primary">Contato e Endereço</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     {paciente.email && <InfoRow icon={Mail} label="E-mail" value={paciente.email} />}
@@ -82,14 +82,14 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
             </div>
 
              {paciente.observacoes && (
-                <div className="p-4 border rounded-lg bg-muted/20">
+                <div className="p-4 border rounded-lg bg-card">
                     <h3 className="font-semibold mb-2 text-primary">Observações</h3>
                     <InfoRow icon={Pencil} label="" value={paciente.observacoes} />
                 </div>
              )}
 
 
-            <div className="p-4 border rounded-lg bg-muted/20">
+            <div className="p-4 border rounded-lg bg-card">
                  <InfoRow icon={FileText} label="Situação do Cadastro">
                     <Badge variant={paciente.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${paciente.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
                         {paciente.situacao}

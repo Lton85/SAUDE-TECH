@@ -41,7 +41,7 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
         </DialogHeader>
         
         <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
-            <Card>
+            <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-base text-primary">Informações Profissionais</CardTitle>
               </CardHeader>
@@ -56,7 +56,7 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-base text-primary">Informações Pessoais</CardTitle>
               </CardHeader>
@@ -72,7 +72,7 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="bg-card">
               <CardHeader>
                   <CardTitle className="text-base text-primary">Informações de Trabalho</CardTitle>
               </CardHeader>

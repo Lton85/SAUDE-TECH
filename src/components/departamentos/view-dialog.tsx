@@ -42,7 +42,7 @@ export function ViewDepartamentoDialog({ isOpen, onOpenChange, departamento }: V
         </DialogHeader>
 
         <div className="space-y-4 py-4 pr-4">
-             <Card>
+             <Card className="bg-card">
                 <CardHeader>
                     <CardTitle className="text-base text-primary">Informações do Departamento</CardTitle>
                 </CardHeader>
