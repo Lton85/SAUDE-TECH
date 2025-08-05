@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Building, Hash, Activity, FileText, BadgeInfo } from "lucide-react";
 import type { Departamento } from "@/types/departamento";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface ViewDepartamentoDialogProps {
   isOpen: boolean;
@@ -41,16 +42,21 @@ export function ViewDepartamentoDialog({ isOpen, onOpenChange, departamento }: V
         </DialogHeader>
 
         <div className="space-y-4 py-4 pr-4">
-            <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
-                <InfoRow icon={BadgeInfo} label="Código" value={departamento.codigo} />
-                <InfoRow icon={Building} label="Nome" value={departamento.nome} />
-                <InfoRow icon={Hash} label="Nº da Sala" value={departamento.numero || "Não informado"} />
-                 <InfoRow icon={Activity} label="Situação">
-                    <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${departamento.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
-                        {departamento.situacao}
-                    </Badge>
-                 </InfoRow>
-            </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="text-base text-primary">Informações do Departamento</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <InfoRow icon={BadgeInfo} label="Código" value={departamento.codigo} />
+                    <InfoRow icon={Building} label="Nome" value={departamento.nome} />
+                    <InfoRow icon={Hash} label="Nº da Sala" value={departamento.numero || "Não informado"} />
+                    <InfoRow icon={Activity} label="Situação">
+                        <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${departamento.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
+                            {departamento.situacao}
+                        </Badge>
+                    </InfoRow>
+                </CardContent>
+             </Card>
         </div>
 
         <DialogFooter className="sm:justify-end">

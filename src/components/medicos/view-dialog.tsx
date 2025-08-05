@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { User, Stethoscope, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
 interface ViewMedicoDialogProps {
   isOpen: boolean;
@@ -40,8 +41,11 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
         </DialogHeader>
         
         <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações Profissionais</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base text-primary">Informações Profissionais</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={BadgeInfo} label="Código" value={medico.codigo} />
                     <InfoRow icon={User} label="Nome Completo" value={medico.nome} />
@@ -49,10 +53,14 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
                     <InfoRow icon={IdCard} label="CNS" value={medico.cns} />
                     <InfoRow icon={Stethoscope} label="Especialidade" value={medico.especialidade} />
                 </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base text-primary">Informações Pessoais</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={Fingerprint} label="CPF" value={medico.cpf} />
                     <InfoRow icon={medico.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
@@ -61,10 +69,14 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
                     <InfoRow icon={Calendar} label="Data de Nascimento" value={medico.dataNascimento} />
                     <InfoRow icon={Phone} label="Telefone" value={medico.telefone} />
                 </div>
-            </div>
-
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações de Trabalho</h3>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                  <CardTitle className="text-base text-primary">Informações de Trabalho</CardTitle>
+              </CardHeader>
+              <CardContent>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <InfoRow icon={Clock} label="Carga Horária Semanal" value={medico.cargaHoraria} />
                     <InfoRow icon={Activity} label="Situação">
@@ -73,7 +85,8 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
                         </Badge>
                     </InfoRow>
                  </div>
-            </div>
+              </CardContent>
+            </Card>
         </div>
 
         <DialogFooter className="sm:justify-end">

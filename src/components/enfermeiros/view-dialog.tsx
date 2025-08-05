@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { User, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint, UserPlus, Stethoscope } from "lucide-react";
+import { User, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint, Stethoscope } from "lucide-react";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
 interface ViewEnfermeiroDialogProps {
   isOpen: boolean;
@@ -40,31 +41,42 @@ export function ViewEnfermeiroDialog({ isOpen, onOpenChange, enfermeiro }: ViewE
         </DialogHeader>
         
         <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações Profissionais</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    <InfoRow icon={BadgeInfo} label="Código" value={enfermeiro.codigo} />
-                    <InfoRow icon={User} label="Nome Completo" value={enfermeiro.nome} className="lg:col-span-2" />
-                    <InfoRow icon={IdCard} label="COREN" value={enfermeiro.coren} />
-                    <InfoRow icon={IdCard} label="CNS" value={enfermeiro.cns} />
-                    <InfoRow icon={Stethoscope} label="Especialidade" value={enfermeiro.especialidade} />
-                </div>
-            </div>
+            <Card>
+                <CardHeader>
+                  <CardTitle className="text-base text-primary">Informações Profissionais</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                      <InfoRow icon={BadgeInfo} label="Código" value={enfermeiro.codigo} />
+                      <InfoRow icon={User} label="Nome Completo" value={enfermeiro.nome} />
+                      <InfoRow icon={IdCard} label="COREN" value={enfermeiro.coren} />
+                      <InfoRow icon={IdCard} label="CNS" value={enfermeiro.cns} />
+                      <InfoRow icon={Stethoscope} label="Especialidade" value={enfermeiro.especialidade} />
+                  </div>
+                </CardContent>
+            </Card>
 
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações Pessoais</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    <InfoRow icon={Fingerprint} label="CPF" value={enfermeiro.cpf} />
-                    <InfoRow icon={enfermeiro.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
-                        <span className="font-semibold text-card-foreground">{enfermeiro.sexo}</span>
-                    </InfoRow>
-                    <InfoRow icon={Calendar} label="Data de Nascimento" value={enfermeiro.dataNascimento} />
-                    <InfoRow icon={Phone} label="Telefone" value={enfermeiro.telefone} />
-                </div>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base text-primary">Informações Pessoais</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <InfoRow icon={Fingerprint} label="CPF" value={enfermeiro.cpf} />
+                        <InfoRow icon={enfermeiro.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
+                            <span className="font-semibold text-card-foreground">{enfermeiro.sexo}</span>
+                        </InfoRow>
+                        <InfoRow icon={Calendar} label="Data de Nascimento" value={enfermeiro.dataNascimento} />
+                        <InfoRow icon={Phone} label="Telefone" value={enfermeiro.telefone} />
+                    </div>
+                </CardContent>
+            </Card>
 
-            <div className="p-4 border rounded-lg bg-muted/20">
-                <h3 className="font-semibold mb-4 text-primary">Informações de Trabalho</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base text-primary">Informações de Trabalho</CardTitle>
+              </CardHeader>
+              <CardContent>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <InfoRow icon={Clock} label="Turno" value={enfermeiro.turno} />
                     <InfoRow icon={Activity} label="Situação">
@@ -73,7 +85,8 @@ export function ViewEnfermeiroDialog({ isOpen, onOpenChange, enfermeiro }: ViewE
                         </Badge>
                     </InfoRow>
                  </div>
-            </div>
+              </CardContent>
+            </Card>
         </div>
 
         <DialogFooter className="sm:justify-end">
