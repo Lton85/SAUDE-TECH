@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home, Globe } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home, Globe, Fingerprint } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -301,7 +301,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
@@ -385,8 +385,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         </div>
 
 
-        <div className={cn("grid grid-cols-1 md:grid-cols-5 gap-6 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
-           <Card className="md:col-span-2 bg-muted/30 h-full">
+        <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
+           <Card className="bg-muted/30 h-full">
                 <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
                         <div className="space-y-1">
@@ -404,6 +404,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         <Separator/>
                         <div className="space-y-2">
                             <InfoRow icon={BadgeInfo} label="CNS" value={selectedPaciente.cns} />
+                            <InfoRow icon={Fingerprint} label="CPF" value={selectedPaciente.cpf} />
                             <InfoRow icon={VenetianMask} label="Sexo" value={selectedPaciente.sexo} />
                             <InfoRow icon={Cake} label="Idade" value={selectedPaciente.idade} />
                             <InfoRow 
@@ -423,7 +424,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </CardContent>
             </Card>
 
-            <div className="md:col-span-3 space-y-4">
+            <div className="space-y-4">
                  <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                     <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
