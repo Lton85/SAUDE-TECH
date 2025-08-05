@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { DialogFooter } from "../ui/dialog";
+import { Checkbox } from "../ui/checkbox";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -27,19 +28,20 @@ const formSchema = z.object({
   dataNascimento: z.string().optional(),
   telefone: z.string().optional(),
   cargaHoraria: z.string().optional(),
-  situacao: z.enum(['Ativo', 'Inativo']),
+  situacao: z.boolean().default(true),
 });
 
-type MedicoFormValues = z.infer<typeof formSchema>;
+export type MedicoFormValues = z.infer<typeof formSchema>;
 
 interface MedicoFormProps {
   onSubmit: (values: MedicoFormValues) => void;
   medico?: Partial<Medico> | null;
   isSubmitting: boolean;
   onCancel: () => void;
+  isEditMode: boolean;
 }
 
-export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoFormProps) {
+export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel, isEditMode }: MedicoFormProps) {
   const form = useForm<MedicoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,7 +54,7 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoF
       dataNascimento: "",
       telefone: "",
       cargaHoraria: "",
-      situacao: "Ativo",
+      situacao: true,
     },
   });
   
@@ -80,7 +82,7 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoF
         dataNascimento: medico.dataNascimento || "",
         telefone: medico.telefone || "",
         cargaHoraria: medico.cargaHoraria || "",
-        situacao: medico.situacao || "Ativo",
+        situacao: medico.situacao === 'Ativo',
       });
     } else {
         form.reset({
@@ -93,7 +95,7 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoF
             dataNascimento: "",
             telefone: "",
             cargaHoraria: "",
-            situacao: "Ativo",
+            situacao: true,
         });
     }
   }, [medico, form]);
@@ -265,27 +267,28 @@ export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoF
                 </FormItem>
               )}
             />
-             <FormField
-                control={form.control}
-                name="situacao"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Situação</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Selecione a situação" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="Ativo">Ativo</SelectItem>
-                        <SelectItem value="Inativo">Inativo</SelectItem>
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
+             {isEditMode && (
+                <FormField
+                    control={form.control}
+                    name="situacao"
+                    render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                        <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                        />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                        <FormLabel>
+                            Cadastro Ativo
+                        </FormLabel>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            )}
         </div>
       </form>
       <DialogFooter>

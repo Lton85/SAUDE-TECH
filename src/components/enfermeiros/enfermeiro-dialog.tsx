@@ -4,7 +4,7 @@ import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { UserPlus, Pencil, Loader2 } from "lucide-react";
 import type { Enfermeiro } from "@/types/enfermeiro";
-import { EnfermeiroForm } from "./enfermeiro-form";
+import { EnfermeiroForm, type EnfermeiroFormValues } from "./enfermeiro-form";
 import { addEnfermeiro, updateEnfermeiro } from "@/services/enfermeirosService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,11 +20,12 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
   const { toast } = useToast();
   const isEditMode = !!enfermeiro;
 
-  const handleSubmit = async (values: Omit<Enfermeiro, 'id' | 'codigo' | 'historico'>) => {
+  const handleSubmit = async (values: EnfermeiroFormValues) => {
     setIsSubmitting(true);
     try {
       const enfermeiroData = {
           ...values,
+          situacao: values.situacao ? 'Ativo' : 'Inativo',
           sexo: values.sexo || "",
           cpf: values.cpf || "",
           dataNascimento: values.dataNascimento || "",
@@ -40,7 +41,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
           className: "bg-green-500 text-white"
         });
       } else {
-        await addEnfermeiro(enfermeiroData);
+        await addEnfermeiro(enfermeiroData as Omit<Enfermeiro, 'id' | 'codigo' | 'historico'>);
         toast({
           title: "Enfermeiro(a) Cadastrado(a)!",
           description: `${values.nome} foi adicionado(a) com sucesso.`,
@@ -52,7 +53,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
     } catch (error) {
       toast({
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'}`,
-        description: `Não foi possível salvar os dados. Tente novamente.`,
+        description: (error as Error).message || `Não foi possível salvar os dados. Tente novamente.`,
         variant: "destructive",
       });
     } finally {
@@ -77,6 +78,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
           enfermeiro={enfermeiro}
           isSubmitting={isSubmitting}
           onCancel={() => onOpenChange(false)}
+          isEditMode={isEditMode}
         />
       </DialogContent>
     </Dialog>

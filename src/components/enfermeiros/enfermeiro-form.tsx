@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { DialogFooter } from "../ui/dialog";
+import { Checkbox } from "../ui/checkbox";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -27,19 +28,20 @@ const formSchema = z.object({
   dataNascimento: z.string().optional(),
   telefone: z.string().optional(),
   turno: z.enum(['Manhã', 'Tarde', 'Noite', '']).optional(),
-  situacao: z.enum(['Ativo', 'Inativo']),
+  situacao: z.boolean().default(true),
 });
 
-type EnfermeiroFormValues = z.infer<typeof formSchema>;
+export type EnfermeiroFormValues = z.infer<typeof formSchema>;
 
 interface EnfermeiroFormProps {
   onSubmit: (values: EnfermeiroFormValues) => void;
   enfermeiro?: Partial<Enfermeiro> | null;
   isSubmitting: boolean;
   onCancel: () => void;
+  isEditMode: boolean;
 }
 
-export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }: EnfermeiroFormProps) {
+export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel, isEditMode }: EnfermeiroFormProps) {
   const form = useForm<EnfermeiroFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,7 +54,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }:
       dataNascimento: "",
       telefone: "",
       turno: "Manhã",
-      situacao: "Ativo",
+      situacao: true,
     },
   });
   
@@ -80,7 +82,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }:
         dataNascimento: enfermeiro.dataNascimento || "",
         telefone: enfermeiro.telefone || "",
         turno: enfermeiro.turno || "Manhã",
-        situacao: enfermeiro.situacao || "Ativo",
+        situacao: enfermeiro.situacao === 'Ativo',
       });
     } else {
         form.reset({
@@ -93,7 +95,7 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }:
             dataNascimento: "",
             telefone: "",
             turno: "Manhã",
-            situacao: "Ativo",
+            situacao: true,
         });
     }
   }, [enfermeiro, form]);
@@ -275,27 +277,28 @@ export function EnfermeiroForm({ onSubmit, enfermeiro, isSubmitting, onCancel }:
                 )}
             />
 
-             <FormField
-                control={form.control}
-                name="situacao"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Situação</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Selecione a situação" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="Ativo">Ativo</SelectItem>
-                        <SelectItem value="Inativo">Inativo</SelectItem>
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
+            {isEditMode && (
+                <FormField
+                    control={form.control}
+                    name="situacao"
+                    render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                        <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                        />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                        <FormLabel>
+                            Cadastro Ativo
+                        </FormLabel>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            )}
         </div>
       </form>
        <DialogFooter>

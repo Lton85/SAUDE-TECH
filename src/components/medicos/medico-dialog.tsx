@@ -4,7 +4,7 @@ import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Stethoscope, Pencil, Loader2 } from "lucide-react";
 import type { Medico } from "@/types/medico";
-import { MedicoForm } from "./medico-form";
+import { MedicoForm, type MedicoFormValues } from "./medico-form";
 import { addMedico, updateMedico } from "@/services/medicosService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,11 +20,12 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   const { toast } = useToast();
   const isEditMode = !!medico;
 
-  const handleSubmit = async (values: Omit<Medico, 'id' | 'codigo' | 'historico'>) => {
+  const handleSubmit = async (values: MedicoFormValues) => {
     setIsSubmitting(true);
     try {
       const medicoData = {
           ...values,
+          situacao: values.situacao ? 'Ativo' : 'Inativo',
           sexo: values.sexo || "",
           cpf: values.cpf || "",
           dataNascimento: values.dataNascimento || "",
@@ -40,7 +41,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
           className: "bg-green-500 text-white"
         });
       } else {
-        await addMedico(medicoData);
+        await addMedico(medicoData as Omit<Medico, 'id' | 'codigo' | 'historico'>);
         toast({
           title: "Médico Cadastrado!",
           description: `O médico ${values.nome} foi adicionado com sucesso.`,
@@ -52,7 +53,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
     } catch (error) {
       toast({
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} médico`,
-        description: "Não foi possível salvar os dados do médico. Tente novamente.",
+        description: (error as Error).message || "Não foi possível salvar os dados do médico. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -81,6 +82,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
           medico={medico}
           isSubmitting={isSubmitting}
           onCancel={onCancel}
+          isEditMode={isEditMode}
         />
       </DialogContent>
     </Dialog>
