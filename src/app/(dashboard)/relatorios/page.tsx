@@ -76,8 +76,8 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     }
 
     const PrintedContent = () => (
-         <div className="w-full">
-            <div className="flex items-center justify-between mb-4">
+         <div className="w-full border p-4">
+            <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-3">
                     <span className="text-sm font-mono">CNS: {paciente?.cns || '...'}</span>
@@ -98,20 +98,18 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
             </div>
 
-            <div className="space-y-2 mb-4 text-sm mt-4">
-                <div className="flex items-center gap-8">
-                     <div className="flex items-center gap-2">
-                        <span className="font-semibold">Departamento:</span>
-                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-semibold">Profissional:</span>
-                        <span>{atendimento.profissionalNome}</span>
-                    </div>
+            <div className="flex items-start gap-8 mb-4">
+                 <div className="flex items-center gap-2 text-sm">
+                    <span className="font-semibold">Departamento:</span>
+                    <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                    <span className="font-semibold">Profissional:</span>
+                    <span>{atendimento.profissionalNome}</span>
                 </div>
             </div>
 
-            <div className="flex justify-around text-xs text-gray-600 border-t pt-2 mt-4">
+            <div className="flex justify-around text-xs text-gray-600 border-t pt-2">
                 <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
                 <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
                 <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
@@ -322,7 +320,17 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
+        const originalTitle = document.title;
+        if (viewMode === 'diario') document.title = "Relatório Diário";
+        else if (viewMode === 'semanal') document.title = "Relatório Semanal";
+        else if (viewMode === 'mensal') document.title = "Relatório Mensal";
+        else if (dateRange.from && dateRange.to) {
+             const from = format(dateRange.from, 'dd/MM/yy');
+             const to = format(dateRange.to, 'dd/MM/yy');
+             document.title = from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
+        }
         window.print();
+        document.title = originalTitle;
     }
     
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
@@ -487,5 +495,6 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
 
 
