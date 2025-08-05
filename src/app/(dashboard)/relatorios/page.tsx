@@ -3,7 +3,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
 
@@ -39,14 +39,6 @@ const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, 
 
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const cardRef = React.useRef<HTMLDivElement>(null);
-    const containerRef = React.useRef<HTMLElement | null>(null);
-
-     React.useEffect(() => {
-        // Find the closest ancestor with the print-container class
-        if (cardRef.current) {
-            containerRef.current = cardRef.current.closest('.print-container');
-        }
-    }, []);
 
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
@@ -57,7 +49,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     
     const handlePrintItem = () => {
         const cardElement = cardRef.current;
-        const mainContainer = containerRef.current;
+        const mainContainer = document.querySelector('.print-container');
         
         if (cardElement && mainContainer) {
             mainContainer.classList.add('printing-single-item');
@@ -374,7 +366,9 @@ export default function RelatoriosPage() {
                 </div>
 
                 {hasSearched && filteredReportData.length > 0 && (
-                     <AtendimentosChart data={filteredReportData} />
+                    <Card>
+                        <AtendimentosChart data={filteredReportData} />
+                    </Card>
                 )}
 
                 <Card className="flex flex-col flex-1">
@@ -422,3 +416,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+

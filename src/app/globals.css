@@ -99,17 +99,8 @@
     display: none !important; 
   }
 
-  /* General print styles for the container */
-  .print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-  }
-
   /* When printing a single item */
-  .printing-single-item > *:not(.print-this) {
+  .printing-single-item > * {
     display: none !important;
   }
   .printing-single-item .print-this {
