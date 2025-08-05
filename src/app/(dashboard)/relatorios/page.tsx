@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
 
@@ -177,7 +177,7 @@ export default function RelatoriosPage() {
             filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
         }
         
-        setFilteredReportData(filteredData);
+        return filteredData;
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
 
     const handleSearch = React.useCallback(async () => {
@@ -195,7 +195,9 @@ export default function RelatoriosPage() {
         try {
             const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
             setAllReportData(data);
-            applyClientSideFilters(data);
+            const finalData = applyClientSideFilters(data);
+            setFilteredReportData(finalData);
+
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             toast({
@@ -210,14 +212,6 @@ export default function RelatoriosPage() {
         }
     }, [dateRange, toast, applyClientSideFilters]);
     
-     React.useEffect(() => {
-        // Re-apply filters whenever they change
-        if (hasSearched) {
-            applyClientSideFilters(allReportData);
-        }
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, allReportData, hasSearched, applyClientSideFilters]);
-
-
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
         setSelectedMedicoId('todos');
@@ -367,6 +361,4 @@ export default function RelatoriosPage() {
             </main>
         </div>
     );
-
-    
-
+}
