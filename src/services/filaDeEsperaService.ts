@@ -200,16 +200,25 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
 
 export const getHistoricoAtendimentosPorPeriodo = async (
     dateFrom: Date,
-    dateTo: Date
+    dateTo: Date,
+    profissionalId?: string
 ): Promise<FilaDeEsperaItem[]> => {
     try {
         const start = startOfDay(dateFrom);
         const end = endOfDay(dateTo);
         
+        const constraints = [
+            where("finalizadaEm", ">=", Timestamp.fromDate(start)),
+            where("finalizadaEm", "<=", Timestamp.fromDate(end))
+        ];
+
+        if(profissionalId) {
+            constraints.push(where("profissionalId", "==", profissionalId));
+        }
+
         const q = query(
             collection(db, "relatorios_atendimentos"),
-            where("finalizadaEm", ">=", Timestamp.fromDate(start)),
-            where("finalizadaEm", "<=", Timestamp.fromDate(end)),
+            ...constraints,
             orderBy("finalizadaEm", "desc")
         );
 
