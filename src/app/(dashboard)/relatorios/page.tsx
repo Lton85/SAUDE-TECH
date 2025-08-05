@@ -157,11 +157,14 @@ export default function RelatoriosPage() {
             filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
         }
 
-        const professionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : (selectedEnfermeiroId !== 'todos' ? selectedEnfermeiroId : null);
-        if (professionalId) {
-            filteredData = filteredData.filter(item => item.profissionalId === professionalId);
+        if (selectedMedicoId !== 'todos') {
+             filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
         }
-
+        
+        if (selectedEnfermeiroId !== 'todos') {
+             filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+        }
+        
         setFilteredReportData(filteredData);
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
 
@@ -204,16 +207,20 @@ export default function RelatoriosPage() {
 
 
     React.useEffect(() => {
-        if (selectedMedicoId !== 'todos') {
-            setSelectedEnfermeiroId('todos');
+        if (selectedMedicoId !== 'todos' && selectedEnfermeiroId !== 'todos') {
+            // If user selects a specific doctor, clear the nurse selection and vice versa,
+            // as one attendance can't have both. But allow one to be selected while the other is "all".
+            toast({
+                title: "Filtro de Profissional",
+                description: "Selecione um médico ou um enfermeiro, mas não ambos.",
+                variant: "default",
+            });
+             if (selectedMedicoId !== 'todos') {
+                 setSelectedEnfermeiroId('todos');
+             }
         }
-    }, [selectedMedicoId]);
+    }, [selectedMedicoId, selectedEnfermeiroId, toast]);
 
-    React.useEffect(() => {
-        if (selectedEnfermeiroId !== 'todos') {
-            setSelectedMedicoId('todos');
-        }
-    }, [selectedEnfermeiroId]);
 
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
@@ -364,4 +371,5 @@ export default function RelatoriosPage() {
             </main>
         </div>
     );
-}
+
+    
