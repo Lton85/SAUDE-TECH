@@ -47,6 +47,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                 nascimento: values.nascimento || "",
                 sexo: values.sexo || "",
                 cpf: values.cpf || "",
+                rg: values.rg || "",
                 estadoCivil: values.estadoCivil || "",
                 cep: values.cep || "",
                 endereco: values.endereco || "",
@@ -111,6 +112,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             email: '',
             telefone: '',
             observacoes: '',
+            rg: '',
         };
     }, [paciente, isEditMode]);
 

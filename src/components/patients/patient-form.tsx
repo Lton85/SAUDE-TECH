@@ -25,6 +25,7 @@ const formSchema = z.object({
   pai: z.string().optional(),
   cns: z.string().min(15, { message: "O CNS deve ter pelo menos 15 dígitos." }),
   cpf: z.string().optional(),
+  rg: z.string().optional(),
   nascimento: z.string().optional(),
   sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
   estadoCivil: z.enum(['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável', '']).optional(),
@@ -70,6 +71,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       pai: "",
       cns: "",
       cpf: "",
+      rg: "",
       nascimento: "",
       sexo: undefined,
       estadoCivil: undefined,
@@ -228,7 +230,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     )}
                   />
                 </div>
-                <div className="md:col-span-12 grid md:grid-cols-4 gap-4 items-end">
+                <div className="md:col-span-12 grid md:grid-cols-5 gap-4 items-end">
                   <FormField
                     control={form.control}
                     name="nascimento"
@@ -303,6 +305,19 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                         <FormLabel>CPF</FormLabel>
                         <FormControl>
                           <Input className="bg-muted/40" placeholder="000.000.000-00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rg"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>RG</FormLabel>
+                        <FormControl>
+                          <Input className="bg-muted/40" placeholder="00.000.000-0" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

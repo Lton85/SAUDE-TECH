@@ -9,6 +9,7 @@ export interface Paciente {
     nascimento?: string;
     cns: string;
     cpf?: string;
+    rg?: string;
     situacao: 'Ativo' | 'Inativo';
     estadoCivil?: 'Solteiro(a)' | 'Casado(a)' | 'Divorciado(a)' | 'Viúvo(a)' | 'União Estável' | '';
     cep?: string;

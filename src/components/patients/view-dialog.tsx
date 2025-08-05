@@ -65,9 +65,10 @@ export function ViewDialog({ isOpen, onOpenChange, paciente }: ViewDialogProps) 
 
              <div className="p-4 border rounded-lg bg-muted/20">
                 <h3 className="font-semibold mb-4 text-primary">Documentos</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
                      <InfoRow icon={IdCard} label="CNS" value={paciente.cns} />
                      <InfoRow icon={BadgeInfo} label="CPF" value={paciente.cpf} />
+                     <InfoRow icon={BadgeInfo} label="RG" value={paciente.rg} />
                 </div>
             </div>
 
