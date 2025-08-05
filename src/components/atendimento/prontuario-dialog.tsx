@@ -48,34 +48,36 @@ const AtendimentoTimelineItem = ({ atendimento, onEdit }: { atendimento: FilaDeE
                         </div>
                     </div>
                     <div className="flex-1 pb-4">
-                        <AccordionTrigger className="p-0 hover:no-underline">
-                             <div className="flex-1 text-left">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-foreground">
-                                        {dataFormatada}
-                                    </p>
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                            <CheckCircle className="h-3 w-3 mr-1" />
-                                            Finalizado
-                                        </Badge>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); onEdit(atendimento); }}>
-                                            <Pencil className="h-3 w-3" />
-                                        </Button>
+                         <div className="flex justify-between items-start">
+                             <AccordionTrigger className="p-0 hover:no-underline flex-1">
+                                 <div className="flex-1 text-left">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-foreground">
+                                            {dataFormatada}
+                                        </p>
                                     </div>
-                                </div>
-                                <div className="mt-1 space-y-1 text-sm text-muted-foreground">
-                                     <div className="flex items-center gap-2">
-                                        <Building className="h-3 w-3" />
-                                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                                    <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                                         <div className="flex items-center gap-2">
+                                            <Building className="h-3 w-3" />
+                                            <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <User className="h-3 w-3" />
+                                            <span>{atendimento.profissionalNome}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <User className="h-3 w-3" />
-                                        <span>{atendimento.profissionalNome}</span>
-                                    </div>
-                                </div>
-                             </div>
-                        </AccordionTrigger>
+                                 </div>
+                            </AccordionTrigger>
+                            <div className="flex items-center gap-2 pl-2">
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Finalizado
+                                </Badge>
+                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onEdit(atendimento)}>
+                                    <Pencil className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        </div>
                         <AccordionContent>
                            <div className="mt-4 space-y-3 rounded-md border bg-muted/30 p-3">
                                 <EventoTimeline icon={LogIn} label="Entrada na Fila" time={horaChegada} />
