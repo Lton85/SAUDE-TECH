@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentosPorPeriodo } from "@/services/filaDeEsperaService";
@@ -45,27 +45,31 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    
+    const handlePrintItem = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        alert(`Imprimindo atendimento de ${atendimento.pacienteNome}`);
+        // Futuramente, aqui podemos implementar a lógica para imprimir apenas este item.
+    }
 
     return (
         <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item">
             <AccordionItem value={atendimento.id} className="border-b-0">
                 <AccordionTrigger className="p-4 text-sm hover:no-underline">
-                    <div className="w-full flex justify-between items-center">
-                        <div className="flex items-center gap-6">
-                            <span className="flex items-center gap-2 font-semibold w-56 truncate">
-                                <User className="h-4 w-4 text-primary" />
-                                {atendimento.pacienteNome}
-                            </span>
-                            <span className="flex items-center gap-2 text-muted-foreground w-40 truncate">
-                                <Building className="h-4 w-4" />
-                                {atendimento.departamentoNome}
-                            </span>
-                            <span className="flex items-center gap-2 text-muted-foreground w-56 truncate">
-                                <User className="h-4 w-4" />
-                                {atendimento.profissionalNome}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-4">
+                    <div className="w-full grid grid-cols-12 items-center gap-4 text-left">
+                        <span className="col-span-4 flex items-center gap-2 font-semibold truncate">
+                            <User className="h-4 w-4 text-primary" />
+                            {atendimento.pacienteNome}
+                        </span>
+                        <span className="col-span-3 flex items-center gap-2 text-muted-foreground truncate">
+                            <Building className="h-4 w-4" />
+                            {atendimento.departamentoNome}
+                        </span>
+                        <span className="col-span-3 flex items-center gap-2 text-muted-foreground truncate">
+                            <User className="h-4 w-4" />
+                            {atendimento.profissionalNome}
+                        </span>
+                        <div className="col-span-2 flex items-center justify-end gap-2">
                              <span className="text-muted-foreground">{dataFormatada}</span>
                             <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -197,11 +201,11 @@ export default function RelatoriosPage() {
         fetchFiltersData();
     }, [toast]);
     
-    // React to changes in date range or filter selections
-    React.useEffect(() => {
+     React.useEffect(() => {
         if (!isMounted) return;
         applyClientSideFilters(allReportData);
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, allReportData, isMounted, applyClientSideFilters]);
+
 
     // Handle quick date selection (Diário, Semanal, Mensal)
     React.useEffect(() => {
@@ -362,7 +366,6 @@ export default function RelatoriosPage() {
                         ) : hasSearched && filteredReportData.length > 0 ? (
                             <div className="flex-1 flex flex-col gap-4 min-h-0">
                                 <AtendimentosChart data={filteredReportData} />
-                                 <p className="text-sm text-muted-foreground">Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span></p>
                                 <ScrollArea className="flex-1">
                                     <div className="space-y-3 pr-4">
                                         {filteredReportData.map((item) => (
@@ -380,6 +383,13 @@ export default function RelatoriosPage() {
                             </div>
                         )}
                     </CardContent>
+                    {hasSearched && filteredReportData.length > 0 && (
+                        <CardFooter className="py-3 px-4 border-t print-hide">
+                            <div className="text-sm text-muted-foreground">
+                                Total de Atendimentos no período: <span className="font-bold text-foreground">{filteredReportData.length}</span>
+                            </div>
+                        </CardFooter>
+                    )}
                 </Card>
             </main>
         </div>
