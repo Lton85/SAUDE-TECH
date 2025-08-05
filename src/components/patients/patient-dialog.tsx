@@ -17,7 +17,7 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'historico'  | 'codigo'>;
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'historico'  | 'codigo' | 'situacao'> & { situacao: boolean };
 
 
 export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
@@ -37,11 +37,14 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                     }
                 } catch(e) { /* ignore parse error */ }
             }
+            
+            const situacao = values.situacao ? 'Ativo' : 'Inativo';
 
             // Sanitize optional fields to be empty strings instead of undefined
             const patientData = {
                 ...values,
                 idade: age,
+                situacao,
                 mae: values.mae || "",
                 pai: values.pai || "",
                 nascimento: values.nascimento || "",
@@ -58,7 +61,6 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                 email: values.email || "",
                 telefone: values.telefone || "",
                 observacoes: values.observacoes || "",
-                situacao: values.situacao || 'Ativo',
             };
 
             if (isEditMode && paciente) {
@@ -99,6 +101,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
         if (isEditMode && paciente) {
             return {
                 ...paciente,
+                situacao: paciente.situacao === 'Ativo',
             };
         }
         return {
@@ -114,7 +117,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             telefone: '',
             observacoes: '',
             rg: '',
-            situacao: 'Ativo' as 'Ativo' | 'Inativo',
+            situacao: true,
         };
     }, [paciente, isEditMode]);
 

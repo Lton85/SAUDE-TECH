@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
+import { Checkbox } from "../ui/checkbox";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -37,7 +38,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
   observacoes: z.string().optional(),
-  situacao: z.enum(['Ativo', 'Inativo']).optional(),
+  situacao: z.boolean().default(true),
 });
 
 type PatientFormValues = z.infer<typeof formSchema>;
@@ -85,7 +86,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode 
       email: "",
       telefone: "",
       observacoes: "",
-      situacao: "Ativo",
+      situacao: true,
     },
   });
 
@@ -97,7 +98,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode 
         ...defaultValues,
         uf: defaultValues.uf || "",
         cidade: defaultValues.cidade || "",
-        situacao: defaultValues.situacao || "Ativo",
+        situacao: defaultValues.situacao,
       });
       // Only focus if it's a new patient form (no ID)
       if (!defaultValues.id) {
@@ -487,26 +488,25 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode 
                 />
                  {isEditMode && (
                    <FormField
-                    control={form.control}
-                    name="situacao"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-4">
-                        <FormLabel>Situação do Cadastro</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-muted/40">
-                              <SelectValue placeholder="Selecione a situação" />
-                            </SelectTrigger>
+                      control={form.control}
+                      name="situacao"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-12 flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4">
+                           <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Ativo">Ativo</SelectItem>
-                            <SelectItem value="Inativo">Inativo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Cadastro Ativo
+                            </FormLabel>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                  )}
               </div>
             </div>
