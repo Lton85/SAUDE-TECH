@@ -89,11 +89,19 @@
       margin: 1cm;
   }
 
-  body {
-    background: #fff !important;
-    color: #000 !important;
-    -webkit-print-color-adjust: exact; 
-    print-color-adjust: exact;
+  body * {
+    visibility: hidden;
+  }
+
+  .print-container, .print-container * {
+    visibility: visible;
+  }
+  
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
 
   .print-hide {
@@ -103,67 +111,4 @@
   .print-only-content {
     display: block !important;
   }
-  
-  .print-container {
-      padding: 0 !important;
-      margin: 0 !important;
-  }
-  
-  .print-header {
-      display: block !important;
-      border-bottom: 2px solid #000;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-  }
-  
-  /* When printing the whole report, expand the scroll area */
-  .print-expand-on-print {
-      height: auto !important;
-      overflow-y: visible !important;
-  }
-  
-  .print-expand-on-print > div[data-radix-scroll-area-viewport] {
-      height: auto !important;
-      overflow-y: visible !important;
-  }
-  .print-badge {
-    color: #fff !important;
-    border-color: transparent !important;
-  }
-
-  /* --- Single Item Printing Logic --- */
-
-  /* Hide everything except the item being printed */
-  .print-container.printing-single-item .print-item-card:not(.print-this) {
-      display: none !important;
-  }
-  /* Hide the header of the full report */
-   .print-container.printing-single-item .print-header {
-      display: none !important;
-  }
-  /* Hide the filters and other UI elements */
-   .print-container.printing-single-item .print-hide {
-      display: none !important;
-  }
-  
-  /* Position the single item for printing */
-  .print-container.printing-single-item .print-this {
-    display: flex !important;
-    position: fixed;
-    inset: 0;
-    justify-content: center;
-    align-items: flex-start; /* Aligns to the top */
-    padding-top: 2cm; /* Adds some space from the top margin */
-    width: 100%;
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  .print-container.printing-single-item .print-this .print-only-content {
-      display: block !important;
-      padding: 0;
-      width: 18cm; /* Adjust width as needed */
-  }
-
 }

@@ -34,10 +34,6 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     React.useEffect(() => {
         const fetchPaciente = async () => {
             if (atendimento.pacienteId) {
-                // This assumes there's a function to get a single patient
-                // For now, we'll find it from the full list if needed, or better, fetch it
-                // As we don't have getPacienteById, let's assume we can get it from somewhere
-                // For this example, we'll mock it. In a real app, you'd fetch this.
                 const pacientes = await getPacientes();
                 const p = pacientes.find(p => p.id === atendimento.pacienteId);
                 setPaciente(p || null);
@@ -55,28 +51,50 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
     const handlePrintItem = () => {
-        const printContainer = document.querySelector('.print-container');
-        const cardElement = cardRef.current;
-        if (cardElement && printContainer) {
-            
+        const printContent = document.getElementById(`print-item-${atendimento.id}`);
+        if(printContent) {
             const originalTitle = document.title;
+            const originalDisplay = document.body.innerHTML;
+            
             document.title = `Relatório Individual do Paciente - ${atendimento.pacienteNome}`;
-
-            printContainer.classList.add('printing-single-item');
-            cardElement.classList.add('print-this');
+            document.body.innerHTML = printContent.innerHTML;
             
             window.print();
             
-            setTimeout(() => {
-                printContainer.classList.remove('printing-single-item');
-                cardElement.classList.remove('print-this');
-                document.title = originalTitle;
-            }, 500);
+            document.body.innerHTML = originalDisplay;
+            document.title = originalTitle;
+            // Need to re-trigger a re-render for React to take over the DOM again
+            window.location.reload(); 
         }
     }
 
     const PrintedContent = () => (
-         <div className="w-full">
+         <div className="print-only-content-item">
+            <style>{`
+              @media print {
+                body {
+                  background: #fff !important;
+                  color: #000 !important;
+                  -webkit-print-color-adjust: exact; 
+                  print-color-adjust: exact;
+                }
+                .print-badge {
+                  color: #fff !important;
+                  border-color: transparent !important;
+                }
+                 .bg-red-500 { background-color: #ef4444 !important; }
+                 .bg-amber-500 { background-color: #f59e0b !important; }
+                 .bg-green-500 { background-color: #22c55e !important; }
+                 .bg-green-100 { background-color: #dcfce7 !important; }
+                 .text-green-800 { color: #166534 !important; }
+                 .border-green-200 { border-color: #bbf7d0 !important; }
+                 .print-only-content-item {
+                    display: block !important;
+                    width: 100%;
+                    padding: 1rem;
+                 }
+              }
+            `}</style>
             <div className="flex items-center justify-between mb-4 border-b pb-2">
                 <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-3">
@@ -119,7 +137,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div ref={cardRef} className="print-item-card w-full border-b">
-            <div className="flex items-center justify-between w-full text-sm p-3 print-hide">
+            <div className="flex items-center justify-between w-full text-sm p-3">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />
@@ -152,13 +170,13 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 print-hide" onClick={handlePrintItem} title="Imprimir Atendimento">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
                 </div>
             </div>
             
-            <div className="hidden print-only-content text-black w-full">
+            <div id={`print-item-${atendimento.id}`} className="hidden">
                 <PrintedContent />
             </div>
 
@@ -321,24 +339,7 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
-        const originalTitle = document.title;
-        const printingSingleItem = document.querySelector('.printing-single-item');
-        
-        if (printingSingleItem) {
-             document.title = "Relatório Individual do Paciente";
-        } else if (viewMode === 'diario') {
-            document.title = "Relatório Diário";
-        } else if (viewMode === 'semanal') {
-            document.title = "Relatório Semanal";
-        } else if (viewMode === 'mensal') {
-            document.title = "Relatório Mensal";
-        } else if (dateRange.from && dateRange.to) {
-            const from = format(dateRange.from, 'dd/MM/yy');
-            const to = format(dateRange.to, 'dd/MM/yy');
-            document.title = from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
-        }
         window.print();
-        document.title = originalTitle;
     }
     
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
@@ -446,7 +447,7 @@ export default function RelatoriosPage() {
                     </div>
                 </div>
 
-                <div className="print-header">
+                <div className="print-header hidden print:block mb-4">
                     <h1 className="text-xl font-bold">{reportTitle}</h1>
                     <p className="text-sm text-muted-foreground">Emitido em: {format(new Date(), "dd/MM/yyyy HH:mm:ss")}</p>
                 </div>
@@ -473,7 +474,7 @@ export default function RelatoriosPage() {
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-grow print-expand-on-print">
+                                <ScrollArea className="flex-grow print:h-auto print:overflow-visible">
                                     <div className="space-y-0 print:space-y-4">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
