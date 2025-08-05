@@ -136,7 +136,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
                 <Separator className="mb-4 bg-gray-300" />
                 
-                <div className="border rounded-md p-4">
+                <div className="border rounded-md p-4 mt-4">
                     <div className="space-y-2 mb-4 text-sm">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold w-28">Departamento:</span>
@@ -477,4 +477,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
