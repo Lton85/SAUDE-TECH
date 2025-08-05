@@ -167,7 +167,7 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
             collection(db, "filaDeEspera"),
             where("pacienteId", "==", pacienteId),
             where("status", "==", "finalizado"),
-            orderBy("chegadaEm", "desc")
+            orderBy("finalizadaEm", "desc")
         );
 
         const querySnapshot = await getDocs(q);

@@ -133,7 +133,7 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
                     </div>
                 ) : historico.length > 0 ? (
                     <div className="space-y-0">
-                        {historico.map((atendimento, index) => (
+                        {historico.map((atendimento) => (
                            <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento}/>
                         ))}
                     </div>
