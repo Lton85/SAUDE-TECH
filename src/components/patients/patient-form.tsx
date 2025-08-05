@@ -17,7 +17,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -164,12 +163,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4">
-          <Tabs defaultValue="info-gerais" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="info-gerais">Informações Gerais</TabsTrigger>
-              <TabsTrigger value="info-complementares">Informações complementares</TabsTrigger>
-            </TabsList>
-            <TabsContent value="info-gerais" className="bg-card p-4 rounded-md border">
+           <div className="bg-card p-4 rounded-md border space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <FormField
                   control={form.control}
@@ -488,11 +482,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                   )}
                 />
               </div>
-            </TabsContent>
-            <TabsContent value="info-complementares" className="bg-card p-4 rounded-md border">
-              <p className="text-center text-muted-foreground">Nenhuma informação complementar necessária no momento.</p>
-            </TabsContent>
-          </Tabs>
+            </div>
         </div>
         <div className="mt-4 pt-4 border-t flex justify-end gap-2">
           <Button type="submit" disabled={isSubmitting}>
