@@ -3,7 +3,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isToday } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter } from "lucide-react";
 
@@ -39,6 +39,14 @@ const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, 
 
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const cardRef = React.useRef<HTMLDivElement>(null);
+    const containerRef = React.useRef<HTMLElement | null>(null);
+
+     React.useEffect(() => {
+        // Find the closest ancestor with the print-container class
+        if (cardRef.current) {
+            containerRef.current = cardRef.current.closest('.print-container');
+        }
+    }, []);
 
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
@@ -46,15 +54,22 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-
+    
     const handlePrintItem = () => {
         const cardElement = cardRef.current;
-        if (cardElement) {
-            document.body.classList.add('printing-single-item');
+        const mainContainer = containerRef.current;
+        
+        if (cardElement && mainContainer) {
+            mainContainer.classList.add('printing-single-item');
             cardElement.classList.add('print-this');
+            
             window.print();
-            cardElement.classList.remove('print-this');
-            document.body.classList.remove('printing-single-item');
+            
+            // Use a timeout to ensure the print dialog has opened before removing classes
+            setTimeout(() => {
+                mainContainer.classList.remove('printing-single-item');
+                cardElement.classList.remove('print-this');
+            }, 500);
         }
     }
 
@@ -363,7 +378,7 @@ export default function RelatoriosPage() {
                 )}
 
                 <Card className="flex flex-col flex-1">
-                    <CardContent className="p-0 flex-1 flex flex-col">
+                    <CardContent className="p-0 flex-1 flex flex-col min-h-0">
                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
