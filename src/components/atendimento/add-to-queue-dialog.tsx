@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -18,7 +18,9 @@ import { Label } from "../ui/label"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getNextCounter } from "@/services/countersService"
-import type { FilaDeEsperaItem } from "@/types/fila"
+import { Card, CardContent } from "../ui/card"
+import { Separator } from "../ui/separator"
+import { Badge } from "../ui/badge"
 
 interface Profissional {
   id: string;
@@ -32,6 +34,17 @@ interface AddToQueueDialogProps {
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
   onSuccess: () => void;
+}
+
+const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) => {
+    if (!value) return null;
+    return (
+        <div className="flex items-center gap-2 text-sm">
+            <Icon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{label}:</span>
+            <span className="font-semibold text-card-foreground">{value}</span>
+        </div>
+    );
 }
 
 export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, onSuccess }: AddToQueueDialogProps) {
@@ -119,6 +132,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       if (patientToAdd) {
         handleSelectPatient(patientToAdd);
       }
+    } else {
+        resetState();
     }
   }, [isOpen, toast]);
 
@@ -126,18 +141,16 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     if (selectedPaciente) {
         try {
             const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
-            // Use a different state for the ticket number to avoid re-fetching
-            if (senhaNumero === null) {
-                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                setSenhaNumero(ticketNumber);
-            }
+            setSenha("Gerando...");
+            const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+            setSenhaNumero(ticketNumber);
         } catch (error) {
             console.error("Erro ao gerar senha:", error);
             setSenha("Erro");
             toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
         }
     }
-  }, [selectedPaciente, toast, senhaNumero]);
+  }, [selectedPaciente, toast]);
 
   useEffect(() => {
     if(selectedPaciente) {
@@ -154,14 +167,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
             const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
             setSenha(ticket);
-        } else if (selectedPaciente) {
+        } else if (selectedPaciente && senha !== "Erro") {
             setSenha("Gerando...");
         } else {
             setSenha("");
         }
     };
     updateTicketDisplay();
-  }, [classification, senhaNumero, selectedPaciente]);
+  }, [classification, senhaNumero, selectedPaciente, senha]);
 
 
 
@@ -229,7 +242,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         className: "bg-green-500 text-white",
       })
       
-      resetState();
       onOpenChange(false);
       onSuccess();
     } catch (error) {
@@ -288,7 +300,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
@@ -298,141 +310,170 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             Selecione o paciente e para qual departamento e profissional ele será encaminhado.
           </DialogDescription>
         </DialogHeader>
+        
+        <div className="space-y-2" ref={searchRef}>
+            <Label htmlFor="paciente-search" className="flex items-center gap-2 sr-only">Paciente</Label>
+            <div className="flex gap-2">
+            <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                id="paciente-search"
+                placeholder="Buscar por nome, mãe, CPF, CNS, endereço ou nº..."
+                value={searchQuery}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    if(e.target.value) {
+                        setShowPatientList(true)
+                        setHighlightedIndex(-1);
+                    } else {
+                        setShowPatientList(false)
+                        setSelectedPaciente(null)
+                    }
+                }}
+                onFocus={() => { if(searchQuery) setShowPatientList(true) }}
+                onKeyDown={handleKeyDown}
+                className="pl-10"
+                />
+                {searchQuery && (
+                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
+                    <X className="h-4 w-4" />
+                </Button>
+                )}
+            </div>
+                <Button onClick={onAddNewPatient}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Novo
+                </Button>
+            </div>
 
-        <div className="py-4 space-y-4">
-            <div className="space-y-2" ref={searchRef}>
-              <Label htmlFor="paciente-search" className="flex items-center gap-2"><User className="h-4 w-4" />Paciente</Label>
-              <div className="flex gap-2">
-                <div className="relative flex-grow">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="paciente-search"
-                    placeholder="Buscar por nome, mãe, CPF, CNS, endereço ou nº..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value)
-                      if(e.target.value) {
-                         setShowPatientList(true)
-                         setHighlightedIndex(-1);
-                      } else {
-                         setShowPatientList(false)
-                         setSelectedPaciente(null)
-                      }
-                    }}
-                    onFocus={() => { if(searchQuery) setShowPatientList(true) }}
-                    onKeyDown={handleKeyDown}
-                    className="pl-10"
-                  />
-                  {searchQuery && (
-                    <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => { setSearchQuery(''); setSelectedPaciente(null); setShowPatientList(false); }}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
+            {showPatientList && filteredPacientes.length > 0 && (
+            <div className="relative">
+                <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
+                <ScrollArea className="h-auto max-h-60">
+                    <div className="p-1">
+                    {filteredPacientes.map((paciente, index) => (
+                        <Button
+                        ref={el => resultsRef.current[index] = el}
+                        key={paciente.id}
+                        variant="ghost"
+                        className={cn(
+                            "w-full justify-start h-auto py-2 px-2 text-left",
+                            highlightedIndex === index && "bg-accent"
+                        )}
+                        onClick={() => handleSelectPatient(paciente)}
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        >
+                            <div>
+                            <p className="font-semibold">{paciente.nome}</p>
+                            <p className="text-xs text-muted-foreground">CNS: {paciente.cns}</p>
+                        </div>
+                        </Button>
+                    ))}
+                    </div>
+                </ScrollArea>
                 </div>
-                 <Button onClick={onAddNewPatient}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Novo
-                 </Button>
-              </div>
-
-              {showPatientList && filteredPacientes.length > 0 && (
+            </div>
+            )}
+            {showPatientList && filteredPacientes.length === 0 && searchQuery && (
                 <div className="relative">
-                  <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
-                    <ScrollArea className="h-auto max-h-60">
-                      <div className="p-1">
-                        {filteredPacientes.map((paciente, index) => (
-                          <Button
-                            ref={el => resultsRef.current[index] = el}
-                            key={paciente.id}
-                            variant="ghost"
-                            className={cn(
-                                "w-full justify-start h-auto py-2 px-2 text-left",
-                                highlightedIndex === index && "bg-accent"
-                            )}
-                            onClick={() => handleSelectPatient(paciente)}
-                            onMouseEnter={() => setHighlightedIndex(index)}
-                          >
-                             <div>
-                                <p className="font-semibold">{paciente.nome}</p>
-                                <p className="text-xs text-muted-foreground">CNS: {paciente.cns}</p>
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                </div>
-              )}
-               {showPatientList && filteredPacientes.length === 0 && searchQuery && (
-                 <div className="relative">
-                  <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg p-4 text-center text-sm text-muted-foreground">
-                    Nenhum paciente encontrado.
-                  </div>
-                </div>
-               )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
-                  <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
-                    <SelectTrigger id="departamento">
-                      <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento"}>
-                        {selectedDepartamento ? `${selectedDepartamento.nome}${selectedDepartamento.numero ? ` (Sala: ${selectedDepartamento.numero})` : ''}` : (!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento")}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departamentos.map((depto) => (
-                        <SelectItem key={depto.id} value={depto.id}>
-                          {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
-                  <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId} disabled={isLoadingProfissionais || !selectedPaciente}>
-                    <SelectTrigger id="profissional">
-                      <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : (isLoadingProfissionais ? "Carregando..." : "Selecione o profissional")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {profissionais.map((prof) => (
-                        <SelectItem key={prof.id} value={prof.id}>
-                          {prof.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg p-4 text-center text-sm text-muted-foreground">
+                Nenhum paciente encontrado.
                 </div>
             </div>
+            )}
+        </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                    <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')} disabled={!selectedPaciente}>
-                        <SelectTrigger id="classification">
-                            <SelectValue placeholder="Selecione a classificação" />
+
+        <div className={cn("grid grid-cols-1 md:grid-cols-5 gap-6 transition-opacity duration-500", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
+           <Card className="md:col-span-2 bg-muted/30 h-full">
+                <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                            <Label htmlFor="paciente" className="text-muted-foreground">Paciente</Label>
+                            <p id="paciente" className="font-semibold text-lg text-card-foreground">{selectedPaciente?.nome || 'Selecione um paciente'}</p>
+                        </div>
+                         <div className="flex items-center gap-2">
+                             {selectedPaciente && <>
+                                <IdCard className="h-4 w-4 text-muted-foreground" />
+                                <Badge variant="outline">{selectedPaciente.codigo}</Badge>
+                             </>}
+                         </div>
+                    </div>
+                    {selectedPaciente && <>
+                        <Separator/>
+                        <div className="space-y-2">
+                            <InfoRow icon={BadgeInfo} label="CNS" value={selectedPaciente.cns} />
+                            <InfoRow icon={VenetianMask} label="Sexo" value={selectedPaciente.sexo} />
+                            <InfoRow icon={Cake} label="Idade" value={selectedPaciente.idade} />
+                        </div>
+                    </>}
+                </CardContent>
+            </Card>
+
+            <div className="md:col-span-3 space-y-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                    <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
+                    <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
+                        <SelectTrigger id="departamento">
+                        <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento"}>
+                            {selectedDepartamento ? `${selectedDepartamento.nome}${selectedDepartamento.numero ? ` (Sala: ${selectedDepartamento.numero})` : ''}` : (!selectedPaciente ? "Selecione um paciente" : "Selecione o departamento")}
+                        </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Normal">Normal</SelectItem>
-                            <SelectItem value="Emergência">Emergência</SelectItem>
+                        {departamentos.map((depto) => (
+                            <SelectItem key={depto.id} value={depto.id}>
+                            {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
+                            </SelectItem>
+                        ))}
                         </SelectContent>
                     </Select>
+                    </div>
+                    <div className="space-y-2">
+                    <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
+                    <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId} disabled={isLoadingProfissionais || !selectedPaciente}>
+                        <SelectTrigger id="profissional">
+                        <SelectValue placeholder={!selectedPaciente ? "Selecione um paciente" : (isLoadingProfissionais ? "Carregando..." : "Selecione o profissional")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {profissionais.map((prof) => (
+                            <SelectItem key={prof.id} value={prof.id}>
+                            {prof.nome}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    </div>
                 </div>
-                <div className={cn("space-y-2 transition-opacity duration-300", selectedPaciente ? "opacity-100" : "opacity-50")}>
-                    <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
-                    <Input 
-                    id="senha" 
-                    value={senha}
-                    readOnly
-                    className="font-bold text-lg bg-muted/30"
-                    disabled={!selectedPaciente}
-                    placeholder=""
-                    />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
+                        <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')} disabled={!selectedPaciente}>
+                            <SelectTrigger id="classification">
+                                <SelectValue placeholder="Selecione a classificação" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Normal">Normal</SelectItem>
+                                <SelectItem value="Emergência">Emergência</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
+                        <Input 
+                        id="senha" 
+                        value={senha}
+                        readOnly
+                        className="font-bold text-lg bg-muted/30 text-center tracking-wider"
+                        disabled={!selectedPaciente}
+                        placeholder="-"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
+
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
@@ -447,3 +488,5 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    
