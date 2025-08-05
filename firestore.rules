@@ -2,49 +2,54 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral para desenvolvimento - permite acesso a todas as coleções
+    // Regra geral: Permite acesso de leitura e escrita para qualquer usuário autenticado.
+    // Isso é adequado para o desenvolvimento e prototipagem.
+    // Para produção, você pode querer refinar essas regras para serem mais restritivas.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
 
-    // Acesso à coleção de pacientes
+    // Regras específicas por coleção para maior clareza,
+    // embora a regra geral acima já cubra estes casos.
+
+    // Coleção de pacientes
     match /pacientes/{pacienteId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
 
-    // Acesso à coleção de médicos
+    // Coleção de médicos
     match /medicos/{medicoId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
-    
-    // Acesso à coleção de enfermeiros
+
+    // Coleção de enfermeiros
     match /enfermeiros/{enfermeiroId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
 
-    // Acesso à coleção de departamentos
+    // Coleção de departamentos
     match /departamentos/{departamentoId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
 
-    // Acesso à fila de espera
+    // Fila de espera e atendimentos em andamento
     match /filaDeEspera/{filaId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
+    }
+    
+    // Histórico de atendimentos (prontuários/relatórios)
+    match /relatorios_atendimentos/{relatorioId} {
+      allow read, write: if request.auth != null;
     }
 
-    // Acesso à coleção de chamadas do painel
+    // Chamadas para o painel de senhas
     match /chamadas/{chamadaId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
-    
-    // Acesso aos contadores
+
+    // Contadores para senhas e códigos
     match /counters/{counterId} {
-      allow read, write: if true;
-    }
-    
-    // Acesso aos relatórios de atendimentos (histórico)
-    match /relatorios_atendimentos/{relatorioId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
   }
 }
