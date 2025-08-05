@@ -132,12 +132,10 @@ export default function RelatoriosPage() {
             filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
         }
 
-        if (selectedMedicoId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
-        }
+        const profissionalId = selectedMedicoId !== 'todos' ? selectedMedicoId : (selectedEnfermeiroId !== 'todos' ? selectedEnfermeiroId : 'todos');
 
-        if (selectedEnfermeiroId !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
+        if (profissionalId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === profissionalId);
         }
         
         setFilteredReportData(filteredData);
@@ -274,30 +272,30 @@ export default function RelatoriosPage() {
             </aside>
             <main className="flex-1 min-w-0">
                 <Card className="h-full flex flex-col" id="report-content">
-                    <CardHeader>
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <CardHeader className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                             <div>
-                                <CardTitle>Relatórios de Atendimento</CardTitle>
-                                <CardDescription>
+                                <CardTitle className="text-lg">Relatórios de Atendimento</CardTitle>
+                                <CardDescription className="text-xs">
                                     Gere consultas precisas e seguras sobre os atendimentos realizados.
                                 </CardDescription>
                             </div>
                             <div className="flex items-center gap-2 print-hide">
-                                <Button onClick={handleSearch} disabled={isLoading}>
+                                <Button onClick={handleSearch} disabled={isLoading} size="sm">
                                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                                     {isLoading ? "Consultando..." : "Consultar"}
                                 </Button>
-                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0}>
+                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
                                     <Printer className="mr-2 h-4 w-4" />
                                     Imprimir
                                 </Button>
                             </div>
                         </div>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 p-4 border rounded-lg bg-muted/40 print-hide">
+                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2 p-3 border rounded-lg bg-muted/40 print-hide">
                              <div className="flex items-center gap-2">
-                                <Button variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
-                                <Button variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
-                                <Button variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
+                                <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
+                                <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
+                                <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
                             </div>
                              <Separator orientation="vertical" className="h-6 hidden sm:block" />
                             <div className="flex items-center gap-2">
@@ -306,15 +304,16 @@ export default function RelatoriosPage() {
                                     <Button
                                         id="date"
                                         variant={"outline"}
+                                        size="sm"
                                         className={cn(
-                                        "w-[260px] justify-start text-left font-normal",
+                                        "w-[240px] justify-start text-left font-normal",
                                         !dateRange.from && "text-muted-foreground"
                                         )}
                                         disabled={isLoading}
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
                                         {dateRange.from && dateRange.to ? (
-                                             `${format(dateRange.from, "dd 'de' MMM, y", { locale: ptBR })} - ${format(dateRange.to, "dd 'de' MMM, y", { locale: ptBR })}`
+                                             `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
                                         ) : <span>Escolha um período</span>
                                         }
                                     </Button>
@@ -351,7 +350,7 @@ export default function RelatoriosPage() {
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col min-h-0">
+                    <CardContent className="flex-1 flex flex-col min-h-0 p-4">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -389,3 +388,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+

@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -47,12 +48,12 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Infográfico de Produtividade</CardTitle>
-        <CardDescription>Número de atendimentos finalizados por hora.</CardDescription>
+      <CardHeader className="p-4">
+        <CardTitle className="text-base">Infográfico de Produtividade</CardTitle>
+        <CardDescription className="text-xs">Número de atendimentos finalizados por hora.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-64">
+      <CardContent className="p-0 pl-2">
+        <ChartContainer config={chartConfig} className="h-40">
            <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} accessibilityLayer>
                 <CartesianGrid vertical={false} />
