@@ -362,9 +362,9 @@ export default function RelatoriosPage() {
                      <AtendimentosChart data={filteredReportData} />
                 )}
 
-                <Card>
-                    <CardContent className="p-0">
-                         <div className="flex-1 flex flex-col min-h-0">
+                <Card className="flex flex-col flex-1">
+                    <CardContent className="p-0 flex-1 flex flex-col">
+                        <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -377,7 +377,7 @@ export default function RelatoriosPage() {
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-1">
+                                <ScrollArea className="flex-grow">
                                     <div className="space-y-0">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />
