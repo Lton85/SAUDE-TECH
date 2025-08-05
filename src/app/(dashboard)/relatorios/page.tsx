@@ -94,13 +94,15 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
             </div>
 
             <div className="space-y-2 mb-4 text-sm mt-4">
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold w-28">Departamento:</span>
-                    <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold w-28">Profissional:</span>
-                    <span>{atendimento.profissionalNome}</span>
+                <div className="flex items-center gap-8">
+                     <div className="flex items-center gap-2">
+                        <span className="font-semibold">Departamento:</span>
+                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="font-semibold">Profissional:</span>
+                        <span>{atendimento.profissionalNome}</span>
+                    </div>
                 </div>
             </div>
 
