@@ -236,12 +236,18 @@ export const getHistoricoAtendimentosPorPeriodo = async (
 
         const q = query(
             collection(db, "relatorios_atendimentos"),
-            ...constraints,
-            orderBy("finalizadaEm", "desc")
+            ...constraints
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        
+        // Sort in-memory after fetching to show most recent first
+        data.sort((a, b) => {
+            const timeA = a.finalizadaEm?.toMillis() || 0;
+            const timeB = b.finalizadaEm?.toMillis() || 0;
+            return timeB - timeA;
+        });
         
         return data;
 
@@ -298,5 +304,3 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
-
-    
