@@ -114,7 +114,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div ref={cardRef} className="print-item-card w-full border-b print:border-b-2 print:border-dashed print:py-4">
-            <div className="flex items-center justify-between w-full text-sm p-3 print-hide-in-single print:hidden">
+            <div className="flex items-center justify-between w-full text-sm p-3 print:hidden">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />
@@ -147,7 +147,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 print:hidden" onClick={handlePrintItem} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
                 </div>
@@ -155,11 +155,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
             <div className="hidden print:block print-only-content text-black w-full">
                  <div className="print-in-card">
-                    <Card>
-                        <CardContent className="p-4">
-                            <PrintedContent />
-                        </CardContent>
-                    </Card>
+                    <PrintedContent />
                  </div>
                  <div className="print-no-card">
                      <PrintedContent />
@@ -487,3 +483,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+

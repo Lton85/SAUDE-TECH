@@ -150,8 +150,8 @@
     display: flex !important;
     position: fixed;
     inset: 0;
-    align-items: flex-start;
     justify-content: center;
+    align-items: flex-start;
     padding-top: 2cm;
     width: 100%;
     border: none !important;
@@ -164,9 +164,9 @@
 
   .print-container.printing-single-item .print-in-card {
       display: block !important;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      padding: 1rem;
+      border: none;
+      padding: 0;
+      width: 18cm; /* Adjust width as needed */
   }
    .print-container.printing-single-item .print-no-card {
       display: none !important;
@@ -180,4 +180,5 @@
       display: block !important;
   }
 }
+
 
