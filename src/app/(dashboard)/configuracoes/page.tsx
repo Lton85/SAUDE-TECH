@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Settings, RefreshCw, Trash2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { clearAllHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
 import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
+import { getPacientes } from "@/services/pacientesService";
 
 
 export default function ConfiguracoesPage() {
@@ -23,6 +25,23 @@ export default function ConfiguracoesPage() {
     const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
     const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
+    const [pacientesCount, setPacientesCount] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchPatientCount = async () => {
+            try {
+                const pacientes = await getPacientes();
+                setPacientesCount(pacientes.length);
+            } catch (error) {
+                toast({
+                    title: "Erro ao verificar pacientes",
+                    description: "Não foi possível verificar a quantidade de pacientes cadastrados.",
+                    variant: "destructive"
+                });
+            }
+        };
+        fetchPatientCount();
+    }, [toast]);
 
     const handleResetRequest = (type: 'Normal' | 'Emergência') => {
         setResetType(type);
@@ -34,6 +53,14 @@ export default function ConfiguracoesPage() {
     };
 
     const handlePacienteResetRequest = () => {
+        if (pacientesCount !== null && pacientesCount > 0) {
+            toast({
+                title: "Ação Bloqueada",
+                description: `Existem ${pacientesCount} paciente(s) cadastrado(s). É necessário excluir todos os pacientes antes de zerar os códigos.`,
+                variant: "destructive",
+            });
+            return;
+        }
         setPacienteDialogOpen(true);
     };
 
@@ -175,7 +202,8 @@ export default function ConfiguracoesPage() {
                                 onClick={handlePacienteResetRequest}
                                 variant="destructive" 
                                 size="sm"
-                                disabled={isPacienteResetting}
+                                disabled={isPacienteResetting || pacientesCount === null}
+                                title={pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
                             >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${isPacienteResetting ? 'animate-spin' : ''}`} />
                                 {isPacienteResetting ? 'Zerando...' : 'Zerar (001)'}
