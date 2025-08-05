@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -15,20 +15,19 @@ import type { Medico } from "@/types/medico";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
+import { DialogFooter } from "../ui/dialog";
 
 const formSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS é obrigatório." }),
   crm: z.string().min(4, { message: "O CRM é obrigatório." }),
-  sexo: z.enum(['Masculino', 'Feminino'], { required_error: "O sexo é obrigatório."}),
   especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
-  cpf: z.string().min(11, { message: "O CPF é obrigatório." }),
-  dataNascimento: z.string().refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), {
-    message: "A data deve estar no formato DD/MM/AAAA.",
-  }),
-  telefone: z.string().min(10, { message: "O telefone é obrigatório." }),
-  cargaHoraria: z.string().min(1, { message: "A carga horária é obrigatória." }),
-  situacao: z.enum(['Ativo', 'Inativo'], { required_error: "A situação é obrigatória." }),
+  sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
+  cpf: z.string().optional(),
+  dataNascimento: z.string().optional(),
+  telefone: z.string().optional(),
+  cargaHoraria: z.string().optional(),
+  situacao: z.enum(['Ativo', 'Inativo']),
 });
 
 type MedicoFormValues = z.infer<typeof formSchema>;
@@ -37,9 +36,10 @@ interface MedicoFormProps {
   onSubmit: (values: MedicoFormValues) => void;
   medico?: Partial<Medico> | null;
   isSubmitting: boolean;
+  onCancel: () => void;
 }
 
-export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) {
+export function MedicoForm({ onSubmit, medico, isSubmitting, onCancel }: MedicoFormProps) {
   const form = useForm<MedicoFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,10 +97,13 @@ export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) 
         });
     }
   }, [medico, form]);
+  
+    const formId = "medico-form";
+
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+      <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4  max-h-[70vh] overflow-y-auto pr-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
@@ -284,12 +287,16 @@ export function MedicoForm({ onSubmit, medico, isSubmitting }: MedicoFormProps) 
                 )}
             />
         </div>
-        <div className="flex justify-end gap-2 pt-4">
-           <Button type="submit" disabled={isSubmitting}>
-             {isSubmitting ? "Salvando..." : "Salvar"}
-           </Button>
-        </div>
       </form>
+      <DialogFooter>
+          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button type="submit" form={formId} disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? 'Salvando...' : 'Salvar'}
+          </Button>
+      </DialogFooter>
     </Form>
   );
 }

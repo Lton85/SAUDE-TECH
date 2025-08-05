@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Stethoscope, Pencil } from "lucide-react";
+import { Stethoscope, Pencil, Loader2 } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import { MedicoForm } from "./medico-form";
 import { addMedico, updateMedico } from "@/services/medicosService";
@@ -23,15 +23,24 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   const handleSubmit = async (values: Omit<Medico, 'id' | 'codigo' | 'historico'>) => {
     setIsSubmitting(true);
     try {
+      const medicoData = {
+          ...values,
+          sexo: values.sexo || "",
+          cpf: values.cpf || "",
+          dataNascimento: values.dataNascimento || "",
+          telefone: values.telefone || "",
+          cargaHoraria: values.cargaHoraria || "",
+      };
+
       if (isEditMode && medico) {
-        await updateMedico(medico.id, values);
+        await updateMedico(medico.id, medicoData);
         toast({
           title: "Médico Atualizado!",
           description: `Os dados de ${values.nome} foram atualizados com sucesso.`,
           className: "bg-green-500 text-white"
         });
       } else {
-        await addMedico(values);
+        await addMedico(medicoData);
         toast({
           title: "Médico Cadastrado!",
           description: `O médico ${values.nome} foi adicionado com sucesso.`,
@@ -50,6 +59,10 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
       setIsSubmitting(false);
     }
   };
+  
+    const onCancel = () => {
+        onOpenChange(false);
+    }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -67,6 +80,7 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
           onSubmit={handleSubmit}
           medico={medico}
           isSubmitting={isSubmitting}
+          onCancel={onCancel}
         />
       </DialogContent>
     </Dialog>
