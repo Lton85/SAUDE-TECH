@@ -424,7 +424,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </CardContent>
             </Card>
 
-            <Card className="bg-muted/30">
+            <Card className="h-full">
               <CardContent className="p-4 space-y-4">
                  <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
