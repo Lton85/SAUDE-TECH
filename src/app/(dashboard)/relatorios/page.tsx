@@ -59,34 +59,34 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     }
 
     return (
-        <div ref={cardRef} className="print-item-card w-full bg-card border rounded-lg hover:border-primary/20 transition-colors p-3">
-            {/* Visible part on screen */}
-             <div className="flex items-center justify-between w-full text-sm print-hide">
-                <div className="flex items-center gap-2 font-semibold truncate">
-                    <User className="h-4 w-4 text-primary" />
-                    <span className="truncate">{atendimento.pacienteNome}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground truncate">
-                    <Building className="h-4 w-4" />
-                    <span className="truncate">{atendimento.departamentoNome}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground truncate">
-                    <User className="h-4 w-4" />
-                    <span className="truncate">{atendimento.profissionalNome}</span>
-                </div>
-                <div className="flex items-center justify-end gap-2 ml-auto pl-2">
-                    <span className="text-muted-foreground text-xs">{dataFormatada}</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado
-                    </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
-                        <Printer className="h-3 w-3" />
-                    </Button>
+        <div ref={cardRef} className="print-item-card w-full">
+             <div className="bg-card border rounded-lg hover:border-primary/20 transition-colors p-3 print-hide">
+                 <div className="flex items-center justify-between w-full text-sm gap-2">
+                    <div className="flex items-center gap-2 font-semibold truncate flex-1 min-w-0">
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="truncate">{atendimento.pacienteNome}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate flex-1 min-w-0">
+                        <Building className="h-4 w-4" />
+                        <span className="truncate">{atendimento.departamentoNome}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate flex-1 min-w-0">
+                        <User className="h-4 w-4" />
+                        <span className="truncate">{atendimento.profissionalNome}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 ml-auto pl-2 flex-shrink-0">
+                        <span className="text-muted-foreground text-xs">{dataFormatada}</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Finalizado
+                        </Badge>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handlePrintItem} title="Imprimir Atendimento">
+                            <Printer className="h-3 w-3" />
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            {/* Hidden part, only for printing */}
             <div className="hidden print:block p-4">
                  <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">Relatório de Atendimento</h2>
@@ -301,17 +301,15 @@ export default function RelatoriosPage() {
             </aside>
             <main className="flex-1 min-w-0">
                 <Card className="h-full flex flex-col" id="report-content">
-                    <CardHeader className="p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <CardHeader className="p-4 print-hide">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <CardTitle className="text-lg">Relatórios de Atendimento</CardTitle>
                                 <CardDescription className="text-xs">
                                     Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
                                 </CardDescription>
                             </div>
-                        </div>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-2 print-hide">
-                             <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                                 <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
                                 <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
@@ -350,11 +348,11 @@ export default function RelatoriosPage() {
                                     />
                                     </PopoverContent>
                                 </Popover>
+                                 <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Imprimir Relatório
+                                </Button>
                             </div>
-                            <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
-                                <Printer className="mr-2 h-4 w-4" />
-                                Imprimir Relatório
-                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 flex flex-col min-h-0 p-4">
