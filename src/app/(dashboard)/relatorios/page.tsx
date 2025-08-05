@@ -206,22 +206,6 @@ export default function RelatoriosPage() {
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, allReportData, hasSearched, applyClientSideFilters]);
 
 
-    React.useEffect(() => {
-        if (selectedMedicoId !== 'todos' && selectedEnfermeiroId !== 'todos') {
-            // If user selects a specific doctor, clear the nurse selection and vice versa,
-            // as one attendance can't have both. But allow one to be selected while the other is "all".
-            toast({
-                title: "Filtro de Profissional",
-                description: "Selecione um médico ou um enfermeiro, mas não ambos.",
-                variant: "default",
-            });
-             if (selectedMedicoId !== 'todos') {
-                 setSelectedEnfermeiroId('todos');
-             }
-        }
-    }, [selectedMedicoId, selectedEnfermeiroId, toast]);
-
-
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
         setSelectedMedicoId('todos');
