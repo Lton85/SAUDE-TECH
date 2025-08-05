@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus, Eraser } from "lucide-react";
-import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +73,7 @@ export default function AtendimentoPage() {
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
@@ -247,6 +248,11 @@ export default function AtendimentoPage() {
     
     const handleEdit = (item: FilaDeEsperaItem) => {
         setItemToEdit(item);
+    };
+
+    const handleEditFromHistory = (item: FilaDeEsperaItem) => {
+        setItemToHistory(null); // Close history dialog
+        setItemToEditFromHistory(item); // Open edit dialog for history item
     };
     
     const handleDelete = (item: FilaDeEsperaItem) => {
@@ -505,6 +511,20 @@ export default function AtendimentoPage() {
                 item={itemToEdit}
                 departamentos={departamentos}
                 profissionais={profissionais}
+                onSave={updateFilaItem}
+                isHistory={false}
+            />
+        )}
+
+        {itemToEditFromHistory && (
+             <EditQueueItemDialog
+                isOpen={!!itemToEditFromHistory}
+                onOpenChange={() => setItemToEditFromHistory(null)}
+                item={itemToEditFromHistory}
+                departamentos={departamentos}
+                profissionais={profissionais}
+                onSave={updateHistoricoItem}
+                isHistory={true}
             />
         )}
         
@@ -524,6 +544,7 @@ export default function AtendimentoPage() {
                 isOpen={!!itemToHistory}
                 onOpenChange={() => setItemToHistory(null)}
                 item={itemToHistory}
+                onEdit={handleEditFromHistory}
             />
         )}
 

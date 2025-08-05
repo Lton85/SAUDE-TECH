@@ -246,6 +246,18 @@ export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>
     await updateDoc(filaDocRef, updates);
 };
 
+export const updateHistoricoItem = async (id: string, data: Partial<FilaDeEsperaItem>): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item de histórico não encontrado.");
+    }
+    const historicoDocRef = doc(db, "relatorios_atendimentos", id);
+    const updates = {...data};
+    if (data.classificacao) {
+        updates.prioridade = data.classificacao === 'Emergência' ? 1 : 2;
+    }
+    await updateDoc(historicoDocRef, updates);
+};
+
 export const retornarPacienteParaFila = async (id: string): Promise<void> => {
     if (!id) {
         throw new Error("ID do item da fila não encontrado.");

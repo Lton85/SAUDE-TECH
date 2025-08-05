@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, User, Building, Loader2, Info, CheckCircle, LogIn, Megaphone, Check } from "lucide-react";
+import { FileText, Calendar, User, Building, Loader2, Info, CheckCircle, LogIn, Megaphone, Check, Pencil } from "lucide-react";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { format } from 'date-fns';
@@ -17,6 +17,7 @@ interface ProntuarioDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   item: FilaDeEsperaItem | null;
+  onEdit: (item: FilaDeEsperaItem) => void;
 }
 
 const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, label: string, time: string }) => (
@@ -29,7 +30,7 @@ const EventoTimeline = ({ icon: Icon, label, time }: { icon: React.ElementType, 
     </div>
 );
 
-const AtendimentoTimelineItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+const AtendimentoTimelineItem = ({ atendimento, onEdit }: { atendimento: FilaDeEsperaItem; onEdit: (item: FilaDeEsperaItem) => void; }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : '';
     
@@ -53,10 +54,15 @@ const AtendimentoTimelineItem = ({ atendimento }: { atendimento: FilaDeEsperaIte
                                     <p className="text-sm font-semibold text-foreground">
                                         {dataFormatada}
                                     </p>
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 mr-2">
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Finalizado
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                            <CheckCircle className="h-3 w-3 mr-1" />
+                                            Finalizado
+                                        </Badge>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); onEdit(atendimento); }}>
+                                            <Pencil className="h-3 w-3" />
+                                        </Button>
+                                    </div>
                                 </div>
                                 <div className="mt-1 space-y-1 text-sm text-muted-foreground">
                                      <div className="flex items-center gap-2">
@@ -85,7 +91,7 @@ const AtendimentoTimelineItem = ({ atendimento }: { atendimento: FilaDeEsperaIte
 }
 
 
-export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialogProps) {
+export function ProntuarioDialog({ isOpen, onOpenChange, item, onEdit }: ProntuarioDialogProps) {
   const [historico, setHistorico] = useState<FilaDeEsperaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,7 +140,7 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item }: ProntuarioDialo
                 ) : historico.length > 0 ? (
                     <div className="space-y-0">
                         {historico.map((atendimento) => (
-                           <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento}/>
+                           <AtendimentoTimelineItem key={atendimento.id} atendimento={atendimento} onEdit={onEdit} />
                         ))}
                     </div>
                 ) : (

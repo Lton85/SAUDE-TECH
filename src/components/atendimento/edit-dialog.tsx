@@ -17,7 +17,6 @@ import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { updateFilaItem } from "@/services/filaDeEsperaService";
 import { Input } from "../ui/input";
 
 interface Profissional {
@@ -31,9 +30,11 @@ interface EditQueueItemDialogProps {
   item: FilaDeEsperaItem | null;
   departamentos: Departamento[];
   profissionais: Profissional[];
+  onSave: (id: string, data: Partial<FilaDeEsperaItem>) => Promise<void>;
+  isHistory?: boolean;
 }
 
-export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais }: EditQueueItemDialogProps) {
+export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onSave, isHistory = false }: EditQueueItemDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
     const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
@@ -79,7 +80,7 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
                 classificacao: classification,
             };
             
-            await updateFilaItem(item.id, updatedData);
+            await onSave(item.id, updatedData);
             
             toast({
                 title: "Atendimento Atualizado!",
@@ -107,10 +108,10 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5" />
-            Editar Item da Fila
+            Editar Atendimento
           </DialogTitle>
           <DialogDescription>
-            Altere as informações para o atendimento de <span className="font-semibold text-primary">{item.pacienteNome}</span>.
+            {isHistory ? "Altere as informações do registro de atendimento finalizado." : `Altere as informações para o atendimento de ${item.pacienteNome}.`}
           </DialogDescription>
         </DialogHeader>
         
