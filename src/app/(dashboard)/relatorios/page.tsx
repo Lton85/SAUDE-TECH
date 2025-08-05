@@ -46,20 +46,27 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
+    const [isAccordionOpen, setIsAccordionOpen] = React.useState(false);
+
     const handlePrintItem = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const cardElement = (e.currentTarget as HTMLElement).closest('.print-item-card');
-        if (cardElement) {
-            document.body.classList.add('printing-single-item');
-            cardElement.classList.add('print-this');
-            window.print();
-            cardElement.classList.remove('print-this');
-            document.body.classList.remove('printing-single-item');
-        }
+        setIsAccordionOpen(true);
+
+        setTimeout(() => {
+            const cardElement = (e.currentTarget as HTMLElement).closest('.print-item-card');
+            if (cardElement) {
+                document.body.classList.add('printing-single-item');
+                cardElement.classList.add('print-this');
+                window.print();
+                cardElement.classList.remove('print-this');
+                document.body.classList.remove('printing-single-item');
+                setIsAccordionOpen(false); 
+            }
+        }, 100); 
     }
 
     return (
-        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card">
+        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card" value={isAccordionOpen ? atendimento.id : ''} onValueChange={(value) => setIsAccordionOpen(!!value)}>
             <AccordionItem value={atendimento.id} className="border-b-0">
                  <div className="flex items-center p-3 text-sm">
                     <AccordionTrigger className="p-0 hover:no-underline flex-1">
@@ -140,35 +147,35 @@ export default function RelatoriosPage() {
     });
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
 
-    const applyAndSetFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[], filters: {paciente: string, medico: string, enfermeiro: string}) => {
+    const applyClientSideFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[]) => {
         let filteredData = [...dataToFilter];
-
-        if (filters.paciente !== 'todos') {
-            filteredData = filteredData.filter(item => item.pacienteId === filters.paciente);
+        
+        if (selectedPacienteId !== 'todos') {
+            filteredData = filteredData.filter(item => item.pacienteId === selectedPacienteId);
         }
 
-        if (filters.medico !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === filters.medico);
+        if (selectedMedicoId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === selectedMedicoId);
         }
         
-        if (filters.enfermeiro !== 'todos') {
-            filteredData = filteredData.filter(item => item.profissionalId === filters.enfermeiro);
+        if (selectedEnfermeiroId !== 'todos') {
+            filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
         }
         
         setFilteredReportData(filteredData);
-    }, []);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
     
-    const handleSearch = React.useCallback(async (range: { from: Date | undefined; to: Date | undefined }, currentFilters: {paciente: string, medico: string, enfermeiro: string}) => {
-        if (!range.from || !range.to) {
+    const handleSearch = React.useCallback(async () => {
+        if (!dateRange.from || !dateRange.to) {
             return;
         }
 
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: range.from, dateTo: range.to });
+            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
             setAllReportData(data);
-            applyAndSetFilters(data, currentFilters); 
+            applyClientSideFilters(data);
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             toast({
@@ -181,30 +188,17 @@ export default function RelatoriosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, applyAndSetFilters]);
-    
-     // Function to trigger search from filters
-    const applyFilters = () => {
-        const currentFilters = {
-            paciente: selectedPacienteId,
-            medico: selectedMedicoId,
-            enfermeiro: selectedEnfermeiroId,
-        };
-        handleSearch(dateRange, currentFilters);
-    };
+    }, [dateRange, applyClientSideFilters, toast]);
+
+     React.useEffect(() => {
+        if (!isMounted) return;
+        handleSearch();
+    }, [isMounted, dateRange, handleSearch]);
     
     // Initial data load for today
     React.useEffect(() => {
         setIsMounted(true);
-        if(!hasSearched){
-            const initialFilters = {
-                paciente: 'todos',
-                medico: 'todos',
-                enfermeiro: 'todos',
-            };
-            handleSearch({ from: new Date(), to: new Date() }, initialFilters);
-        }
-    }, [hasSearched, handleSearch]);
+    }, []);
 
     // Fetch filter options (pacientes, medicos, etc.)
     React.useEffect(() => {
@@ -228,16 +222,14 @@ export default function RelatoriosPage() {
         };
         fetchFiltersData();
     }, [toast]);
+    
+    // re-apply client filters when they change
+    React.useEffect(() => {
+        if(hasSearched){
+            applyClientSideFilters(allReportData);
+        }
+    },[selectedPacienteId, selectedEnfermeiroId, selectedMedicoId, allReportData, hasSearched, applyClientSideFilters])
 
-    const handleDateChange = React.useCallback((range: { from: Date | undefined; to: Date | undefined }) => {
-        setDateRange(range);
-        const currentFilters = {
-            paciente: selectedPacienteId,
-            medico: selectedMedicoId,
-            enfermeiro: selectedEnfermeiroId,
-        };
-        handleSearch(range, currentFilters);
-    }, [handleSearch, selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
 
     // Handle quick date selection (Diário, Semanal, Mensal)
     React.useEffect(() => {
@@ -256,10 +248,10 @@ export default function RelatoriosPage() {
             newFrom = startOfMonth(today);
             newTo = endOfMonth(today);
         }
+        
+        setDateRange({ from: newFrom, to: newTo });
 
-        handleDateChange({ from: newFrom, to: newTo });
-
-    }, [viewMode, isMounted, handleDateChange]);
+    }, [viewMode, isMounted]);
 
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
@@ -281,11 +273,7 @@ export default function RelatoriosPage() {
     }
     
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
-        if (range.from && range.to) {
-            handleDateChange(range);
-        } else {
-             setDateRange(range || { from: undefined, to: undefined });
-        }
+        setDateRange(range || { from: undefined, to: undefined });
     }
 
     if (!isMounted) {
@@ -309,7 +297,7 @@ export default function RelatoriosPage() {
                     onMedicoChange={setSelectedMedicoId}
                     selectedEnfermeiroId={selectedEnfermeiroId}
                     onEnfermeiroChange={setSelectedEnfermeiroId}
-                    onSearch={applyFilters}
+                    onSearch={() => applyClientSideFilters(allReportData)}
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
                     hasActiveFilters={hasActiveFilters}
