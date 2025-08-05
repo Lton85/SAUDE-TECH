@@ -386,7 +386,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
 
         <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
-           <Card className="h-full bg-card">
+           <Card className="h-full">
                 <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
                         <div className="space-y-1 w-full pr-2">
@@ -424,7 +424,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 </CardContent>
             </Card>
 
-            <div className="space-y-4 p-4 rounded-lg">
+            <Card className="bg-muted/30">
+              <CardContent className="p-4 space-y-4">
                  <div className="space-y-2">
                     <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
                     <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId} disabled={!selectedPaciente}>
@@ -483,7 +484,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         />
                     </div>
                 </div>
-            </div>
+              </CardContent>
+            </Card>
         </div>
 
 
