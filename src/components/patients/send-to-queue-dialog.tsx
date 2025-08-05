@@ -200,10 +200,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                          </div>
                     </div>
                     <Separator/>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2">
-                        <InfoRow icon={BadgeInfo} label="CNS" value={paciente.cns} />
-                        <InfoRow icon={VenetianMask} label="Sexo" value={paciente.sexo} />
-                        <InfoRow icon={Cake} label="Idade" value={paciente.idade} />
+                    <div className="grid grid-cols-5 gap-x-4 gap-y-2">
+                        <div className="col-span-3"><InfoRow icon={BadgeInfo} label="CNS" value={paciente.cns} /></div>
+                        <div className="col-span-2"><InfoRow icon={Cake} label="Idade" value={paciente.idade} /></div>
                     </div>
                 </CardContent>
             </Card>
