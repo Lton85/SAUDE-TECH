@@ -112,31 +112,31 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
             </div>
 
 
-            <div className="hidden print:block print-only-content p-4 text-black">
-                <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
-                    <div className="flex items-center gap-3">
-                         <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
-                         <Badge
-                            className={cn(
-                                'text-xs text-white',
-                                atendimento.classificacao === 'Urgência' && 'bg-red-500',
-                                atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
-                                atendimento.classificacao === 'Normal' && 'bg-green-500'
-                            )}
-                        >
-                            {atendimento.classificacao}
-                        </Badge>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Finalizado
-                        </Badge>
+            <div className="hidden print:block print-only-content text-black w-full">
+                <div className="border rounded-md p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
+                            <Badge
+                                className={cn(
+                                    'text-xs text-white',
+                                    atendimento.classificacao === 'Urgência' && 'bg-red-500',
+                                    atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
+                                    atendimento.classificacao === 'Normal' && 'bg-green-500'
+                                )}
+                            >
+                                {atendimento.classificacao}
+                            </Badge>
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Finalizado
+                            </Badge>
+                        </div>
                     </div>
-                </div>
 
-                <Separator className="mb-4 bg-gray-300" />
-                
-                <div className="border rounded-md p-4 mt-4">
+                    <Separator className="mb-4 bg-gray-300" />
+                    
                     <div className="space-y-2 mb-4 text-sm">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold w-28">Departamento:</span>
@@ -477,3 +477,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
