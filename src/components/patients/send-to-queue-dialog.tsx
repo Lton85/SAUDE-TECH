@@ -48,7 +48,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
-  const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
+  const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [senha, setSenha] = useState("");
   const { toast } = useToast()
@@ -85,9 +85,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         if (paciente && isOpen) {
             setSenha("Gerando senha...");
             try {
-                const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+                const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
                 const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+                const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
                 const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
                 setSenha(ticket);
             } catch (error) {
@@ -114,9 +114,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
 
     setIsSubmitting(true)
     try {
-      const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+      const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
       const ticketNumber = await getNextCounter(counterName, true); // true = increment
-      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
       const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
 
       const departamento = departamentos.find(d => d.id === selectedDepartamentoId)
@@ -125,7 +125,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'> = {
+      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
@@ -136,7 +136,6 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         senha: ticket,
         status: "aguardando",
         classificacao: classification,
-        prioridade: classification === 'Emergência' ? 1 : 2,
       }
       
       await addPacienteToFila(newItem)
@@ -210,13 +209,14 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                    <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')}>
+                    <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])}>
                         <SelectTrigger id="classification">
                             <SelectValue placeholder="Selecione a classificação" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Normal">Normal</SelectItem>
-                            <SelectItem value="Emergência">Emergência</SelectItem>
+                            <SelectItem value="Preferencial">Preferencial</SelectItem>
+                            <SelectItem value="Urgência">Urgência</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

@@ -15,6 +15,6 @@ export interface FilaDeEsperaItem {
     chamadaEm?: Timestamp;
     finalizadaEm?: Timestamp;
     status: 'aguardando' | 'em-atendimento' | 'finalizado';
-    classificacao: 'Normal' | 'Emergência';
-    prioridade: 1 | 2; // 1 for Emergência, 2 for Normal
+    classificacao: 'Normal' | 'Preferencial' | 'Urgência';
+    prioridade: 1 | 2 | 3; // 1: Urgência, 2: Preferencial, 3: Normal
 }

@@ -21,6 +21,7 @@ import { getNextCounter } from "@/services/countersService"
 import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { Badge } from "../ui/badge"
+import { FilaDeEsperaItem } from "@/types/fila"
 
 interface Profissional {
   id: string;
@@ -54,7 +55,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
-  const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
+  const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [senha, setSenha] = useState("");
   const [senhaNumero, setSenhaNumero] = useState<number | null>(null);
@@ -138,10 +139,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   }, [isOpen, toast]);
 
-  const generateTicketPreview = useCallback(async (currentClassification: 'Normal' | 'Emergência') => {
+  const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
     if (selectedPaciente) {
         try {
-            const counterName = currentClassification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+            const counterName = currentClassification === 'Urgência' ? 'senha_emergencia' : (currentClassification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
             setSenha("Gerando...");
             const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
             setSenhaNumero(ticketNumber);
@@ -165,7 +166,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   useEffect(() => {
     const updateTicketDisplay = () => {
         if (senhaNumero !== null) {
-            const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+            const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
             const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
             setSenha(ticket);
         } else if (selectedPaciente && senha !== "Erro") {
@@ -213,9 +214,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
     setIsSubmitting(true)
     try {
-      const counterName = classification === 'Emergência' ? 'senha_emergencia' : 'senha_normal';
+      const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
       const ticketNumber = await getNextCounter(counterName, true); // true = increment counter
-      const ticketPrefix = classification === 'Emergência' ? 'E' : 'N';
+      const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
       const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
 
       if (!selectedDepartamento) throw new Error("Departamento não encontrado")
@@ -234,7 +235,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         senha: ticket,
         status: "aguardando",
         classificacao: classification,
-        prioridade: classification === 'Emergência' ? 1 : 2,
       })
 
       toast({
@@ -462,13 +462,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <div className="space-y-2">
                         <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                        <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')} disabled={!selectedPaciente}>
+                        <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])} disabled={!selectedPaciente}>
                             <SelectTrigger id="classification">
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Normal">Normal</SelectItem>
-                                <SelectItem value="Emergência">Emergência</SelectItem>
+                                <SelectItem value="Preferencial">Preferencial</SelectItem>
+                                <SelectItem value="Urgência">Urgência</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

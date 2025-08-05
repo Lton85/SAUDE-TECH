@@ -35,7 +35,7 @@ interface ReturnToQueueDialogProps {
 export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm }: ReturnToQueueDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
-    const [classification, setClassification] = useState<'Normal' | 'Emergência'>('Normal');
+    const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
 
@@ -73,7 +73,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                 profissionalId: selectedProf.id,
                 profissionalNome: selectedProf.nome,
                 classificacao: classification,
-                prioridade: classification === 'Emergência' ? 1 : 2,
+                prioridade: classification === 'Urgência' ? 1 : (classification === 'Preferencial' ? 2 : 3),
             };
             
             await onConfirm(item, updates);
@@ -138,13 +138,14 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
             </div>
             <div className="space-y-2">
                 <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                <Select value={classification} onValueChange={(value) => setClassification(value as 'Normal' | 'Emergência')}>
+                <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])}>
                     <SelectTrigger id="classification">
                         <SelectValue placeholder="Selecione a classificação" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Normal">Normal</SelectItem>
-                        <SelectItem value="Emergência">Emergência</SelectItem>
+                        <SelectItem value="Preferencial">Preferencial</SelectItem>
+                        <SelectItem value="Urgência">Urgência</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

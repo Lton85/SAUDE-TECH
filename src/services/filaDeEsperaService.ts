@@ -13,7 +13,16 @@ interface SearchFilters {
     dateTo: Date;
 }
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
+const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
+    switch (classificacao) {
+        case 'Urgência': return 1;
+        case 'Preferencial': return 2;
+        case 'Normal': return 3;
+        default: return 3;
+    }
+}
+
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> & { prioridade?: FilaDeEsperaItem['prioridade'] } ) => {
     try {
         // Check for 'aguardando' status
         const qAguardando = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "==", "aguardando"));
@@ -29,7 +38,7 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
             throw new Error("Este paciente já está em atendimento.");
         }
         
-        const prioridade = item.classificacao === 'Emergência' ? 1 : 2;
+        const prioridade = getPrioridade(item.classificacao);
 
         await addDoc(collection(db, 'filaDeEspera'), {
             ...item,
@@ -241,7 +250,7 @@ export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>
     const filaDocRef = doc(db, "filaDeEspera", id);
     const updates = {...data};
     if (data.classificacao) {
-        updates.prioridade = data.classificacao === 'Emergência' ? 1 : 2;
+        updates.prioridade = getPrioridade(data.classificacao);
     }
     await updateDoc(filaDocRef, updates);
 };
@@ -253,7 +262,7 @@ export const updateHistoricoItem = async (id: string, data: Partial<FilaDeEspera
     const historicoDocRef = doc(db, "relatorios_atendimentos", id);
     const updates = {...data};
     if (data.classificacao) {
-        updates.prioridade = data.classificacao === 'Emergência' ? 1 : 2;
+        updates.prioridade = getPrioridade(data.classificacao);
     }
     await updateDoc(historicoDocRef, updates);
 };

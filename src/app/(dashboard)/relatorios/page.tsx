@@ -84,10 +84,11 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
                 <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
                     <span className="text-muted-foreground text-xs">{dataFormatada}</span>
-                     <Badge
+                    <Badge
                         className={cn(
                             'text-xs',
-                            atendimento.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                            atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
                             atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                         )}
                     >
@@ -433,4 +434,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-

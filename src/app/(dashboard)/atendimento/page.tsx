@@ -339,7 +339,8 @@ export default function AtendimentoPage() {
                                              <Badge
                                                 className={cn(
                                                     'text-xs',
-                                                    item.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                                                    item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                    item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
                                                     item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >
@@ -436,10 +437,11 @@ export default function AtendimentoPage() {
                                     <TableRow key={item.id} className="hover:bg-muted/50">
                                         <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
                                         <TableCell className="px-2 py-1 text-xs">
-                                             <Badge
+                                            <Badge
                                                 className={cn(
                                                     'text-xs',
-                                                    item.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                                                    item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                    item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
                                                     item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                                                 )}
                                             >

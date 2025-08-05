@@ -123,7 +123,8 @@ export function FiltrosRelatorio({
                         <SelectContent>
                             <SelectItem value="todos">Todos os Tipos</SelectItem>
                             <SelectItem value="Normal">Atendimento Normal</SelectItem>
-                            <SelectItem value="Emergência">Atendimento de Emergência</SelectItem>
+                            <SelectItem value="Preferencial">Atendimento Preferencial</SelectItem>
+                            <SelectItem value="Urgência">Atendimento de Urgência</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
