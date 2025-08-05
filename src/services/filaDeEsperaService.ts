@@ -24,23 +24,25 @@ const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDe
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> & { prioridade?: FilaDeEsperaItem['prioridade'] } ) => {
     try {
-        // Check for 'aguardando' status
-        const qAguardando = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "==", "aguardando"));
-        const aguardandoSnapshot = await getDocs(qAguardando);
-        if (!aguardandoSnapshot.empty) {
-            throw new Error("Este paciente já está na fila de atendimento.");
-        }
+        const filaDeEsperaCollection = collection(db, 'filaDeEspera');
+        
+        // Check if patient is already in queue ('aguardando' or 'em-atendimento')
+        const q = query(
+            filaDeEsperaCollection, 
+            where("pacienteId", "==", item.pacienteId), 
+            where("status", "in", ["aguardando", "em-atendimento"])
+        );
+        const querySnapshot = await getDocs(q);
 
-        // Check for 'em-atendimento' status
-        const qEmAtendimento = query(collection(db, 'filaDeEspera'), where("pacienteId", "==", item.pacienteId), where("status", "==", "em-atendimento"));
-        const emAtendimentoSnapshot = await getDocs(qEmAtendimento);
-        if (!emAtendimentoSnapshot.empty) {
-            throw new Error("Este paciente já está em atendimento.");
+        if (!querySnapshot.empty) {
+             const doc = querySnapshot.docs[0].data();
+             const status = doc.status === 'aguardando' ? 'aguardando atendimento' : 'em atendimento';
+            throw new Error(`Este paciente já está ${status} e não pode ser adicionado novamente à fila.`);
         }
         
         const prioridade = getPrioridade(item.classificacao);
 
-        await addDoc(collection(db, 'filaDeEspera'), {
+        await addDoc(filaDeEsperaCollection, {
             ...item,
             prioridade,
             chegadaEm: serverTimestamp(),
@@ -302,3 +304,4 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
+
