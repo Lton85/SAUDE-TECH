@@ -8,6 +8,13 @@ import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
 
+interface SearchFilters {
+    dateFrom: Date;
+    dateTo: Date;
+    pacienteId?: string;
+    medicoId?: string;
+    enfermeiroId?: string;
+}
 
 export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm'>) => {
     try {
@@ -199,21 +206,32 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
 };
 
 export const getHistoricoAtendimentosPorPeriodo = async (
-    dateFrom: Date,
-    dateTo: Date,
-    profissionalId?: string
+    filters: SearchFilters
 ): Promise<FilaDeEsperaItem[]> => {
+    const { dateFrom, dateTo, pacienteId, medicoId, enfermeiroId } = filters;
     try {
         const start = startOfDay(dateFrom);
         const end = endOfDay(dateTo);
         
-        const constraints = [
+        let constraints = [
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
             where("finalizadaEm", "<=", Timestamp.fromDate(end))
         ];
 
-        if(profissionalId) {
-            constraints.push(where("profissionalId", "==", profissionalId));
+        if(pacienteId && pacienteId !== 'todos') {
+            constraints.push(where("pacienteId", "==", pacienteId));
+        }
+        
+        // Determine the professional ID to filter by
+        let professionalIdToFilter: string | undefined;
+        if (medicoId && medicoId !== 'todos') {
+            professionalIdToFilter = medicoId;
+        } else if (enfermeiroId && enfermeiroId !== 'todos') {
+            professionalIdToFilter = enfermeiroId;
+        }
+
+        if(professionalIdToFilter) {
+            constraints.push(where("profissionalId", "==", professionalIdToFilter));
         }
 
         const q = query(
@@ -280,3 +298,5 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
+
+    

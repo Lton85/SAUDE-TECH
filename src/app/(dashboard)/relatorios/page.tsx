@@ -18,8 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
+import { getPacientes } from "@/services/pacientesService";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
+import type { Paciente } from "@/types/paciente";
 import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -88,17 +90,19 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     )
 }
 
-type Profissional = (Medico | Enfermeiro) & { tipo: 'medico' | 'enfermeiro' };
-
-
 export default function RelatoriosPage() {
     const { toast } = useToast();
     const [dateFrom, setDateFrom] = React.useState<Date | undefined>(new Date());
     const [dateTo, setDateTo] = React.useState<Date | undefined>(new Date());
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
     
-    const [profissionais, setProfissionais] = React.useState<Profissional[]>([]);
-    const [selectedProfissionalId, setSelectedProfissionalId] = React.useState<string>("todos");
+    const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
+    const [medicos, setMedicos] = React.useState<Medico[]>([]);
+    const [enfermeiros, setEnfermeiros] = React.useState<Enfermeiro[]>([]);
+    
+    const [selectedPacienteId, setSelectedPacienteId] = React.useState<string>("todos");
+    const [selectedMedicoId, setSelectedMedicoId] = React.useState<string>("todos");
+    const [selectedEnfermeiroId, setSelectedEnfermeiroId] = React.useState<string>("todos");
 
     const [reportData, setReportData] = React.useState<FilaDeEsperaItem[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
@@ -111,21 +115,25 @@ export default function RelatoriosPage() {
     }, []);
 
     React.useEffect(() => {
-        const fetchProfissionais = async () => {
+        const fetchFiltersData = async () => {
             try {
-                const [medicosData, enfermeirosData] = await Promise.all([getMedicos(), getEnfermeiros()]);
-                const medicosList = medicosData.map(m => ({ ...m, nome: `Dr(a). ${m.nome}`, tipo: 'medico' as const }));
-                const enfermeirosList = enfermeirosData.map(e => ({ ...e, nome: `Enf. ${e.nome}`, tipo: 'enfermeiro' as const }));
-                setProfissionais([...medicosList, ...enfermeirosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+                const [medicosData, enfermeirosData, pacientesData] = await Promise.all([
+                    getMedicos(), 
+                    getEnfermeiros(),
+                    getPacientes()
+                ]);
+                setMedicos(medicosData);
+                setEnfermeiros(enfermeirosData);
+                setPacientes(pacientesData);
             } catch (error) {
                 toast({
-                    title: "Erro ao carregar profissionais",
-                    description: "Não foi possível carregar a lista de profissionais.",
+                    title: "Erro ao carregar dados dos filtros",
+                    description: "Não foi possível carregar as listas de pacientes e profissionais.",
                     variant: "destructive"
                 });
             }
         };
-        fetchProfissionais();
+        fetchFiltersData();
     }, [toast]);
 
     React.useEffect(() => {
@@ -155,7 +163,13 @@ export default function RelatoriosPage() {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodo(dateFrom, dateTo, selectedProfissionalId !== "todos" ? selectedProfissionalId : undefined);
+            const data = await getHistoricoAtendimentosPorPeriodo({
+                dateFrom, 
+                dateTo,
+                pacienteId: selectedPacienteId,
+                medicoId: selectedMedicoId,
+                enfermeiroId: selectedEnfermeiroId
+            });
             setReportData(data);
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
@@ -168,7 +182,7 @@ export default function RelatoriosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [dateFrom, dateTo, selectedProfissionalId, toast]);
+    }, [dateFrom, dateTo, selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, toast]);
 
     const handlePrint = () => {
         toast({
@@ -185,9 +199,15 @@ export default function RelatoriosPage() {
         <div className="flex flex-col lg:flex-row gap-6 h-full">
             <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0">
                 <FiltrosRelatorio
-                    profissionais={profissionais}
-                    selectedProfissionalId={selectedProfissionalId}
-                    onProfissionalChange={setSelectedProfissionalId}
+                    pacientes={pacientes}
+                    medicos={medicos}
+                    enfermeiros={enfermeiros}
+                    selectedPacienteId={selectedPacienteId}
+                    onPacienteChange={setSelectedPacienteId}
+                    selectedMedicoId={selectedMedicoId}
+                    onMedicoChange={setSelectedMedicoId}
+                    selectedEnfermeiroId={selectedEnfermeiroId}
+                    onEnfermeiroChange={setSelectedEnfermeiroId}
                     onSearch={handleSearch}
                     isLoading={isLoading}
                 />
@@ -233,7 +253,7 @@ export default function RelatoriosPage() {
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
                                         {dateFrom && dateTo ? (
-                                             `${format(dateFrom, "LLL dd, y")} - ${format(dateTo, "LLL dd, y")}`
+                                             `${format(dateFrom, "dd 'de' MMM, y", { locale: ptBR })} - ${format(dateTo, "dd 'de' MMM, y", { locale: ptBR })}`
                                         ) : <span>Escolha um período</span>
                                         }
                                     </Button>
@@ -287,3 +307,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
