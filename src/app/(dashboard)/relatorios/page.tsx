@@ -62,7 +62,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     return (
         <div ref={cardRef} className="print-item-card w-full bg-card border rounded-lg hover:border-primary/20 transition-colors p-3">
             {/* Visible part on screen */}
-            <div className="flex items-center gap-4 text-sm print-hide">
+            <div className="flex items-center gap-2 text-sm print-hide">
                 <span className="flex items-center gap-2 font-semibold truncate w-1/3">
                     <User className="h-4 w-4 text-primary" />
                     {atendimento.pacienteNome}
@@ -75,7 +75,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                     <User className="h-4 w-4" />
                     {atendimento.profissionalNome}
                 </span>
-                <div className="flex items-center justify-end gap-2 ml-auto pl-4">
+                <div className="flex items-center justify-end gap-2 ml-auto pl-2">
                     <span className="text-muted-foreground text-xs">{dataFormatada}</span>
                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
                         <CheckCircle className="h-3 w-3 mr-1" />
@@ -317,7 +317,7 @@ export default function RelatoriosPage() {
                                 </Button>
                             </div>
                         </div>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2 p-3 border rounded-lg bg-muted/40 print-hide">
+                        <div className="mt-2 flex flex-col sm:flex-row items-center gap-2 p-3 border rounded-lg bg-muted/40 print-hide">
                              <div className="flex items-center gap-2">
                                 <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                                 <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
