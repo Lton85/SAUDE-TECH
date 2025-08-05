@@ -99,6 +99,10 @@
   .print-hide {
     display: none !important;
   }
+
+  .print-only-content {
+    display: block !important;
+  }
   
   .print-container {
       padding: 0 !important;
@@ -111,13 +115,6 @@
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
   }
-
-  .print\:block { 
-    display: block !important; 
-  }
-  .print\:hidden { 
-    display: none !important; 
-  }
   
   /* When printing the whole report, expand the scroll area */
   .print-expand-on-print {
@@ -128,6 +125,10 @@
   .print-expand-on-print > div[data-radix-scroll-area-viewport] {
       height: auto !important;
       overflow-y: visible !important;
+  }
+  .print-badge {
+    color: #fff !important;
+    border-color: transparent !important;
   }
 
   /* --- Single Item Printing Logic --- */
@@ -151,8 +152,8 @@
     position: fixed;
     inset: 0;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 2cm;
+    align-items: flex-start; /* Aligns to the top */
+    padding-top: 2cm; /* Adds some space from the top margin */
     width: 100%;
     border: none !important;
     box-shadow: none !important;
@@ -160,25 +161,12 @@
 
   .print-container.printing-single-item .print-this .print-only-content {
       display: block !important;
-  }
-
-  .print-container.printing-single-item .print-in-card {
-      display: block !important;
       border: none;
       padding: 0;
       width: 18cm; /* Adjust width as needed */
   }
-   .print-container.printing-single-item .print-no-card {
-      display: none !important;
-  }
 
-  /* --- General Report Printing Logic --- */
-  .print-container:not(.printing-single-item) .print-item-card .print-in-card {
-      display: none !important;
-  }
-  .print-container:not(.printing-single-item) .print-item-card .print-no-card {
-      display: block !important;
-  }
 }
+
 
 

@@ -58,6 +58,10 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
         const printContainer = document.querySelector('.print-container');
         const cardElement = cardRef.current;
         if (cardElement && printContainer) {
+            
+            const originalTitle = document.title;
+            document.title = `Relatório Individual Paciente - ${atendimento.pacienteNome}`;
+
             printContainer.classList.add('printing-single-item');
             cardElement.classList.add('print-this');
             
@@ -66,19 +70,20 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
             setTimeout(() => {
                 printContainer.classList.remove('printing-single-item');
                 cardElement.classList.remove('print-this');
+                document.title = originalTitle;
             }, 500);
         }
     }
 
     const PrintedContent = () => (
-        <>
-            <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold">{atendimento.pacienteNome}</h2>
+         <div className="w-full">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono">CNS: {paciente?.cns || '...'}</span>
-                    <Badge
+                    <span className="text-sm font-mono">CNS: {paciente?.cns || '...'}</span>
+                     <Badge
                         className={cn(
-                            'text-xs text-white',
+                            'text-xs text-white print-badge',
                             atendimento.classificacao === 'Urgência' && 'bg-red-500',
                             atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
                             atendimento.classificacao === 'Normal' && 'bg-green-500'
@@ -86,7 +91,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                     >
                         {atendimento.classificacao}
                     </Badge>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs print-badge">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
@@ -111,12 +116,12 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
                 <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
             </div>
-        </>
+        </div>
     );
 
     return (
-        <div ref={cardRef} className="print-item-card w-full border-b print:border-b-2 print:border-dashed print:py-4">
-            <div className="flex items-center justify-between w-full text-sm p-3 print:hidden">
+        <div ref={cardRef} className="print-item-card w-full border-b">
+            <div className="flex items-center justify-between w-full text-sm p-3 print-hide">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />
@@ -149,19 +154,14 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 print:hidden" onClick={handlePrintItem} title="Imprimir Atendimento">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 print-hide" onClick={handlePrintItem} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
                 </div>
             </div>
 
-            <div className="hidden print:block print-only-content text-black w-full">
-                 <div className="print-in-card">
-                    <PrintedContent />
-                 </div>
-                 <div className="print-no-card">
-                     <PrintedContent />
-                 </div>
+            <div className="hidden print-only-content text-black w-full">
+                <PrintedContent />
             </div>
         </div>
     )
@@ -189,7 +189,7 @@ export default function RelatoriosPage() {
       from: new Date(),
       to: new Date(),
     });
-    const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal'>('diario');
+    const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
     const applyClientSideFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[]) => {
         let filteredData = [...dataToFilter];
@@ -284,7 +284,8 @@ export default function RelatoriosPage() {
     // Handle quick date selection (Diário, Semanal, Mensal)
     React.useEffect(() => {
         if (!isMounted) return;
-        
+        if (viewMode === 'personalizado') return;
+
         const today = new Date();
         let newFrom, newTo;
 
@@ -325,6 +326,7 @@ export default function RelatoriosPage() {
     }
     
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
+        setViewMode('personalizado');
         setDateRange(range || { from: undefined, to: undefined });
     }
 
@@ -440,7 +442,7 @@ export default function RelatoriosPage() {
                     </Card>
                 )}
 
-                 <Card className="flex flex-col flex-1 min-h-0 print:shadow-none print:border-none">
+                 <Card className="flex flex-col flex-1 min-h-0 print:shadow-none print:border-none print:bg-transparent">
                     <CardContent className="p-0 flex-1 flex flex-col print:p-0">
                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
@@ -485,4 +487,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
 
