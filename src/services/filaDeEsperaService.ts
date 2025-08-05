@@ -166,13 +166,19 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
         const q = query(
             collection(db, "filaDeEspera"),
             where("pacienteId", "==", pacienteId),
-            where("status", "==", "finalizado"),
-            orderBy("finalizadaEm", "desc")
+            where("status", "==", "finalizado")
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
         
+        // Sort in-memory after fetching
+        data.sort((a, b) => {
+            const timeA = a.finalizadaEm?.toMillis() || 0;
+            const timeB = b.finalizadaEm?.toMillis() || 0;
+            return timeB - timeA;
+        });
+
         return data;
 
     } catch (error) {
