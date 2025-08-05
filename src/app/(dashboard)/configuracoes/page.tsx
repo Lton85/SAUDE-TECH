@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,6 +14,10 @@ import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog"
 import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
 import { getPacientes } from "@/services/pacientesService";
+import { getMedicos } from "@/services/medicosService";
+import { getEnfermeiros } from "@/services/enfermeirosService";
+import { ResetMedicoDialog } from "@/components/configuracoes/reset-medico-dialog";
+import { ResetEnfermeiroDialog } from "@/components/configuracoes/reset-enfermeiro-dialog";
 
 
 export default function ConfiguracoesPage() {
@@ -21,26 +26,41 @@ export default function ConfiguracoesPage() {
     const [isEmergenciaResetting, setIsEmergenciaResetting] = useState(false);
     const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
+    const [isMedicoResetting, setIsMedicoResetting] = useState(false);
+    const [isEnfermeiroResetting, setIsEnfermeiroResetting] = useState(false);
+
     const [senhaDialogOpen, setSenhaDialogOpen] = useState(false);
     const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
+    const [medicoDialogOpen, setMedicoDialogOpen] = useState(false);
+    const [enfermeiroDialogOpen, setEnfermeiroDialogOpen] = useState(false);
+    
     const [resetType, setResetType] = useState<'Normal' | 'Emergência' | null>(null);
+    
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
+    const [medicosCount, setMedicosCount] = useState<number | null>(null);
+    const [enfermeirosCount, setEnfermeirosCount] = useState<number | null>(null);
 
     useEffect(() => {
-        const fetchPatientCount = async () => {
+        const fetchCounts = async () => {
             try {
-                const pacientes = await getPacientes();
+                const [pacientes, medicos, enfermeiros] = await Promise.all([
+                    getPacientes(),
+                    getMedicos(),
+                    getEnfermeiros(),
+                ]);
                 setPacientesCount(pacientes.length);
+                setMedicosCount(medicos.length);
+                setEnfermeirosCount(enfermeiros.length);
             } catch (error) {
                 toast({
-                    title: "Erro ao verificar pacientes",
-                    description: "Não foi possível verificar a quantidade de pacientes cadastrados.",
+                    title: "Erro ao verificar cadastros",
+                    description: "Não foi possível verificar a quantidade de registros.",
                     variant: "destructive"
                 });
             }
         };
-        fetchPatientCount();
+        fetchCounts();
     }, [toast]);
 
     const handleResetRequest = (type: 'Normal' | 'Emergência') => {
@@ -56,12 +76,36 @@ export default function ConfiguracoesPage() {
         if (pacientesCount !== null && pacientesCount > 0) {
             toast({
                 title: "Ação Bloqueada",
-                description: `Existem ${pacientesCount} paciente(s) cadastrado(s). É necessário excluir todos os pacientes antes de zerar os códigos.`,
+                description: `Existem ${pacientesCount} paciente(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
                 variant: "destructive",
             });
             return;
         }
         setPacienteDialogOpen(true);
+    };
+
+    const handleMedicoResetRequest = () => {
+        if (medicosCount !== null && medicosCount > 0) {
+            toast({
+                title: "Ação Bloqueada",
+                description: `Existem ${medicosCount} médico(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
+                variant: "destructive",
+            });
+            return;
+        }
+        setMedicoDialogOpen(true);
+    };
+
+    const handleEnfermeiroResetRequest = () => {
+        if (enfermeirosCount !== null && enfermeirosCount > 0) {
+            toast({
+                title: "Ação Bloqueada",
+                description: `Existem ${enfermeirosCount} enfermeiro(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
+                variant: "destructive",
+            });
+            return;
+        }
+        setEnfermeiroDialogOpen(true);
     };
 
     const handleConfirmSenhaReset = async () => {
@@ -137,6 +181,48 @@ export default function ConfiguracoesPage() {
             setIsPacienteResetting(false);
         }
     };
+    
+    const handleConfirmMedicoReset = async () => {
+        setIsMedicoResetting(true);
+        setMedicoDialogOpen(false);
+        try {
+            await resetCounterByName('medicos_v2');
+            toast({
+                title: "Códigos de Médico Zerados!",
+                description: "A contagem de códigos de cadastro de médico foi reiniciada para 001.",
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao zerar códigos de médico",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsMedicoResetting(false);
+        }
+    };
+    
+    const handleConfirmEnfermeiroReset = async () => {
+        setIsEnfermeiroResetting(true);
+        setEnfermeiroDialogOpen(false);
+        try {
+            await resetCounterByName('enfermeiros_v1');
+            toast({
+                title: "Códigos de Enfermeiro Zerados!",
+                description: "A contagem de códigos de cadastro de enfermeiro foi reiniciada para 001.",
+                className: "bg-green-500 text-white",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao zerar códigos de enfermeiro",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsEnfermeiroResetting(false);
+        }
+    };
 
 
   return (
@@ -151,7 +237,7 @@ export default function ConfiguracoesPage() {
           Ajuste as configurações gerais e perigosas do sistema nesta área.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <CardContent className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <div className="md:col-span-1">
            <Card>
               <CardHeader>
@@ -196,17 +282,47 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Pacientes</TableCell>
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Pacientes</TableCell>
                         <TableCell className="text-right">
                             <Button 
                                 onClick={handlePacienteResetRequest}
                                 variant="destructive" 
                                 size="sm"
                                 disabled={isPacienteResetting || pacientesCount === null}
-                                title={pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
+                                title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
                             >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${isPacienteResetting ? 'animate-spin' : ''}`} />
                                 {isPacienteResetting ? 'Zerando...' : 'Zerar (001)'}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                     <TableRow>
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Médicos</TableCell>
+                        <TableCell className="text-right">
+                            <Button 
+                                onClick={handleMedicoResetRequest}
+                                variant="destructive" 
+                                size="sm"
+                                disabled={isMedicoResetting || medicosCount === null}
+                                title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isMedicoResetting ? 'animate-spin' : ''}`} />
+                                {isMedicoResetting ? 'Zerando...' : 'Zerar (001)'}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                     <TableRow>
+                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
+                        <TableCell className="text-right">
+                            <Button 
+                                onClick={handleEnfermeiroResetRequest}
+                                variant="destructive" 
+                                size="sm"
+                                disabled={isEnfermeiroResetting || enfermeirosCount === null}
+                                title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isEnfermeiroResetting ? 'animate-spin' : ''}`} />
+                                {isEnfermeiroResetting ? 'Zerando...' : 'Zerar (001)'}
                             </Button>
                         </TableCell>
                     </TableRow>
@@ -229,11 +345,6 @@ export default function ConfiguracoesPage() {
               </CardContent>
            </Card>
         </div>
-        <div className="md:col-span-2 flex items-center justify-center h-full border-2 border-dashed rounded-lg">
-            <p className="text-muted-foreground">
-                Outras configurações serão implementadas aqui.
-            </p>
-        </div>
       </CardContent>
     </Card>
      {resetType && (
@@ -254,6 +365,17 @@ export default function ConfiguracoesPage() {
             onOpenChange={setPacienteDialogOpen}
             onConfirm={handleConfirmPacienteReset}
         />
+        <ResetMedicoDialog
+            isOpen={medicoDialogOpen}
+            onOpenChange={setMedicoDialogOpen}
+            onConfirm={handleConfirmMedicoReset}
+        />
+        <ResetEnfermeiroDialog
+            isOpen={enfermeiroDialogOpen}
+            onOpenChange={setEnfermeiroDialogOpen}
+            onConfirm={handleConfirmEnfermeiroReset}
+        />
     </>
   );
 }
+
