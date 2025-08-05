@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, User, Stethoscope, UserPlus, X, Search } from "lucide-react";
+import { Filter, Loader2, User, Stethoscope, UserPlus, X, Search, ShieldQuestion } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import type { Paciente } from "@/types/paciente";
@@ -22,6 +22,8 @@ interface FiltrosRelatorioProps {
     onMedicoChange: (id: string) => void;
     selectedEnfermeiroId: string;
     onEnfermeiroChange: (id: string) => void;
+    selectedClassificacao: string;
+    onClassificacaoChange: (value: string) => void;
     onSearch: () => void;
     isLoading: boolean;
     onClearFilters: () => void;
@@ -38,6 +40,8 @@ export function FiltrosRelatorio({
     onMedicoChange,
     selectedEnfermeiroId,
     onEnfermeiroChange,
+    selectedClassificacao,
+    onClassificacaoChange,
     onSearch,
     isLoading,
     onClearFilters,
@@ -105,6 +109,25 @@ export function FiltrosRelatorio({
                         </SelectContent>
                     </Select>
                 </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="classificacao-filter" className="flex items-center gap-2 text-sm"><ShieldQuestion className="h-4 w-4"/>Tipo de Atendimento</Label>
+                    <Select
+                        value={selectedClassificacao}
+                        onValueChange={onClassificacaoChange}
+                        disabled={isLoading}
+                    >
+                        <SelectTrigger id="classificacao-filter">
+                            <SelectValue placeholder="Filtrar por tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="todos">Todos os Tipos</SelectItem>
+                            <SelectItem value="Normal">Atendimento Normal</SelectItem>
+                            <SelectItem value="Emergência">Atendimento de Emergência</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
 
                 <div className="flex flex-col gap-2 pt-2">
                     <Button onClick={onSearch} className="w-full" disabled={isLoading}>

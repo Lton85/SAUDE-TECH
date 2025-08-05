@@ -48,42 +48,51 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
     const handlePrintItem = () => {
+        const printContainer = document.querySelector('.print-container');
         const cardElement = cardRef.current;
-        if (cardElement) {
-            document.body.classList.add('printing-single-item');
+        if (cardElement && printContainer) {
+            printContainer.classList.add('printing-single-item');
             cardElement.classList.add('print-this');
             
             window.print();
             
-            // Use a timeout to ensure the print dialog has opened before removing classes
             setTimeout(() => {
-                document.body.classList.remove('printing-single-item');
+                printContainer.classList.remove('printing-single-item');
                 cardElement.classList.remove('print-this');
             }, 500);
         }
     }
 
     return (
-        <div ref={cardRef} className="print-item-card w-full">
-             <div className="flex items-center justify-between w-full text-sm p-3 border-b print-hide">
+        <div ref={cardRef} className="print-item-card w-full border-b">
+             <div className="flex items-center justify-between w-full text-sm p-3">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 font-medium truncate">
+                    <div className="flex items-center gap-2 font-medium truncate w-1/3">
                         <User className="h-4 w-4 text-primary" />
                         <span className="truncate">{atendimento.pacienteNome}</span>
                     </div>
                     <Separator orientation="vertical" className="h-5" />
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                    <div className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
                         <Building className="h-4 w-4" />
                         <span className="truncate">{atendimento.departamentoNome}</span>
                     </div>
                     <Separator orientation="vertical" className="h-5" />
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                    <div className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
                         <User className="h-4 w-4" />
                         <span className="truncate">{atendimento.profissionalNome}</span>
                     </div>
                 </div>
                 <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
                     <span className="text-muted-foreground text-xs">{dataFormatada}</span>
+                     <Badge
+                        className={cn(
+                            'text-xs',
+                            atendimento.classificacao === 'Emergência' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                        )}
+                    >
+                        {atendimento.classificacao}
+                    </Badge>
                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
@@ -138,6 +147,8 @@ export default function RelatoriosPage() {
     const [selectedPacienteId, setSelectedPacienteId] = React.useState<string>("todos");
     const [selectedMedicoId, setSelectedMedicoId] = React.useState<string>("todos");
     const [selectedEnfermeiroId, setSelectedEnfermeiroId] = React.useState<string>("todos");
+    const [selectedClassificacao, setSelectedClassificacao] = React.useState<string>("todos");
+
 
     const [allReportData, setAllReportData] = React.useState<FilaDeEsperaItem[]>([]);
     const [filteredReportData, setFilteredReportData] = React.useState<FilaDeEsperaItem[]>([]);
@@ -166,8 +177,12 @@ export default function RelatoriosPage() {
             filteredData = filteredData.filter(item => item.profissionalId === selectedEnfermeiroId);
         }
         
+        if (selectedClassificacao !== 'todos') {
+            filteredData = filteredData.filter(item => item.classificacao === selectedClassificacao);
+        }
+
         setFilteredReportData(filteredData);
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao]);
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange.from || !dateRange.to) {
@@ -232,7 +247,7 @@ export default function RelatoriosPage() {
         if(hasSearched){
             applyClientSideFilters(allReportData);
         }
-    },[selectedPacienteId, selectedEnfermeiroId, selectedMedicoId, allReportData, hasSearched, applyClientSideFilters])
+    },[selectedPacienteId, selectedEnfermeiroId, selectedMedicoId, selectedClassificacao, allReportData, hasSearched, applyClientSideFilters])
 
 
     // Handle quick date selection (Diário, Semanal, Mensal)
@@ -261,15 +276,17 @@ export default function RelatoriosPage() {
         setSelectedPacienteId('todos');
         setSelectedMedicoId('todos');
         setSelectedEnfermeiroId('todos');
+        setSelectedClassificacao('todos');
     };
 
     const hasActiveFilters = React.useMemo(() => {
         return (
             selectedPacienteId !== 'todos' ||
             selectedMedicoId !== 'todos' ||
-            selectedEnfermeiroId !== 'todos'
+            selectedEnfermeiroId !== 'todos' ||
+            selectedClassificacao !== 'todos'
         );
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId]);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao]);
 
 
     const handlePrint = () => {
@@ -301,6 +318,8 @@ export default function RelatoriosPage() {
                     onMedicoChange={setSelectedMedicoId}
                     selectedEnfermeiroId={selectedEnfermeiroId}
                     onEnfermeiroChange={setSelectedEnfermeiroId}
+                    selectedClassificacao={selectedClassificacao}
+                    onClassificacaoChange={setSelectedClassificacao}
                     onSearch={() => applyClientSideFilters(allReportData)}
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
@@ -364,13 +383,13 @@ export default function RelatoriosPage() {
                 </div>
 
                 {hasSearched && filteredReportData.length > 0 && (
-                    <Card className="print-hide-on-single">
+                     <Card className="print-hide print-hide-on-single">
                         <AtendimentosChart data={filteredReportData} />
                     </Card>
                 )}
 
-                <Card className="flex flex-col flex-1">
-                    <CardContent className="p-0 flex-1 flex flex-col min-h-0">
+                 <Card className="flex flex-col flex-1 min-h-0">
+                    <CardContent className="p-0 flex-1 flex flex-col">
                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
@@ -414,3 +433,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
