@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home } from "lucide-react"
+import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home, Globe } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
@@ -36,13 +36,14 @@ interface AddToQueueDialogProps {
   onSuccess: () => void;
 }
 
-const InfoRow = ({ icon: Icon, label, value, className }: { icon: React.ElementType, label: string, value: string | undefined, className?: string }) => {
-    if (!value) return null;
+const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: React.ElementType, label: string, value?: string, children?: React.ReactNode, className?: string }) => {
+    if (!value && !children) return null;
     return (
         <div className={cn("flex items-center gap-2 text-sm", className)}>
             <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-muted-foreground">{label}:</span>
-            <span className="font-semibold text-card-foreground truncate">{value}</span>
+            {value && <span className="font-semibold text-card-foreground truncate">{value}</span>}
+            {children}
         </div>
     );
 }
@@ -384,7 +385,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         </div>
 
 
-        <div className={cn("grid grid-cols-1 md:grid-cols-5 gap-6 transition-opacity duration-500", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
+        <div className={cn("grid grid-cols-1 md:grid-cols-5 gap-6 transition-opacity duration-500 pt-4", selectedPaciente ? "opacity-100" : "opacity-40 pointer-events-none")}>
            <Card className="md:col-span-2 bg-muted/30 h-full">
                 <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
@@ -409,6 +410,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 icon={Home} 
                                 label="Endereço" 
                                 value={`${selectedPaciente.endereco || ''}, ${selectedPaciente.numero || ''}`}
+                                className="text-xs" 
+                            />
+                            <InfoRow 
+                                icon={Globe} 
+                                label="Cidade" 
+                                value={`${selectedPaciente.cidade || ''} - ${selectedPaciente.uf || ''}`}
                                 className="text-xs" 
                             />
                         </div>
@@ -492,7 +499,3 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
-
-    
-
-    
