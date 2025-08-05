@@ -48,12 +48,18 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     
     const handlePrintItem = (e: React.MouseEvent) => {
         e.stopPropagation();
-        alert(`Imprimindo atendimento de ${atendimento.pacienteNome}`);
-        // Futuramente, aqui podemos implementar a lógica para imprimir apenas este item.
+        const cardElement = (e.currentTarget as HTMLElement).closest('.print-item-card');
+        if (cardElement) {
+            document.body.classList.add('printing-single-item');
+            cardElement.classList.add('print-this');
+            window.print();
+            cardElement.classList.remove('print-this');
+            document.body.classList.remove('printing-single-item');
+        }
     }
 
     return (
-        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item">
+        <Accordion type="single" collapsible className="w-full bg-card border rounded-lg hover:border-primary/20 transition-colors print-item-card">
             <AccordionItem value={atendimento.id} className="border-b-0">
                  <div className="flex items-center p-3 text-sm">
                     <AccordionTrigger className="p-0 hover:no-underline flex-1">
@@ -415,5 +421,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
