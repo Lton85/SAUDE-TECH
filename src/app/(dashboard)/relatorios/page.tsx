@@ -495,6 +495,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-
-

@@ -157,16 +157,13 @@
     width: 100%;
     border: none !important;
     box-shadow: none !important;
+    background: transparent !important;
   }
 
   .print-container.printing-single-item .print-this .print-only-content {
       display: block !important;
-      border: none;
       padding: 0;
       width: 18cm; /* Adjust width as needed */
   }
 
 }
-
-
-
