@@ -237,29 +237,29 @@ export default function ConfiguracoesPage() {
           Ajuste as configurações gerais e perigosas do sistema nesta área.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className="md:col-span-1">
+      <CardContent>
            <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Configurações Gerais</CardTitle>
                 <CardDescription>Parâmetros principais do sistema.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Parâmetro</TableHead>
-                      <TableHead className="text-right">Ação</TableHead>
+                      <TableHead className="py-2">Parâmetro</TableHead>
+                      <TableHead className="text-right py-2">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                        <TableCell className="font-medium">Zerar Senha de Classificação Normal</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Senha de Classificação Normal</TableCell>
+                        <TableCell className="text-right py-2">
                            <Button 
                              onClick={() => handleResetRequest('Normal')}
                              variant="destructive" 
                              size="sm"
+                             className="h-8"
                              disabled={isNormalResetting}
                            >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${isNormalResetting ? 'animate-spin' : ''}`} />
@@ -268,12 +268,13 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium">Zerar Senha de Classificação Emergência</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Senha de Classificação Emergência</TableCell>
+                        <TableCell className="text-right py-2">
                             <Button 
                                 onClick={() => handleResetRequest('Emergência')}
                                 variant="destructive" 
                                 size="sm"
+                                className="h-8"
                                 disabled={isEmergenciaResetting}
                             >
                                 <RefreshCw className={`mr-2 h-4 w-4 ${isEmergenciaResetting ? 'animate-spin' : ''}`} />
@@ -282,12 +283,13 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Pacientes</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Pacientes</TableCell>
+                        <TableCell className="text-right py-2">
                             <Button 
                                 onClick={handlePacienteResetRequest}
                                 variant="destructive" 
                                 size="sm"
+                                className="h-8"
                                 disabled={isPacienteResetting || pacientesCount === null}
                                 title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""}
                             >
@@ -297,12 +299,13 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Médicos</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Médicos</TableCell>
+                        <TableCell className="text-right py-2">
                             <Button 
                                 onClick={handleMedicoResetRequest}
                                 variant="destructive" 
                                 size="sm"
+                                className="h-8"
                                 disabled={isMedicoResetting || medicosCount === null}
                                 title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
                             >
@@ -312,12 +315,13 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                      <TableRow>
-                        <TableCell className="font-medium">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Códigos de Cadastro de Enfermeiros</TableCell>
+                        <TableCell className="text-right py-2">
                             <Button 
                                 onClick={handleEnfermeiroResetRequest}
                                 variant="destructive" 
                                 size="sm"
+                                className="h-8"
                                 disabled={isEnfermeiroResetting || enfermeirosCount === null}
                                 title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
                             >
@@ -327,12 +331,13 @@ export default function ConfiguracoesPage() {
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell className="font-medium">Zerar Prontuário de Pacientes</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium py-2">Zerar Prontuário de Pacientes</TableCell>
+                        <TableCell className="text-right py-2">
                             <Button 
                                 onClick={handleProntuarioResetRequest}
                                 variant="destructive" 
                                 size="sm"
+                                className="h-8"
                                 disabled={isProntuarioResetting}
                             >
                                 <Trash2 className={`mr-2 h-4 w-4 ${isProntuarioResetting ? 'animate-spin' : ''}`} />
@@ -344,7 +349,6 @@ export default function ConfiguracoesPage() {
                 </Table>
               </CardContent>
            </Card>
-        </div>
       </CardContent>
     </Card>
      {resetType && (
@@ -378,4 +382,3 @@ export default function ConfiguracoesPage() {
     </>
   );
 }
-
