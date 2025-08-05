@@ -84,12 +84,33 @@
 }
 
 @media print {
+  .print-header {
+      display: none;
+  }
+
+  @page {
+      size: auto;
+      margin: 1cm;
+  }
+
   body {
     background: #fff;
     color: #000;
   }
   .print-hide {
     display: none !important;
+  }
+  
+  .print-container {
+      padding: 0 !important;
+      margin: 0 !important;
+  }
+  
+  .print-header {
+      display: block !important;
+      border-bottom: 2px solid #000;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
   }
 
   .print\:block { 

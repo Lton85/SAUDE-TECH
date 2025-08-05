@@ -298,6 +298,21 @@ export default function RelatoriosPage() {
         setDateRange(range || { from: undefined, to: undefined });
     }
 
+    const reportTitle = React.useMemo(() => {
+        if (viewMode === 'diario') return "Relatório Diário";
+        if (viewMode === 'semanal') return "Relatório Semanal";
+        if (viewMode === 'mensal') return "Relatório Mensal";
+        
+        if (dateRange.from && dateRange.to) {
+            const from = format(dateRange.from, 'dd/MM/yy');
+            const to = format(dateRange.to, 'dd/MM/yy');
+            return from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
+        }
+
+        return "Relatório de Atendimentos";
+    }, [viewMode, dateRange]);
+
+
     if (!isMounted) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -382,6 +397,12 @@ export default function RelatoriosPage() {
                         </div>
                     </div>
                 </div>
+
+                <div className="print-header">
+                    <h1 className="text-xl font-bold">{reportTitle}</h1>
+                    <p className="text-sm text-muted-foreground">Emitido em: {format(new Date(), "dd/MM/yyyy HH:mm:ss")}</p>
+                </div>
+
 
                 {hasSearched && filteredReportData.length > 0 && (
                      <Card className="print-hide print-hide-on-single">
