@@ -37,6 +37,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Digite um e-mail válido." }).optional().or(z.literal('')),
   telefone: z.string().optional(),
   observacoes: z.string().optional(),
+  situacao: z.enum(['Ativo', 'Inativo']).optional(),
 });
 
 type PatientFormValues = z.infer<typeof formSchema>;
@@ -45,6 +46,7 @@ interface PatientFormProps {
   onSubmit: (values: PatientFormValues) => void;
   defaultValues?: Partial<PatientFormValues & { id?: string }>;
   isSubmitting: boolean;
+  isEditMode: boolean;
 }
 
 const ufs = [
@@ -57,7 +59,7 @@ interface IbgeCityResponse {
     nome: string;
 }
 
-export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFormProps) {
+export function PatientForm({ onSubmit, defaultValues, isSubmitting, isEditMode }: PatientFormProps) {
   const [cities, setCities] = React.useState<string[]>([]);
   const [isCitiesLoading, setIsCitiesLoading] = React.useState(false);
   const nameInputRef = React.useRef<HTMLInputElement>(null);
@@ -83,6 +85,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
       email: "",
       telefone: "",
       observacoes: "",
+      situacao: "Ativo",
     },
   });
 
@@ -94,6 +97,7 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
         ...defaultValues,
         uf: defaultValues.uf || "",
         cidade: defaultValues.cidade || "",
+        situacao: defaultValues.situacao || "Ativo",
       });
       // Only focus if it's a new patient form (no ID)
       if (!defaultValues.id) {
@@ -481,6 +485,29 @@ export function PatientForm({ onSubmit, defaultValues, isSubmitting }: PatientFo
                     </FormItem>
                   )}
                 />
+                 {isEditMode && (
+                   <FormField
+                    control={form.control}
+                    name="situacao"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-4">
+                        <FormLabel>Situação do Cadastro</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-muted/40">
+                              <SelectValue placeholder="Selecione a situação" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Ativo">Ativo</SelectItem>
+                            <SelectItem value="Inativo">Inativo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                 )}
               </div>
             </div>
         </div>

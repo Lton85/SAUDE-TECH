@@ -17,7 +17,7 @@ interface PatientDialogProps {
   paciente?: Paciente | null;
 }
 
-type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'situacao' | 'historico'  | 'codigo'>;
+type PatientFormValues = Omit<Paciente, 'id' | 'idade' | 'historico'  | 'codigo'>;
 
 
 export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
@@ -58,6 +58,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                 email: values.email || "",
                 telefone: values.telefone || "",
                 observacoes: values.observacoes || "",
+                situacao: values.situacao || 'Ativo',
             };
 
             if (isEditMode && paciente) {
@@ -113,6 +114,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
             telefone: '',
             observacoes: '',
             rg: '',
+            situacao: 'Ativo' as 'Ativo' | 'Inativo',
         };
     }, [paciente, isEditMode]);
 
@@ -134,6 +136,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
           onSubmit={handleSubmit}
           defaultValues={defaultValues}
           isSubmitting={isSubmitting}
+          isEditMode={isEditMode}
         />
       </DialogContent>
     </Dialog>
