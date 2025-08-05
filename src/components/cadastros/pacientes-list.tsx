@@ -2,10 +2,10 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -83,6 +83,17 @@ export function PacientesList() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const statusCounts = useMemo(() => {
+    return pacientes.reduce((acc, p) => {
+        if (p.situacao === 'Ativo') {
+            acc.ativos++;
+        } else {
+            acc.inativos++;
+        }
+        return acc;
+    }, { ativos: 0, inativos: 0 });
+  }, [pacientes]);
 
   useEffect(() => {
     const lowercasedQuery = searchTerm.toLowerCase();
@@ -298,6 +309,15 @@ export function PacientesList() {
             </TableBody>
           </Table>
         </CardContent>
+         <CardFooter className="py-3 px-6 border-t flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+                Exibindo <strong>{filteredPacientes.length}</strong> de <strong>{pacientes.length}</strong> {pacientes.length === 1 ? 'registro' : 'registros'}
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+                <span className="text-green-600 font-medium">Ativos: <strong>{statusCounts.ativos}</strong></span>
+                <span className="text-red-600 font-medium">Inativos: <strong>{statusCounts.inativos}</strong></span>
+            </div>
+        </CardFooter>
       </Card>
       {selectedPatientForHistory && (
           <HistoryDialog

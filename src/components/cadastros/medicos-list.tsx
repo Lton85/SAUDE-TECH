@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { PlusCircle, Trash2, Pencil, Venus, Mars, Eye, History, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,17 @@ export function MedicosList() {
   useEffect(() => {
     fetchMedicos();
   }, []);
+  
+  const statusCounts = useMemo(() => {
+    return medicos.reduce((acc, medico) => {
+        if (medico.situacao === 'Ativo') {
+            acc.ativos++;
+        } else {
+            acc.inativos++;
+        }
+        return acc;
+    }, { ativos: 0, inativos: 0 });
+  }, [medicos]);
 
   useEffect(() => {
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -216,6 +227,15 @@ export function MedicosList() {
           </TableBody>
         </Table>
       </CardContent>
+       <CardFooter className="py-3 px-6 border-t flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+                Exibindo <strong>{filteredMedicos.length}</strong> de <strong>{medicos.length}</strong> {medicos.length === 1 ? 'registro' : 'registros'}
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+                <span className="text-green-600 font-medium">Ativos: <strong>{statusCounts.ativos}</strong></span>
+                <span className="text-red-600 font-medium">Inativos: <strong>{statusCounts.inativos}</strong></span>
+            </div>
+        </CardFooter>
     </Card>
 
     <MedicoDialog
