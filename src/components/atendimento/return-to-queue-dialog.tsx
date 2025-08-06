@@ -17,6 +17,7 @@ import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "../ui/card";
 
 interface Profissional {
   id: string;
@@ -105,50 +106,54 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 space-y-4">
-             <div className="space-y-2">
-                  <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
-                  <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
-                    <SelectTrigger id="departamento">
-                      <SelectValue placeholder="Selecione o departamento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departamentos.map((depto) => (
-                        <SelectItem key={depto.id} value={depto.id}>
-                          {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
-                <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId}>
-                    <SelectTrigger id="profissional">
-                    <SelectValue placeholder="Selecione o profissional" />
-                    </SelectTrigger>
-                    <SelectContent>
-                    {profissionais.map((prof) => (
-                        <SelectItem key={prof.id} value={prof.id}>
-                        {prof.nome}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])}>
-                    <SelectTrigger id="classification">
-                        <SelectValue placeholder="Selecione a classificação" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Normal">Normal</SelectItem>
-                        <SelectItem value="Preferencial">Preferencial</SelectItem>
-                        <SelectItem value="Urgência">Urgência</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+        <div className="py-4">
+            <Card>
+                <CardContent className="p-4 space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="departamento" className="flex items-center gap-2"><Building className="h-4 w-4" />Departamento</Label>
+                        <Select value={selectedDepartamentoId} onValueChange={setSelectedDepartamentoId}>
+                            <SelectTrigger id="departamento">
+                            <SelectValue placeholder="Selecione o departamento" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {departamentos.map((depto) => (
+                                <SelectItem key={depto.id} value={depto.id}>
+                                {depto.nome}{depto.numero ? ` (Sala: ${depto.numero})` : ''}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="profissional" className="flex items-center gap-2"><User className="h-4 w-4" />Profissional</Label>
+                        <Select value={selectedProfissionalId} onValueChange={setSelectedProfissionalId}>
+                            <SelectTrigger id="profissional">
+                            <SelectValue placeholder="Selecione o profissional" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {profissionais.map((prof) => (
+                                <SelectItem key={prof.id} value={prof.id}>
+                                {prof.nome}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
+                        <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])}>
+                            <SelectTrigger id="classification">
+                                <SelectValue placeholder="Selecione a classificação" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Normal">Normal</SelectItem>
+                                <SelectItem value="Preferencial">Preferencial</SelectItem>
+                                <SelectItem value="Urgência">Urgência</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
 
         <DialogFooter className="sm:justify-end">
