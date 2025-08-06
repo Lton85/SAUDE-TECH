@@ -103,33 +103,39 @@ const AppSidebar = () => {
     );
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const MainContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-
   const getPageTitle = () => {
     const currentItem = menuItems.find(item => item.href !== '/' && pathname.startsWith(item.href));
     if (currentItem) return currentItem.label;
     if (pathname === "/") return "Dashboard";
     return "Saúde Fácil";
-  }
+  };
+
+  return (
+    <SidebarInset>
+      <header className="flex h-12 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
+        <SidebarTrigger className="md:hidden"/>
+        <h1 className="flex-1 text-lg font-semibold md:text-xl font-headline">
+          {getPageTitle()}
+        </h1>
+      </header>
+      <main className="flex-1 p-2">{children}</main>
+    </SidebarInset>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
 
   return (
     <SidebarProvider>
       <div className="flex">
         <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-12 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
-            <SidebarTrigger className="md:hidden"/>
-            <h1 className="flex-1 text-lg font-semibold md:text-xl font-headline">
-              {getPageTitle()}
-            </h1>
-          </header>
-          <main className="flex-1 p-2">{children}</main>
-        </SidebarInset>
+        <MainContent>{children}</MainContent>
       </div>
     </SidebarProvider>
   );
