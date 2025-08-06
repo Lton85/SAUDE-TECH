@@ -1,8 +1,10 @@
 
-import Link from "next/link";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ClipboardList, Clock, Tv2, Settings } from "lucide-react";
 
+// This component is not used directly in the tabbed layout, 
+// but is kept for reference or if the tab system is removed.
+// The new "home" is managed inside the client-layout.
 export default function DashboardPage() {
   const features = [
     {
@@ -43,22 +45,24 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-      {features.map((feature) => (
-        <Link href={feature.href} key={feature.title} target={feature.target} className="flex">
-          <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
-            <CardHeader className="p-0 mb-4">
-              <feature.icon className="h-8 w-8 text-primary mx-auto" />
-            </CardHeader>
-            <CardContent className="p-0 flex-grow">
-              <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
-              <CardDescription className="text-sm">
-                {feature.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
+    <div className="p-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        {features.map((feature) => (
+          <div key={feature.title} className="flex cursor-pointer">
+            <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
+              <CardHeader className="p-0 mb-4">
+                <feature.icon className="h-8 w-8 text-primary mx-auto" />
+              </CardHeader>
+              <CardContent className="p-0 flex-grow">
+                <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
+                <CardDescription className="text-sm">
+                  {feature.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
