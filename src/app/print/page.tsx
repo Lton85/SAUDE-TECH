@@ -111,7 +111,7 @@ function PrintPageContent() {
     }
 
     return (
-        <div className="bg-white text-black font-sans p-8">
+        <div className="bg-white text-black font-sans p-8 flex flex-col min-h-screen">
             <header className="mb-6 text-center">
                 <h1 className="text-2xl font-bold mb-1">{data.title}</h1>
                  {dateRangeString && (
@@ -119,12 +119,9 @@ function PrintPageContent() {
                         {dateRangeString}
                     </p>
                 )}
-                <p className="text-sm text-gray-600">
-                    Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
-                </p>
             </header>
             
-            <main>
+            <main className="flex-grow">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -163,6 +160,11 @@ function PrintPageContent() {
                     Total de Atendimentos: {data.items.length}
                 </div>
             </main>
+             <footer className="mt-auto pt-6 text-center">
+                <p className="text-xs text-gray-500">
+                    Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
+                </p>
+            </footer>
         </div>
     );
 }
