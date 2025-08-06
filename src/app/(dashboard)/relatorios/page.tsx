@@ -109,8 +109,28 @@ export default function RelatoriosPage() {
 
     const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
+    const [dateFromInput, setDateFromInput] = React.useState<string>(format(today, 'dd/MM/yyyy'));
+    const [dateToInput, setDateToInput] = React.useState<string>(format(today, 'dd/MM/yyyy'));
+
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
     
+    React.useEffect(() => {
+        if (dateRange?.from) {
+            setDateFromInput(format(dateRange.from, 'dd/MM/yyyy'));
+        } else {
+            setDateFromInput('');
+        }
+    }, [dateRange?.from]);
+
+    React.useEffect(() => {
+        if (dateRange?.to) {
+            setDateToInput(format(dateRange.to, 'dd/MM/yyyy'));
+        } else {
+            setDateToInput('');
+        }
+    }, [dateRange?.to]);
+
+
     const applyClientSideFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[]) => {
         let filteredData = [...dataToFilter];
         
@@ -231,16 +251,48 @@ export default function RelatoriosPage() {
         } else if (mode === 'mensal') {
             newFrom = startOfMonth(today);
             newTo = endOfMonth(today);
-        } else { 
-             const from = startOfMonth(new Date());
-             const to = endOfMonth(new Date());
-             setDateRange({ from: from, to: to });
-             setFilteredReportData([]);
-             setAllReportData([]);
-             setHasSearched(false);
-             return;
+        } else {
+            const from = dateRange?.from || startOfMonth(new Date());
+            const to = dateRange?.to || endOfMonth(new Date());
+            setDateRange({ from, to });
+            setFilteredReportData([]);
+            setAllReportData([]);
+            setHasSearched(false);
+            return;
         }
         setDateRange({ from: newFrom, to: newTo });
+    };
+    
+     const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'from' | 'to') => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) value = `${value.slice(0, 2)}/${value.slice(2)}`;
+        if (value.length > 5) value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+        
+        if (field === 'from') {
+            setDateFromInput(value);
+        } else {
+            setDateToInput(value);
+        }
+    };
+    
+    const handleDateInputBlur = (field: 'from' | 'to') => {
+        const dateInput = field === 'from' ? dateFromInput : dateToInput;
+        const date = parse(dateInput, 'dd/MM/yyyy', new Date());
+
+        if (isValid(date)) {
+            if (field === 'from') {
+                setDateRange(prev => ({ ...prev, from: date, to: prev?.to && date > prev.to ? date : prev.to }));
+            } else {
+                setDateRange(prev => ({ ...prev, to: date }));
+            }
+            setViewMode('personalizado');
+        } else if(dateInput === '') {
+             if (field === 'from') {
+                setDateRange(prev => ({...prev, from: undefined}));
+             } else {
+                setDateRange(prev => ({...prev, to: undefined}));
+             }
+        }
     };
 
     const handleClearFilters = () => {
@@ -342,17 +394,6 @@ export default function RelatoriosPage() {
             });
         }
     };
-    
-     const handleDateSelect = (range: DateRange | undefined, field: 'from' | 'to') => {
-        if (!range) return;
-
-        if (field === 'from') {
-             setDateRange(prev => ({ ...prev, from: range.from, to: prev?.to && range.from && range.from > prev.to ? range.from : prev.to }));
-        }
-        if (field === 'to') {
-            setDateRange(prev => ({ ...prev, to: range.to }));
-        }
-    };
 
     if (!isMounted) {
         return (
@@ -416,70 +457,68 @@ export default function RelatoriosPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="date-from" className="text-xs">Data de Início</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    id="date-from"
-                                                    variant={"outline"}
-                                                    size="sm"
-                                                    className={cn(
-                                                        "w-full justify-start text-left font-normal h-9",
-                                                        !dateRange?.from && "text-muted-foreground"
-                                                    )}
-                                                    disabled={isLoading}
-                                                    onClick={() => setViewMode('personalizado')}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {dateRange?.from ? format(dateRange.from, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="range"
-                                                    selected={dateRange}
-                                                    onSelect={(range) => handleDateSelect(range, 'from')}
-                                                    initialFocus
-                                                    numberOfMonths={1}
-                                                    captionLayout="dropdown-buttons"
-                                                    fromYear={2015}
-                                                    toYear={2035}
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
+                                        <div className="relative">
+                                            <Input
+                                                id="date-from"
+                                                value={dateFromInput}
+                                                onChange={(e) => handleDateInputChange(e, 'from')}
+                                                onBlur={() => handleDateInputBlur('from')}
+                                                placeholder="DD/MM/AAAA"
+                                                className="h-9 pr-8"
+                                                disabled={isLoading}
+                                                onClick={() => setViewMode('personalizado')}
+                                            />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-2" disabled={isLoading}>
+                                                        <CalendarIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="range"
+                                                        selected={dateRange}
+                                                        onSelect={setDateRange}
+                                                        initialFocus
+                                                        numberOfMonths={1}
+                                                        captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="date-to" className="text-xs">Data de Fim</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    id="date-to"
-                                                    variant={"outline"}
-                                                     size="sm"
-                                                    className={cn(
-                                                        "w-full justify-start text-left font-normal h-9",
-                                                        !dateRange?.to && "text-muted-foreground"
-                                                    )}
-                                                    disabled={isLoading || !dateRange?.from}
-                                                    onClick={() => setViewMode('personalizado')}
-                                                >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {dateRange?.to ? format(dateRange.to, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="range"
-                                                    selected={dateRange}
-                                                    onSelect={(range) => handleDateSelect(range, 'to')}
-                                                    disabled={{ before: dateRange?.from! }}
-                                                    initialFocus
-                                                    numberOfMonths={1}
-                                                    captionLayout="dropdown-buttons"
-                                                    fromYear={2015}
-                                                    toYear={2035}
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
+                                         <div className="relative">
+                                            <Input
+                                                id="date-to"
+                                                value={dateToInput}
+                                                onChange={(e) => handleDateInputChange(e, 'to')}
+                                                onBlur={() => handleDateInputBlur('to')}
+                                                placeholder="DD/MM/AAAA"
+                                                className="h-9 pr-8"
+                                                disabled={isLoading || !dateRange?.from}
+                                                onClick={() => setViewMode('personalizado')}
+                                            />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-2" disabled={isLoading || !dateRange?.from}>
+                                                        <CalendarIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="range"
+                                                        selected={dateRange}
+                                                        onSelect={setDateRange}
+                                                        disabled={{ before: dateRange?.from! }}
+                                                        initialFocus
+                                                        numberOfMonths={1}
+                                                        captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
                                     </div>
                                 </div>
                                 <Button onClick={handleSearch} className="w-full" disabled={isLoading}>
@@ -542,3 +581,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
