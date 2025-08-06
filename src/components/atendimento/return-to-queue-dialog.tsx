@@ -155,7 +155,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button type="button" onClick={handleConfirm} disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600 text-white">
+          <Button type="button" onClick={handleConfirm} disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-600">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar e Retornar à Fila
           </Button>
