@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
 import type { DateRange } from "react-day-picker";
@@ -340,6 +340,13 @@ export default function RelatoriosPage() {
         setCalendarMonth(month);
     }
 
+    const selectedDays = React.useMemo(() => {
+        if (dateRange?.from && dateRange.to) {
+            return differenceInDays(dateRange.to, dateRange.from) + 1;
+        }
+        return 0;
+    }, [dateRange]);
+
     if (!isMounted) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -412,19 +419,24 @@ export default function RelatoriosPage() {
                                 </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    month={calendarMonth}
-                                    onMonthChange={handleMonthChange}
-                                    selected={dateRange}
-                                    onSelect={handleManualDateSearch}
-                                    numberOfMonths={2}
-                                    locale={ptBR}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={new Date().getFullYear() - 10}
-                                    toYear={new Date().getFullYear() + 10}
-                                />
+                                    <Calendar
+                                        initialFocus
+                                        mode="range"
+                                        month={calendarMonth}
+                                        onMonthChange={handleMonthChange}
+                                        selected={dateRange}
+                                        onSelect={handleManualDateSearch}
+                                        numberOfMonths={2}
+                                        locale={ptBR}
+                                        captionLayout="dropdown-buttons"
+                                        fromYear={new Date().getFullYear() - 10}
+                                        toYear={new Date().getFullYear() + 10}
+                                    />
+                                    {selectedDays > 0 && (
+                                        <div className="p-2 border-t text-center text-xs text-muted-foreground">
+                                            {selectedDays} {selectedDays === 1 ? 'dia selecionado' : 'dias selecionados'}
+                                        </div>
+                                    )}
                                 </PopoverContent>
                             </Popover>
                                 <Button variant="outline" onClick={handlePrint} disabled={isLoading} size="sm">
