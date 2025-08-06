@@ -1,7 +1,42 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Allow public access to all collections for prototyping
     match /{document=**} {
+      allow read, write: if true;
+    }
+
+    match /chamadas/{docId} {
+      allow read, write: if true;
+    }
+
+    match /counters/{docId} {
+      allow read, write: if true;
+    }
+
+    match /departamentos/{docId} {
+      allow read, write: if true;
+    }
+
+    match /enfermeiros/{docId} {
+      allow read, write: if true;
+    }
+
+    match /filaDeEspera/{docId} {
+      allow read, write: if true;
+    }
+
+    match /medicos/{docId} {
+      allow read, write: if true;
+    }
+
+    match /pacientes/{docId} {
+      allow read, write: if true;
+    }
+    
+    match /relatorios_atendimentos/{docId} {
       allow read, write: if true;
     }
   }
