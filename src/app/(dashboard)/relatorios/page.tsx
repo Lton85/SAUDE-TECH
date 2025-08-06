@@ -166,8 +166,12 @@ export default function RelatoriosPage() {
 
      React.useEffect(() => {
         if (!isMounted) return;
+        // Do not auto-search in personalized mode until a full range is selected
+        if (viewMode === 'personalizado' && (!dateRange.from || !dateRange.to)) {
+            return;
+        }
         handleSearch();
-    }, [isMounted, dateRange, handleSearch]);
+    }, [isMounted, dateRange, viewMode, handleSearch]);
     
     // Initial data load for today
     React.useEffect(() => {
@@ -208,27 +212,30 @@ export default function RelatoriosPage() {
 
 
     // Handle quick date selection (Diário, Semanal, Mensal)
-    React.useEffect(() => {
-        if (!isMounted) return;
-        if (viewMode === 'personalizado') return;
+    const handleViewModeChange = (mode: 'diario' | 'semanal' | 'mensal' | 'personalizado') => {
+        setViewMode(mode);
+        if (mode === 'personalizado') {
+             setDateRange({ from: undefined, to: undefined });
+             setFilteredReportData([]);
+             setHasSearched(false);
+        } else {
+            const today = new Date();
+            let newFrom, newTo;
 
-        const today = new Date();
-        let newFrom, newTo;
-
-        if (viewMode === 'diario') {
-            newFrom = today;
-            newTo = today;
-        } else if (viewMode === 'semanal') {
-            newFrom = startOfWeek(today, { locale: ptBR });
-            newTo = endOfWeek(today, { locale: ptBR });
-        } else if (viewMode === 'mensal') {
-            newFrom = startOfMonth(today);
-            newTo = endOfMonth(today);
+            if (mode === 'diario') {
+                newFrom = today;
+                newTo = today;
+            } else if (mode === 'semanal') {
+                newFrom = startOfWeek(today, { locale: ptBR });
+                newTo = endOfWeek(today, { locale: ptBR });
+            } else if (mode === 'mensal') {
+                newFrom = startOfMonth(today);
+                newTo = endOfMonth(today);
+            }
+            setDateRange({ from: newFrom, to: newTo });
         }
-        
-        setDateRange({ from: newFrom, to: newTo });
+    }
 
-    }, [viewMode, isMounted]);
 
     const handleClearFilters = () => {
         setSelectedPacienteId('todos');
@@ -310,9 +317,14 @@ export default function RelatoriosPage() {
         }
     };
     
-    const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
-        setViewMode('personalizado');
-        setDateRange(range || { from: undefined, to: undefined });
+    const handleManualDateSearch = (range: any) => {
+       if (range?.from && !range.to) {
+            setViewMode('personalizado');
+            setDateRange({ from: range.from, to: undefined });
+       } else if (range?.from && range?.to) {
+            setViewMode('personalizado');
+            setDateRange({ from: range.from, to: range.to });
+       }
     }
 
     if (!isMounted) {
@@ -357,10 +369,10 @@ export default function RelatoriosPage() {
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
-                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
-                            <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
-                            <Button size="sm" variant={viewMode === 'personalizado' ? 'default' : 'outline'} onClick={() => setViewMode('personalizado')} disabled={isLoading}>Personalizado</Button>
+                            <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => handleViewModeChange('diario')} disabled={isLoading}>Diário</Button>
+                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => handleViewModeChange('semanal')} disabled={isLoading}>Semanal</Button>
+                            <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => handleViewModeChange('mensal')} disabled={isLoading}>Mensal</Button>
+                            <Button size="sm" variant={viewMode === 'personalizado' ? 'default' : 'outline'} onClick={() => handleViewModeChange('personalizado')} disabled={isLoading}>Personalizado</Button>
                         
                                 <Popover>
                                 <PopoverTrigger asChild>
@@ -370,16 +382,15 @@ export default function RelatoriosPage() {
                                     size="sm"
                                     className={cn(
                                     "w-[240px] justify-start text-left font-normal",
-                                    !dateRange.from && "text-muted-foreground",
+                                    !dateRange.from && viewMode !== 'personalizado' && "text-muted-foreground",
                                     viewMode !== 'personalizado' && 'border-dashed'
                                     )}
                                     disabled={isLoading}
-                                    onClick={() => setViewMode('personalizado')}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dateRange.from && dateRange.to ? (
                                             `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
-                                    ) : <span>Escolha um período</span>
+                                    ) : (dateRange.from ? format(dateRange.from, "dd/MM/yy") : <span>Escolha um período</span>)
                                     }
                                 </Button>
                                 </PopoverTrigger>
@@ -387,7 +398,7 @@ export default function RelatoriosPage() {
                                 <Calendar
                                     initialFocus
                                     mode="range"
-                                    defaultMonth={dateRange.from}
+                                    defaultMonth={dateRange?.from}
                                     selected={dateRange}
                                     onSelect={handleManualDateSearch}
                                     numberOfMonths={2}
@@ -438,7 +449,7 @@ export default function RelatoriosPage() {
                                 <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 m-4">
                                     <Filter className="h-10 w-10 text-muted-foreground/50" />
                                     <p className="mt-4 text-center text-muted-foreground">
-                                        Use os filtros para gerar o relatório.
+                                        Selecione um período para gerar o relatório.
                                     </p>
                                 </div>
                             )}
