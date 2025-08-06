@@ -9,7 +9,7 @@ import { ptBR } from "date-fns/locale";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CheckCircle, User, Building, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getAtendimentoById, getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 
@@ -18,7 +18,7 @@ interface PrintData {
   items: FilaDeEsperaItem[];
 }
 
-const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+const ReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
         if (typeof timestamp.toDate === 'function') return timestamp.toDate();
@@ -41,12 +41,12 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between mb-1">
                 <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <Badge
                         className={cn(
-                            'text-xs text-white',
+                            'text-xs text-white border-none',
                             atendimento.classificacao === 'Urgência' && 'bg-red-500',
                             atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
                             atendimento.classificacao === 'Normal' && 'bg-green-500'
@@ -54,16 +54,16 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
                     >
                         {atendimento.classificacao}
                     </Badge>
-                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                     <div className="flex items-center text-xs text-black">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado em {dataFormatada}
-                    </Badge>
+                        <span>Finalizado em {dataFormatada}</span>
+                    </div>
                 </div>
             </div>
 
             <Separator className="my-2 bg-black" />
 
-             <div className="flex justify-between gap-4">
+             <div className="flex justify-between gap-4 text-xs">
                 <div>
                     <span className="font-semibold">Departamento:</span>
                     <span className="ml-1">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
@@ -86,58 +86,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 };
 
 
-const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    const toDate = (timestamp: any): Date | null => {
-        if (!timestamp) return null;
-        if (typeof timestamp.toDate === 'function') return timestamp.toDate();
-        if (typeof timestamp === 'string') {
-            const date = new Date(timestamp);
-            if (!isNaN(date.getTime())) return date;
-        }
-        if (timestamp instanceof Date) return timestamp;
-        return null;
-    };
-        
-    const dataFinalizacao = toDate(atendimento.finalizadaEm);
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
-
-     return (
-        <div className="w-full border-b text-xs py-2 px-1 break-inside-avoid">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 font-medium truncate w-1/3">
-                        <User className="h-3 w-3" />
-                        <span className="truncate">{atendimento.pacienteNome}</span>
-                    </div>
-                     <Separator orientation="vertical" className="h-4" />
-                    <div className="flex items-center gap-2 text-gray-600 truncate w-1/3">
-                        <Building className="h-3 w-3" />
-                        <span className="truncate">{atendimento.departamentoNome}</span>
-                    </div>
-                     <Separator orientation="vertical" className="h-4" />
-                    <div className="flex items-center gap-2 text-gray-600 truncate w-1/3">
-                        <User className="h-3 w-3" />
-                        <span className="truncate">{atendimento.profissionalNome}</span>
-                    </div>
-                </div>
-                <div className="flex items-center justify-end gap-2 ml-auto pl-3 flex-shrink-0">
-                    <span className="text-gray-600 text-xs">{dataFormatada}</span>
-                    <Badge
-                        className={cn(
-                            'text-xs text-white',
-                            atendimento.classificacao === 'Urgência' && 'bg-red-500',
-                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
-                            atendimento.classificacao === 'Normal' && 'bg-green-500'
-                        )}
-                    >
-                        {atendimento.classificacao}
-                    </Badge>
-                </div>
-            </div>
-        </div>
-    )
-}
-
 function PrintPageContent() {
     const searchParams = useSearchParams();
     const [data, setData] = useState<PrintData | null>(null);
@@ -154,7 +102,7 @@ function PrintPageContent() {
                     const atendimento = await getAtendimentoById(individualReportId);
                     if (atendimento) {
                         printData = {
-                            title: "Relatório Individual do Paciente",
+                            title: `Relatório Individual do Paciente`,
                             items: [atendimento]
                         };
                     } else {
@@ -223,8 +171,6 @@ function PrintPageContent() {
             </div>
         );
     }
-    
-    const isIndividualReport = !!searchParams.get('id');
 
     return (
         <div className="bg-white text-black font-sans p-8">
@@ -237,11 +183,9 @@ function PrintPageContent() {
             
             <main>
                 <div className="space-y-4">
-                     {data.items.map(item => 
-                        isIndividualReport 
-                            ? <IndividualReportItem key={item.id} atendimento={item} />
-                            : <GeneralReportItem key={item.id} atendimento={item} />
-                     )}
+                     {data.items.map(item => (
+                        <ReportItem key={item.id} atendimento={item} />
+                     ))}
                 </div>
             </main>
         </div>
