@@ -22,7 +22,7 @@ export default function PainelPage() {
   const [currentCall, setCurrentCall] = useState<Call>(emptyCall);
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -64,10 +64,6 @@ export default function PainelPage() {
     return () => unsubscribe();
   }, [isClient, hasInteracted, currentCall.id]);
   
-  const handleInteraction = () => {
-    setHasInteracted(true);
-  };
-
   if (!isClient) {
     return (
        <div className="flex h-screen w-full items-center justify-center bg-slate-900 font-headline text-white overflow-hidden">
@@ -79,22 +75,6 @@ export default function PainelPage() {
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none">
         
-        {!hasInteracted && (
-             <div className="absolute inset-0 z-50 bg-black/70 flex flex-col items-center justify-center backdrop-blur-sm">
-                <div className="text-center">
-                    <h1 className="text-5xl font-bold text-white mb-4">Bem-vindo ao Painel</h1>
-                    <p className="text-xl text-white/80 mb-8">Clique para iniciar e habilitar as notificações sonoras.</p>
-                    <button
-                        onClick={handleInteraction}
-                        className="flex items-center gap-3 bg-amber-400 text-slate-900 font-bold text-xl px-8 py-4 rounded-full shadow-lg hover:bg-amber-300 transition-all transform hover:scale-105"
-                    >
-                        <PlayCircle className="h-8 w-8" />
-                        Iniciar Painel
-                    </button>
-                </div>
-            </div>
-        )}
-
         <main className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12">
             <AnimatePresence mode="wait">
                 <motion.div
