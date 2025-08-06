@@ -260,17 +260,20 @@ export default function RelatoriosPage() {
     }, [viewMode, dateRange]);
 
 
-    const handlePrint = async () => {
-        setIsLoading(true);
+    const handlePrint = () => {
         try {
-            const today = new Date();
-            const dailyData = await getHistoricoAtendimentosPorPeriodo({
-                dateFrom: startOfDay(today),
-                dateTo: endOfDay(today),
-            });
+            if (filteredReportData.length === 0) {
+                toast({
+                    title: "Nenhum dado para imprimir",
+                    description: "Não há atendimentos na lista para gerar um relatório.",
+                    variant: "destructive"
+                });
+                return;
+            }
+
             const printData = {
-                title: `Relatório Diário - ${format(today, 'dd/MM/yyyy')}`,
-                items: dailyData
+                title: reportTitle,
+                items: filteredReportData
             };
             localStorage.setItem('print-data', JSON.stringify(printData));
             window.open('/print', '_blank');
@@ -278,11 +281,9 @@ export default function RelatoriosPage() {
             console.error("Erro ao preparar impressão:", error);
             toast({
                 title: "Erro ao imprimir",
-                description: "Não foi possível gerar o relatório diário. Tente novamente.",
+                description: "Não foi possível gerar o relatório. Tente novamente.",
                 variant: "destructive"
             });
-        } finally {
-            setIsLoading(false);
         }
     }
     
