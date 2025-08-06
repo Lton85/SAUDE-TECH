@@ -203,9 +203,8 @@ export default function DashboardClientLayout({
   const [activeTab, setActiveTab] = React.useState<string>("/");
 
   const handleMenuItemClick = (item: Tab) => {
-    // If 'Início' is clicked, reset to the main dashboard view
+    // If 'Início' is clicked, just set the active tab to the main dashboard
     if (item.id === '/') {
-        setOpenTabs([]);
         setActiveTab('/');
         return;
     }
