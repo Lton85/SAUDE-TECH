@@ -39,9 +39,10 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
 
     return (
-        <div className="p-4 border border-black break-inside-avoid">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-black">
-                <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
+        <div className="p-4 border border-black break-inside-avoid text-sm">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-2">
                     <Badge
                         className={cn(
@@ -59,20 +60,28 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
                     </Badge>
                 </div>
             </div>
-             <div className="flex items-start justify-between gap-4 mb-2 text-sm">
-                <div className="flex items-center gap-2">
+
+            <Separator className="my-2 bg-black" />
+
+            {/* Details */}
+             <div className="flex justify-between gap-4">
+                <div>
                     <span className="font-semibold">Departamento:</span>
-                    <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                    <span className="ml-1">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div>
                     <span className="font-semibold">Profissional:</span>
-                    <span>{atendimento.profissionalNome}</span>
+                    <span className="ml-1">{atendimento.profissionalNome}</span>
                 </div>
             </div>
-             <div className="flex justify-around text-xs text-gray-600 border-t border-black pt-2">
-                <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
-                <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
-                <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+
+             <Separator className="my-2 bg-black" />
+
+            {/* Timeline */}
+             <div className="flex justify-around text-xs text-gray-600">
+                <span>Entrada na Fila: <span className="font-mono text-black font-semibold">{horaChegada}</span></span>
+                <span>Chamada no Painel: <span className="font-mono text-black font-semibold">{horaChamada}</span></span>
+                <span>Finalização: <span className="font-mono text-black font-semibold">{horaFinalizacao}</span></span>
             </div>
         </div>
     );
@@ -169,7 +178,7 @@ export default function PrintPage() {
         );
     }
     
-    const isIndividualReport = data.items.length === 1;
+    const isIndividualReport = data.title === "Relatório Individual do Paciente";
 
     return (
         <div className="bg-white text-black font-sans p-8">
