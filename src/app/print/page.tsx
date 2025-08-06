@@ -19,13 +19,17 @@ interface PrintData {
 }
 
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+    // This helper function handles Firestore Timestamps safely
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
+        // Check for Firestore Timestamp object
         if (typeof timestamp.toDate === 'function') return timestamp.toDate();
+        // Handle ISO string dates that might come from localStorage
         if (typeof timestamp === 'string') {
             const date = new Date(timestamp);
             if (!isNaN(date.getTime())) return date;
         }
+        // Handle native JS Date objects
         if (timestamp instanceof Date) return timestamp;
         return null;
     };
@@ -87,10 +91,19 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
 
 const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    const dataFinalizacao = atendimento.finalizadaEm && typeof (atendimento.finalizadaEm as any).toDate === 'function' 
-        ? (atendimento.finalizadaEm as any).toDate() 
-        : atendimento.finalizadaEm ? new Date(atendimento.finalizadaEm as any) : null;
+    // This helper function handles Firestore Timestamps safely
+    const toDate = (timestamp: any): Date | null => {
+        if (!timestamp) return null;
+        if (typeof timestamp.toDate === 'function') return timestamp.toDate();
+        if (typeof timestamp === 'string') {
+            const date = new Date(timestamp);
+            if (!isNaN(date.getTime())) return date;
+        }
+        if (timestamp instanceof Date) return timestamp;
+        return null;
+    };
         
+    const dataFinalizacao = toDate(atendimento.finalizadaEm);
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
 
      return (
@@ -141,6 +154,7 @@ function PrintPageContent() {
         const fetchData = async () => {
             try {
                 let printData: PrintData | null = null;
+                // If an ID is present, fetch data for an individual report
                 if (individualReportId) {
                     const atendimento = await getAtendimentoById(individualReportId);
                     if (atendimento) {
@@ -152,11 +166,12 @@ function PrintPageContent() {
                         setError("Atendimento não encontrado.");
                     }
                 } else {
+                    // Otherwise, get data from localStorage for a general report
                     const storedData = localStorage.getItem('print-data');
                     if (storedData) {
                         printData = JSON.parse(storedData);
                     } else {
-                        setError("Dados para impressão não encontrados.");
+                        setError("Dados para impressão não encontrados. Por favor, volte e tente novamente.");
                     }
                 }
                 
@@ -164,7 +179,7 @@ function PrintPageContent() {
                     setData(printData);
                     setTimeout(() => {
                         window.print();
-                    }, 500);
+                    }, 500); // Delay to allow data to render before printing
                 }
             } catch (err) {
                 console.error("Erro ao processar dados de impressão:", err);
@@ -174,15 +189,20 @@ function PrintPageContent() {
 
         fetchData();
 
-        window.onafterprint = () => {
+        // Event handler for after printing
+        const handleAfterPrint = () => {
+            // Clean up localStorage only if it was a general report
             if (!individualReportId) {
                 localStorage.removeItem('print-data');
             }
             window.close();
         };
 
+        window.onafterprint = handleAfterPrint;
+
+        // Cleanup on unmount
         return () => {
-            window.onafterprint = null; // Clean up
+            window.onafterprint = null; 
         };
 
     }, [searchParams]);
@@ -235,5 +255,3 @@ export default function PrintPage() {
         </Suspense>
     );
 }
-
-    

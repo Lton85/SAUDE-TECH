@@ -231,14 +231,14 @@ export default function RelatoriosPage() {
 
 
      const reportTitle = React.useMemo(() => {
-        if (viewMode === 'diario') return "Relatório Diário";
-        if (viewMode === 'semanal') return "Relatório Semanal";
-        if (viewMode === 'mensal') return "Relatório Mensal";
+        if (viewMode === 'diario') return "Relatório Diário de Atendimentos";
+        if (viewMode === 'semanal') return "Relatório Semanal de Atendimentos";
+        if (viewMode === 'mensal') return "Relatório Mensal de Atendimentos";
         
         if (dateRange.from && dateRange.to) {
             const from = format(dateRange.from, 'dd/MM/yy');
             const to = format(dateRange.to, 'dd/MM/yy');
-            return from === to ? `Relatório de ${from}` : `Relatório de ${from} a ${to}`;
+            return from === to ? `Relatório de Atendimentos de ${from}` : `Relatório de Atendimentos de ${from} a ${to}`;
         }
 
         return "Relatório de Atendimentos";
@@ -255,6 +255,7 @@ export default function RelatoriosPage() {
                 });
                 return;
             }
+            // Use local storage to pass data to the print page for general reports
             const printData = {
                 title: reportTitle,
                 items: filteredReportData
@@ -273,6 +274,7 @@ export default function RelatoriosPage() {
     
     const handlePrintItem = (itemId: string) => {
          try {
+            // Open the print page with the specific item ID as a query parameter
             window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);
