@@ -59,17 +59,9 @@ export default function EmpresaPage() {
     return (
         <Card className="w-full">
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Building className="h-6 w-6" />
-                        <CardTitle>Dados da Empresa</CardTitle>
-                    </div>
-                     {!isEditing && (
-                        <Button onClick={handleEditToggle} variant="outline">
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar Cadastro
-                        </Button>
-                    )}
+                <div className="flex items-center gap-3">
+                    <Building className="h-6 w-6" />
+                    <CardTitle>Dados da Empresa</CardTitle>
                 </div>
                 <CardDescription>
                     Gerencie as informações da sua unidade de saúde. Estes dados serão utilizados nos relatórios e impressões.
@@ -161,18 +153,25 @@ export default function EmpresaPage() {
                         </div>
                     </div>
                     
-                    {isEditing && (
-                        <div className="flex justify-end pt-4 gap-2">
-                             <Button variant="outline" onClick={handleCancel}>
-                                <X className="mr-2 h-4 w-4" />
-                                Cancelar
+                    <div className="flex justify-end pt-4 gap-2">
+                        {!isEditing ? (
+                            <Button onClick={handleEditToggle}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Editar Cadastro
                             </Button>
-                            <Button>
-                                <Save className="mr-2 h-4 w-4" />
-                                Salvar Alterações
-                            </Button>
-                        </div>
-                    )}
+                        ) : (
+                            <>
+                                <Button variant="outline" onClick={handleCancel}>
+                                    <X className="mr-2 h-4 w-4" />
+                                    Cancelar
+                                </Button>
+                                <Button>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Salvar Alterações
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </form>
             </CardContent>
         </Card>
