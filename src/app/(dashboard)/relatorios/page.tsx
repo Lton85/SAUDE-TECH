@@ -327,13 +327,15 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        if (range?.from) {
+        // "Lock" the month view to the start of the range when the 'from' date is selected
+        if (range?.from && !range.to) {
            setCalendarMonth(range.from);
         }
     };
 
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
+            // Add 1 to include both start and end dates in the count
             return differenceInDays(dateRange.to, dateRange.from) + 1;
         }
         return 0;
@@ -424,7 +426,7 @@ export default function RelatoriosPage() {
                                         fromYear={new Date().getFullYear() - 10}
                                         toYear={new Date().getFullYear() + 10}
                                     />
-                                    {selectedDays > 0 && (
+                                     {selectedDays > 0 && (
                                         <div className="p-2 border-t text-center text-xs text-muted-foreground">
                                             {selectedDays} {selectedDays === 1 ? 'dia selecionado' : 'dias selecionados'}
                                         </div>
@@ -490,5 +492,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
