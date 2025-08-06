@@ -54,7 +54,7 @@ export default function EmpresaPage() {
             if (data) {
                 setFormData(data);
                 if (data.uf) {
-                    fetchCitiesForUf(data.uf);
+                    await fetchCitiesForUf(data.uf);
                 }
             } else {
                 setFormData(initialEmpresaState);
@@ -99,9 +99,9 @@ export default function EmpresaPage() {
         fetchEmpresaData();
     }, []);
     
-    const handleUfChange = async (uf: string) => {
+    const handleUfChange = (uf: string) => {
         setFormData(prev => ({ ...prev, uf, cidade: "" })); // Reset city when UF changes
-        await fetchCitiesForUf(uf);
+        fetchCitiesForUf(uf);
     }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,7 +109,7 @@ export default function EmpresaPage() {
         setFormData(prev => ({...prev, [id]: value }));
     }
 
-    const handleSelectChange = (id: keyof Omit<Empresa, 'uf'>, value: string) => {
+    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf'>, value: string) => {
         setFormData(prev => ({...prev, [id]: value }));
     }
     
@@ -134,6 +134,7 @@ export default function EmpresaPage() {
                     bairro: data.bairro,
                     cidade: data.localidade,
                     uf: data.uf,
+                    cep: prev.cep, // keep formatted cep
                 }));
                  await fetchCitiesForUf(data.uf);
             }
@@ -148,7 +149,12 @@ export default function EmpresaPage() {
     };
 
 
-    const handleEditToggle = () => setIsEditing(true);
+    const handleEditToggle = () => {
+        setIsEditing(true);
+        if (formData.uf) {
+            fetchCitiesForUf(formData.uf);
+        }
+    };
 
     const handleCancel = () => {
         setIsEditing(false);
@@ -301,3 +307,5 @@ export default function EmpresaPage() {
         </Card>
     );
 }
+
+    
