@@ -6,6 +6,7 @@ import { HeartPulse, PlayCircle, User, Stethoscope, DoorOpen } from 'lucide-reac
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getEmpresa } from '@/services/empresaService';
 
 interface Call {
   id?: string;
@@ -20,6 +21,7 @@ const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', paci
 
 export default function PainelPage() {
   const [currentCall, setCurrentCall] = useState<Call>(emptyCall);
+  const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(true);
@@ -30,6 +32,20 @@ export default function PainelPage() {
   
   useEffect(() => {
     if(!isClient) return;
+    
+    const fetchRazaoSocial = async () => {
+        try {
+            const empresaData = await getEmpresa();
+            if (empresaData && empresaData.razaoSocial) {
+                setRazaoSocial(empresaData.razaoSocial.toUpperCase());
+            }
+        } catch (error) {
+            console.error("Erro ao buscar razão social:", error);
+            // Mantém o valor padrão em caso de erro
+        }
+    };
+
+    fetchRazaoSocial();
 
     setTime(new Date()); 
     const timeInterval = setInterval(() => setTime(new Date()), 1000);
@@ -108,7 +124,7 @@ export default function PainelPage() {
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
                 <HeartPulse className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" />
-                <span className="font-bold">SAÚDE FÁCIL | UNIDADE BÁSICA DE SAÚDE</span>
+                <span className="font-bold">SAÚDE FÁCIL | {razaoSocial}</span>
             </div>
             {time ? (
                 <div className="text-right">
