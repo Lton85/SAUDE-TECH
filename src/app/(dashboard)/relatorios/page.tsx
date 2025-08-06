@@ -33,46 +33,50 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
 
     return (
         <div className="w-full border-b last:border-b-0">
-            <div className="flex items-center justify-between w-full text-sm p-3 hover:bg-muted/50 transition-colors">
-                <div className="flex-1 min-w-0">
+            <div className="flex flex-col p-3 hover:bg-muted/50 transition-colors text-xs">
+                <div className="flex items-center justify-between w-full">
+                    {/* Left Side */}
                     <div className="flex items-center gap-3">
-                         <div className="flex items-center gap-2 font-medium text-primary text-xs">
+                        <div className="flex items-center gap-2 font-medium text-primary">
                             <User className="h-4 w-4" />
                             <span className="truncate">{atendimento.pacienteNome}</span>
                         </div>
-                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <Building className="h-3 w-3" />
                             <span className="truncate">{atendimento.departamentoNome}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <User className="h-3 w-3" />
                             <span className="truncate">{atendimento.profissionalNome}</span>
                         </div>
                     </div>
-                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 pl-1">
-                        <Clock className="h-3 w-3"/>
-                        <span>{dataHoraFormatada}</span>
+
+                    {/* Right Side */}
+                    <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
+                        <Badge
+                            className={cn(
+                                'text-xs font-semibold',
+                                atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                            )}
+                        >
+                            {atendimento.classificacao}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Finalizado
+                        </Badge>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento.id)} title="Imprimir Atendimento">
+                            <Printer className="h-3 w-3" />
+                        </Button>
                     </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
-                    <Badge
-                        className={cn(
-                            'text-xs font-semibold',
-                            atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                        )}
-                    >
-                        {atendimento.classificacao}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado
-                    </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento.id)} title="Imprimir Atendimento">
-                        <Printer className="h-3 w-3" />
-                    </Button>
+                {/* Second Line */}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 pl-1">
+                    <Clock className="h-3 w-3"/>
+                    <span>{dataHoraFormatada}</span>
                 </div>
             </div>
         </div>
@@ -250,7 +254,7 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
-        if (!dateRange.from || !dateRange.to) {
+         if (!dateRange.from || !dateRange.to) {
             toast({
                 title: "Período não selecionado",
                 description: "Por favor, selecione um período antes de imprimir.",
@@ -267,18 +271,22 @@ export default function RelatoriosPage() {
             return;
         }
 
-        // Use localStorage to pass data for the general report
-        localStorage.setItem('printData', JSON.stringify({
+        const queryParams = new URLSearchParams({
             title: reportTitle,
-            items: filteredReportData
-        }));
+            from: dateRange.from.toISOString(),
+            to: dateRange.to.toISOString(),
+        });
+        
+        if (selectedPacienteId !== 'todos') queryParams.set('pacienteId', selectedPacienteId);
+        if (selectedMedicoId !== 'todos') queryParams.set('medicoId', selectedMedicoId);
+        if (selectedEnfermeiroId !== 'todos') queryParams.set('enfermeiroId', selectedEnfermeiroId);
+        if (selectedClassificacao !== 'todos') queryParams.set('classificacao', selectedClassificacao);
 
-        window.open(`/print?type=general`, '_blank');
+        window.open(`/print?${queryParams.toString()}`, '_blank');
     }
     
     const handlePrintItem = (itemId: string) => {
          try {
-            localStorage.removeItem('printData'); // Clear general report data
             window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);
