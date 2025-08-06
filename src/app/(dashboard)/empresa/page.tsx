@@ -1,13 +1,53 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save } from "lucide-react";
+import { Building, Save, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+const ufs = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+    'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
+
+interface IbgeCityResponse {
+    id: number;
+    nome: string;
+}
 
 export default function EmpresaPage() {
+    const [selectedUf, setSelectedUf] = useState<string>("");
+    const [selectedCity, setSelectedCity] = useState<string>("");
+    const [cities, setCities] = useState<string[]>([]);
+    const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (!selectedUf) {
+                setCities([]);
+                setSelectedCity("");
+                return;
+            }
+            setIsCitiesLoading(true);
+            try {
+                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`);
+                const data: IbgeCityResponse[] = await response.json();
+                setCities(data.map(city => city.nome).sort());
+            } catch (error) {
+                console.error("Erro ao buscar cidades:", error);
+                setCities([]);
+            } finally {
+                setIsCitiesLoading(false);
+            }
+        };
+        fetchCities();
+    }, [selectedUf]);
+
     return (
         <Card className="w-full">
             <CardHeader>
@@ -58,11 +98,39 @@ export default function EmpresaPage() {
                         </div>
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="uf">Estado (UF)</Label>
-                            <Input id="uf" placeholder="Ex: SP" />
+                            <Select value={selectedUf} onValueChange={setSelectedUf}>
+                                <SelectTrigger id="uf">
+                                    <SelectValue placeholder="UF" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <ScrollArea className="h-72">
+                                        {ufs.map(uf => (
+                                            <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                                        ))}
+                                    </ScrollArea>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cidade">Cidade</Label>
-                            <Input id="cidade" placeholder="Ex: São Paulo" />
+                             <Select value={selectedCity} onValueChange={setSelectedCity} disabled={isCitiesLoading || cities.length === 0}>
+                                <SelectTrigger id="cidade">
+                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : "Cidade"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                     {isCitiesLoading ? (
+                                        <div className="flex items-center justify-center p-2">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        </div>
+                                    ) : (
+                                    <ScrollArea className="h-72">
+                                        {cities.map(city => (
+                                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                                        ))}
+                                    </ScrollArea>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     
