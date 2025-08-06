@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -33,9 +32,9 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
 
     return (
         <div className="w-full border-b last:border-b-0">
-            <div className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
+            <div className="grid grid-cols-3 items-center p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
                 {/* Left Side: Patient, Dept, Prof */}
-                <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
+                <div className="flex items-center justify-start gap-3 flex-shrink-0 min-w-0">
                     <div className="flex items-center gap-2 font-medium text-primary">
                         <User className="h-4 w-4" />
                         <span className="truncate">{atendimento.pacienteNome}</span>
@@ -51,7 +50,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                 </div>
 
                 {/* Center: Timestamp */}
-                <div className="flex-grow flex items-center justify-center text-muted-foreground">
+                <div className="flex items-center justify-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                         <Clock className="h-3 w-3" />
                         <span>{dataHoraFormatada}</span>
@@ -439,5 +438,7 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
 
     
