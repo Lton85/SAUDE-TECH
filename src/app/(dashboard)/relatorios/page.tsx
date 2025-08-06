@@ -436,17 +436,11 @@ export default function RelatoriosPage() {
                                 Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
                             </p>
                         </div>
-                         <div className="flex items-center gap-2">
-                            <Button variant="outline" onClick={handlePrint} disabled={isLoading || !hasSearched} size="sm">
-                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
-                                Imprimir Relatório
-                            </Button>
-                        </div>
                     </div>
                      <Card className="mt-4">
                         <CardContent className="p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                                <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-2">
                                      <div className="space-y-2">
                                         <Label className="text-xs">Visualização Rápida</Label>
                                         <div className="flex items-center gap-1">
@@ -480,7 +474,8 @@ export default function RelatoriosPage() {
                                                         selected={dateRange}
                                                         onSelect={setDateRange}
                                                         initialFocus
-                                                        numberOfMonths={1}
+                                                        numberOfMonths={2}
+                                                        pagedNavigation
                                                         captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}
                                                     />
                                                 </PopoverContent>
@@ -513,7 +508,8 @@ export default function RelatoriosPage() {
                                                         onSelect={setDateRange}
                                                         disabled={{ before: dateRange?.from! }}
                                                         initialFocus
-                                                        numberOfMonths={1}
+                                                        numberOfMonths={2}
+                                                        pagedNavigation
                                                         captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}
                                                     />
                                                 </PopoverContent>
@@ -521,10 +517,16 @@ export default function RelatoriosPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <Button onClick={handleSearch} className="w-full" disabled={isLoading}>
-                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                                    Buscar
-                                </Button>
+                                <div className="md:col-span-4 flex items-end gap-2">
+                                    <Button onClick={handleSearch} className="flex-1" disabled={isLoading}>
+                                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                                        Buscar
+                                    </Button>
+                                    <Button variant="outline" onClick={handlePrint} disabled={isLoading || !hasSearched} className="flex-1">
+                                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
+                                        Imprimir
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -581,5 +583,7 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
 
     
