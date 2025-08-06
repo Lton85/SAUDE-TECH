@@ -203,6 +203,10 @@ export default function DashboardClientLayout({
   const [activeTab, setActiveTab] = React.useState<string>(menuItems[0].id);
 
   const handleMenuItemClick = (item: Tab) => {
+    if (item.id === '/') {
+        setActiveTab('/');
+        return;
+    }
     if (!openTabs.some(tab => tab.id === item.id)) {
         setOpenTabs(prev => [...prev, item]);
     }
@@ -214,16 +218,22 @@ export default function DashboardClientLayout({
   }
 
   const handleTabClose = (tabId: string) => {
-    setOpenTabs(prev => {
-        const newTabs = prev.filter(tab => tab.id !== tabId);
-        // If the closed tab was active, switch to another tab
-        if (activeTab === tabId) {
-            const closingTabIndex = prev.findIndex(tab => tab.id === tabId);
-            const newActiveTab = newTabs[closingTabIndex] || newTabs[closingTabIndex - 1] || newTabs[0];
-            setActiveTab(newActiveTab ? newActiveTab.id : '');
+    if (tabId === '/') return; // Cannot close the 'Início' tab
+
+    const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
+    if (closingTabIndex === -1) return;
+
+    setOpenTabs(prev => prev.filter(tab => tab.id !== tabId));
+
+    // If the closed tab was the active one, we need to set a new active tab.
+    if (activeTab === tabId) {
+        // Find the next available tab to activate.
+        // Prefer the tab to the left (previous), if not, the one to the right, or finally the home tab.
+        const newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1] || openTabs[0];
+        if (newActiveTab) {
+            setActiveTab(newActiveTab.id);
         }
-        return newTabs;
-    });
+    }
   }
 
   return (
