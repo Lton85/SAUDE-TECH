@@ -5,7 +5,7 @@
 import * as React from "react";
 import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
-import { getHistoricoAtendimentosPorPeriodo, getHistoricoAtendimentos } from "@/services/filaDeEsperaService";
+import { getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getMedicos } from "@/services/medicosService";
@@ -29,32 +29,36 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (itemId: string) => void }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
+    const dataHoraFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yyyy - HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     return (
-        <div className="w-full border-b">
-            <div className="flex items-center justify-between w-full text-sm p-3">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 font-medium truncate w-1/3">
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="truncate">{atendimento.pacienteNome}</span>
+        <div className="w-full border-b last:border-b-0">
+            <div className="flex items-center justify-between w-full text-sm p-3 hover:bg-muted/50 transition-colors">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                         <div className="flex items-center gap-2 font-medium text-primary">
+                            <User className="h-4 w-4" />
+                            <span className="truncate">{atendimento.pacienteNome}</span>
+                        </div>
+                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Building className="h-3 w-3" />
+                            <span className="truncate">{atendimento.departamentoNome}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <User className="h-3 w-3" />
+                            <span className="truncate">{atendimento.profissionalNome}</span>
+                        </div>
                     </div>
-                    <Separator orientation="vertical" className="h-5" />
-                    <div className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
-                        <Building className="h-4 w-4" />
-                        <span className="truncate">{atendimento.departamentoNome}</span>
-                    </div>
-                    <Separator orientation="vertical" className="h-5" />
-                    <div className="flex items-center gap-2 text-muted-foreground truncate w-1/3">
-                        <User className="h-4 w-4" />
-                        <span className="truncate">{atendimento.profissionalNome}</span>
+                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 pl-1">
+                        <Clock className="h-3 w-3"/>
+                        <span>{dataHoraFormatada}</span>
                     </div>
                 </div>
+
                 <div className="flex items-center justify-end gap-3 ml-auto pl-4 flex-shrink-0">
-                    <span className="text-muted-foreground text-xs">{dataFormatada}</span>
                     <Badge
                         className={cn(
-                            'text-xs',
+                            'text-xs font-semibold',
                             atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
                             atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
                             atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
@@ -132,7 +136,7 @@ export default function RelatoriosPage() {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodo({ dateFrom: dateRange.from, dateTo: dateRange.to });
+            const data = await getHistoricoAtendimentosPorPeriodoComFiltros({ dateFrom: dateRange.from, dateTo: dateRange.to });
             setAllReportData(data);
             applyClientSideFilters(data);
         } catch (error) {
