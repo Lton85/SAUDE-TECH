@@ -16,11 +16,27 @@ interface PrintData {
 }
 
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const horaChegada = atendimento.chegadaEm ? format(atendimento.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const horaChamada = atendimento.chamadaEm ? format(atendimento.chamadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const horaFinalizacao = dataFinalizacao ? format(dataFinalizacao, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yyyy", { locale: ptBR }) : 'N/A';
+    // Helper to safely convert Firestore Timestamp or Date object to a JS Date
+    const toDate = (timestamp: any): Date | null => {
+        if (!timestamp) return null;
+        if (typeof timestamp.toDate === 'function') {
+            return timestamp.toDate();
+        }
+        if (timestamp instanceof Date) {
+            return timestamp;
+        }
+        return new Date(timestamp);
+    };
+
+    const chegadaDate = toDate(atendimento.chegadaEm);
+    const chamadaDate = toDate(atendimento.chamadaEm);
+    const finalizacaoDate = toDate(atendimento.finalizadaEm);
+
+    const horaChegada = chegadaDate ? format(chegadaDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaChamada = chamadaDate ? format(chamadaDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const horaFinalizacao = finalizacaoDate ? format(finalizacaoDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const dataFormatada = finalizacaoDate ? format(finalizacaoDate, "dd/MM/yyyy", { locale: ptBR }) : 'N/A';
+
 
     return (
         <div className="p-4 border border-black break-inside-avoid">
@@ -64,7 +80,10 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
 
 const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    const dataFinalizacao = atendimento.finalizadaEm?.toDate();
+    const dataFinalizacao = atendimento.finalizadaEm && typeof (atendimento.finalizadaEm as any).toDate === 'function' 
+        ? (atendimento.finalizadaEm as any).toDate() 
+        : atendimento.finalizadaEm ? new Date(atendimento.finalizadaEm as any) : null;
+        
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
 
      return (
@@ -112,10 +131,17 @@ export default function PrintPage() {
         const storedData = localStorage.getItem('print-data');
         if (storedData) {
             try {
-                //Firestore Timestamps need to be converted back to Date objects
+                //Firestore Timestamps are stringified as objects, so we need to parse them back into Date objects
                 const parsedData = JSON.parse(storedData, (key, value) => {
                     if (key.endsWith('Em') && value && value.seconds) {
                         return new Date(value.seconds * 1000 + value.nanoseconds / 1000000);
+                    }
+                     // Handle cases where the date might already be a string
+                    if (key.endsWith('Em') && typeof value === 'string') {
+                        const date = new Date(value);
+                        if (!isNaN(date.getTime())) {
+                            return date;
+                        }
                     }
                     return value;
                 });
