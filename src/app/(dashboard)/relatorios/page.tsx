@@ -36,7 +36,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
             <div className="flex items-center justify-between w-full text-sm p-3 hover:bg-muted/50 transition-colors">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                         <div className="flex items-center gap-2 font-medium text-primary">
+                         <div className="flex items-center gap-2 font-medium text-primary text-xs">
                             <User className="h-4 w-4" />
                             <span className="truncate">{atendimento.pacienteNome}</span>
                         </div>
@@ -267,25 +267,18 @@ export default function RelatoriosPage() {
             return;
         }
 
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
-
-        const params = new URLSearchParams({
-            from: fromDate,
-            to: toDate,
+        // Use localStorage to pass data for the general report
+        localStorage.setItem('printData', JSON.stringify({
             title: reportTitle,
-        });
+            items: filteredReportData
+        }));
 
-        if (selectedPacienteId !== 'todos') params.append('pacienteId', selectedPacienteId);
-        if (selectedMedicoId !== 'todos') params.append('medicoId', selectedMedicoId);
-        if (selectedEnfermeiroId !== 'todos') params.append('enfermeiroId', selectedEnfermeiroId);
-        if (selectedClassificacao !== 'todos') params.append('classificacao', selectedClassificacao);
-
-        window.open(`/print?${params.toString()}`, '_blank');
+        window.open(`/print?type=general`, '_blank');
     }
     
     const handlePrintItem = (itemId: string) => {
          try {
+            localStorage.removeItem('printData'); // Clear general report data
             window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);
