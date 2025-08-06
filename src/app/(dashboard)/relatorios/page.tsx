@@ -107,7 +107,8 @@ export default function RelatoriosPage() {
 
     const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(today);
+    const [fromMonth, setFromMonth] = React.useState<Date>(today);
+    const [toMonth, setToMonth] = React.useState<Date>(today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -228,14 +229,16 @@ export default function RelatoriosPage() {
             newTo = endOfMonth(today);
         } else { // personalizado
              setDateRange(undefined);
-             setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
+             setFromMonth(today);
+             setToMonth(addDays(today, 1)); // Set to next day to avoid same month issue
              return; // Stop here for custom mode
         }
-        setCalendarMonth(startOfDay(newFrom));
         setDateRange({ from: newFrom, to: newTo });
+        setFromMonth(newFrom);
+        setToMonth(newTo);
     }
 
 
@@ -344,7 +347,10 @@ export default function RelatoriosPage() {
         setViewMode('personalizado');
         setDateRange(range);
         if (range?.from) {
-            setCalendarMonth(startOfDay(range.from));
+            setFromMonth(range.from);
+        }
+        if (range?.to) {
+            setToMonth(range.to);
         }
     };
     
@@ -430,15 +436,15 @@ export default function RelatoriosPage() {
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="end">
                                     <Calendar
-                                        pagedNavigation
                                         initialFocus
                                         mode="range"
-                                        defaultMonth={calendarMonth}
-                                        month={calendarMonth}
-                                        onMonthChange={setCalendarMonth}
                                         selected={dateRange}
                                         onSelect={handleManualDateSearch}
                                         numberOfMonths={2}
+                                        fromMonth={fromMonth}
+                                        toMonth={toMonth}
+                                        onFromMonthChange={setFromMonth}
+                                        onToMonthChange={setToMonth}
                                         locale={ptBR}
                                         captionLayout="dropdown-buttons"
                                         fromYear={new Date().getFullYear() - 10}
@@ -510,5 +516,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
