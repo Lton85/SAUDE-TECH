@@ -15,14 +15,14 @@ import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { DialogFooter } from "../ui/dialog";
 import { Checkbox } from "../ui/checkbox";
-import type { MedicoFormValues } from "./medico-dialog";
+import type { ProfissionalFormValues } from "./profissional-dialog";
 
-interface MedicoFormProps {
+interface ProfissionalFormProps {
   isEditMode: boolean;
 }
 
-export function MedicoForm({ isEditMode }: MedicoFormProps) {
-  const form = useFormContext<MedicoFormValues>();
+export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
+  const form = useFormContext<ProfissionalFormValues>();
   
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -45,7 +45,7 @@ export function MedicoForm({ isEditMode }: MedicoFormProps) {
                 <FormItem className="md:col-span-3">
                   <FormLabel>Nome Completo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Dr. Nome do Médico" {...field} />
+                    <Input placeholder="Nome do Profissional" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -69,7 +69,7 @@ export function MedicoForm({ isEditMode }: MedicoFormProps) {
               name="crm"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CRM</FormLabel>
+                  <FormLabel>CRM / Conselho</FormLabel>
                   <FormControl>
                     <Input placeholder="000000/BR" {...field} />
                   </FormControl>
@@ -204,7 +204,7 @@ export function MedicoForm({ isEditMode }: MedicoFormProps) {
 }
 
 const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
-    const form = useFormContext<MedicoFormValues>();
+    const form = useFormContext<ProfissionalFormValues>();
     if (!isEditMode) return null;
     return (
         <div className="flex-1 flex justify-start">
@@ -232,4 +232,4 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
     )
 }
 
-MedicoForm.SituacaoCheckbox = SituacaoCheckbox;
+ProfissionalForm.SituacaoCheckbox = SituacaoCheckbox;

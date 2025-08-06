@@ -8,7 +8,7 @@ import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
-import { getMedicos } from './medicosService';
+import { getProfissionais } from './profissionaisService';
 
 
 interface SearchFilters {
@@ -18,7 +18,7 @@ interface SearchFilters {
 
 interface FullSearchFilters extends SearchFilters {
     pacienteId?: string;
-    medicoId?: string;
+    profissionalId?: string;
     departamentoId?: string;
     classificacao?: string;
 }
@@ -265,10 +265,10 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
         data = data.filter(item => item.pacienteId === filters.pacienteId);
     }
 
-    if (filters.medicoId && filters.medicoId !== 'todos') {
-        const medicos = await getMedicos();
-        const medico = medicos.find(m => m.id === filters.medicoId);
-        if(medico) data = data.filter(item => item.profissionalNome === `Dr(a). ${medico.nome}`);
+    if (filters.profissionalId && filters.profissionalId !== 'todos') {
+        const profissionais = await getProfissionais();
+        const profissional = profissionais.find(m => m.id === filters.profissionalId);
+        if(profissional) data = data.filter(item => item.profissionalNome === `Dr(a). ${profissional.nome}`);
     }
 
     if (filters.departamentoId && filters.departamentoId !== 'todos') {

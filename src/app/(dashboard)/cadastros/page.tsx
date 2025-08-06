@@ -3,7 +3,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacientesList } from "@/components/cadastros/pacientes-list";
-import { MedicosList } from "@/components/cadastros/medicos-list";
+import { ProfissionaisList } from "@/components/cadastros/profissionais-list";
 import { User, Stethoscope } from "lucide-react";
 
 export default function CadastrosPage() {
@@ -14,16 +14,16 @@ export default function CadastrosPage() {
           <User className="mr-2 h-4 w-4" />
           Pacientes
         </TabsTrigger>
-        <TabsTrigger value="medicos">
+        <TabsTrigger value="profissionais">
           <Stethoscope className="mr-2 h-4 w-4" />
-          Médicos
+          Profissionais
         </TabsTrigger>
       </TabsList>
       <TabsContent value="pacientes" className="mt-4">
         <PacientesList />
       </TabsContent>
-      <TabsContent value="medicos" className="mt-4">
-        <MedicosList />
+      <TabsContent value="profissionais" className="mt-4">
+        <ProfissionaisList />
       </TabsContent>
     </Tabs>
   );

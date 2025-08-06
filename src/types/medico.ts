@@ -1,4 +1,5 @@
-export interface Medico {
+
+export interface Profissional {
     id: string;
     codigo: string;
     nome: string;

@@ -11,7 +11,7 @@ import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
 import { addPacienteToFila } from "@/services/filaDeEsperaService"
-import { getMedicos } from "@/services/medicosService"
+import { getProfissionais } from "@/services/profissionaisService"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Badge } from "../ui/badge"
@@ -59,13 +59,13 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     const fetchProfissionais = async () => {
       setIsLoading(true);
       try {
-        const medicosData = await getMedicos();
-        const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
-        setProfissionais([...medicosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+        const profissionaisData = await getProfissionais();
+        const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+        setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
       } catch (error) {
          toast({
           title: "Erro ao carregar profissionais",
-          description: "Não foi possível carregar a lista de médicos.",
+          description: "Não foi possível carregar a lista de profissionais.",
           variant: "destructive",
         });
       } finally {

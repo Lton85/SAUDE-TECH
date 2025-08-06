@@ -2,26 +2,26 @@
 "use client"
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
-import type { Medico } from '@/types/medico';
+import type { Profissional } from '@/types/profissional';
 import { getNextCounter } from './countersService';
 
-const medicosCollection = collection(db, 'medicos');
+const profissionaisCollection = collection(db, 'profissionais');
 
 // Dados de exemplo para popular a coleção, se estiver vazia.
-const medicosData: Omit<Medico, 'id' | 'codigo' | 'historico'>[] = [];
+const profissionaisData: Omit<Profissional, 'id' | 'codigo' | 'historico'>[] = [];
 
-// Popula a coleção de médicos se ela estiver vazia.
-export const seedMedicos = async () => {
+// Popula a coleção de profissionais se ela estiver vazia.
+export const seedProfissionais = async () => {
     try {
-        const snapshot = await getDocs(medicosCollection);
-        if (snapshot.empty && medicosData.length > 0) {
+        const snapshot = await getDocs(profissionaisCollection);
+        if (snapshot.empty && profissionaisData.length > 0) {
             const batch = writeBatch(db);
-            for (const medico of medicosData) {
-                const docRef = doc(medicosCollection);
-                const nextId = await getNextCounter('medicos_v2');
+            for (const profissional of profissionaisData) {
+                const docRef = doc(profissionaisCollection);
+                const nextId = await getNextCounter('profissionais_v2');
                 const codigo = String(nextId).padStart(3, '0');
-                const medicoWithHistory = {
-                    ...medico,
+                const profissionalWithHistory = {
+                    ...profissional,
                     codigo,
                     historico: {
                         criadoEm: new Date().toISOString(),
@@ -30,30 +30,30 @@ export const seedMedicos = async () => {
                         alteradoPor: 'Admin (Seed)',
                     }
                 }
-                batch.set(docRef, medicoWithHistory);
+                batch.set(docRef, profissionalWithHistory);
             }
             await batch.commit();
-            console.log('Medicos collection has been seeded.');
+            console.log('Profissionais collection has been seeded.');
         }
     } catch (error) {
-        console.error("Error seeding medicos: ", error);
+        console.error("Error seeding profissionais: ", error);
     }
 };
 
-// Obtém todos os médicos do banco de dados.
-export const getMedicos = async (): Promise<Medico[]> => {
-    // await seedMedicos(); // Comentado para não popular
-    const q = query(medicosCollection, orderBy("codigo"));
+// Obtém todos os profissionais do banco de dados.
+export const getProfissionais = async (): Promise<Profissional[]> => {
+    // await seedProfissionais(); // Comentado para não popular
+    const q = query(profissionaisCollection, orderBy("codigo"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Medico));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profissional));
 };
 
-// Adiciona um novo médico ao banco de dados.
-export const addMedico = async (medico: Omit<Medico, 'id' | 'codigo' | 'historico'>): Promise<string> => {
-    const nextId = await getNextCounter('medicos_v2');
+// Adiciona um novo profissional ao banco de dados.
+export const addProfissional = async (profissional: Omit<Profissional, 'id' | 'codigo' | 'historico'>): Promise<string> => {
+    const nextId = await getNextCounter('profissionais_v2');
     const codigo = String(nextId).padStart(3, '0');
-    const newMedico = {
-        ...medico,
+    const newProfissional = {
+        ...profissional,
         codigo,
         historico: {
             criadoEm: new Date().toISOString(),
@@ -62,32 +62,32 @@ export const addMedico = async (medico: Omit<Medico, 'id' | 'codigo' | 'historic
             alteradoPor: 'Admin (Cadastro)',
         }
     }
-    const docRef = await addDoc(medicosCollection, newMedico);
+    const docRef = await addDoc(profissionaisCollection, newProfissional);
     return docRef.id;
 };
 
-// Atualiza um médico existente no banco de dados.
-export const updateMedico = async (id: string, medico: Partial<Omit<Medico, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
-    const medicoDocRef = doc(db, 'medicos', id);
-    const medicoSnap = await getDoc(medicoDocRef);
-    if (!medicoSnap.exists()) {
-        throw new Error("Médico não encontrado");
+// Atualiza um profissional existente no banco de dados.
+export const updateProfissional = async (id: string, profissional: Partial<Omit<Profissional, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
+    const profissionalDocRef = doc(db, 'profissionais', id);
+    const profissionalSnap = await getDoc(profissionalDocRef);
+    if (!profissionalSnap.exists()) {
+        throw new Error("Profissional não encontrado");
     }
-    const existingMedico = medicoSnap.data() as Medico;
+    const existingProfissional = profissionalSnap.data() as Profissional;
 
-    const medicoToUpdate: Partial<Omit<Medico, 'id'>> = {
-        ...medico,
+    const profissionalToUpdate: Partial<Omit<Profissional, 'id'>> = {
+        ...profissional,
         historico: {
-            ...existingMedico.historico,
+            ...existingProfissional.historico,
             alteradoEm: new Date().toISOString(),
             alteradoPor: 'Admin (Edição)',
         }
     }
-    await updateDoc(medicoDocRef, medicoToUpdate);
+    await updateDoc(profissionalDocRef, profissionalToUpdate);
 };
 
-// Exclui um médico do banco de dados.
-export const deleteMedico = async (id: string): Promise<void> => {
-    const medicoDoc = doc(db, 'medicos', id);
-    await deleteDoc(medicoDoc);
+// Exclui um profissional do banco de dados.
+export const deleteProfissional = async (id: string): Promise<void> => {
+    const profissionalDoc = doc(db, 'profissionais', id);
+    await deleteDoc(profissionalDoc);
 };

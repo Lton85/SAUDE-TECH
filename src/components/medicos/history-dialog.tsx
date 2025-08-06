@@ -1,15 +1,16 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Pencil, History } from "lucide-react";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { Medico } from "@/types/medico";
+import type { Profissional } from "@/types/profissional";
 import { Badge } from "@/components/ui/badge";
 
 interface HistoryDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  medico: Medico | null;
+  profissional: Profissional | null;
 }
 
 const InfoCard = ({ icon: Icon, title, user, date }: { icon: React.ElementType, title: string, user: string, date: string }) => {
@@ -40,8 +41,8 @@ const InfoCard = ({ icon: Icon, title, user, date }: { icon: React.ElementType, 
     )
 };
 
-export function HistoryMedicoDialog({ isOpen, onOpenChange, medico }: HistoryDialogProps) {
-  if (!medico || !medico.historico) return null;
+export function HistoryProfissionalDialog({ isOpen, onOpenChange, profissional }: HistoryDialogProps) {
+  if (!profissional || !profissional.historico) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -49,10 +50,10 @@ export function HistoryMedicoDialog({ isOpen, onOpenChange, medico }: HistoryDia
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Histórico do Médico
+            Histórico do Profissional
           </DialogTitle>
            <DialogDescription>
-            Acompanhe o registro de criação e a última alteração do cadastro de <span className="font-semibold text-primary">{medico.nome}</span>.
+            Acompanhe o registro de criação e a última alteração do cadastro de <span className="font-semibold text-primary">{profissional.nome}</span>.
           </DialogDescription>
         </DialogHeader>
         
@@ -60,14 +61,14 @@ export function HistoryMedicoDialog({ isOpen, onOpenChange, medico }: HistoryDia
             <InfoCard 
                 icon={User}
                 title="Criação do Cadastro"
-                user={medico.historico.criadoPor}
-                date={medico.historico.criadoEm}
+                user={profissional.historico.criadoPor}
+                date={profissional.historico.criadoEm}
             />
             <InfoCard 
                 icon={Pencil}
                 title="Última Alteração"
-                user={medico.historico.alteradoPor}
-                date={medico.historico.alteradoEm}
+                user={profissional.historico.alteradoPor}
+                date={profissional.historico.alteradoEm}
             />
         </div>
 

@@ -25,7 +25,7 @@ import type { Departamento } from "@/types/departamento";
 import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
 import { EditQueueItemDialog } from "../atendimento/edit-dialog";
 import { FilaDeEsperaItem } from "@/types/fila";
-import { getMedicos } from "@/services/medicosService";
+import { getProfissionais } from "@/services/profissionaisService";
 import { updateHistoricoItem } from "@/services/filaDeEsperaService";
 
 
@@ -54,17 +54,17 @@ export function PacientesList() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [pacientesData, departamentosData, medicosData] = await Promise.all([
+      const [pacientesData, departamentosData, profissionaisData] = await Promise.all([
         getPacientes(), 
         getDepartamentos(),
-        getMedicos(),
+        getProfissionais(),
       ]);
       setPacientes(pacientesData);
       setFilteredPacientes(pacientesData);
       setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
       
-      const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
-      setProfissionais([...medicosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+      const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+      setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
 
     } catch (error) {
       toast({

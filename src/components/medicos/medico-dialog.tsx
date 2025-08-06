@@ -4,16 +4,16 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Stethoscope, Pencil, Loader2 } from "lucide-react";
-import type { Medico } from "@/types/medico";
-import { MedicoForm } from "./medico-form";
-import { addMedico, updateMedico } from "@/services/medicosService";
+import type { Profissional } from "@/types/profissional";
+import { ProfissionalForm } from "./profissional-form";
+import { addProfissional, updateProfissional } from "@/services/profissionaisService";
 import { useToast } from "@/hooks/use-toast";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "../ui/button";
 
-const MedicoFormSchema = z.object({
+const ProfissionalFormSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS é obrigatório." }),
   crm: z.string().min(4, { message: "O CRM é obrigatório." }),
@@ -26,23 +26,23 @@ const MedicoFormSchema = z.object({
   situacao: z.boolean().default(true),
 });
 
-export type MedicoFormValues = z.infer<typeof MedicoFormSchema>;
+export type ProfissionalFormValues = z.infer<typeof ProfissionalFormSchema>;
 
 
-interface MedicoDialogProps {
+interface ProfissionalDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: () => void;
-  medico?: Medico | null;
+  profissional?: Profissional | null;
 }
 
-export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: MedicoDialogProps) {
+export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profissional }: ProfissionalDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
-  const isEditMode = !!medico;
+  const isEditMode = !!profissional;
   
-  const form = useForm<MedicoFormValues>({
-    resolver: zodResolver(MedicoFormSchema),
+  const form = useForm<ProfissionalFormValues>({
+    resolver: zodResolver(ProfissionalFormSchema),
     defaultValues: {
       nome: "",
       cns: "",
@@ -58,18 +58,18 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
   });
 
   React.useEffect(() => {
-    if (medico) {
+    if (profissional) {
       form.reset({
-        nome: medico.nome || "",
-        cns: medico.cns || "",
-        crm: medico.crm || "",
-        sexo: medico.sexo || undefined,
-        especialidade: medico.especialidade || "",
-        cpf: medico.cpf || "",
-        dataNascimento: medico.dataNascimento || "",
-        telefone: medico.telefone || "",
-        cargaHoraria: medico.cargaHoraria || "",
-        situacao: medico.situacao === 'Ativo',
+        nome: profissional.nome || "",
+        cns: profissional.cns || "",
+        crm: profissional.crm || "",
+        sexo: profissional.sexo || undefined,
+        especialidade: profissional.especialidade || "",
+        cpf: profissional.cpf || "",
+        dataNascimento: profissional.dataNascimento || "",
+        telefone: profissional.telefone || "",
+        cargaHoraria: profissional.cargaHoraria || "",
+        situacao: profissional.situacao === 'Ativo',
       });
     } else {
         form.reset({
@@ -85,12 +85,12 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
             situacao: true,
         });
     }
-  }, [medico, isOpen, form]);
+  }, [profissional, isOpen, form]);
 
-  const handleSubmit = async (values: MedicoFormValues) => {
+  const handleSubmit = async (values: ProfissionalFormValues) => {
     setIsSubmitting(true);
     try {
-      const medicoData = {
+      const profissionalData = {
           ...values,
           situacao: values.situacao ? 'Ativo' : 'Inativo',
           sexo: values.sexo || "",
@@ -100,18 +100,18 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
           cargaHoraria: values.cargaHoraria || "",
       };
 
-      if (isEditMode && medico) {
-        await updateMedico(medico.id, medicoData);
+      if (isEditMode && profissional) {
+        await updateProfissional(profissional.id, profissionalData);
         toast({
-          title: "Médico Atualizado!",
+          title: "Profissional Atualizado!",
           description: `Os dados de ${values.nome} foram atualizados com sucesso.`,
           className: "bg-green-500 text-white"
         });
       } else {
-        await addMedico(medicoData as Omit<Medico, 'id' | 'codigo' | 'historico'>);
+        await addProfissional(profissionalData as Omit<Profissional, 'id' | 'codigo' | 'historico'>);
         toast({
-          title: "Médico Cadastrado!",
-          description: `O médico ${values.nome} foi adicionado com sucesso.`,
+          title: "Profissional Cadastrado!",
+          description: `O profissional ${values.nome} foi adicionado com sucesso.`,
           className: "bg-green-500 text-white"
         });
       }
@@ -119,8 +119,8 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
       onOpenChange(false);
     } catch (error) {
       toast({
-        title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} médico`,
-        description: (error as Error).message || "Não foi possível salvar os dados do médico. Tente novamente.",
+        title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} profissional`,
+        description: (error as Error).message || "Não foi possível salvar os dados do profissional. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -134,17 +134,17 @@ export function MedicoDialog({ isOpen, onOpenChange, onSuccess, medico }: Medico
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <Stethoscope />}
-            {isEditMode ? "Editar Médico" : "Cadastrar Novo Médico"}
+            {isEditMode ? "Editar Profissional" : "Cadastrar Novo Profissional"}
           </DialogTitle>
           <DialogDescription>
-            {isEditMode ? "Altere os dados abaixo para atualizar o cadastro do médico." : "Preencha os campos abaixo para adicionar um novo médico ao sistema."}
+            {isEditMode ? "Altere os dados abaixo para atualizar o cadastro do profissional." : "Preencha os campos abaixo para adicionar um novo profissional ao sistema."}
           </DialogDescription>
         </DialogHeader>
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)}>
-                <MedicoForm isEditMode={isEditMode}/>
+                <ProfissionalForm isEditMode={isEditMode}/>
                 <DialogFooter className="mt-4 pt-4 border-t items-center">
-                    <MedicoForm.SituacaoCheckbox isEditMode={isEditMode} />
+                    <ProfissionalForm.SituacaoCheckbox isEditMode={isEditMode} />
                     <div className="flex gap-2">
                          <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                             Cancelar

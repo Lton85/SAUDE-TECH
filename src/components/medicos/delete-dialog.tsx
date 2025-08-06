@@ -1,3 +1,4 @@
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,10 +15,10 @@ interface DeleteConfirmationDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: () => void
-  medicoName: string
+  profissionalName: string
 }
 
-export function DeleteConfirmationDialog({ isOpen, onOpenChange, onConfirm, medicoName }: DeleteConfirmationDialogProps) {
+export function DeleteConfirmationDialog({ isOpen, onOpenChange, onConfirm, profissionalName }: DeleteConfirmationDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -27,7 +28,7 @@ export function DeleteConfirmationDialog({ isOpen, onOpenChange, onConfirm, medi
             Confirmar Exclusão
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir o médico <span className="font-bold text-destructive">{medicoName}</span>? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir o profissional <span className="font-bold text-destructive">{profissionalName}</span>? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

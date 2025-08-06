@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { AlertTriangle } from "lucide-react"
 
-interface ResetMedicoDialogProps {
+interface ResetProfissionalDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: () => void
 }
 
-export function ResetMedicoDialog({ isOpen, onOpenChange, onConfirm }: ResetMedicoDialogProps) {
+export function ResetProfissionalDialog({ isOpen, onOpenChange, onConfirm }: ResetProfissionalDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -27,7 +27,7 @@ export function ResetMedicoDialog({ isOpen, onOpenChange, onConfirm }: ResetMedi
             Confirmar Ação
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Você tem certeza que deseja zerar a contagem de códigos de cadastro de médico? O próximo médico cadastrado terá o código <span className="font-bold text-destructive">001</span>. Esta ação não pode ser desfeita.
+            Você tem certeza que deseja zerar a contagem de códigos de cadastro de profissional? O próximo profissional cadastrado terá o código <span className="font-bold text-destructive">001</span>. Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -7,18 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Filter, Loader2, User, Stethoscope, X, Search, ShieldQuestion, Building } from "lucide-react";
-import type { Medico } from "@/types/medico";
+import type { Profissional } from "@/types/profissional";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
 
 interface FiltrosRelatorioProps {
     pacientes: Paciente[];
-    medicos: Medico[];
+    profissionais: Profissional[];
     departamentos: Departamento[];
     selectedPacienteId: string;
     onPacienteChange: (id: string) => void;
-    selectedMedicoId: string;
-    onMedicoChange: (id: string) => void;
+    selectedProfissionalId: string;
+    onProfissionalChange: (id: string) => void;
     selectedDepartamentoId: string;
     onDepartamentoChange: (id: string) => void;
     selectedClassificacao: string;
@@ -31,12 +31,12 @@ interface FiltrosRelatorioProps {
 
 export function FiltrosRelatorio({
     pacientes,
-    medicos,
+    profissionais,
     departamentos,
     selectedPacienteId,
     onPacienteChange,
-    selectedMedicoId,
-    onMedicoChange,
+    selectedProfissionalId,
+    onProfissionalChange,
     selectedDepartamentoId,
     onDepartamentoChange,
     selectedClassificacao,
@@ -84,18 +84,18 @@ export function FiltrosRelatorio({
                     </Select>
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="medico-filter" className="flex items-center gap-2 text-sm"><Stethoscope className="h-4 w-4"/>Médico</Label>
+                    <Label htmlFor="profissional-filter" className="flex items-center gap-2 text-sm"><Stethoscope className="h-4 w-4"/>Profissional</Label>
                     <Select
-                        value={selectedMedicoId}
-                        onValueChange={onMedicoChange}
+                        value={selectedProfissionalId}
+                        onValueChange={onProfissionalChange}
                         disabled={isLoading}
                     >
-                        <SelectTrigger id="medico-filter">
-                            <SelectValue placeholder="Filtrar por médico" />
+                        <SelectTrigger id="profissional-filter">
+                            <SelectValue placeholder="Filtrar por profissional" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="todos">Todos os Médicos</SelectItem>
-                            {medicos.map(p => (
+                            <SelectItem value="todos">Todos os Profissionais</SelectItem>
+                            {profissionais.map(p => (
                                 <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
                             ))}
                         </SelectContent>

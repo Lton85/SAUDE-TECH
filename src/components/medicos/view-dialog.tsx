@@ -1,14 +1,15 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { User, Stethoscope, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint } from "lucide-react";
-import type { Medico } from "@/types/medico";
+import type { Profissional } from "@/types/profissional";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
-interface ViewMedicoDialogProps {
+interface ViewProfissionalDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  medico: Medico | null;
+  profissional: Profissional | null;
 }
 
 const InfoRow = ({ icon: Icon, label, value, children }: { icon: React.ElementType, label: string, value?: string, children?: React.ReactNode }) => {
@@ -24,8 +25,8 @@ const InfoRow = ({ icon: Icon, label, value, children }: { icon: React.ElementTy
     )
 };
 
-export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDialogProps) {
-  if (!medico) return null;
+export function ViewProfissionalDialog({ isOpen, onOpenChange, profissional }: ViewProfissionalDialogProps) {
+  if (!profissional) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -33,10 +34,10 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
              <FileText className="h-5 w-5 text-primary"/>
-            Cadastro do Médico
+            Cadastro do Profissional
           </DialogTitle>
            <DialogDescription>
-             Visualização dos dados completos de <span className="font-semibold text-primary">{medico.nome}</span>.
+             Visualização dos dados completos de <span className="font-semibold text-primary">{profissional.nome}</span>.
           </DialogDescription>
         </DialogHeader>
         
@@ -47,11 +48,11 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    <InfoRow icon={BadgeInfo} label="Código" value={medico.codigo} />
-                    <InfoRow icon={User} label="Nome Completo" value={medico.nome} />
-                    <InfoRow icon={IdCard} label="CRM" value={medico.crm} />
-                    <InfoRow icon={IdCard} label="CNS" value={medico.cns} />
-                    <InfoRow icon={Stethoscope} label="Especialidade" value={medico.especialidade} />
+                    <InfoRow icon={BadgeInfo} label="Código" value={profissional.codigo} />
+                    <InfoRow icon={User} label="Nome Completo" value={profissional.nome} />
+                    <InfoRow icon={IdCard} label="CRM" value={profissional.crm} />
+                    <InfoRow icon={IdCard} label="CNS" value={profissional.cns} />
+                    <InfoRow icon={Stethoscope} label="Especialidade" value={profissional.especialidade} />
                 </div>
               </CardContent>
             </Card>
@@ -62,12 +63,12 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                    <InfoRow icon={Fingerprint} label="CPF" value={medico.cpf} />
-                    <InfoRow icon={medico.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
-                        <span className="font-semibold text-card-foreground">{medico.sexo}</span>
+                    <InfoRow icon={Fingerprint} label="CPF" value={profissional.cpf} />
+                    <InfoRow icon={profissional.sexo === 'Masculino' ? Mars : Venus} label="Sexo">
+                        <span className="font-semibold text-card-foreground">{profissional.sexo}</span>
                     </InfoRow>
-                    <InfoRow icon={Calendar} label="Data de Nascimento" value={medico.dataNascimento} />
-                    <InfoRow icon={Phone} label="Telefone" value={medico.telefone} />
+                    <InfoRow icon={Calendar} label="Data de Nascimento" value={profissional.dataNascimento} />
+                    <InfoRow icon={Phone} label="Telefone" value={profissional.telefone} />
                 </div>
               </CardContent>
             </Card>
@@ -78,10 +79,10 @@ export function ViewMedicoDialog({ isOpen, onOpenChange, medico }: ViewMedicoDia
               </CardHeader>
               <CardContent>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <InfoRow icon={Clock} label="Carga Horária Semanal" value={medico.cargaHoraria} />
+                    <InfoRow icon={Clock} label="Carga Horária Semanal" value={profissional.cargaHoraria} />
                     <InfoRow icon={Activity} label="Situação">
-                        <Badge variant={medico.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${medico.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
-                            {medico.situacao}
+                        <Badge variant={profissional.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${profissional.situacao === 'Ativo' ? 'bg-green-500' : ''} mt-1`}>
+                            {profissional.situacao}
                         </Badge>
                     </InfoRow>
                  </div>

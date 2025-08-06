@@ -12,8 +12,8 @@ import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog"
 import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
 import { getPacientes } from "@/services/pacientesService";
-import { getMedicos } from "@/services/medicosService";
-import { ResetMedicoDialog } from "@/components/configuracoes/reset-medico-dialog";
+import { getProfissionais } from "@/services/profissionaisService";
+import { ResetProfissionalDialog } from "@/components/configuracoes/reset-profissional-dialog";
 import { Separator } from "@/components/ui/separator";
 
 
@@ -24,27 +24,27 @@ export default function ConfiguracoesPage() {
     const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
     const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
-    const [isMedicoResetting, setIsMedicoResetting] = useState(false);
+    const [isProfissionalResetting, setIsProfissionalResetting] = useState(false);
 
     const [senhaDialogOpen, setSenhaDialogOpen] = useState(false);
     const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
-    const [medicoDialogOpen, setMedicoDialogOpen] = useState(false);
+    const [profissionalDialogOpen, setProfissionalDialogOpen] = useState(false);
     
     const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
-    const [medicosCount, setMedicosCount] = useState<number | null>(null);
+    const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchCounts = async () => {
             try {
-                const [pacientes, medicos] = await Promise.all([
+                const [pacientes, profissionais] = await Promise.all([
                     getPacientes(),
-                    getMedicos(),
+                    getProfissionais(),
                 ]);
                 setPacientesCount(pacientes.length);
-                setMedicosCount(medicos.length);
+                setProfissionaisCount(profissionais.length);
             } catch (error) {
                 toast({
                     title: "Erro ao verificar cadastros",
@@ -77,16 +77,16 @@ export default function ConfiguracoesPage() {
         setPacienteDialogOpen(true);
     };
 
-    const handleMedicoResetRequest = () => {
-        if (medicosCount !== null && medicosCount > 0) {
+    const handleProfissionalResetRequest = () => {
+        if (profissionaisCount !== null && profissionaisCount > 0) {
             toast({
                 title: "Ação Bloqueada",
-                description: `Existem ${medicosCount} médico(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
+                description: `Existem ${profissionaisCount} profissional(is) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
                 variant: "destructive",
             });
             return;
         }
-        setMedicoDialogOpen(true);
+        setProfissionalDialogOpen(true);
     };
 
     const handleConfirmSenhaReset = async () => {
@@ -183,24 +183,24 @@ export default function ConfiguracoesPage() {
         }
     };
     
-    const handleConfirmMedicoReset = async () => {
-        setIsMedicoResetting(true);
-        setMedicoDialogOpen(false);
+    const handleConfirmProfissionalReset = async () => {
+        setIsProfissionalResetting(true);
+        setProfissionalDialogOpen(false);
         try {
-            await resetCounterByName('medicos_v2');
+            await resetCounterByName('profissionais_v2');
             toast({
-                title: "Códigos de Médico Zerados!",
-                description: "A contagem de códigos de cadastro de médico foi reiniciada para 001.",
+                title: "Códigos de Profissional Zerados!",
+                description: "A contagem de códigos de cadastro de profissional foi reiniciada para 001.",
                 className: "bg-green-500 text-white",
             });
         } catch (error) {
             toast({
-                title: "Erro ao zerar códigos de médico",
+                title: "Erro ao zerar códigos de profissional",
                 description: (error as Error).message,
                 variant: "destructive",
             });
         } finally {
-            setIsMedicoResetting(false);
+            setIsProfissionalResetting(false);
         }
     };
 
@@ -275,12 +275,12 @@ export default function ConfiguracoesPage() {
                   icon={RefreshCw}
               />
               <ActionRow
-                  label="Zerar Códigos de Cadastro de Médicos"
+                  label="Zerar Códigos de Cadastro de Profissionais"
                   buttonText="Zerar (001)"
-                  onClick={handleMedicoResetRequest}
-                  isResetting={isMedicoResetting}
-                  disabled={medicosCount === null}
-                  title={medicosCount !== null && medicosCount > 0 ? `Existem ${medicosCount} médicos cadastrados. Exclua-os primeiro.` : ""}
+                  onClick={handleProfissionalResetRequest}
+                  isResetting={isProfissionalResetting}
+                  disabled={profissionaisCount === null}
+                  title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""}
                   icon={RefreshCw}
               />
               <ActionRow
@@ -311,10 +311,10 @@ export default function ConfiguracoesPage() {
               onOpenChange={setPacienteDialogOpen}
               onConfirm={handleConfirmPacienteReset}
           />
-          <ResetMedicoDialog
-              isOpen={medicoDialogOpen}
-              onOpenChange={setMedicoDialogOpen}
-              onConfirm={handleConfirmMedicoReset}
+          <ResetProfissionalDialog
+              isOpen={profissionalDialogOpen}
+              onOpenChange={setProfissionalDialogOpen}
+              onConfirm={handleConfirmProfissionalReset}
           />
     </div>
   );
