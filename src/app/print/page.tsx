@@ -41,7 +41,7 @@ const ReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
-            <div className="flex items-start justify-between mb-2">
+            <div className="flex items-start justify-between">
                 <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-3 text-xs">
                     <span className="font-semibold">{atendimento.classificacao}</span>
@@ -52,22 +52,18 @@ const ReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                 </div>
             </div>
 
-            <Separator className="my-1 bg-black" />
-            
-            <div className="space-y-1 text-xs mt-2">
-                <div>
+            <div className="flex justify-between text-xs mt-2">
+                 <div>
                     <span className="font-semibold">Departamento:</span>
                     <span className="ml-1">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
                 </div>
-                <div>
+                 <div>
                     <span className="font-semibold">Profissional:</span>
                     <span className="ml-1">{atendimento.profissionalNome}</span>
                 </div>
             </div>
 
-             <Separator className="my-1 bg-black" />
-
-             <div className="flex justify-around text-xs mt-2">
+             <div className="flex justify-between text-xs mt-2">
                 <span>Entrada na Fila: <span className="font-mono text-black font-semibold">{horaChegada}</span></span>
                 <span>Chamada no Painel: <span className="font-mono text-black font-semibold">{horaChamada}</span></span>
                 <span>Finalização: <span className="font-mono text-black font-semibold">{horaFinalizacao}</span></span>
