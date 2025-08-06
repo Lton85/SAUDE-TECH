@@ -327,11 +327,8 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        if (range?.from) {
+        if (range?.from && !range.to) {
             setCalendarMonth(range.from);
-        }
-        if (!range?.from) {
-             setCalendarMonth(new Date());
         }
     };
     
@@ -495,3 +492,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
