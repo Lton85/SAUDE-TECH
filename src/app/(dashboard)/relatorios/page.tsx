@@ -5,6 +5,7 @@ import * as React from "react";
 import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -104,10 +105,9 @@ export default function RelatoriosPage() {
     const [hasSearched, setHasSearched] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
 
-    const [dateRange, setDateRange] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
-      from: new Date(),
-      to: new Date(),
-    });
+    const today = new Date();
+    const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
+    const [month, setMonth] = React.useState<Date>(dateRange?.from || today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -140,7 +140,7 @@ export default function RelatoriosPage() {
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedDepartamentoId, selectedClassificacao, medicos, enfermeiros]);
     
     const handleSearch = React.useCallback(async () => {
-        if (!dateRange.from || !dateRange.to) {
+        if (!dateRange?.from || !dateRange?.to) {
             return;
         }
 
@@ -167,7 +167,7 @@ export default function RelatoriosPage() {
      React.useEffect(() => {
         if (!isMounted) return;
         // Do not auto-search in personalized mode until a full range is selected
-        if (viewMode === 'personalizado' && (!dateRange.from || !dateRange.to)) {
+        if (viewMode === 'personalizado' && (!dateRange?.from || !dateRange?.to)) {
             return;
         }
         handleSearch();
@@ -214,13 +214,14 @@ export default function RelatoriosPage() {
     // Handle quick date selection (Diário, Semanal, Mensal)
     const handleViewModeChange = (mode: 'diario' | 'semanal' | 'mensal' | 'personalizado') => {
         setViewMode(mode);
+        const today = new Date();
         if (mode === 'personalizado') {
-             setDateRange({ from: undefined, to: undefined });
+             setDateRange(undefined);
+             setMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
         } else {
-            const today = new Date();
             let newFrom, newTo;
 
             if (mode === 'diario') {
@@ -262,10 +263,14 @@ export default function RelatoriosPage() {
         if (viewMode === 'semanal') return "Relatório Semanal de Atendimentos";
         if (viewMode === 'mensal') return "Relatório Mensal de Atendimentos";
         
-        if (dateRange.from && dateRange.to) {
+        if (dateRange?.from && dateRange.to) {
             const from = format(dateRange.from, 'dd/MM/yy');
             const to = format(dateRange.to, 'dd/MM/yy');
             return from === to ? `Relatório de Atendimentos de ${from}` : `Relatório de Atendimentos de ${from} a ${to}`;
+        }
+        
+        if (dateRange?.from) {
+             return `Relatório de Atendimentos a partir de ${format(dateRange.from, 'dd/MM/yy')}`;
         }
 
         return "Relatório de Atendimentos";
@@ -273,7 +278,7 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
-         if (!dateRange.from || !dateRange.to) {
+         if (!dateRange?.from || !dateRange.to) {
             toast({
                 title: "Período não selecionado",
                 description: "Por favor, selecione um período antes de imprimir.",
@@ -318,10 +323,11 @@ export default function RelatoriosPage() {
         }
     };
     
-    const handleManualDateSearch = (range: { from?: Date; to?: Date } | undefined) => {
-        if (range) {
-            setViewMode('personalizado');
-            setDateRange({ from: range.from, to: range.to });
+    const handleManualDateSearch = (range: DateRange | undefined) => {
+        setViewMode('personalizado');
+        setDateRange(range);
+        if (range?.from) {
+            setMonth(range.from);
         }
     }
 
@@ -380,15 +386,19 @@ export default function RelatoriosPage() {
                                     size="sm"
                                     className={cn(
                                     "w-[240px] justify-start text-left font-normal",
-                                    !dateRange.from && viewMode !== 'personalizado' && "text-muted-foreground",
+                                    !dateRange?.from && "text-muted-foreground",
                                     viewMode !== 'personalizado' && 'border-dashed'
                                     )}
                                     disabled={isLoading}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.from && dateRange.to ? (
+                                    {dateRange?.from ? (
+                                        dateRange.to ? (
                                             `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
-                                    ) : (dateRange.from ? format(dateRange.from, "dd/MM/yy") : <span>Escolha um período</span>)
+                                        ) : (
+                                            format(dateRange.from, "dd/MM/yy")
+                                        )
+                                    ) : (<span>Escolha um período</span>)
                                     }
                                 </Button>
                                 </PopoverTrigger>
@@ -396,7 +406,8 @@ export default function RelatoriosPage() {
                                 <Calendar
                                     initialFocus
                                     mode="range"
-                                    defaultMonth={dateRange?.from}
+                                    month={month}
+                                    onMonthChange={setMonth}
                                     selected={dateRange}
                                     onSelect={handleManualDateSearch}
                                     numberOfMonths={2}
@@ -466,3 +477,4 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
