@@ -1,10 +1,47 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public access to all collections for prototyping purposes.
-    // In a production environment, these rules should be more restrictive.
-    match /{document=**} {
-      allow read, write: if true;
+    // Regra geral: permite leitura e escrita para todos os usuários autenticados.
+    // Para um ambiente de produção, você deve restringir o acesso com base nas funções do usuário (ex: admin, recepcionista).
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Coleções de Cadastros
+    match /pacientes/{pacienteId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    match /medicos/{medicoId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    match /enfermeiros/{enfermeiroId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    match /departamentos/{departamentoId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    // Fila de Atendimento e Relatórios
+    match /filaDeEspera/{filaId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    match /relatorios_atendimentos/{relatorioId} {
+      allow read, write, create, delete: if isAuthenticated();
+    }
+
+    // Painel de Chamadas
+    match /chamadas/{chamadaId} {
+      allow read, create: if true; // Permite que o painel leia e a recepção crie chamadas sem autenticação
+    }
+
+    // Contadores
+    match /counters/{counterId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }
