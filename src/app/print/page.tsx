@@ -22,6 +22,7 @@ function PrintPageContent() {
     const searchParams = useSearchParams();
     const [data, setData] = useState<PrintData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [dateRangeString, setDateRangeString] = useState<string | null>(null);
 
     useEffect(() => {
         const individualReportId = searchParams.get('id');
@@ -46,9 +47,13 @@ function PrintPageContent() {
                     const title = searchParams.get('title') || 'Relatório de Atendimentos';
 
                     if (fromStr && toStr) {
+                        const fromDate = parseISO(fromStr);
+                        const toDate = parseISO(toStr);
+                        setDateRangeString(`Referente a ${format(fromDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(toDate, "dd/MM/yyyy", { locale: ptBR })}`);
+                        
                          const filters = {
-                            dateFrom: parseISO(fromStr),
-                            dateTo: parseISO(toStr),
+                            dateFrom: fromDate,
+                            dateTo: toDate,
                             pacienteId: searchParams.get('pacienteId') || undefined,
                             medicoId: searchParams.get('medicoId') || undefined,
                             enfermeiroId: searchParams.get('enfermeiroId') || undefined,
@@ -108,7 +113,12 @@ function PrintPageContent() {
     return (
         <div className="bg-white text-black font-sans p-8">
             <header className="mb-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
+                <h1 className="text-2xl font-bold mb-1">{data.title}</h1>
+                 {dateRangeString && (
+                    <p className="text-md text-gray-700 font-semibold mb-2">
+                        {dateRangeString}
+                    </p>
+                )}
                 <p className="text-sm text-gray-600">
                     Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
                 </p>
