@@ -7,21 +7,25 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, User, Stethoscope, UserPlus, X, Search, ShieldQuestion } from "lucide-react";
+import { Filter, Loader2, User, Stethoscope, UserPlus, X, Search, ShieldQuestion, Building } from "lucide-react";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import type { Paciente } from "@/types/paciente";
+import type { Departamento } from "@/types/departamento";
 
 interface FiltrosRelatorioProps {
     pacientes: Paciente[];
     medicos: Medico[];
     enfermeiros: Enfermeiro[];
+    departamentos: Departamento[];
     selectedPacienteId: string;
     onPacienteChange: (id: string) => void;
     selectedMedicoId: string;
     onMedicoChange: (id: string) => void;
     selectedEnfermeiroId: string;
     onEnfermeiroChange: (id: string) => void;
+    selectedDepartamentoId: string;
+    onDepartamentoChange: (id: string) => void;
     selectedClassificacao: string;
     onClassificacaoChange: (value: string) => void;
     onSearch: () => void;
@@ -34,12 +38,15 @@ export function FiltrosRelatorio({
     pacientes,
     medicos,
     enfermeiros,
+    departamentos,
     selectedPacienteId,
     onPacienteChange,
     selectedMedicoId,
     onMedicoChange,
     selectedEnfermeiroId,
     onEnfermeiroChange,
+    selectedDepartamentoId,
+    onDepartamentoChange,
     selectedClassificacao,
     onClassificacaoChange,
     onSearch,
@@ -105,6 +112,25 @@ export function FiltrosRelatorio({
                             <SelectItem value="todos">Todos os Enfermeiros</SelectItem>
                             {enfermeiros.map(p => (
                                 <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="departamento-filter" className="flex items-center gap-2 text-sm"><Building className="h-4 w-4"/>Departamento</Label>
+                    <Select
+                        value={selectedDepartamentoId}
+                        onValueChange={onDepartamentoChange}
+                        disabled={isLoading}
+                    >
+                        <SelectTrigger id="departamento-filter">
+                            <SelectValue placeholder="Filtrar por departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="todos">Todos os Departamentos</SelectItem>
+                            {departamentos.map(d => (
+                                <SelectItem key={d.id} value={d.id}>{d.nome}{d.numero ? ` - Sala ${d.numero}`: ''}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

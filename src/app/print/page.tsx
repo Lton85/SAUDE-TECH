@@ -41,32 +41,45 @@ const ReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
 
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
-            <div className="flex items-start justify-between">
-                <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
-                <div className="flex items-center gap-3 text-xs">
-                    <span className="font-semibold">{atendimento.classificacao}</span>
+            <div className="flex items-center justify-between text-xs">
+                <div>
+                     <div className="font-bold text-base uppercase">{atendimento.pacienteNome}</div>
+                     <div className="text-muted-foreground">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</div>
+                     <div className="text-muted-foreground">{atendimento.profissionalNome}</div>
+                </div>
+                 <div className="flex flex-col items-end gap-1">
+                    <Badge
+                        className={cn(
+                            'text-xs font-semibold',
+                            atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                        )}
+                    >
+                        {atendimento.classificacao}
+                    </Badge>
                      <div className="flex items-center text-black">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         <span>Finalizado em {dataFormatada}</span>
                     </div>
-                </div>
+                 </div>
             </div>
 
-            <div className="flex justify-between text-xs mt-2">
-                 <div>
-                    <span className="font-semibold">Departamento:</span>
-                    <span className="ml-1">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+            <Separator className="my-2 bg-black/20"/>
+            
+             <div className="flex justify-around text-xs mt-2">
+                <div className="text-center">
+                    <div className="font-semibold">Entrada na Fila</div>
+                    <div className="font-mono text-black font-semibold">{horaChegada}</div>
                 </div>
-                 <div>
-                    <span className="font-semibold">Profissional:</span>
-                    <span className="ml-1">{atendimento.profissionalNome}</span>
+                <div className="text-center">
+                    <div className="font-semibold">Chamada no Painel</div>
+                    <div className="font-mono text-black font-semibold">{horaChamada}</div>
                 </div>
-            </div>
-
-             <div className="flex justify-between text-xs mt-2">
-                <span>Entrada na Fila: <span className="font-mono text-black font-semibold">{horaChegada}</span></span>
-                <span>Chamada no Painel: <span className="font-mono text-black font-semibold">{horaChamada}</span></span>
-                <span>Finalização: <span className="font-mono text-black font-semibold">{horaFinalizacao}</span></span>
+                <div className="text-center">
+                    <div className="font-semibold">Finalização</div>
+                    <div className="font-mono text-black font-semibold">{horaFinalizacao}</div>
+                </div>
             </div>
         </div>
     );
@@ -107,6 +120,7 @@ function PrintPageContent() {
                             pacienteId: searchParams.get('pacienteId') || undefined,
                             medicoId: searchParams.get('medicoId') || undefined,
                             enfermeiroId: searchParams.get('enfermeiroId') || undefined,
+                            departamentoId: searchParams.get('departamentoId') || undefined,
                             classificacao: searchParams.get('classificacao') || undefined,
                         };
                         const items = await getHistoricoAtendimentosPorPeriodoComFiltros(filters);

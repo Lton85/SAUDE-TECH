@@ -19,9 +19,11 @@ import { Separator } from "@/components/ui/separator";
 import { getMedicos } from "@/services/medicosService";
 import { getEnfermeiros } from "@/services/enfermeirosService";
 import { getPacientes } from "@/services/pacientesService";
+import { getDepartamentos } from "@/services/departamentosService";
 import type { Medico } from "@/types/medico";
 import type { Enfermeiro } from "@/types/enfermeiro";
 import type { Paciente } from "@/types/paciente";
+import type { Departamento } from "@/types/departamento";
 import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -87,10 +89,12 @@ export default function RelatoriosPage() {
     const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
     const [medicos, setMedicos] = React.useState<Medico[]>([]);
     const [enfermeiros, setEnfermeiros] = React.useState<Enfermeiro[]>([]);
+    const [departamentos, setDepartamentos] = React.useState<Departamento[]>([]);
     
     const [selectedPacienteId, setSelectedPacienteId] = React.useState<string>("todos");
     const [selectedMedicoId, setSelectedMedicoId] = React.useState<string>("todos");
     const [selectedEnfermeiroId, setSelectedEnfermeiroId] = React.useState<string>("todos");
+    const [selectedDepartamentoId, setSelectedDepartamentoId] = React.useState<string>("todos");
     const [selectedClassificacao, setSelectedClassificacao] = React.useState<string>("todos");
 
 
@@ -123,13 +127,17 @@ export default function RelatoriosPage() {
              const enfermeiro = enfermeiros.find(e => e.id === selectedEnfermeiroId);
             if(enfermeiro) filteredData = filteredData.filter(item => item.profissionalNome === `Enf. ${enfermeiro.nome}`);
         }
+
+        if (selectedDepartamentoId !== 'todos') {
+            filteredData = filteredData.filter(item => item.departamentoId === selectedDepartamentoId);
+        }
         
         if (selectedClassificacao !== 'todos') {
             filteredData = filteredData.filter(item => item.classificacao === selectedClassificacao);
         }
 
         setFilteredReportData(filteredData);
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao, medicos, enfermeiros]);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedDepartamentoId, selectedClassificacao, medicos, enfermeiros]);
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange.from || !dateRange.to) {
@@ -170,14 +178,16 @@ export default function RelatoriosPage() {
     React.useEffect(() => {
         const fetchFiltersData = async () => {
             try {
-                const [medicosData, enfermeirosData, pacientesData] = await Promise.all([
+                const [medicosData, enfermeirosData, pacientesData, departamentosData] = await Promise.all([
                     getMedicos(), 
                     getEnfermeiros(),
-                    getPacientes()
+                    getPacientes(),
+                    getDepartamentos(),
                 ]);
                 setMedicos(medicosData);
                 setEnfermeiros(enfermeirosData);
                 setPacientes(pacientesData);
+                setDepartamentos(departamentosData);
             } catch (error) {
                 toast({
                     title: "Erro ao carregar dados dos filtros",
@@ -194,7 +204,7 @@ export default function RelatoriosPage() {
         if(hasSearched){
             applyClientSideFilters(allReportData);
         }
-    },[selectedPacienteId, selectedEnfermeiroId, selectedMedicoId, selectedClassificacao, allReportData, hasSearched, applyClientSideFilters])
+    },[selectedPacienteId, selectedEnfermeiroId, selectedMedicoId, selectedDepartamentoId, selectedClassificacao, allReportData, hasSearched, applyClientSideFilters])
 
 
     // Handle quick date selection (Diário, Semanal, Mensal)
@@ -224,6 +234,7 @@ export default function RelatoriosPage() {
         setSelectedPacienteId('todos');
         setSelectedMedicoId('todos');
         setSelectedEnfermeiroId('todos');
+        setSelectedDepartamentoId('todos');
         setSelectedClassificacao('todos');
     };
 
@@ -232,9 +243,10 @@ export default function RelatoriosPage() {
             selectedPacienteId !== 'todos' ||
             selectedMedicoId !== 'todos' ||
             selectedEnfermeiroId !== 'todos' ||
+            selectedDepartamentoId !== 'todos' ||
             selectedClassificacao !== 'todos'
         );
-    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao]);
+    }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedDepartamentoId, selectedClassificacao]);
 
 
      const reportTitle = React.useMemo(() => {
@@ -279,6 +291,7 @@ export default function RelatoriosPage() {
         if (selectedPacienteId !== 'todos') queryParams.set('pacienteId', selectedPacienteId);
         if (selectedMedicoId !== 'todos') queryParams.set('medicoId', selectedMedicoId);
         if (selectedEnfermeiroId !== 'todos') queryParams.set('enfermeiroId', selectedEnfermeiroId);
+        if (selectedDepartamentoId !== 'todos') queryParams.set('departamentoId', selectedDepartamentoId);
         if (selectedClassificacao !== 'todos') queryParams.set('classificacao', selectedClassificacao);
 
         window.open(`/print?${queryParams.toString()}`, '_blank');
@@ -317,12 +330,15 @@ export default function RelatoriosPage() {
                     pacientes={pacientes}
                     medicos={medicos}
                     enfermeiros={enfermeiros}
+                    departamentos={departamentos}
                     selectedPacienteId={selectedPacienteId}
                     onPacienteChange={setSelectedPacienteId}
                     selectedMedicoId={selectedMedicoId}
                     onMedicoChange={setSelectedMedicoId}
                     selectedEnfermeiroId={selectedEnfermeiroId}
                     onEnfermeiroChange={setSelectedEnfermeiroId}
+                    selectedDepartamentoId={selectedDepartamentoId}
+                    onDepartamentoChange={setSelectedDepartamentoId}
                     selectedClassificacao={selectedClassificacao}
                     onClassificacaoChange={setSelectedClassificacao}
                     onSearch={() => applyClientSideFilters(allReportData)}

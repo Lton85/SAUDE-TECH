@@ -21,6 +21,7 @@ interface FullSearchFilters extends SearchFilters {
     pacienteId?: string;
     medicoId?: string;
     enfermeiroId?: string;
+    departamentoId?: string;
     classificacao?: string;
 }
 
@@ -275,6 +276,10 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
         const enfermeiros = await getEnfermeiros();
         const enfermeiro = enfermeiros.find(e => e.id === filters.enfermeiroId);
         if(enfermeiro) data = data.filter(item => item.profissionalNome === `Enf. ${enfermeiro.nome}`);
+    }
+
+    if (filters.departamentoId && filters.departamentoId !== 'todos') {
+        data = data.filter(item => item.departamentoId === filters.departamentoId);
     }
     
     if (filters.classificacao && filters.classificacao !== 'todos') {
