@@ -1,15 +1,17 @@
 
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CheckCircle, User, Building } from "lucide-react";
+import { CheckCircle, User, Building, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getAtendimentoById } from "@/services/filaDeEsperaService";
 
 interface PrintData {
   title: string;
@@ -19,21 +21,12 @@ interface PrintData {
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
-        // Handle Firestore Timestamp objects
-        if (typeof timestamp.toDate === 'function') {
-            return timestamp.toDate();
-        }
-        // Handle ISO strings
+        if (typeof timestamp.toDate === 'function') return timestamp.toDate();
         if (typeof timestamp === 'string') {
             const date = new Date(timestamp);
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
+            if (!isNaN(date.getTime())) return date;
         }
-        // Handle native Date objects
-        if (timestamp instanceof Date) {
-            return timestamp;
-        }
+        if (timestamp instanceof Date) return timestamp;
         return null;
     };
 
@@ -45,7 +38,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
     const horaChamada = chamadaDate ? format(chamadaDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const horaFinalizacao = finalizacaoDate ? format(finalizacaoDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
     const dataFormatada = finalizacaoDate ? format(finalizacaoDate, "dd/MM/yyyy", { locale: ptBR }) : 'N/A';
-
 
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
@@ -138,47 +130,86 @@ const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) =
     )
 }
 
-
-export default function PrintPage() {
+function PrintPageContent() {
+    const searchParams = useSearchParams();
     const [data, setData] = useState<PrintData | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedData = localStorage.getItem('print-data');
-        if (storedData) {
+        const individualReportId = searchParams.get('id');
+
+        const fetchData = async () => {
             try {
-                const parsedData = JSON.parse(storedData);
-                setData(parsedData);
+                let printData: PrintData | null = null;
+                if (individualReportId) {
+                    const atendimento = await getAtendimentoById(individualReportId);
+                    if (atendimento) {
+                        printData = {
+                            title: "Relatório Individual do Paciente",
+                            items: [atendimento]
+                        };
+                    } else {
+                        setError("Atendimento não encontrado.");
+                    }
+                } else {
+                    const storedData = localStorage.getItem('print-data');
+                    if (storedData) {
+                        printData = JSON.parse(storedData);
+                    } else {
+                        setError("Dados para impressão não encontrados.");
+                    }
+                }
+                
+                if (printData) {
+                    setData(printData);
+                    setTimeout(() => {
+                        window.print();
+                    }, 500);
+                }
+            } catch (err) {
+                console.error("Erro ao processar dados de impressão:", err);
+                setError((err as Error).message || "Ocorreu um erro desconhecido.");
+            }
+        };
 
-                setTimeout(() => {
-                    window.print();
-                }, 500); 
+        fetchData();
 
-                window.onafterprint = () => {
-                    localStorage.removeItem('print-data');
-                    window.close();
-                };
-
-            } catch (error) {
-                console.error("Error parsing print data from localStorage", error);
+        window.onafterprint = () => {
+            if (!individualReportId) {
                 localStorage.removeItem('print-data');
             }
-        }
-    }, []);
+            window.close();
+        };
 
-    if (!data) {
+        return () => {
+            window.onafterprint = null; // Clean up
+        };
+
+    }, [searchParams]);
+
+    if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                Carregando dados para impressão...
+            <div className="flex items-center justify-center min-h-screen text-red-500">
+                Erro: {error}
             </div>
         );
     }
     
-    const isIndividualReport = data.title === "Relatório Individual do Paciente" && data.items.length === 1;
+    if (!data) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="mt-4">Carregando dados para impressão...</p>
+            </div>
+        );
+    }
+    
+    const isIndividualReport = !!searchParams.get('id');
 
     return (
         <div className="bg-white text-black font-sans p-8">
             <header className="mb-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">{isIndividualReport ? 'Relatório Individual do Paciente' : data.title}</h1>
+                <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
                 <p className="text-sm text-gray-600">
                     Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
                 </p>
@@ -196,3 +227,13 @@ export default function PrintPage() {
         </div>
     );
 }
+
+export default function PrintPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <PrintPageContent />
+        </Suspense>
+    );
+}
+
+    

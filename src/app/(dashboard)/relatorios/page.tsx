@@ -27,7 +27,7 @@ import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (item: FilaDeEsperaItem) => void }) => {
+const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (itemId: string) => void }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
 
@@ -66,7 +66,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento)} title="Imprimir Atendimento">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento.id)} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
                 </div>
@@ -271,17 +271,16 @@ export default function RelatoriosPage() {
         }
     }
     
-    const handlePrintItem = (atendimentoToPrint: FilaDeEsperaItem) => {
+    const handlePrintItem = (itemId: string) => {
          try {
-            const printData = {
-                title: "Relatório Individual do Paciente",
-                items: [atendimentoToPrint]
-            };
-            localStorage.setItem('print-data', JSON.stringify(printData));
-            window.open('/print', '_blank');
+            window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);
-            alert("Não foi possível abrir a página de impressão. Verifique as permissões de pop-up do seu navegador.");
+            toast({
+                title: "Erro ao imprimir",
+                description: "Não foi possível gerar o relatório. Tente novamente.",
+                variant: "destructive"
+            });
         }
     };
     
@@ -426,3 +425,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    

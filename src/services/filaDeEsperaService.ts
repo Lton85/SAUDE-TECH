@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -245,6 +246,21 @@ export const getHistoricoAtendimentosPorPeriodo = async (
     }
 };
 
+export const getAtendimentoById = async (id: string): Promise<FilaDeEsperaItem | null> => {
+    if (!id) return null;
+    try {
+        const docRef = doc(db, "relatorios_atendimentos", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as FilaDeEsperaItem;
+        }
+        return null;
+    } catch (error) {
+        console.error("Erro ao buscar atendimento por ID:", error);
+        throw new Error("Não foi possível carregar o atendimento.");
+    }
+};
+
 export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>): Promise<void> => {
     if (!id) {
         throw new Error("ID do item da fila não encontrado.");
@@ -305,3 +321,4 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
     }
 };
 
+    
