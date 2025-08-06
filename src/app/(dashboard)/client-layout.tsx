@@ -60,7 +60,7 @@ const menuItems = [
 
 type Tab = (typeof menuItems)[number];
 
-const AppSidebar = ({ onMenuItemClick }: { onMenuItemClick: (item: Tab) => void; }) => {
+const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; }) => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
     const { toast } = useToast();
@@ -120,6 +120,7 @@ const AppSidebar = ({ onMenuItemClick }: { onMenuItemClick: (item: Tab) => void;
                 <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                         onClick={item.id === 'painel' ? handleOpenPainel : () => onMenuItemClick(item)}
+                        isActive={activeContentId === item.id}
                         tooltip={{children: item.label, side: "right"}}
                     >
                         <item.icon />
@@ -133,13 +134,14 @@ const AppSidebar = ({ onMenuItemClick }: { onMenuItemClick: (item: Tab) => void;
     );
 }
 
-const MainContent = ({ openTabs, activeTab, onTabClick, onTabClose }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose }: { 
     openTabs: Tab[];
     activeTab: string;
+    activeContentId: string;
     onTabClick: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
 }) => {
-  const activeComponent = menuItems.find(item => item.id === activeTab)?.component;
+  const activeComponent = menuItems.find(item => item.id === activeContentId)?.component;
 
   return (
     <SidebarInset>
@@ -200,40 +202,49 @@ export default function DashboardClientLayout({
 }) {
 
   const [openTabs, setOpenTabs] = React.useState<Tab[]>([]);
+  // activeTab tracks the visually highlighted tab
   const [activeTab, setActiveTab] = React.useState<string>("/");
+  // activeContentId tracks the component to render in the main content area
+  const [activeContentId, setActiveContentId] = React.useState<string>("/");
+
 
   const handleMenuItemClick = (item: Tab) => {
-    // If 'Início' is clicked, just set the active tab to the main dashboard
+    // If 'Início' is clicked, just show the dashboard content.
+    // Don't change the active tab, just the content view.
     if (item.id === '/') {
-        setActiveTab('/');
+        setActiveContentId('/');
         return;
     }
+    
     // If tab is not open, add it
     if (!openTabs.some(tab => tab.id === item.id)) {
         setOpenTabs(prev => [...prev, item]);
     }
-    // Set the clicked tab as active
+    
+    // Set both the active tab and content to the clicked item
     setActiveTab(item.id);
+    setActiveContentId(item.id);
   }
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
+    setActiveContentId(tabId);
   }
 
   const handleTabClose = (tabId: string) => {
     const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
     if (closingTabIndex === -1) return;
 
-    // Set new active tab before removing the old one
-    if (activeTab === tabId) {
-        // Find the next available tab to activate.
-        // Prefer the tab to the left (previous), if not, the one to the right.
+    // Determine the new active tab/content before removing the closed one
+    if (activeContentId === tabId) {
         const newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1];
         if (newActiveTab) {
             setActiveTab(newActiveTab.id);
+            setActiveContentId(newActiveTab.id);
         } else {
             // If no other tabs, go back to home/dashboard view
             setActiveTab('/');
+            setActiveContentId('/');
         }
     }
     
@@ -244,10 +255,11 @@ export default function DashboardClientLayout({
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar onMenuItemClick={handleMenuItemClick} />
+        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} />
         <MainContent 
             openTabs={openTabs} 
             activeTab={activeTab}
+            activeContentId={activeContentId}
             onTabClick={handleTabClick}
             onTabClose={handleTabClose}
         />
