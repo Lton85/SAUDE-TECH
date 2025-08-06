@@ -122,7 +122,7 @@ export default function DashboardLayout({
       <div className="flex">
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
+          <header className="flex h-12 items-center gap-4 border-b bg-card px-6 sticky top-0 z-30">
             <SidebarTrigger className="md:hidden"/>
             <h1 className="flex-1 text-lg font-semibold md:text-xl font-headline">
               {getPageTitle()}
