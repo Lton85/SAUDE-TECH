@@ -34,7 +34,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const handlePrintItem = () => {
          try {
             const printData = {
-                title: `Relatório Individual do Paciente - ${atendimento.pacienteNome}`,
+                title: "Relatório Individual do Paciente",
                 items: [atendimento]
             };
             localStorage.setItem('print-data', JSON.stringify(printData));
