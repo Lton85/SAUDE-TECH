@@ -107,7 +107,7 @@ export default function RelatoriosPage() {
 
     const today = new Date();
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(today);
+    const [calendarMonth, setCalendarMonth] = React.useState<Date>(startOfDay(today));
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -217,7 +217,7 @@ export default function RelatoriosPage() {
         const today = new Date();
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setCalendarMonth(today);
+             setCalendarMonth(startOfDay(today));
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -234,7 +234,7 @@ export default function RelatoriosPage() {
                 newFrom = startOfMonth(today);
                 newTo = endOfMonth(today);
             }
-            if(newFrom) setCalendarMonth(newFrom);
+            if(newFrom) setCalendarMonth(startOfDay(newFrom));
             setDateRange({ from: newFrom, to: newTo });
         }
     }
@@ -327,10 +327,11 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
+        // If only the "from" date is selected, lock the calendar month to that month.
         if (range?.from) {
-            setCalendarMonth(range.from);
+            setCalendarMonth(startOfDay(range.from));
         } else {
-             setCalendarMonth(new Date());
+             setCalendarMonth(startOfDay(new Date()));
         }
     };
     
@@ -419,6 +420,7 @@ export default function RelatoriosPage() {
                                         pagedNavigation
                                         initialFocus
                                         mode="range"
+                                        defaultMonth={calendarMonth}
                                         month={calendarMonth}
                                         onMonthChange={setCalendarMonth}
                                         selected={dateRange}
@@ -495,7 +497,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
-
-    
