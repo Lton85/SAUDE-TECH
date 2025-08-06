@@ -326,13 +326,18 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        if (range?.from) {
-            // Se 'to' não estiver definido, significa que estamos no meio da seleção de um intervalo.
-            // Travamos o mês visível no mês da data de início.
-            if (!range.to) {
-                setCalendarMonth(range.from);
-            }
+        // Only set the calendar month when a "from" date is selected and we are starting a new selection
+        if (range?.from && !range.to) {
+            setCalendarMonth(range.from);
         }
+    };
+
+    const handleMonthChange = (month: Date) => {
+        // Prevent month change if a date range selection is in progress
+        if (dateRange?.from && !dateRange.to) {
+            return;
+        }
+        setCalendarMonth(month);
     }
 
     if (!isMounted) {
@@ -411,7 +416,7 @@ export default function RelatoriosPage() {
                                     initialFocus
                                     mode="range"
                                     month={calendarMonth}
-                                    onMonthChange={setCalendarMonth}
+                                    onMonthChange={handleMonthChange}
                                     selected={dateRange}
                                     onSelect={handleManualDateSearch}
                                     numberOfMonths={2}
