@@ -441,8 +441,8 @@ export default function RelatoriosPage() {
                      <Card className="mt-4">
                         <CardContent className="p-4">
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                     <div className="space-y-2">
+                                <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                     <div className="space-y-2 col-span-3">
                                         <Label className="text-xs">Visualização Rápida</Label>
                                         <div className="flex items-center gap-1">
                                             <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('diario')} disabled={isLoading}>Diário</Button>
@@ -450,6 +450,8 @@ export default function RelatoriosPage() {
                                             <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('mensal')} disabled={isLoading}>Mensal</Button>
                                         </div>
                                     </div>
+                                </div>
+                                <div className="md:col-span-4 grid grid-cols-2 gap-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="date-from" className="text-xs">Data de Início</Label>
                                         <div className="relative">
@@ -518,7 +520,7 @@ export default function RelatoriosPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="md:col-span-4 flex items-end gap-2">
+                                <div className="md:col-span-3 flex items-end gap-2">
                                     <Button onClick={handleSearch} className="flex-1" disabled={isLoading}>
                                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                                         Buscar
