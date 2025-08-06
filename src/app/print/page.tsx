@@ -9,82 +9,14 @@ import { ptBR } from "date-fns/locale";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CheckCircle, Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAtendimentoById, getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 
 interface PrintData {
   title: string;
   items: FilaDeEsperaItem[];
 }
-
-const ReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    const toDate = (timestamp: any): Date | null => {
-        if (!timestamp) return null;
-        if (typeof timestamp.toDate === 'function') return timestamp.toDate();
-        if (typeof timestamp === 'string') {
-            const date = new Date(timestamp);
-            if (!isNaN(date.getTime())) return date;
-        }
-        if (timestamp instanceof Date) return timestamp;
-        return null;
-    };
-
-    const chegadaDate = toDate(atendimento.chegadaEm);
-    const chamadaDate = toDate(atendimento.chamadaEm);
-    const finalizacaoDate = toDate(atendimento.finalizadaEm);
-
-    const horaChegada = chegadaDate ? format(chegadaDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const horaChamada = chamadaDate ? format(chamadaDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const horaFinalizacao = finalizacaoDate ? format(finalizacaoDate, "HH:mm:ss", { locale: ptBR }) : 'N/A';
-    const dataFormatada = finalizacaoDate ? format(finalizacaoDate, "dd/MM/yyyy", { locale: ptBR }) : 'N/A';
-
-    return (
-        <div className="p-4 border border-black break-inside-avoid text-sm">
-            <div className="flex items-center justify-between text-xs">
-                <div>
-                     <div className="font-bold text-base uppercase">{atendimento.pacienteNome}</div>
-                     <div className="text-muted-foreground">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</div>
-                     <div className="text-muted-foreground">{atendimento.profissionalNome}</div>
-                </div>
-                 <div className="flex flex-col items-end gap-1">
-                    <Badge
-                        className={cn(
-                            'text-xs font-semibold',
-                            atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                        )}
-                    >
-                        {atendimento.classificacao}
-                    </Badge>
-                     <div className="flex items-center text-black">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        <span>Finalizado em {dataFormatada}</span>
-                    </div>
-                 </div>
-            </div>
-
-            <Separator className="my-2 bg-black/20"/>
-            
-             <div className="flex justify-around text-xs mt-2">
-                <div className="text-center">
-                    <div className="font-semibold">Entrada na Fila</div>
-                    <div className="font-mono text-black font-semibold">{horaChegada}</div>
-                </div>
-                <div className="text-center">
-                    <div className="font-semibold">Chamada no Painel</div>
-                    <div className="font-mono text-black font-semibold">{horaChamada}</div>
-                </div>
-                <div className="text-center">
-                    <div className="font-semibold">Finalização</div>
-                    <div className="font-mono text-black font-semibold">{horaFinalizacao}</div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 function PrintPageContent() {
     const searchParams = useSearchParams();
@@ -183,10 +115,47 @@ function PrintPageContent() {
             </header>
             
             <main>
-                <div className="space-y-4">
-                     {data.items.map(item => (
-                        <ReportItem key={item.id} atendimento={item} />
-                     ))}
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Data</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Paciente</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Departamento</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Profissional</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Classificação</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {data.items.map(item => {
+                            const dataFinalizacao = item.finalizadaEm?.toDate();
+                            const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy HH:mm", { locale: ptBR }) : 'N/A';
+                            
+                            return (
+                                <TableRow key={item.id} className="text-xs">
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">{dataFormatada}</TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200 font-medium">{item.pacienteNome}</TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">{item.departamentoNome}</TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">{item.profissionalNome}</TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">
+                                        <Badge
+                                            variant="outline"
+                                            className={cn(
+                                                'text-xs font-semibold border',
+                                                item.classificacao === 'Urgência' && 'bg-red-100 text-red-800 border-red-300',
+                                                item.classificacao === 'Preferencial' && 'bg-amber-100 text-amber-800 border-amber-300',
+                                                item.classificacao === 'Normal' && 'bg-green-100 text-green-800 border-green-300'
+                                            )}
+                                        >
+                                            {item.classificacao}
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })}
+                    </TableBody>
+                </Table>
+                 <div className="mt-4 text-right text-sm font-bold">
+                    Total de Atendimentos: {data.items.length}
                 </div>
             </main>
         </div>
