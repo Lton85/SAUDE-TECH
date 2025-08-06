@@ -82,7 +82,7 @@ function Calendar({
               }}
             >
               <SelectTrigger className="pr-1.5 focus:ring-0 w-auto min-w-[8ch]">
-                <SelectValue>{selected?.props?.children}</SelectValue>
+                <SelectValue placeholder={selected?.props?.children?.toString()} />
               </SelectTrigger>
               <SelectContent position="popper">
                  <ScrollArea className="h-48">
