@@ -107,7 +107,7 @@ export default function RelatoriosPage() {
 
     const today = new Date();
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(dateRange?.from || today);
+    const [month, setMonth] = React.useState<Date>(dateRange?.from || today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -217,7 +217,7 @@ export default function RelatoriosPage() {
         const today = new Date();
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setCalendarMonth(today);
+             setMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -234,6 +234,7 @@ export default function RelatoriosPage() {
                 newFrom = startOfMonth(today);
                 newTo = endOfMonth(today);
             }
+            if(newFrom) setMonth(newFrom);
             setDateRange({ from: newFrom, to: newTo });
         }
     }
@@ -325,18 +326,13 @@ export default function RelatoriosPage() {
     
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
-        setDateRange(range);
+        // If user selects a "from" date, but no "to" date yet,
+        // set the month to the "from" date so the view locks on it.
         if (range?.from && !range.to) {
-             // Do nothing, wait for the 'to' date
+           setMonth(range.from);
         }
+        setDateRange(range);
     };
-
-    const handleMonthChange = (month: Date) => {
-        // Only allow month change if we are not in the middle of a range selection
-        if (!(dateRange?.from && !dateRange.to)) {
-            setCalendarMonth(month);
-        }
-    }
 
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
@@ -420,8 +416,8 @@ export default function RelatoriosPage() {
                                     <Calendar
                                         initialFocus
                                         mode="range"
-                                        month={calendarMonth}
-                                        onMonthChange={handleMonthChange}
+                                        month={month}
+                                        onMonthChange={setMonth}
                                         selected={dateRange}
                                         onSelect={handleManualDateSearch}
                                         numberOfMonths={2}
@@ -496,3 +492,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
