@@ -30,6 +30,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const cardRef = React.useRef<HTMLDivElement>(null);
     const [paciente, setPaciente] = React.useState<Paciente | null>(null);
+    const [printTitle, setPrintTitle] = React.useState('');
+
 
     React.useEffect(() => {
         const fetchPaciente = async () => {
@@ -52,91 +54,65 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     
     const handlePrintItem = () => {
         const printContent = document.getElementById(`print-item-${atendimento.id}`);
-        if(printContent) {
-            const originalTitle = document.title;
-            const originalDisplay = document.body.innerHTML;
-            
-            document.title = `Relatório Individual do Paciente - ${atendimento.pacienteNome}`;
-            document.body.innerHTML = printContent.innerHTML;
-            
+        if (printContent) {
+            setPrintTitle(`Relatório Individual do Paciente - ${atendimento.pacienteNome}`);
+            const onAfterPrint = () => {
+                printContent.classList.remove('print-this');
+                window.removeEventListener('afterprint', onAfterPrint);
+                setPrintTitle(''); // Reset title
+            };
+            window.addEventListener('afterprint', onAfterPrint);
+            printContent.classList.add('print-this');
             window.print();
-            
-            document.body.innerHTML = originalDisplay;
-            document.title = originalTitle;
-            // Need to re-trigger a re-render for React to take over the DOM again
-            window.location.reload(); 
         }
-    }
+    };
 
     const PrintedContent = () => (
          <div className="print-only-content-item">
-            <style>{`
-              @media print {
-                body {
-                  background: #fff !important;
-                  color: #000 !important;
-                  -webkit-print-color-adjust: exact; 
-                  print-color-adjust: exact;
-                }
-                .print-badge {
-                  color: #fff !important;
-                  border-color: transparent !important;
-                }
-                 .bg-red-500 { background-color: #ef4444 !important; }
-                 .bg-amber-500 { background-color: #f59e0b !important; }
-                 .bg-green-500 { background-color: #22c55e !important; }
-                 .bg-green-100 { background-color: #dcfce7 !important; }
-                 .text-green-800 { color: #166534 !important; }
-                 .border-green-200 { border-color: #bbf7d0 !important; }
-                 .print-only-content-item {
-                    display: block !important;
-                    width: 100%;
-                    padding: 1rem;
-                 }
-              }
-            `}</style>
-            <div className="flex items-center justify-between mb-4 border-b pb-2">
-                <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-mono">CNS: {paciente?.cns || '...'}</span>
-                     <Badge
-                        className={cn(
-                            'text-xs text-white print-badge',
-                            atendimento.classificacao === 'Urgência' && 'bg-red-500',
-                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
-                            atendimento.classificacao === 'Normal' && 'bg-green-500'
-                        )}
-                    >
-                        {atendimento.classificacao}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs print-badge">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado
-                    </Badge>
+            <div className="border border-black p-4">
+                <div className="flex items-center justify-between mb-2 pb-2">
+                    <h2 className="text-xl font-bold">{atendimento.pacienteNome}</h2>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-mono">CNS: {paciente?.cns || '...'}</span>
+                         <Badge
+                            className={cn(
+                                'text-xs text-white print-badge',
+                                atendimento.classificacao === 'Urgência' && 'bg-red-500',
+                                atendimento.classificacao === 'Preferencial' && 'bg-amber-500',
+                                atendimento.classificacao === 'Normal' && 'bg-green-500'
+                            )}
+                        >
+                            {atendimento.classificacao}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs print-badge">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Finalizado
+                        </Badge>
+                    </div>
                 </div>
-            </div>
 
-            <div className="flex items-start justify-between gap-8 mb-4">
-                 <div className="flex items-center gap-2 text-sm">
-                    <span className="font-semibold">Departamento:</span>
-                    <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                <div className="flex items-start justify-between gap-8 mb-2">
+                     <div className="flex items-center gap-2 text-sm">
+                        <span className="font-semibold">Departamento:</span>
+                        <span>{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="font-semibold">Profissional:</span>
+                        <span>{atendimento.profissionalNome}</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                    <span className="font-semibold">Profissional:</span>
-                    <span>{atendimento.profissionalNome}</span>
-                </div>
-            </div>
 
-            <div className="flex justify-around text-xs text-gray-600 border-t pt-2">
-                <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
-                <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
-                <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+                <div className="flex justify-around text-xs text-gray-600 border-t border-black pt-2">
+                    <span>Entrada na Fila: <span className="font-mono">{horaChegada}</span></span>
+                    <span>Chamada no Painel: <span className="font-mono">{horaChamada}</span></span>
+                    <span>Finalização: <span className="font-mono">{horaFinalizacao}</span></span>
+                </div>
             </div>
         </div>
     );
 
     return (
-        <div ref={cardRef} className="print-item-card w-full border-b">
+        <div ref={cardRef} className="w-full border-b">
             <div className="flex items-center justify-between w-full text-sm p-3">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="flex items-center gap-2 font-medium truncate w-1/3">
@@ -207,6 +183,8 @@ export default function RelatoriosPage() {
       to: new Date(),
     });
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
+    const [printTitle, setPrintTitle] = React.useState('');
+
 
     const applyClientSideFilters = React.useCallback((dataToFilter: FilaDeEsperaItem[]) => {
         let filteredData = [...dataToFilter];
@@ -338,16 +316,9 @@ export default function RelatoriosPage() {
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedClassificacao]);
 
 
-    const handlePrint = () => {
-        window.print();
-    }
-    
-    const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
-        setViewMode('personalizado');
-        setDateRange(range || { from: undefined, to: undefined });
-    }
+     const reportTitle = React.useMemo(() => {
+        if (printTitle) return printTitle;
 
-    const reportTitle = React.useMemo(() => {
         if (viewMode === 'diario') return "Relatório Diário";
         if (viewMode === 'semanal') return "Relatório Semanal";
         if (viewMode === 'mensal') return "Relatório Mensal";
@@ -359,8 +330,25 @@ export default function RelatoriosPage() {
         }
 
         return "Relatório de Atendimentos";
-    }, [viewMode, dateRange]);
+    }, [viewMode, dateRange, printTitle]);
 
+
+    const handlePrint = () => {
+        setPrintTitle(reportTitle);
+        const onAfterPrint = () => {
+            document.body.classList.remove('printing-report');
+            window.removeEventListener('afterprint', onAfterPrint);
+            setPrintTitle(''); // Reset title
+        };
+        window.addEventListener('afterprint', onAfterPrint);
+        document.body.classList.add('printing-report');
+        window.print();
+    }
+    
+    const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
+        setViewMode('personalizado');
+        setDateRange(range || { from: undefined, to: undefined });
+    }
 
     if (!isMounted) {
         return (
@@ -459,7 +447,7 @@ export default function RelatoriosPage() {
                     </Card>
                 )}
 
-                 <Card className="flex flex-col flex-1 min-h-0 print:shadow-none print:border-none print:bg-transparent">
+                 <Card className="flex flex-col flex-1 min-h-0 print-report-card">
                     <CardContent className="p-0 flex-1 flex flex-col print:p-0">
                         <div className="flex-1 flex flex-col min-h-0">
                             {isLoading ? (
@@ -474,7 +462,7 @@ export default function RelatoriosPage() {
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-grow print:h-auto print:overflow-visible">
+                                <ScrollArea className="flex-grow print-scroll-area">
                                     <div className="space-y-0 print:space-y-4">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} />

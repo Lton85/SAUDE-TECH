@@ -85,30 +85,57 @@
 
 @media print {
   @page {
-      size: auto;
-      margin: 1cm;
+    size: A4;
+    margin: 1cm;
   }
 
-  body * {
-    visibility: hidden;
+  body {
+    background-color: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
   }
 
-  .print-container, .print-container * {
-    visibility: visible;
+  /* Default behavior: hide everything */
+  body > *:not(.print-this) {
+    display: none !important;
   }
   
-  .print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+  /* When printing the report, show the report card */
+  body.printing-report .print-report-card {
+    display: block !important;
+    box-shadow: none !important;
+    border: none !important;
   }
-
+  
+  body.printing-report .print-scroll-area {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  /* When printing a single item, show only that item */
+  body .print-this {
+    display: block !important;
+  }
+  
+  /* Hide elements not meant for printing */
   .print-hide {
     display: none !important;
   }
-
-  .print-only-content {
+  
+  .print-header {
     display: block !important;
   }
+  
+  .print-badge {
+    color: #fff !important;
+    border-color: transparent !important;
+  }
+   .bg-red-500 { background-color: #ef4444 !important; }
+   .bg-amber-500 { background-color: #f59e0b !important; }
+   .bg-green-500 { background-color: #22c55e !important; }
+   .bg-green-100 { background-color: #dcfce7 !important; }
+   .text-green-800 { color: #166534 !important; }
+   .border-green-200 { border-color: #bbf7d0 !important; }
 }
+
