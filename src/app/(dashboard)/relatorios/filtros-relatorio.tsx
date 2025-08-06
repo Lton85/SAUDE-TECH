@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import * as React from "react";
@@ -56,9 +55,21 @@ export function FiltrosRelatorio({
 }: FiltrosRelatorioProps) {
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center gap-2 p-4">
-                <Filter className="w-5 h-5" />
-                <CardTitle className="text-base">Filtros de Refinamento</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 p-4">
+                <div className="flex items-center gap-2">
+                    <Filter className="w-5 h-5" />
+                    <CardTitle className="text-base">Filtros de Refinamento</CardTitle>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onClearFilters}
+                    disabled={!hasActiveFilters || isLoading}
+                    className="flex items-center gap-1 text-xs"
+                >
+                    <X className="mr-1 h-3 w-3" />
+                    Limpar
+                </Button>
             </CardHeader>
             <CardContent className="space-y-4 p-4">
                  <div className="space-y-2">
@@ -154,26 +165,7 @@ export function FiltrosRelatorio({
                         </SelectContent>
                     </Select>
                 </div>
-
-
-                <div className="flex flex-col gap-2 pt-2">
-                    <Button onClick={onSearch} className="w-full" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                        Aplicar Filtros
-                    </Button>
-                     <Button
-                        variant="ghost"
-                        onClick={onClearFilters}
-                        className="w-full"
-                        disabled={!hasActiveFilters || isLoading}
-                    >
-                        <X className="mr-2 h-4 w-4" />
-                        Limpar Filtros
-                    </Button>
-                </div>
             </CardContent>
         </Card>
     );
 }
-
-    

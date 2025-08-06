@@ -4,7 +4,7 @@
 import * as React from "react";
 import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays, isEqual } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock, ArrowRight } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ import type { Departamento } from "@/types/departamento";
 import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 
 const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (itemId: string) => void }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
@@ -107,7 +108,6 @@ export default function RelatoriosPage() {
 
     const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(startOfMonth(today));
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -141,6 +141,11 @@ export default function RelatoriosPage() {
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange?.from || !dateRange?.to) {
+            toast({
+                title: "Período inválido",
+                description: "Por favor, selecione uma data de início e fim para a busca.",
+                variant: "destructive"
+            });
             return;
         }
 
@@ -167,11 +172,11 @@ export default function RelatoriosPage() {
      React.useEffect(() => {
         if (!isMounted) return;
         // Do not auto-search in personalized mode until a full range is selected
-        if (viewMode === 'personalizado' && (!dateRange?.from || !dateRange?.to)) {
+        if (!dateRange?.from || !dateRange?.to) {
             return;
         }
         handleSearch();
-    }, [isMounted, dateRange, viewMode, handleSearch]);
+    }, [isMounted, dateRange, handleSearch]);
     
     // Initial data load for today
     React.useEffect(() => {
@@ -227,15 +232,13 @@ export default function RelatoriosPage() {
             newFrom = startOfMonth(today);
             newTo = endOfMonth(today);
         } else { // personalizado
-             setDateRange(undefined);
+             setDateRange({ from: startOfMonth(today), to: endOfMonth(today) }); // Set a default range for custom
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
-             setCalendarMonth(startOfMonth(today));
              return; // Stop here for custom mode
         }
         setDateRange({ from: newFrom, to: newTo });
-        setCalendarMonth(startOfMonth(newFrom));
     }
 
 
@@ -260,7 +263,7 @@ export default function RelatoriosPage() {
 
     const hasActiveDateFilter = React.useMemo(() => {
         if (!dateRange?.from) return false;
-        if (viewMode === 'personalizado') return !!dateRange.to;
+        if (viewMode === 'personalizado') return true;
         
         const today = startOfDay(new Date());
         // Compare only the date part, ignoring time
@@ -339,23 +342,6 @@ export default function RelatoriosPage() {
             });
         }
     };
-    
-    const handleManualDateSearch = (range: DateRange | undefined) => {
-        setViewMode('personalizado');
-        setDateRange(range);
-        if (range?.from) {
-            setCalendarMonth(startOfMonth(range.from));
-        }
-    };
-    
-    
-    const selectedDays = React.useMemo(() => {
-        if (dateRange?.from && dateRange.to) {
-            const days = differenceInDays(endOfDay(dateRange.to), startOfDay(dateRange.from));
-            return days >= 0 ? days + 1 : 0;
-        }
-        return 0;
-    }, [dateRange]);
 
     if (!isMounted) {
         return (
@@ -383,7 +369,7 @@ export default function RelatoriosPage() {
                     onDepartamentoChange={setSelectedDepartamentoId}
                     selectedClassificacao={selectedClassificacao}
                     onClassificacaoChange={setSelectedClassificacao}
-                    onSearch={() => applyClientSideFilters(allReportData)}
+                    onSearch={handleSearch}
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
                     hasActiveFilters={hasActiveFilters}
@@ -398,64 +384,86 @@ export default function RelatoriosPage() {
                                 Use os filtros para gerar consultas precisas e seguras sobre os atendimentos.
                             </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => handleViewModeChange('diario')} disabled={isLoading}>Diário</Button>
-                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => handleViewModeChange('semanal')} disabled={isLoading}>Semanal</Button>
-                            <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => handleViewModeChange('mensal')} disabled={isLoading}>Mensal</Button>
-                            <Button size="sm" variant={viewMode === 'personalizado' ? 'default' : 'outline'} onClick={() => handleViewModeChange('personalizado')} disabled={isLoading}>Personalizado</Button>
-                        
-                                <Popover>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    id="date"
-                                    variant={"outline"}
-                                    size="sm"
-                                    className={cn(
-                                    "w-[240px] justify-start text-left font-normal",
-                                    !dateRange?.from && "text-muted-foreground",
-                                    viewMode !== 'personalizado' && 'border-dashed'
-                                    )}
-                                    disabled={isLoading}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange?.from ? (
-                                        dateRange.to ? (
-                                            `${format(dateRange.from, "dd/MM/yy", { locale: ptBR })} - ${format(dateRange.to, "dd/MM/yy", { locale: ptBR })}`
-                                        ) : (
-                                            format(dateRange.from, "dd/MM/yy")
-                                        )
-                                    ) : (<span>Escolha um período</span>)
-                                    }
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="end">
-                                    <Calendar
-                                        initialFocus
-                                        mode="range"
-                                        pagedNavigation
-                                        month={calendarMonth}
-                                        onMonthChange={setCalendarMonth}
-                                        selected={dateRange}
-                                        onSelect={handleManualDateSearch}
-                                        numberOfMonths={2}
-                                        locale={ptBR}
-                                        captionLayout="dropdown-buttons"
-                                        fromYear={new Date().getFullYear() - 10}
-                                        toYear={new Date().getFullYear() + 10}
-                                    />
-                                     {selectedDays > 0 && (
-                                        <div className="p-2 border-t text-center text-xs text-muted-foreground">
-                                            {selectedDays} {selectedDays === 1 ? 'dia selecionado' : 'dias selecionados'}
-                                        </div>
-                                    )}
-                                </PopoverContent>
-                            </Popover>
-                                <Button variant="outline" onClick={handlePrint} disabled={isLoading} size="sm">
+                         <div className="flex items-center gap-2">
+                            <Button variant="outline" onClick={handlePrint} disabled={isLoading || !hasSearched} size="sm">
                                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
                                 Imprimir Relatório
                             </Button>
                         </div>
                     </div>
+                     <Card className="mt-4">
+                        <CardContent className="p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                     <div className="space-y-2">
+                                        <Label className="text-xs">Visualização Rápida</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('diario')} disabled={isLoading}>Diário</Button>
+                                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('semanal')} disabled={isLoading}>Semanal</Button>
+                                            <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('mensal')} disabled={isLoading}>Mensal</Button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="date-from" className="text-xs">Data de Início</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    id="date-from"
+                                                    variant={"outline"}
+                                                    size="sm"
+                                                    className={cn("w-full justify-start text-left font-normal", !dateRange?.from && "text-muted-foreground")}
+                                                    onClick={() => setViewMode('personalizado')}
+                                                    disabled={isLoading}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateRange?.from ? format(dateRange.from, "dd/MM/yyyy") : <span>Selecione</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateRange?.from}
+                                                    onSelect={(day) => setDateRange(prev => ({ ...prev, from: day }))}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="date-to" className="text-xs">Data de Fim</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    id="date-to"
+                                                    variant={"outline"}
+                                                    size="sm"
+                                                    className={cn("w-full justify-start text-left font-normal", !dateRange?.to && "text-muted-foreground")}
+                                                    onClick={() => setViewMode('personalizado')}
+                                                    disabled={isLoading || !dateRange?.from}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateRange?.to ? format(dateRange.to, "dd/MM/yyyy") : <span>Selecione</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateRange?.to}
+                                                    onSelect={(day) => setDateRange(prev => ({ ...prev, to: day }))}
+                                                    disabled={{ before: dateRange?.from! }}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
+                                <Button onClick={handleSearch} className="w-full" disabled={isLoading}>
+                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                                    Buscar
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {hasSearched && filteredReportData.length > 0 && (
@@ -509,5 +517,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
