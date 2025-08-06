@@ -88,6 +88,14 @@ export default function PainelPage() {
     );
   }
 
+  const formattedDate = time 
+    ? (() => {
+        const dateString = time.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        const parts = dateString.split(' de ');
+        return `${parts[0]} de ${parts[1].toUpperCase()} de ${parts[2]}`;
+      })()
+    : "";
+
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none">
         
@@ -128,7 +136,7 @@ export default function PainelPage() {
             </div>
             {time ? (
                 <div className="text-right">
-                    <p className="font-bold">{time.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                    <p className="font-bold">{formattedDate} | {time.toLocaleTimeString('pt-BR')}</p>
                 </div>
             ) : (
                 <div className="h-6 w-48 bg-gray-700/80 rounded-md animate-pulse"></div>
@@ -137,5 +145,3 @@ export default function PainelPage() {
     </div>
   );
 }
-
-    
