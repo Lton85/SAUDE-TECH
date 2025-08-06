@@ -107,7 +107,7 @@ export default function RelatoriosPage() {
 
     const today = new Date();
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(dateRange?.from || today);
+    const [calendarMonth, setCalendarMonth] = React.useState<Date>(today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -327,7 +327,6 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        // "Lock" the month view to the start of the range when the 'from' date is selected
         if (range?.from && !range.to) {
            setCalendarMonth(range.from);
         }
@@ -335,7 +334,6 @@ export default function RelatoriosPage() {
 
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
-            // Add 1 to include both start and end dates in the count
             return differenceInDays(dateRange.to, dateRange.from) + 1;
         }
         return 0;
