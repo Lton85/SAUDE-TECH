@@ -107,7 +107,7 @@ export default function RelatoriosPage() {
 
     const today = new Date();
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [month, setMonth] = React.useState<Date>(dateRange?.from || today);
+    const [calendarMonth, setCalendarMonth] = React.useState<Date>(dateRange?.from || today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -217,7 +217,7 @@ export default function RelatoriosPage() {
         const today = new Date();
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setMonth(today);
+             setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -234,7 +234,7 @@ export default function RelatoriosPage() {
                 newFrom = startOfMonth(today);
                 newTo = endOfMonth(today);
             }
-            if(newFrom) setMonth(newFrom);
+            if(newFrom) setCalendarMonth(newFrom);
             setDateRange({ from: newFrom, to: newTo });
         }
     }
@@ -326,12 +326,10 @@ export default function RelatoriosPage() {
     
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
-        // If user selects a "from" date, but no "to" date yet,
-        // set the month to the "from" date so the view locks on it.
-        if (range?.from && !range.to) {
-           setMonth(range.from);
-        }
         setDateRange(range);
+        if (range?.from && !range.to) {
+           setCalendarMonth(range.from);
+        }
     };
 
     const selectedDays = React.useMemo(() => {
@@ -416,8 +414,8 @@ export default function RelatoriosPage() {
                                     <Calendar
                                         initialFocus
                                         mode="range"
-                                        month={month}
-                                        onMonthChange={setMonth}
+                                        month={calendarMonth}
+                                        onMonthChange={setCalendarMonth}
                                         selected={dateRange}
                                         onSelect={handleManualDateSearch}
                                         numberOfMonths={2}
