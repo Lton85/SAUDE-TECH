@@ -1,35 +1,43 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral para desenvolvimento, permite acesso a qualquer documento.
-    // Para produção, você deve restringir o acesso a usuários autenticados e por coleção.
+    // Allow public read and write access to all collections for development
     match /{document=**} {
       allow read, write: if true;
     }
 
-    // Regras específicas por coleção
+    // Explicit rules for each collection
     match /pacientes/{pacienteId} {
       allow read, write: if true;
     }
+
     match /medicos/{medicoId} {
       allow read, write: if true;
     }
+
     match /enfermeiros/{enfermeiroId} {
       allow read, write: if true;
     }
+
     match /departamentos/{departamentoId} {
       allow read, write: if true;
     }
+
     match /filaDeEspera/{filaId} {
       allow read, write: if true;
     }
+
+    match /relatorios_atendimentos/{relatorioId} {
+      allow read, write: if true;
+    }
+
     match /chamadas/{chamadaId} {
       allow read, write: if true;
     }
+
     match /counters/{counterId} {
-      allow read, write: if true;
-    }
-    match /relatorios_atendimentos/{relatorioId} {
       allow read, write: if true;
     }
   }
