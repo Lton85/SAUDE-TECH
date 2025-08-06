@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Building, Save, Loader2, Pencil, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
+import type { Empresa } from "@/types/empresa";
+import { useToast } from "@/hooks/use-toast";
 
 const ufs = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -20,23 +23,63 @@ interface IbgeCityResponse {
     nome: string;
 }
 
+const initialEmpresaState: Empresa = {
+    id: "config",
+    razaoSocial: "",
+    nomeFantasia: "",
+    cnpj: "",
+    cep: "",
+    endereco: "",
+    numero: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    telefone: "",
+    email: "",
+};
+
 export default function EmpresaPage() {
-    const [selectedUf, setSelectedUf] = useState<string>("");
-    const [selectedCity, setSelectedCity] = useState<string>("");
+    const [empresaData, setEmpresaData] = useState<Empresa>(initialEmpresaState);
+    const [formData, setFormData] = useState<Empresa>(initialEmpresaState);
     const [cities, setCities] = useState<string[]>([]);
     const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
+        const fetchEmpresaData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getEmpresa();
+                if (data) {
+                    setEmpresaData(data);
+                    setFormData(data);
+                }
+            } catch (error) {
+                toast({
+                    title: "Erro ao carregar dados",
+                    description: "Não foi possível buscar as informações da empresa.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchEmpresaData();
+    }, [toast]);
+    
+    useEffect(() => {
         const fetchCities = async () => {
-            if (!selectedUf) {
+            if (!formData.uf) {
                 setCities([]);
-                setSelectedCity("");
+                setFormData(prev => ({...prev, cidade: ""}));
                 return;
             }
             setIsCitiesLoading(true);
             try {
-                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`);
+                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.uf}/municipios`);
                 const data: IbgeCityResponse[] = await response.json();
                 setCities(data.map(city => city.nome).sort());
             } catch (error) {
@@ -46,15 +89,53 @@ export default function EmpresaPage() {
                 setIsCitiesLoading(false);
             }
         };
-        fetchCities();
-    }, [selectedUf]);
+        
+        if (formData.uf) {
+             fetchCities();
+        }
+    }, [formData.uf]);
     
-    const handleEditToggle = () => setIsEditing(!isEditing);
-    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({...prev, [id]: value }));
+    }
+
+    const handleSelectChange = (id: keyof Empresa, value: string) => {
+        setFormData(prev => ({...prev, [id]: value }));
+    }
+
+    const handleEditToggle = () => setIsEditing(true);
+
     const handleCancel = () => {
-        // Here you would typically reset the form to its original state
+        setFormData(empresaData);
         setIsEditing(false);
     };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await saveOrUpdateEmpresa(formData);
+            setEmpresaData(formData);
+            setIsEditing(false);
+            toast({
+                title: "Dados Salvos!",
+                description: "As informações da empresa foram atualizadas com sucesso.",
+                className: "bg-green-500 text-white"
+            })
+        } catch (error) {
+            toast({
+                title: "Erro ao salvar",
+                description: "Não foi possível salvar os dados da empresa.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>
+    }
 
     return (
         <Card className="w-full">
@@ -72,41 +153,41 @@ export default function EmpresaPage() {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                         <div className="space-y-2 col-span-12 md:col-span-6">
                             <Label htmlFor="razaoSocial">Razão Social</Label>
-                            <Input id="razaoSocial" placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
+                            <Input id="razaoSocial" value={formData.razaoSocial} onChange={handleInputChange} placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-4">
                             <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-                            <Input id="nomeFantasia" placeholder="Ex: UBS Central" disabled={!isEditing}/>
+                            <Input id="nomeFantasia" value={formData.nomeFantasia} onChange={handleInputChange} placeholder="Ex: UBS Central" disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cnpj">CNPJ</Label>
-                            <Input id="cnpj" placeholder="00.000.000/0001-00" disabled={!isEditing}/>
+                            <Input id="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" disabled={!isEditing}/>
                         </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cep">CEP</Label>
-                            <Input id="cep" placeholder="00000-000" disabled={!isEditing}/>
+                            <Input id="cep" value={formData.cep} onChange={handleInputChange} placeholder="00000-000" disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-8">
                             <Label htmlFor="endereco">Endereço (Rua)</Label>
-                            <Input id="endereco" placeholder="Ex: Av. Principal" disabled={!isEditing}/>
+                            <Input id="endereco" value={formData.endereco} onChange={handleInputChange} placeholder="Ex: Av. Principal" disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="numero">Número</Label>
-                            <Input id="numero" placeholder="Ex: 123" disabled={!isEditing}/>
+                            <Input id="numero" value={formData.numero} onChange={handleInputChange} placeholder="Ex: 123" disabled={!isEditing}/>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                         <div className="space-y-2 col-span-12 md:col-span-8">
                             <Label htmlFor="bairro">Bairro</Label>
-                            <Input id="bairro" placeholder="Ex: Centro" disabled={!isEditing}/>
+                            <Input id="bairro" value={formData.bairro} onChange={handleInputChange} placeholder="Ex: Centro" disabled={!isEditing}/>
                         </div>
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="uf">Estado (UF)</Label>
-                            <Select value={selectedUf} onValueChange={setSelectedUf} disabled={!isEditing}>
+                            <Select value={formData.uf} onValueChange={(v) => handleSelectChange('uf', v)} disabled={!isEditing}>
                                 <SelectTrigger id="uf">
                                     <SelectValue placeholder="UF" />
                                 </SelectTrigger>
@@ -121,7 +202,7 @@ export default function EmpresaPage() {
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cidade">Cidade</Label>
-                             <Select value={selectedCity} onValueChange={setSelectedCity} disabled={!isEditing || isCitiesLoading || cities.length === 0}>
+                             <Select value={formData.cidade} onValueChange={(v) => handleSelectChange('cidade', v)} disabled={!isEditing || isCitiesLoading || cities.length === 0}>
                                 <SelectTrigger id="cidade">
                                     <SelectValue placeholder={isCitiesLoading ? "Carregando..." : "Cidade"} />
                                 </SelectTrigger>
@@ -145,28 +226,28 @@ export default function EmpresaPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="telefone">Telefone</Label>
-                            <Input id="telefone" type="tel" placeholder="(00) 0000-0000" disabled={!isEditing}/>
+                            <Input id="telefone" value={formData.telefone} onChange={handleInputChange} type="tel" placeholder="(00) 0000-0000" disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">E-mail</Label>
-                            <Input id="email" type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
+                            <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
                         </div>
                     </div>
                     
                     <div className="flex justify-end pt-4 gap-2">
                         {!isEditing ? (
-                            <Button onClick={handleEditToggle}>
+                            <Button onClick={handleEditToggle} disabled={isSaving}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Editar Cadastro
                             </Button>
                         ) : (
                             <>
-                                <Button variant="outline" onClick={handleCancel}>
+                                <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
                                     <X className="mr-2 h-4 w-4" />
                                     Cancelar
                                 </Button>
-                                <Button>
-                                    <Save className="mr-2 h-4 w-4" />
+                                <Button onClick={handleSave} disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                     Salvar Alterações
                                 </Button>
                             </>

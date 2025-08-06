@@ -24,6 +24,7 @@ const EnfermeiroFormSchema = z.object({
   telefone: z.string().optional(),
   turno: z.enum(['Manhã', 'Tarde', 'Noite', '']).optional(),
   situacao: z.boolean().default(true),
+  cnpj: z.string().optional(), // Added to match other forms, though not used here
 });
 
 export type EnfermeiroFormValues = z.infer<typeof EnfermeiroFormSchema>;
