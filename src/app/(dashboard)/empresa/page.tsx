@@ -37,22 +37,22 @@ export default function EmpresaPage() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                         <div className="space-y-2 col-span-12 sm:col-span-3">
+                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cep">CEP</Label>
                             <Input id="cep" placeholder="00000-000" />
                         </div>
-                        <div className="space-y-2 col-span-12 sm:col-span-9">
+                        <div className="space-y-2 col-span-12 md:col-span-8">
                             <Label htmlFor="endereco">Endereço (Rua)</Label>
                             <Input id="endereco" placeholder="Ex: Av. Principal" />
+                        </div>
+                        <div className="space-y-2 col-span-12 md:col-span-2">
+                            <Label htmlFor="numero">Número</Label>
+                            <Input id="numero" placeholder="Ex: 123" />
                         </div>
                     </div>
 
                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12 sm:col-span-3">
-                            <Label htmlFor="numero">Número</Label>
-                            <Input id="numero" placeholder="Ex: 123" />
-                        </div>
-                        <div className="space-y-2 col-span-12 sm:col-span-9">
+                        <div className="space-y-2 col-span-12">
                             <Label htmlFor="bairro">Bairro</Label>
                             <Input id="bairro" placeholder="Ex: Centro" />
                         </div>
