@@ -19,13 +19,22 @@ interface PrintData {
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
+        // Handle Firestore Timestamp objects
         if (typeof timestamp.toDate === 'function') {
             return timestamp.toDate();
         }
+        // Handle ISO strings
+        if (typeof timestamp === 'string') {
+            const date = new Date(timestamp);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+        // Handle native Date objects
         if (timestamp instanceof Date) {
             return timestamp;
         }
-        return new Date(timestamp);
+        return null;
     };
 
     const chegadaDate = toDate(atendimento.chegadaEm);
@@ -137,19 +146,7 @@ export default function PrintPage() {
         const storedData = localStorage.getItem('print-data');
         if (storedData) {
             try {
-                const parsedData = JSON.parse(storedData, (key, value) => {
-                    if (key.endsWith('Em') && value && value.seconds) {
-                        return new Date(value.seconds * 1000 + value.nanoseconds / 1000000);
-                    }
-                    if (key.endsWith('Em') && typeof value === 'string') {
-                        const date = new Date(value);
-                        if (!isNaN(date.getTime())) {
-                            return date;
-                        }
-                    }
-                    return value;
-                });
-                
+                const parsedData = JSON.parse(storedData);
                 setData(parsedData);
 
                 setTimeout(() => {
