@@ -30,20 +30,36 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
+import { clearPainel } from "@/services/chamadasService";
+import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
-  { href: "/cadastros", label: "Cadastros", icon: Users },
-  { href: "/triagem", label: "Departamentos", icon: ClipboardList },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
-  { href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
+  { id: "inicio", href: "/", label: "Início", icon: Home },
+  { id: "atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
+  { id: "cadastros", href: "/cadastros", label: "Cadastros", icon: Users },
+  { id: "departamentos", href: "/triagem", label: "Departamentos", icon: ClipboardList },
+  { id: "relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3 },
+  { id: "configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings },
+  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
 ];
 
 const AppSidebar = () => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
+    const { toast } = useToast();
+
+    const handleOpenPainel = async () => {
+        try {
+            await clearPainel();
+            window.open("/painel", "_blank");
+        } catch (error) {
+            toast({
+                title: "Erro ao abrir o painel",
+                description: "Não foi possível limpar o painel antes de abrir.",
+                variant: "destructive",
+            });
+        }
+    };
 
     const filteredMenuItems = React.useMemo(() => {
         if (!searchTerm) {
@@ -84,17 +100,27 @@ const AppSidebar = () => {
             </div>
             <SidebarMenu>
               {filteredMenuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={usePathname() === "/" ? usePathname() === item.href : usePathname().startsWith(item.href)}
-                    tooltip={{children: item.label, side: "right"}}
-                  >
-                    <Link href={item.href} {...(item.target && { target: item.target })}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                <SidebarMenuItem key={item.id}>
+                    {item.id === 'painel' ? (
+                        <SidebarMenuButton
+                            onClick={handleOpenPainel}
+                            tooltip={{children: item.label, side: "right"}}
+                        >
+                            <item.icon />
+                            <span>{item.label}</span>
+                        </SidebarMenuButton>
+                    ) : (
+                        <SidebarMenuButton
+                            asChild
+                            isActive={usePathname() === "/" ? usePathname() === item.href : usePathname().startsWith(item.href)}
+                            tooltip={{children: item.label, side: "right"}}
+                        >
+                            <Link href={item.href} {...(item.target && { target: item.target })}>
+                                <item.icon />
+                                <span>{item.label}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

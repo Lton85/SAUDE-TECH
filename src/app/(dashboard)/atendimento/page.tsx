@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, History, Users, FileText, CheckCircle, Hourglass, Undo2, FilePlus, Eraser } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
@@ -29,7 +29,6 @@ import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-di
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { cn } from "@/lib/utils";
 import { clearPainel, getUltimaChamada } from "@/services/chamadasService";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
@@ -168,22 +167,6 @@ export default function AtendimentoPage() {
         setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
     };
     
-    const handleClearPainel = async () => {
-        try {
-            await clearPainel();
-            toast({
-                title: "Painel Zerado!",
-                description: "As informações do painel foram redefinidas.",
-            });
-        } catch (error) {
-            toast({
-                title: "Erro ao zerar o painel",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        }
-    };
-
     const handleChamarPaciente = async (item: FilaDeEsperaItem) => {
         try {
             await chamarPaciente(item);
@@ -290,280 +273,264 @@ export default function AtendimentoPage() {
     };
     
     return (
-        <TooltipProvider>
-        <div className="space-y-6">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>Fila de Atendimento</CardTitle>
-                        <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Adicionar Paciente à Fila
-                        </Button>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                 <Button onClick={handleClearPainel} variant="destructive" size="icon" className="h-9 w-9">
-                                    <Eraser className="h-4 w-4" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Zerar Painel</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
-                                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                [...Array(3)].map((_, i) => (
-                                    <TableRow key={i}>
-                                        {[...Array(6)].map((_, j) => (
-                                            <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : fila.length > 0 ? (
-                                fila.map((item) => (
-                                    <TableRow key={item.id} className="hover:bg-muted/50">
-                                        <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
-                                        <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">
-                                             <Badge
-                                                className={cn(
-                                                    'text-xs',
-                                                    item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                                    item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                                                    item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                                                )}
-                                            >
-                                                {item.classificacao}
-                                            </Badge>
+        <>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Fila de Atendimento</CardTitle>
+                            <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Adicionar Paciente à Fila
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    [...Array(3)].map((_, i) => (
+                                        <TableRow key={i}>
+                                            {[...Array(6)].map((_, j) => (
+                                                <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : fila.length > 0 ? (
+                                    fila.map((item) => (
+                                        <TableRow key={item.id} className="hover:bg-muted/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <TempoDeEspera chegadaEm={item.chegadaEm}/>
+                                                    <Button size="sm" onClick={() => handleChamarPaciente(item)} className="h-7 px-2 text-xs">
+                                                        <Megaphone className="mr-2 h-3 w-3" />
+                                                        Chamar
+                                                    </Button>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-7 w-7 p-0">
+                                                                <span className="sr-only">Abrir menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
+                                                            <DropdownMenuItem onClick={() => handleEdit(item)}>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                <span>Editar</span>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleHistory(item)}>
+                                                                <FileText className="mr-2 h-4 w-4" />
+                                                                <span>Prontuário</span>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                <span>Excluir da Fila</span>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-64 text-center">
+                                            Nenhum paciente aguardando atendimento.
                                         </TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
-                                        <TableCell className="text-right px-2 py-1 text-xs">
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className="py-3 px-6 border-t">
+                        <div className="text-xs text-muted-foreground">
+                            Exibindo <strong>{fila.length}</strong> {fila.length === 1 ? 'registro' : 'registros'}
+                        </div>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Hourglass className="h-5 w-5 text-primary" />
+                            Atendimentos em Andamento
+                        </CardTitle>
+                        <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                    </TableRow>
+                                ) : emAtendimento.length > 0 ? (
+                                    emAtendimento.map((item) => (
+                                        <TableRow key={item.id} className="hover:bg-muted/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <div className="flex items-center gap-2 text-muted-foreground">
+                                                    <Clock className="h-3 w-3" />
+                                                    {item.chamadaEm ? new Date(item.chamadaEm.seconds * 1000).toLocaleTimeString('pt-BR') : 'N/A'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
                                             <div className="flex items-center justify-end gap-2">
-                                                <TempoDeEspera chegadaEm={item.chegadaEm}/>
-                                                <Button size="sm" onClick={() => handleChamarPaciente(item)} className="h-7 px-2 text-xs">
-                                                    <Megaphone className="mr-2 h-3 w-3" />
-                                                    Chamar
-                                                </Button>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-7 w-7 p-0">
-                                                            <span className="sr-only">Abrir menu</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => handleEdit(item)}>
-                                                            <Pencil className="mr-2 h-4 w-4" />
-                                                            <span>Editar</span>
-                                                        </DropdownMenuItem>
-                                                         <DropdownMenuItem onClick={() => handleHistory(item)}>
-                                                            <FileText className="mr-2 h-4 w-4" />
-                                                            <span>Prontuário</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Excluir da Fila</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
+                                                    <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
+                                                        <Undo2 className="mr-2 h-3 w-3" />
+                                                        Retornar à Fila
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
+                                                        <CheckCircle className="mr-2 h-3 w-3" />
+                                                        Finalizar Atendimento
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-24 text-center">
+                                            Nenhum paciente em atendimento no momento.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-64 text-center">
-                                        <div className="flex flex-col items-center justify-center gap-4">
-                                            <Users className="h-16 w-16 text-muted-foreground/30" />
-                                            <div className="space-y-1">
-                                                <h3 className="text-lg font-semibold text-muted-foreground">Fila Vazia</h3>
-                                                <p className="text-sm text-muted-foreground">Nenhum paciente aguardando atendimento no momento.</p>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                 <CardFooter className="py-3 px-6 border-t">
-                    <div className="text-xs text-muted-foreground">
-                        Exibindo <strong>{fila.length}</strong> {fila.length === 1 ? 'registro' : 'registros'}
-                    </div>
-                </CardFooter>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Hourglass className="h-5 w-5 text-primary" />
-                        Atendimentos em Andamento
-                    </CardTitle>
-                    <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
-                                <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
-                                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
-                                </TableRow>
-                            ) : emAtendimento.length > 0 ? (
-                                emAtendimento.map((item) => (
-                                    <TableRow key={item.id} className="hover:bg-muted/50">
-                                        <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">
-                                            <Badge
-                                                className={cn(
-                                                    'text-xs',
-                                                    item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                                    item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                                                    item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                                                )}
-                                            >
-                                                {item.classificacao}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
-                                        <TableCell className="px-2 py-1 text-xs">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <Clock className="h-3 w-3" />
-                                                {item.chamadaEm ? format(item.chamadaEm.toDate(), 'HH:mm:ss') : 'N/A'}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right px-2 py-1 text-xs">
-                                           <div className="flex items-center justify-end gap-2">
-                                                <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
-                                                    <Undo2 className="mr-2 h-3 w-3" />
-                                                    Retornar à Fila
-                                                </Button>
-                                                <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
-                                                    <CheckCircle className="mr-2 h-3 w-3" />
-                                                    Finalizar Atendimento
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
-                                        Nenhum paciente em atendimento no momento.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                 <CardFooter className="py-3 px-6 border-t">
-                    <div className="text-xs text-muted-foreground">
-                        Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
-                    </div>
-                </CardFooter>
-            </Card>
-        </div>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className="py-3 px-6 border-t">
+                        <div className="text-xs text-muted-foreground">
+                            Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
+                        </div>
+                    </CardFooter>
+                </Card>
+            </div>
 
 
-        <AddToQueueDialog
-            isOpen={isAddToQueueDialogOpen}
-            onOpenChange={setIsAddToQueueDialogOpen}
-            pacientes={pacientes}
-            departamentos={departamentos}
-            onAddNewPatient={handleOpenNewPatientDialog}
-            patientToAdd={patientToAdd}
-            onSuccess={() => {}}
-        />
-
-        <PatientDialog
-            isOpen={isPatientDialogOpen}
-            onOpenChange={setIsPatientDialogOpen}
-            onSuccess={handlePatientDialogSuccess}
-            paciente={null}
-        />
-
-        {itemToEdit && (
-            <EditQueueItemDialog
-                isOpen={!!itemToEdit}
-                onOpenChange={() => setItemToEdit(null)}
-                item={itemToEdit}
+            <AddToQueueDialog
+                isOpen={isAddToQueueDialogOpen}
+                onOpenChange={setIsAddToQueueDialogOpen}
+                pacientes={pacientes}
                 departamentos={departamentos}
-                profissionais={profissionais}
-                onSave={updateFilaItem}
-                isHistory={false}
+                onAddNewPatient={handleOpenNewPatientDialog}
+                patientToAdd={patientToAdd}
+                onSuccess={() => {}}
             />
-        )}
 
-        {itemToEditFromHistory && (
-             <EditQueueItemDialog
-                isOpen={!!itemToEditFromHistory}
-                onOpenChange={() => setItemToEditFromHistory(null)}
-                item={itemToEditFromHistory}
-                departamentos={departamentos}
-                profissionais={profissionais}
-                onSave={updateHistoricoItem}
-                isHistory={true}
+            <PatientDialog
+                isOpen={isPatientDialogOpen}
+                onOpenChange={setIsPatientDialogOpen}
+                onSuccess={handlePatientDialogSuccess}
+                paciente={null}
             />
-        )}
-        
-        {itemToReturn && (
-            <ReturnToQueueDialog
-                isOpen={!!itemToReturn}
-                onOpenChange={() => setItemToReturn(null)}
-                item={itemToReturn}
-                departamentos={departamentos}
-                profissionais={profissionais}
-                onConfirm={handleReturnToQueueConfirm}
-            />
-        )}
-        
-        {itemToHistory && (
-             <ProntuarioDialog
-                isOpen={!!itemToHistory}
-                onOpenChange={() => setItemToHistory(null)}
-                item={itemToHistory}
-                onEdit={handleEditFromHistory}
-            />
-        )}
 
-        {itemToDelete && (
-            <DeleteQueueItemDialog
-                isOpen={!!itemToDelete}
-                onOpenChange={() => setItemToDelete(null)}
-                onConfirm={handleDeleteConfirm}
-                itemName={itemToDelete.pacienteNome}
-            />
-        )}
-        </TooltipProvider>
+            {itemToEdit && (
+                <EditQueueItemDialog
+                    isOpen={!!itemToEdit}
+                    onOpenChange={() => setItemToEdit(null)}
+                    item={itemToEdit}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onSave={updateFilaItem}
+                    isHistory={false}
+                />
+            )}
+
+            {itemToEditFromHistory && (
+                <EditQueueItemDialog
+                    isOpen={!!itemToEditFromHistory}
+                    onOpenChange={() => setItemToEditFromHistory(null)}
+                    item={itemToEditFromHistory}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onSave={updateHistoricoItem}
+                    isHistory={true}
+                />
+            )}
+            
+            {itemToReturn && (
+                <ReturnToQueueDialog
+                    isOpen={!!itemToReturn}
+                    onOpenChange={() => setItemToReturn(null)}
+                    item={itemToReturn}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onConfirm={handleReturnToQueueConfirm}
+                />
+            )}
+            
+            {itemToHistory && (
+                <ProntuarioDialog
+                    isOpen={!!itemToHistory}
+                    onOpenChange={() => setItemToHistory(null)}
+                    item={itemToHistory}
+                    onEdit={handleEditFromHistory}
+                />
+            )}
+
+            {itemToDelete && (
+                <DeleteQueueItemDialog
+                    isOpen={!!itemToDelete}
+                    onOpenChange={() => setItemToDelete(null)}
+                    onConfirm={handleDeleteConfirm}
+                    itemName={itemToDelete.pacienteNome}
+                />
+            )}
+        </>
     );
 }
