@@ -39,7 +39,6 @@ const initialEmpresaState: Empresa = {
 };
 
 export default function EmpresaPage() {
-    const [empresaData, setEmpresaData] = useState<Empresa>(initialEmpresaState);
     const [formData, setFormData] = useState<Empresa>(initialEmpresaState);
     const [cities, setCities] = useState<string[]>([]);
     const [isCitiesLoading, setIsCitiesLoading] = useState(false);
@@ -48,25 +47,27 @@ export default function EmpresaPage() {
     const [isEditing, setIsEditing] = useState(false);
     const { toast } = useToast();
 
-    useEffect(() => {
-        const fetchEmpresaData = async () => {
-            setIsLoading(true);
-            try {
-                const data = await getEmpresa();
-                if (data) {
-                    setEmpresaData(data);
-                    setFormData(data);
-                }
-            } catch (error) {
-                toast({
-                    title: "Erro ao carregar dados",
-                    description: "Não foi possível buscar as informações da empresa.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
+    const fetchEmpresaData = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getEmpresa();
+            if (data) {
+                setFormData(data);
+            } else {
+                setFormData(initialEmpresaState); // Reset if no data found
             }
-        };
+        } catch (error) {
+            toast({
+                title: "Erro ao carregar dados",
+                description: "Não foi possível buscar as informações da empresa.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    useEffect(() => {
         fetchEmpresaData();
     }, [toast]);
     
@@ -107,15 +108,14 @@ export default function EmpresaPage() {
     const handleEditToggle = () => setIsEditing(true);
 
     const handleCancel = () => {
-        setFormData(empresaData);
         setIsEditing(false);
+        fetchEmpresaData(); // Refetch original data on cancel
     };
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
             await saveOrUpdateEmpresa(formData);
-            setEmpresaData(formData);
             setIsEditing(false);
             toast({
                 title: "Dados Salvos!",
