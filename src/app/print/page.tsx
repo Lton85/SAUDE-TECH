@@ -65,7 +65,6 @@ function PrintPageContent() {
                             dateTo: toDate,
                             pacienteId: searchParams.get('pacienteId') || undefined,
                             medicoId: searchParams.get('medicoId') || undefined,
-                            enfermeiroId: searchParams.get('enfermeiroId') || undefined,
                             departamentoId: searchParams.get('departamentoId') || undefined,
                             classificacao: searchParams.get('classificacao') || undefined,
                         };
@@ -180,4 +179,3 @@ export default function PrintPage() {
         </Suspense>
     );
 }
-

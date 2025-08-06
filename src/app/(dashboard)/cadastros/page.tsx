@@ -3,13 +3,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacientesList } from "@/components/cadastros/pacientes-list";
 import { MedicosList } from "@/components/cadastros/medicos-list";
-import { EnfermeirosList } from "@/components/cadastros/enfermeiros-list";
-import { User, Stethoscope, UserPlus } from "lucide-react";
+import { User, Stethoscope } from "lucide-react";
 
 export default function CadastrosPage() {
   return (
     <Tabs defaultValue="pacientes" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="pacientes">
           <User className="mr-2 h-4 w-4" />
           Pacientes
@@ -18,19 +17,12 @@ export default function CadastrosPage() {
           <Stethoscope className="mr-2 h-4 w-4" />
           Médicos
         </TabsTrigger>
-        <TabsTrigger value="enfermeiros">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Enfermeiros
-        </TabsTrigger>
       </TabsList>
       <TabsContent value="pacientes" className="mt-4">
         <PacientesList />
       </TabsContent>
       <TabsContent value="medicos" className="mt-4">
         <MedicosList />
-      </TabsContent>
-      <TabsContent value="enfermeiros" className="mt-4">
-        <EnfermeirosList />
       </TabsContent>
     </Tabs>
   );

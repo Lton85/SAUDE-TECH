@@ -12,7 +12,6 @@ import type { Departamento } from "@/types/departamento"
 import { useToast } from "@/hooks/use-toast"
 import { addPacienteToFila } from "@/services/filaDeEsperaService"
 import { getMedicos } from "@/services/medicosService"
-import { getEnfermeiros } from "@/services/enfermeirosService"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { cn } from "@/lib/utils"
@@ -114,10 +113,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     const fetchProfissionais = async () => {
       setIsLoadingProfissionais(true);
       try {
-        const [medicosData, enfermeirosData] = await Promise.all([getMedicos(), getEnfermeiros()]);
+        const medicosData = await getMedicos();
         const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
-        const enfermeirosList = enfermeirosData.map(e => ({ id: e.id, nome: `Enf. ${e.nome}` }));
-        setProfissionais([...medicosList, ...enfermeirosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+        setProfissionais([...medicosList].sort((a,b) => a.nome.localeCompare(b.nome)));
       } catch (error) {
          toast({
           title: "Erro ao carregar profissionais",

@@ -13,9 +13,7 @@ import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuar
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
 import { getPacientes } from "@/services/pacientesService";
 import { getMedicos } from "@/services/medicosService";
-import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ResetMedicoDialog } from "@/components/configuracoes/reset-medico-dialog";
-import { ResetEnfermeiroDialog } from "@/components/configuracoes/reset-enfermeiro-dialog";
 import { Separator } from "@/components/ui/separator";
 
 
@@ -27,31 +25,26 @@ export default function ConfiguracoesPage() {
     const [isProntuarioResetting, setIsProntuarioResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isMedicoResetting, setIsMedicoResetting] = useState(false);
-    const [isEnfermeiroResetting, setIsEnfermeiroResetting] = useState(false);
 
     const [senhaDialogOpen, setSenhaDialogOpen] = useState(false);
     const [prontuarioDialogOpen, setProntuarioDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
     const [medicoDialogOpen, setMedicoDialogOpen] = useState(false);
-    const [enfermeiroDialogOpen, setEnfermeiroDialogOpen] = useState(false);
     
     const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [medicosCount, setMedicosCount] = useState<number | null>(null);
-    const [enfermeirosCount, setEnfermeirosCount] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchCounts = async () => {
             try {
-                const [pacientes, medicos, enfermeiros] = await Promise.all([
+                const [pacientes, medicos] = await Promise.all([
                     getPacientes(),
                     getMedicos(),
-                    getEnfermeiros(),
                 ]);
                 setPacientesCount(pacientes.length);
                 setMedicosCount(medicos.length);
-                setEnfermeirosCount(enfermeiros.length);
             } catch (error) {
                 toast({
                     title: "Erro ao verificar cadastros",
@@ -94,18 +87,6 @@ export default function ConfiguracoesPage() {
             return;
         }
         setMedicoDialogOpen(true);
-    };
-
-    const handleEnfermeiroResetRequest = () => {
-        if (enfermeirosCount !== null && enfermeirosCount > 0) {
-            toast({
-                title: "Ação Bloqueada",
-                description: `Existem ${enfermeirosCount} enfermeiro(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
-                variant: "destructive",
-            });
-            return;
-        }
-        setEnfermeiroDialogOpen(true);
     };
 
     const handleConfirmSenhaReset = async () => {
@@ -222,27 +203,6 @@ export default function ConfiguracoesPage() {
             setIsMedicoResetting(false);
         }
     };
-    
-    const handleConfirmEnfermeiroReset = async () => {
-        setIsEnfermeiroResetting(true);
-        setEnfermeiroDialogOpen(false);
-        try {
-            await resetCounterByName('enfermeiros_v1');
-            toast({
-                title: "Códigos de Enfermeiro Zerados!",
-                description: "A contagem de códigos de cadastro de enfermeiro foi reiniciada para 001.",
-                className: "bg-green-500 text-white",
-            });
-        } catch (error) {
-            toast({
-                title: "Erro ao zerar códigos de enfermeiro",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        } finally {
-            setIsEnfermeiroResetting(false);
-        }
-    };
 
     const ActionRow = ({ label, buttonText, onClick, isResetting, disabled, icon: Icon, title }: {
         label: string;
@@ -324,15 +284,6 @@ export default function ConfiguracoesPage() {
                   icon={RefreshCw}
               />
               <ActionRow
-                  label="Zerar Códigos de Cadastro de Enfermeiros"
-                  buttonText="Zerar (001)"
-                  onClick={handleEnfermeiroResetRequest}
-                  isResetting={isEnfermeiroResetting}
-                  disabled={enfermeirosCount === null}
-                  title={enfermeirosCount !== null && enfermeirosCount > 0 ? `Existem ${enfermeirosCount} enfermeiros cadastrados. Exclua-os primeiro.` : ""}
-                  icon={RefreshCw}
-              />
-              <ActionRow
                   label="Zerar Prontuário de Pacientes"
                   buttonText="Zerar Prontuários"
                   onClick={handleProntuarioResetRequest}
@@ -364,11 +315,6 @@ export default function ConfiguracoesPage() {
               isOpen={medicoDialogOpen}
               onOpenChange={setMedicoDialogOpen}
               onConfirm={handleConfirmMedicoReset}
-          />
-          <ResetEnfermeiroDialog
-              isOpen={enfermeiroDialogOpen}
-              onOpenChange={setEnfermeiroDialogOpen}
-              onConfirm={handleConfirmEnfermeiroReset}
           />
     </div>
   );

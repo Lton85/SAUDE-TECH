@@ -24,7 +24,6 @@ import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
 import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { getMedicos } from "@/services/medicosService";
-import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { cn } from "@/lib/utils";
@@ -96,17 +95,15 @@ export default function AtendimentoPage() {
     useEffect(() => {
         const fetchData = async () => {
              try {
-                const [deptoData, medicosData, enfermeirosData] = await Promise.all([
+                const [deptoData, medicosData] = await Promise.all([
                     getDepartamentos(),
                     getMedicos(),
-                    getEnfermeiros(),
                 ]);
 
                 setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
                 
                 const medicosList = medicosData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
-                const enfermeirosList = enfermeirosData.map(e => ({ id: e.id, nome: `Enf. ${e.nome}` }));
-                setProfissionais([...medicosList, ...enfermeirosList].sort((a,b) => a.nome.localeCompare(b.nome)));
+                setProfissionais([...medicosList].sort((a,b) => a.nome.localeCompare(b.nome)));
 
              } catch (error) {
                   toast({

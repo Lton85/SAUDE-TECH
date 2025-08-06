@@ -9,7 +9,6 @@ import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
 import { getMedicos } from './medicosService';
-import { getEnfermeiros } from './enfermeirosService';
 
 
 interface SearchFilters {
@@ -20,7 +19,6 @@ interface SearchFilters {
 interface FullSearchFilters extends SearchFilters {
     pacienteId?: string;
     medicoId?: string;
-    enfermeiroId?: string;
     departamentoId?: string;
     classificacao?: string;
 }
@@ -271,12 +269,6 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
         const medicos = await getMedicos();
         const medico = medicos.find(m => m.id === filters.medicoId);
         if(medico) data = data.filter(item => item.profissionalNome === `Dr(a). ${medico.nome}`);
-    }
-
-    if (filters.enfermeiroId && filters.enfermeiroId !== 'todos') {
-        const enfermeiros = await getEnfermeiros();
-        const enfermeiro = enfermeiros.find(e => e.id === filters.enfermeiroId);
-        if(enfermeiro) data = data.filter(item => item.profissionalNome === `Enf. ${enfermeiro.nome}`);
     }
 
     if (filters.departamentoId && filters.departamentoId !== 'todos') {
