@@ -40,3 +40,5 @@ export function ResetProfissionalDialog({ isOpen, onOpenChange, onConfirm }: Res
     </AlertDialog>
   )
 }
+
+    

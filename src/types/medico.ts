@@ -19,3 +19,5 @@ export interface Profissional {
         alteradoPor: string;
     }
 }
+
+    

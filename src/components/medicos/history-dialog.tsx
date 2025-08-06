@@ -81,3 +81,5 @@ export function HistoryProfissionalDialog({ isOpen, onOpenChange, profissional }
     </Dialog>
   );
 }
+
+    

@@ -99,3 +99,5 @@ export function ViewProfissionalDialog({ isOpen, onOpenChange, profissional }: V
     </Dialog>
   );
 }
+
+    
