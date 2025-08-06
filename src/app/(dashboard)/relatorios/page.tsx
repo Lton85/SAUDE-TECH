@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
-import { getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
+import { getHistoricoAtendimentosPorPeriodoComFiltros, getAtendimentoById } from "@/services/filaDeEsperaService";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getMedicos } from "@/services/medicosService";
@@ -249,7 +249,7 @@ export default function RelatoriosPage() {
         setDateRange({ from: newFrom, to: newTo });
         setInputValueFrom(format(newFrom, "dd/MM/yyyy"));
         setInputValueTo(format(newTo, "dd/MM/yyyy"));
-    }
+    };
 
 
     const handleClearFilters = () => {
@@ -446,7 +446,7 @@ export default function RelatoriosPage() {
                                         <Label className="text-xs">Visualização Rápida</Label>
                                         <div className="flex items-center gap-1">
                                             <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('diario')} disabled={isLoading}>Diário</Button>
-                                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} className="w-full text-xs" onClick={()={() => handleViewModeChange('semanal')} disabled={isLoading}>Semanal</Button>
+                                            <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('semanal')} disabled={isLoading}>Semanal</Button>
                                             <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} className="w-full text-xs" onClick={() => handleViewModeChange('mensal')} disabled={isLoading}>Mensal</Button>
                                         </div>
                                     </div>
