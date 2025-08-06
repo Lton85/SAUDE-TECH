@@ -35,13 +35,13 @@ import { clearPainel } from "@/services/chamadasService";
 import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
-  { id: "inicio", href: "/", label: "Início", icon: Home },
-  { id: "atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock },
-  { id: "cadastros", href: "/cadastros", label: "Cadastros", icon: Users },
-  { id: "departamentos", href: "/triagem", label: "Departamentos", icon: ClipboardList },
-  { id: "relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { id: "empresa", href: "/empresa", label: "Empresa", icon: Building },
-  { id: "configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings },
+  { id: "inicio", href: "/", label: "Início", icon: Home, target: "_self" as const },
+  { id: "atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, target: "_blank" as const },
+  { id: "cadastros", href: "/cadastros", label: "Cadastros", icon: Users, target: "_blank" as const },
+  { id: "departamentos", href: "/triagem", label: "Departamentos", icon: ClipboardList, target: "_blank" as const },
+  { id: "relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, target: "_blank" as const },
+  { id: "empresa", href: "/empresa", label: "Empresa", icon: Building, target: "_blank" as const },
+  { id: "configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, target: "_blank" as const },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, target: "_blank" as const },
 ];
 
