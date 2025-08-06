@@ -215,28 +215,27 @@ export default function RelatoriosPage() {
     const handleViewModeChange = (mode: 'diario' | 'semanal' | 'mensal' | 'personalizado') => {
         setViewMode(mode);
         const today = startOfDay(new Date());
-        if (mode === 'personalizado') {
+        let newFrom, newTo;
+
+        if (mode === 'diario') {
+            newFrom = today;
+            newTo = today;
+        } else if (mode === 'semanal') {
+            newFrom = startOfWeek(today, { locale: ptBR });
+            newTo = endOfWeek(today, { locale: ptBR });
+        } else if (mode === 'mensal') {
+            newFrom = startOfMonth(today);
+            newTo = endOfMonth(today);
+        } else { // personalizado
              setDateRange(undefined);
              setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
-        } else {
-            let newFrom, newTo;
-
-            if (mode === 'diario') {
-                newFrom = today;
-                newTo = today;
-            } else if (mode === 'semanal') {
-                newFrom = startOfWeek(today, { locale: ptBR });
-                newTo = endOfWeek(today, { locale: ptBR });
-            } else if (mode === 'mensal') {
-                newFrom = startOfMonth(today);
-                newTo = endOfMonth(today);
-            }
-            if(newFrom) setCalendarMonth(startOfDay(newFrom));
-            setDateRange({ from: newFrom, to: newTo });
+             return; // Stop here for custom mode
         }
+        setCalendarMonth(startOfDay(newFrom));
+        setDateRange({ from: newFrom, to: newTo });
     }
 
 
@@ -261,7 +260,8 @@ export default function RelatoriosPage() {
 
     const hasActiveDateFilter = React.useMemo(() => {
         if (!dateRange?.from) return false;
-        return viewMode !== 'diario' || !isToday(dateRange.from);
+        if (viewMode === 'personalizado') return !!dateRange.to;
+        return !isEqual(dateRange.from, startOfDay(new Date())) || !isEqual(dateRange.to, startOfDay(new Date()));
     }, [dateRange, viewMode]);
 
     const hasActiveFilters = hasActiveSelectFilters || hasActiveDateFilter;
@@ -501,7 +501,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
-
-    

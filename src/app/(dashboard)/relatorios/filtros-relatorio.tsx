@@ -162,7 +162,7 @@ export function FiltrosRelatorio({
                         Aplicar Filtros
                     </Button>
                      <Button
-                        variant="outline"
+                        variant="ghost"
                         onClick={onClearFilters}
                         className="w-full"
                         disabled={!hasActiveFilters || isLoading}
