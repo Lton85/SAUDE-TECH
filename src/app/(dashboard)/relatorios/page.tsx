@@ -328,7 +328,6 @@ export default function RelatoriosPage() {
         setViewMode('personalizado');
         setDateRange(range);
         if (range?.from) {
-            // Se o 'to' não estiver definido, o segundo painel deve espelhar o primeiro
             setCalendarMonth(range.from);
         } else {
              setCalendarMonth(new Date());
@@ -496,4 +495,3 @@ export default function RelatoriosPage() {
     );
 }
 
-    
