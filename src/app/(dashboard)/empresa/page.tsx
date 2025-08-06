@@ -9,7 +9,7 @@ import { Building, Save } from "lucide-react";
 
 export default function EmpresaPage() {
     return (
-        <Card>
+        <Card className="w-full">
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <Building className="h-6 w-6" />
