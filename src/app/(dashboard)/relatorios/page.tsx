@@ -33,7 +33,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
 
     return (
         <div className="w-full border-b last:border-b-0">
-            <div className="flex items-center p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
+            <div className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
                 {/* Left Side: Patient, Dept, Prof */}
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
                     <div className="flex items-center gap-2 font-medium text-primary">
@@ -439,3 +439,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
