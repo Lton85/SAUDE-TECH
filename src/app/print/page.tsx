@@ -4,14 +4,14 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { CheckCircle, User, Building, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { getAtendimentoById } from "@/services/filaDeEsperaService";
+import { getAtendimentoById, getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 
 interface PrintData {
   title: string;
@@ -19,17 +19,13 @@ interface PrintData {
 }
 
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    // This helper function handles Firestore Timestamps safely
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
-        // Check for Firestore Timestamp object
         if (typeof timestamp.toDate === 'function') return timestamp.toDate();
-        // Handle ISO string dates that might come from localStorage
         if (typeof timestamp === 'string') {
             const date = new Date(timestamp);
             if (!isNaN(date.getTime())) return date;
         }
-        // Handle native JS Date objects
         if (timestamp instanceof Date) return timestamp;
         return null;
     };
@@ -91,7 +87,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
 
 const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    // This helper function handles Firestore Timestamps safely
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
         if (typeof timestamp.toDate === 'function') return timestamp.toDate();
@@ -154,7 +149,7 @@ function PrintPageContent() {
         const fetchData = async () => {
             try {
                 let printData: PrintData | null = null;
-                // If an ID is present, fetch data for an individual report
+                
                 if (individualReportId) {
                     const atendimento = await getAtendimentoById(individualReportId);
                     if (atendimento) {
@@ -166,12 +161,23 @@ function PrintPageContent() {
                         setError("Atendimento não encontrado.");
                     }
                 } else {
-                    // Otherwise, get data from localStorage for a general report
-                    const storedData = localStorage.getItem('print-data');
-                    if (storedData) {
-                        printData = JSON.parse(storedData);
+                    const fromStr = searchParams.get('from');
+                    const toStr = searchParams.get('to');
+                    const title = searchParams.get('title') || 'Relatório de Atendimentos';
+
+                    if (fromStr && toStr) {
+                         const filters = {
+                            dateFrom: parseISO(fromStr),
+                            dateTo: parseISO(toStr),
+                            pacienteId: searchParams.get('pacienteId') || undefined,
+                            medicoId: searchParams.get('medicoId') || undefined,
+                            enfermeiroId: searchParams.get('enfermeiroId') || undefined,
+                            classificacao: searchParams.get('classificacao') || undefined,
+                        };
+                        const items = await getHistoricoAtendimentosPorPeriodoComFiltros(filters);
+                        printData = { title, items };
                     } else {
-                        setError("Dados para impressão não encontrados. Por favor, volte e tente novamente.");
+                        setError("Parâmetros de data ausentes para o relatório geral.");
                     }
                 }
                 
@@ -179,7 +185,7 @@ function PrintPageContent() {
                     setData(printData);
                     setTimeout(() => {
                         window.print();
-                    }, 500); // Delay to allow data to render before printing
+                    }, 500); 
                 }
             } catch (err) {
                 console.error("Erro ao processar dados de impressão:", err);
@@ -189,18 +195,12 @@ function PrintPageContent() {
 
         fetchData();
 
-        // Event handler for after printing
         const handleAfterPrint = () => {
-            // Clean up localStorage only if it was a general report
-            if (!individualReportId) {
-                localStorage.removeItem('print-data');
-            }
             window.close();
         };
 
         window.onafterprint = handleAfterPrint;
 
-        // Cleanup on unmount
         return () => {
             window.onafterprint = null; 
         };
@@ -250,7 +250,7 @@ function PrintPageContent() {
 
 export default function PrintPage() {
     return (
-        <Suspense fallback={<div>Carregando...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /> Carregando...</div>}>
             <PrintPageContent />
         </Suspense>
     );

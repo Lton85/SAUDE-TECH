@@ -246,35 +246,42 @@ export default function RelatoriosPage() {
 
 
     const handlePrint = () => {
-        try {
-            if (filteredReportData.length === 0) {
-                toast({
-                    title: "Nenhum dado para imprimir",
-                    description: "Não há atendimentos na lista para gerar um relatório.",
-                    variant: "destructive"
-                });
-                return;
-            }
-            // Use local storage to pass data to the print page for general reports
-            const printData = {
-                title: reportTitle,
-                items: filteredReportData
-            };
-            localStorage.setItem('print-data', JSON.stringify(printData));
-            window.open('/print', '_blank');
-        } catch (error) {
-            console.error("Erro ao preparar impressão:", error);
+        if (!dateRange.from || !dateRange.to) {
             toast({
-                title: "Erro ao imprimir",
-                description: "Não foi possível gerar o relatório. Tente novamente.",
+                title: "Período não selecionado",
+                description: "Por favor, selecione um período antes de imprimir.",
                 variant: "destructive"
             });
+            return;
         }
+        if (filteredReportData.length === 0) {
+            toast({
+                title: "Nenhum dado para imprimir",
+                description: "Não há atendimentos na lista para gerar um relatório.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+
+        const params = new URLSearchParams({
+            from: fromDate,
+            to: toDate,
+            title: reportTitle,
+        });
+
+        if (selectedPacienteId !== 'todos') params.append('pacienteId', selectedPacienteId);
+        if (selectedMedicoId !== 'todos') params.append('medicoId', selectedMedicoId);
+        if (selectedEnfermeiroId !== 'todos') params.append('enfermeiroId', selectedEnfermeiroId);
+        if (selectedClassificacao !== 'todos') params.append('classificacao', selectedClassificacao);
+
+        window.open(`/print?${params.toString()}`, '_blank');
     }
     
     const handlePrintItem = (itemId: string) => {
          try {
-            // Open the print page with the specific item ID as a query parameter
             window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);

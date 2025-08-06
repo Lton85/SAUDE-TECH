@@ -8,10 +8,20 @@ import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
+import { getMedicos } from './medicosService';
+import { getEnfermeiros } from './enfermeirosService';
+
 
 interface SearchFilters {
     dateFrom: Date;
     dateTo: Date;
+}
+
+interface FullSearchFilters extends SearchFilters {
+    pacienteId?: string;
+    medicoId?: string;
+    enfermeiroId?: string;
+    classificacao?: string;
 }
 
 const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
@@ -245,6 +255,34 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         throw new Error("Não foi possível carregar o relatório de atendimentos. Pode ser necessário criar um índice no Firestore. Verifique o console para um link de criação.");
     }
 };
+
+export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
+    filters: FullSearchFilters
+): Promise<FilaDeEsperaItem[]> => {
+    let data = await getHistoricoAtendimentosPorPeriodo(filters);
+
+    if (filters.pacienteId && filters.pacienteId !== 'todos') {
+        data = data.filter(item => item.pacienteId === filters.pacienteId);
+    }
+
+    if (filters.medicoId && filters.medicoId !== 'todos') {
+        const medicos = await getMedicos();
+        const medico = medicos.find(m => m.id === filters.medicoId);
+        if(medico) data = data.filter(item => item.profissionalNome === `Dr(a). ${medico.nome}`);
+    }
+
+    if (filters.enfermeiroId && filters.enfermeiroId !== 'todos') {
+        const enfermeiros = await getEnfermeiros();
+        const enfermeiro = enfermeiros.find(e => e.id === filters.enfermeiroId);
+        if(enfermeiro) data = data.filter(item => item.profissionalNome === `Enf. ${enfermeiro.nome}`);
+    }
+    
+    if (filters.classificacao && filters.classificacao !== 'todos') {
+        data = data.filter(item => item.classificacao === filters.classificacao);
+    }
+    
+    return data;
+}
 
 export const getAtendimentoById = async (id: string): Promise<FilaDeEsperaItem | null> => {
     if (!id) return null;
