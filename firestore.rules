@@ -2,46 +2,44 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral: permite leitura e escrita para todos os usuários autenticados.
-    // Para um ambiente de produção, você deve restringir o acesso com base nas funções do usuário (ex: admin, recepcionista).
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Coleções de Cadastros
+    // Regras para Pacientes
     match /pacientes/{pacienteId} {
-      allow read, write, create, delete: if isAuthenticated();
+      allow read, write: if true; 
     }
 
+    // Regras para Médicos
     match /medicos/{medicoId} {
-      allow read, write, create, delete: if isAuthenticated();
+      allow read, write: if true;
     }
 
+    // Regras para Enfermeiros
     match /enfermeiros/{enfermeiroId} {
-      allow read, write, create, delete: if isAuthenticated();
+      allow read, write: if true;
     }
 
+    // Regras para Departamentos
     match /departamentos/{departamentoId} {
-      allow read, write, create, delete: if isAuthenticated();
+      allow read, write: if true;
     }
 
-    // Fila de Atendimento e Relatórios
+    // Regras para a Fila de Espera
     match /filaDeEspera/{filaId} {
-      allow read, write, create, delete: if isAuthenticated();
+      allow read, write: if true;
     }
-
-    match /relatorios_atendimentos/{relatorioId} {
-      allow read, write, create, delete: if isAuthenticated();
-    }
-
-    // Painel de Chamadas
+    
+    // Regras para as Chamadas do Painel
     match /chamadas/{chamadaId} {
-      allow read, create: if true; // Permite que o painel leia e a recepção crie chamadas sem autenticação
+        allow read, write: if true;
     }
 
-    // Contadores
+    // Regras para Contadores
     match /counters/{counterId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
+    }
+
+    // Regras para Relatórios de Atendimentos
+    match /relatorios_atendimentos/{relatorioId} {
+      allow read, write: if true;
     }
   }
 }
