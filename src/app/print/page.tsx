@@ -38,6 +38,10 @@ function PrintPageContent() {
                             title: `Relatório Individual do Paciente`,
                             items: [atendimento]
                         };
+                         if (atendimento.finalizadaEm) {
+                            const dataAtendimento = atendimento.finalizadaEm.toDate();
+                            setDateRangeString(`Data do Atendimento: ${format(dataAtendimento, "dd/MM/yyyy", { locale: ptBR })}`);
+                        }
                     } else {
                         setError("Atendimento não encontrado.");
                     }
@@ -49,7 +53,12 @@ function PrintPageContent() {
                     if (fromStr && toStr) {
                         const fromDate = parseISO(fromStr);
                         const toDate = parseISO(toStr);
-                        setDateRangeString(`Referente a ${format(fromDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(toDate, "dd/MM/yyyy", { locale: ptBR })}`);
+                        
+                        if (format(fromDate, 'dd/MM/yyyy') === format(toDate, 'dd/MM/yyyy')) {
+                            setDateRangeString(`Referente ao dia ${format(fromDate, "dd/MM/yyyy", { locale: ptBR })}`);
+                        } else {
+                            setDateRangeString(`Referente a ${format(fromDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(toDate, "dd/MM/yyyy", { locale: ptBR })}`);
+                        }
                         
                          const filters = {
                             dateFrom: fromDate,
