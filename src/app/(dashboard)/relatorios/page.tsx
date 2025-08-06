@@ -270,7 +270,6 @@ export default function RelatoriosPage() {
                 });
                 return;
             }
-
             const printData = {
                 title: reportTitle,
                 items: filteredReportData
