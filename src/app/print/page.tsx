@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -41,7 +42,7 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
                 <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-2">
                     <Badge
@@ -135,6 +136,7 @@ const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) =
 
 export default function PrintPage() {
     const [data, setData] = useState<PrintData | null>(null);
+    const [pageTitle, setPageTitle] = useState<string>("");
 
     useEffect(() => {
         const storedData = localStorage.getItem('print-data');
@@ -154,7 +156,9 @@ export default function PrintPage() {
                     }
                     return value;
                 });
+                
                 setData(parsedData);
+                setPageTitle(parsedData.title);
 
                 setTimeout(() => {
                     window.print();
@@ -183,7 +187,7 @@ export default function PrintPage() {
     return (
         <div className="bg-white text-black font-sans p-8">
             <header className="mb-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
+                <h1 className="text-2xl font-bold mb-2">{pageTitle}</h1>
                 <p className="text-sm text-gray-600">
                     Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
                 </p>
@@ -201,3 +205,5 @@ export default function PrintPage() {
         </div>
     );
 }
+
+    
