@@ -152,13 +152,8 @@ function PrintPageContent() {
                                     <TableCell className="px-2 py-1 border-b border-gray-200 font-medium">{item.pacienteNome}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200">{item.profissionalNome}</TableCell>
-                                    <TableCell className="px-2 py-1 border-b border-gray-200">
-                                        <Badge
-                                            variant="outline"
-                                            className="text-xs font-semibold border-black text-black"
-                                        >
-                                            {item.classificacao}
-                                        </Badge>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200 font-semibold">
+                                        {item.classificacao}
                                     </TableCell>
                                 </TableRow>
                             )
@@ -185,3 +180,4 @@ export default function PrintPage() {
         </Suspense>
     );
 }
+
