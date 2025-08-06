@@ -90,10 +90,10 @@ export default function EmpresaPage() {
             }
         };
         
-        if (formData.uf) {
+        if (isEditing && formData.uf) {
              fetchCities();
         }
-    }, [formData.uf]);
+    }, [formData.uf, isEditing]);
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
