@@ -556,7 +556,7 @@ export default function RelatoriosPage() {
                                     </p>
                                 </div>
                             ) : hasSearched && filteredReportData.length > 0 ? (
-                                <ScrollArea className="flex-grow">
+                                <ScrollArea className="flex-grow h-96">
                                     <div className="space-y-0">
                                         {filteredReportData.map((item) => (
                                             <ReportItemCard key={item.id} atendimento={item} onPrintItem={handlePrintItem} />
