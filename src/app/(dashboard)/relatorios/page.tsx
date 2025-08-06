@@ -416,6 +416,7 @@ export default function RelatoriosPage() {
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="end">
                                     <Calendar
+                                        pagedNavigation
                                         initialFocus
                                         mode="range"
                                         month={calendarMonth}
@@ -494,5 +495,7 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
 
     
