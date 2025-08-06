@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays, isEqual } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
 import type { DateRange } from "react-day-picker";
@@ -105,9 +105,9 @@ export default function RelatoriosPage() {
     const [hasSearched, setHasSearched] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
 
-    const today = new Date();
+    const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(startOfDay(today));
+    const [calendarMonth, setCalendarMonth] = React.useState<Date>(today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -214,10 +214,10 @@ export default function RelatoriosPage() {
     // Handle quick date selection (Diário, Semanal, Mensal)
     const handleViewModeChange = (mode: 'diario' | 'semanal' | 'mensal' | 'personalizado') => {
         setViewMode(mode);
-        const today = new Date();
+        const today = startOfDay(new Date());
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setCalendarMonth(startOfDay(today));
+             setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -246,9 +246,10 @@ export default function RelatoriosPage() {
         setSelectedEnfermeiroId('todos');
         setSelectedDepartamentoId('todos');
         setSelectedClassificacao('todos');
+        handleViewModeChange('diario');
     };
 
-    const hasActiveFilters = React.useMemo(() => {
+    const hasActiveSelectFilters = React.useMemo(() => {
         return (
             selectedPacienteId !== 'todos' ||
             selectedMedicoId !== 'todos' ||
@@ -257,6 +258,13 @@ export default function RelatoriosPage() {
             selectedClassificacao !== 'todos'
         );
     }, [selectedPacienteId, selectedMedicoId, selectedEnfermeiroId, selectedDepartamentoId, selectedClassificacao]);
+
+    const hasActiveDateFilter = React.useMemo(() => {
+        if (!dateRange?.from) return false;
+        return viewMode !== 'diario' || !isToday(dateRange.from);
+    }, [dateRange, viewMode]);
+
+    const hasActiveFilters = hasActiveSelectFilters || hasActiveDateFilter;
 
 
      const reportTitle = React.useMemo(() => {
@@ -327,7 +335,6 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        // If only the "from" date is selected, lock the calendar month to that month.
         if (range?.from) {
             setCalendarMonth(startOfDay(range.from));
         } else {
@@ -338,7 +345,7 @@ export default function RelatoriosPage() {
     
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
-            const days = differenceInDays(dateRange.to, dateRange.from);
+            const days = differenceInDays(endOfDay(dateRange.to), startOfDay(dateRange.from));
             return days >= 0 ? days + 1 : 0;
         }
         return 0;
@@ -497,3 +504,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
