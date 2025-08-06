@@ -21,16 +21,16 @@ export default function EmpresaPage() {
             </CardHeader>
             <CardContent>
                 <form className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="space-y-2 col-span-12 md:col-span-5">
                             <Label htmlFor="razaoSocial">Razão Social</Label>
                             <Input id="razaoSocial" placeholder="Ex: Saúde Fácil Ltda." />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 col-span-12 md:col-span-4">
                             <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
                             <Input id="nomeFantasia" placeholder="Ex: UBS Central" />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 col-span-12 md:col-span-3">
                             <Label htmlFor="cnpj">CNPJ</Label>
                             <Input id="cnpj" placeholder="00.000.000/0001-00" />
                         </div>
