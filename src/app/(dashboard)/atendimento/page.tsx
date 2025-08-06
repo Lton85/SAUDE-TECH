@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2, Eraser } from "lucide-react";
 import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
@@ -183,6 +183,22 @@ export default function AtendimentoPage() {
             });
         }
     };
+    
+    const handleClearPainel = async () => {
+        try {
+            await clearPainel();
+             toast({
+                title: "Painel Limpo!",
+                description: `O painel de senhas foi redefinido.`,
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao limpar o painel",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
 
     const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
         try {
@@ -282,6 +298,10 @@ export default function AtendimentoPage() {
                             <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
+                             <Button onClick={handleClearPainel} variant="outline" size="sm">
+                                <Eraser className="mr-2 h-4 w-4" />
+                                Limpar Painel
+                            </Button>
                             <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Adicionar Paciente à Fila
