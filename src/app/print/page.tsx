@@ -134,7 +134,7 @@ function PrintPageContent() {
                                 <TableRow key={item.id} className="text-xs">
                                     <TableCell className="px-2 py-1 border-b border-gray-200">{dataFormatada}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200 font-medium">{item.pacienteNome}</TableCell>
-                                    <TableCell className="px-2 py-1 border-b border-gray-200">{item.departamentoNome}</TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200">{item.profissionalNome}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200">
                                         <Badge
