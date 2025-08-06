@@ -27,24 +27,9 @@ import { AtendimentosChart } from "./atendimentos-chart";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
+const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (item: FilaDeEsperaItem) => void }) => {
     const dataFinalizacao = atendimento.finalizadaEm?.toDate();
     const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy", { locale: ptBR }) : 'N/A';
-
-    const handlePrintItem = (atendimentoToPrint: FilaDeEsperaItem) => {
-         try {
-            const printData = {
-                title: "Relatório Individual do Paciente",
-                items: [atendimentoToPrint]
-            };
-            localStorage.setItem('print-data', JSON.stringify(printData));
-            window.open('/print', '_blank');
-        } catch (error) {
-            console.error("Erro ao preparar impressão:", error);
-            alert("Não foi possível abrir a página de impressão. Verifique as permissões de pop-up do seu navegador.");
-        }
-    };
-    
 
     return (
         <div className="w-full border-b">
@@ -81,7 +66,7 @@ const ReportItemCard = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Finalizado
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handlePrintItem(atendimento)} title="Imprimir Atendimento">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento)} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
                 </div>
@@ -286,6 +271,20 @@ export default function RelatoriosPage() {
         }
     }
     
+    const handlePrintItem = (atendimentoToPrint: FilaDeEsperaItem) => {
+         try {
+            const printData = {
+                title: "Relatório Individual do Paciente",
+                items: [atendimentoToPrint]
+            };
+            localStorage.setItem('print-data', JSON.stringify(printData));
+            window.open('/print', '_blank');
+        } catch (error) {
+            console.error("Erro ao preparar impressão:", error);
+            alert("Não foi possível abrir a página de impressão. Verifique as permissões de pop-up do seu navegador.");
+        }
+    };
+    
     const handleManualDateSearch = (range: { from: Date | undefined; to: Date | undefined }) => {
         setViewMode('personalizado');
         setDateRange(range || { from: undefined, to: undefined });
@@ -400,7 +399,7 @@ export default function RelatoriosPage() {
                                 <ScrollArea className="flex-grow">
                                     <div className="space-y-0">
                                         {filteredReportData.map((item) => (
-                                            <ReportItemCard key={item.id} atendimento={item} />
+                                            <ReportItemCard key={item.id} atendimento={item} onPrintItem={handlePrintItem} />
                                         ))}
                                     </div>
                                 </ScrollArea>
