@@ -53,8 +53,11 @@ export default function EmpresaPage() {
             const data = await getEmpresa();
             if (data) {
                 setFormData(data);
+                if (data.uf) {
+                    await fetchCitiesForUf(data.uf);
+                }
             } else {
-                setFormData(initialEmpresaState); // Reset if no data found
+                setFormData(initialEmpresaState);
             }
         } catch (error) {
             toast({
@@ -67,41 +70,45 @@ export default function EmpresaPage() {
         }
     };
     
+    const fetchCitiesForUf = async (uf: string) => {
+        if (!uf) {
+            setCities([]);
+            return;
+        }
+        setIsCitiesLoading(true);
+        try {
+            const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+            if (!response.ok) throw new Error('Failed to fetch cities');
+            const data: IbgeCityResponse[] = await response.json();
+            setCities(data.map(city => city.nome).sort());
+        } catch (error) {
+            console.error("Erro ao buscar cidades:", error);
+            setCities([]);
+             toast({
+                title: "Erro ao buscar cidades",
+                description: "Não foi possível carregar a lista de cidades para o estado selecionado.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsCitiesLoading(false);
+        }
+    }
+    
     useEffect(() => {
         fetchEmpresaData();
     }, []);
     
-    useEffect(() => {
-        const fetchCities = async () => {
-            if (!formData.uf) {
-                setCities([]);
-                setFormData(prev => ({...prev, cidade: ""}));
-                return;
-            }
-            setIsCitiesLoading(true);
-            try {
-                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.uf}/municipios`);
-                const data: IbgeCityResponse[] = await response.json();
-                setCities(data.map(city => city.nome).sort());
-            } catch (error) {
-                console.error("Erro ao buscar cidades:", error);
-                setCities([]);
-            } finally {
-                setIsCitiesLoading(false);
-            }
-        };
-        
-        if (isEditing && formData.uf) {
-             fetchCities();
-        }
-    }, [formData.uf, isEditing]);
+    const handleUfChange = async (uf: string) => {
+        setFormData(prev => ({ ...prev, uf, cidade: "" })); // Reset city when UF changes
+        await fetchCitiesForUf(uf);
+    }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setFormData(prev => ({...prev, [id]: value }));
     }
 
-    const handleSelectChange = (id: keyof Empresa, value: string) => {
+    const handleSelectChange = (id: keyof Omit<Empresa, 'uf'>, value: string) => {
         setFormData(prev => ({...prev, [id]: value }));
     }
 
@@ -109,7 +116,7 @@ export default function EmpresaPage() {
 
     const handleCancel = () => {
         setIsEditing(false);
-        fetchEmpresaData(); // Refetch original data on cancel
+        fetchEmpresaData(); // Refetch original data on cancel to discard changes
     };
 
     const handleSave = async () => {
@@ -125,7 +132,7 @@ export default function EmpresaPage() {
         } catch (error) {
             toast({
                 title: "Erro ao salvar",
-                description: "Não foi possível salvar os dados da empresa.",
+                description: (error as Error).message || "Não foi possível salvar os dados da empresa.",
                 variant: "destructive"
             });
         } finally {
@@ -149,13 +156,13 @@ export default function EmpresaPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12 md:col-span-6">
+                        <div className="space-y-2 col-span-12 md:col-span-5">
                             <Label htmlFor="razaoSocial">Razão Social</Label>
                             <Input id="razaoSocial" value={formData.razaoSocial} onChange={handleInputChange} placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-4">
+                        <div className="space-y-2 col-span-12 md:col-span-5">
                             <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
                             <Input id="nomeFantasia" value={formData.nomeFantasia} onChange={handleInputChange} placeholder="Ex: UBS Central" disabled={!isEditing}/>
                         </div>
@@ -187,7 +194,7 @@ export default function EmpresaPage() {
                         </div>
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="uf">Estado (UF)</Label>
-                            <Select value={formData.uf} onValueChange={(v) => handleSelectChange('uf', v)} disabled={!isEditing}>
+                            <Select value={formData.uf} onValueChange={handleUfChange} disabled={!isEditing}>
                                 <SelectTrigger id="uf">
                                     <SelectValue placeholder="UF" />
                                 </SelectTrigger>
@@ -204,7 +211,7 @@ export default function EmpresaPage() {
                             <Label htmlFor="cidade">Cidade</Label>
                              <Select value={formData.cidade} onValueChange={(v) => handleSelectChange('cidade', v)} disabled={!isEditing || isCitiesLoading || cities.length === 0}>
                                 <SelectTrigger id="cidade">
-                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : "Cidade"} />
+                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (formData.uf ? "Selecione..." : "Escolha um UF")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                      {isCitiesLoading ? (
@@ -258,5 +265,3 @@ export default function EmpresaPage() {
         </Card>
     );
 }
-
-    
