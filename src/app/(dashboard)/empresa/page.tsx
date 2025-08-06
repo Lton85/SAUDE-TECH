@@ -54,10 +54,13 @@ export default function EmpresaPage() {
             if (data) {
                 setFormData(data);
                 if (data.uf) {
-                    await fetchCitiesForUf(data.uf);
+                    // Pre-load cities if UF exists, but do it silently in the background
+                    // The user will see the loaded cities when they click edit.
+                    fetchCitiesForUf(data.uf);
                 }
             } else {
                 setFormData(initialEmpresaState);
+                setIsEditing(true); // If no data, start in edit mode
             }
         } catch (error) {
             toast({

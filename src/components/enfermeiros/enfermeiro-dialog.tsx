@@ -55,6 +55,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
       telefone: "",
       turno: "Manhã",
       situacao: true,
+      cnpj: "",
     },
   });
 
@@ -71,6 +72,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
         telefone: enfermeiro.telefone || "",
         turno: enfermeiro.turno || "Manhã",
         situacao: enfermeiro.situacao === 'Ativo',
+        cnpj: (enfermeiro as any).cnpj || "",
       });
     } else {
         form.reset({
@@ -84,6 +86,7 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
             telefone: "",
             turno: "Manhã",
             situacao: true,
+            cnpj: "",
         });
     }
   }, [enfermeiro, isOpen, form]);
@@ -162,5 +165,3 @@ export function EnfermeiroDialog({ isOpen, onOpenChange, onSuccess, enfermeiro }
     </Dialog>
   );
 }
-
-    
