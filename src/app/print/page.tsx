@@ -17,7 +17,6 @@ interface PrintData {
 }
 
 const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) => {
-    // Helper to safely convert Firestore Timestamp or Date object to a JS Date
     const toDate = (timestamp: any): Date | null => {
         if (!timestamp) return null;
         if (typeof timestamp.toDate === 'function') {
@@ -41,7 +40,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
     return (
         <div className="p-4 border border-black break-inside-avoid text-sm">
-            {/* Header */}
             <div className="flex items-start justify-between">
                 <h2 className="text-lg font-bold uppercase">{atendimento.pacienteNome}</h2>
                 <div className="flex items-center gap-2">
@@ -64,7 +62,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
             <Separator className="my-2 bg-black" />
 
-            {/* Details */}
              <div className="flex justify-between gap-4">
                 <div>
                     <span className="font-semibold">Departamento:</span>
@@ -78,7 +75,6 @@ const IndividualReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }
 
              <Separator className="my-2 bg-black" />
 
-            {/* Timeline */}
              <div className="flex justify-around text-xs text-gray-600">
                 <span>Entrada na Fila: <span className="font-mono text-black font-semibold">{horaChegada}</span></span>
                 <span>Chamada no Painel: <span className="font-mono text-black font-semibold">{horaChamada}</span></span>
@@ -136,18 +132,15 @@ const GeneralReportItem = ({ atendimento }: { atendimento: FilaDeEsperaItem }) =
 
 export default function PrintPage() {
     const [data, setData] = useState<PrintData | null>(null);
-    const [pageTitle, setPageTitle] = useState<string>("");
 
     useEffect(() => {
         const storedData = localStorage.getItem('print-data');
         if (storedData) {
             try {
-                //Firestore Timestamps are stringified as objects, so we need to parse them back into Date objects
                 const parsedData = JSON.parse(storedData, (key, value) => {
                     if (key.endsWith('Em') && value && value.seconds) {
                         return new Date(value.seconds * 1000 + value.nanoseconds / 1000000);
                     }
-                     // Handle cases where the date might already be a string
                     if (key.endsWith('Em') && typeof value === 'string') {
                         const date = new Date(value);
                         if (!isNaN(date.getTime())) {
@@ -158,18 +151,19 @@ export default function PrintPage() {
                 });
                 
                 setData(parsedData);
-                setPageTitle(parsedData.title);
 
                 setTimeout(() => {
                     window.print();
-                    window.onafterprint = () => {
-                        localStorage.removeItem('print-data');
-                        window.close();
-                    };
-                }, 500); // Delay to ensure content is rendered
+                }, 500); 
+
+                window.onafterprint = () => {
+                    localStorage.removeItem('print-data');
+                    window.close();
+                };
 
             } catch (error) {
                 console.error("Error parsing print data from localStorage", error);
+                localStorage.removeItem('print-data');
             }
         }
     }, []);
@@ -182,12 +176,12 @@ export default function PrintPage() {
         );
     }
     
-    const isIndividualReport = data.title === "Relatório Individual do Paciente";
+    const isIndividualReport = data.title === "Relatório Individual do Paciente" && data.items.length === 1;
 
     return (
         <div className="bg-white text-black font-sans p-8">
             <header className="mb-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">{pageTitle}</h1>
+                <h1 className="text-2xl font-bold mb-2">{isIndividualReport ? 'Relatório Individual do Paciente' : data.title}</h1>
                 <p className="text-sm text-gray-600">
                     Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
                 </p>
@@ -205,5 +199,3 @@ export default function PrintPage() {
         </div>
     );
 }
-
-    
