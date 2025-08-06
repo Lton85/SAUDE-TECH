@@ -13,6 +13,7 @@ interface Call {
   departamentoNome: string;
   pacienteNome: string;
   profissionalNome: string;
+  atendimentoId?: string;
 }
 
 const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', pacienteNome: 'Aguardando paciente...', profissionalNome: 'Aguardando profissional...' };
@@ -126,7 +127,7 @@ export default function PainelPage() {
         
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
-                <HeartPulse className="h-6 w-6 md:h-7 md:w-7 text-cyan-400" />
+                <HeartPulse className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" />
                 <span className="font-bold">SAÚDE FÁCIL | UNIDADE BÁSICA DE SAÚDE</span>
             </div>
             {time ? (

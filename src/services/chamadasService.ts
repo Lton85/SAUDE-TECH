@@ -1,13 +1,16 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 interface Chamada {
+    id?: string; // Adicionado para rastrear a chamada
     senha: string;
     departamentoNome: string;
     pacienteNome: string;
     profissionalNome: string;
+    // O ID do item da fila original, para saber qual atendimento está no painel
+    atendimentoId?: string; 
 }
 
 const chamadasCollection = collection(db, 'chamadas');
@@ -31,10 +34,30 @@ export const clearPainel = async () => {
             departamentoNome: 'Aguardando...',
             pacienteNome: 'Aguardando paciente...',
             profissionalNome: 'Aguardando profissional...',
+            atendimentoId: null, // Limpa o ID do atendimento
             timestamp: serverTimestamp() 
         });
     } catch (error) {
         console.error("Erro ao limpar painel: ", error);
         throw new Error("Não foi possível limpar o painel no Firestore.");
+    }
+};
+
+/**
+ * Retorna a última chamada feita no painel.
+ */
+export const getUltimaChamada = async (): Promise<Chamada | null> => {
+    try {
+        const q = query(chamadasCollection, orderBy("timestamp", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            return { id: doc.id, ...doc.data() } as Chamada;
+        }
+        return null;
+    } catch (error) {
+        console.error("Erro ao buscar última chamada:", error);
+        throw new Error("Não foi possível buscar a última chamada do painel.");
     }
 };

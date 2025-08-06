@@ -155,6 +155,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         departamentoNome: sala,
         profissionalNome: item.profissionalNome,
         pacienteNome: item.pacienteNome,
+        atendimentoId: item.id, // Adiciona o ID do atendimento na chamada
     });
     
     // 3. Update the patient's status in the queue
@@ -363,5 +364,3 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
-
-    

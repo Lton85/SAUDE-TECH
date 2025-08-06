@@ -28,7 +28,7 @@ import { getEnfermeiros } from "@/services/enfermeirosService";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { cn } from "@/lib/utils";
-import { clearPainel } from "@/services/chamadasService";
+import { clearPainel, getUltimaChamada } from "@/services/chamadasService";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
@@ -229,8 +229,11 @@ export default function AtendimentoPage() {
             // Then, return the patient to the queue
             await retornarPacienteParaFila(item.id);
             
-            // Finally, clear the panel display
-            await clearPainel();
+            // Check if the returned patient is the one on the panel
+            const ultimaChamada = await getUltimaChamada();
+            if (ultimaChamada?.atendimentoId === item.id) {
+                await clearPainel();
+            }
 
             toast({
                 title: "Paciente Retornou para a Fila!",
