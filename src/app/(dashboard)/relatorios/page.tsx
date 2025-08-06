@@ -326,18 +326,16 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        // Only set the calendar month when a "from" date is selected and we are starting a new selection
         if (range?.from && !range.to) {
-            setCalendarMonth(range.from);
+             // Do nothing, wait for the 'to' date
         }
     };
 
     const handleMonthChange = (month: Date) => {
-        // Prevent month change if a date range selection is in progress
-        if (dateRange?.from && !dateRange.to) {
-            return;
+        // Only allow month change if we are not in the middle of a range selection
+        if (!(dateRange?.from && !dateRange.to)) {
+            setCalendarMonth(month);
         }
-        setCalendarMonth(month);
     }
 
     const selectedDays = React.useMemo(() => {
