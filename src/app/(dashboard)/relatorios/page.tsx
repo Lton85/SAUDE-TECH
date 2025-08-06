@@ -217,6 +217,7 @@ export default function RelatoriosPage() {
         if (mode === 'personalizado') {
              setDateRange({ from: undefined, to: undefined });
              setFilteredReportData([]);
+             setAllReportData([]);
              setHasSearched(false);
         } else {
             const today = new Date();
@@ -317,14 +318,11 @@ export default function RelatoriosPage() {
         }
     };
     
-    const handleManualDateSearch = (range: any) => {
-       if (range?.from && !range.to) {
-            setViewMode('personalizado');
-            setDateRange({ from: range.from, to: undefined });
-       } else if (range?.from && range?.to) {
+    const handleManualDateSearch = (range: { from?: Date; to?: Date } | undefined) => {
+        if (range) {
             setViewMode('personalizado');
             setDateRange({ from: range.from, to: range.to });
-       }
+        }
     }
 
     if (!isMounted) {
