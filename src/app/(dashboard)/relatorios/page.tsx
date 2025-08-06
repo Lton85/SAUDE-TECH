@@ -34,7 +34,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
 
     return (
         <div className="w-full border-b last:border-b-0">
-            <div className="grid grid-cols-3 items-center p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center p-3 hover:bg-muted/50 transition-colors text-xs space-x-4">
                 {/* Left Side: Patient, Dept, Prof */}
                 <div className="flex items-center justify-start gap-3 flex-shrink-0 min-w-0">
                     <div className="flex items-center gap-2 font-medium text-primary">
@@ -52,7 +52,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                 </div>
 
                 {/* Center: Timestamp */}
-                <div className="flex items-center justify-center text-muted-foreground">
+                 <div className="flex items-center justify-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                         <Clock className="h-3 w-3" />
                         <span>{dataHoraFormatada}</span>
@@ -360,6 +360,7 @@ export default function RelatoriosPage() {
                             <Button size="sm" variant={viewMode === 'diario' ? 'default' : 'outline'} onClick={() => setViewMode('diario')} disabled={isLoading}>Diário</Button>
                             <Button size="sm" variant={viewMode === 'semanal' ? 'default' : 'outline'} onClick={() => setViewMode('semanal')} disabled={isLoading}>Semanal</Button>
                             <Button size="sm" variant={viewMode === 'mensal' ? 'default' : 'outline'} onClick={() => setViewMode('mensal')} disabled={isLoading}>Mensal</Button>
+                            <Button size="sm" variant={viewMode === 'personalizado' ? 'default' : 'outline'} onClick={() => setViewMode('personalizado')} disabled={isLoading}>Personalizado</Button>
                         
                                 <Popover>
                                 <PopoverTrigger asChild>
@@ -369,9 +370,11 @@ export default function RelatoriosPage() {
                                     size="sm"
                                     className={cn(
                                     "w-[240px] justify-start text-left font-normal",
-                                    !dateRange.from && "text-muted-foreground"
+                                    !dateRange.from && "text-muted-foreground",
+                                    viewMode !== 'personalizado' && 'border-dashed'
                                     )}
                                     disabled={isLoading}
+                                    onClick={() => setViewMode('personalizado')}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dateRange.from && dateRange.to ? (
@@ -454,7 +457,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
-
-    
