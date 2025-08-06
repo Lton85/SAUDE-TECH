@@ -3,7 +3,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint } from "lucide-react";
 
@@ -260,11 +260,17 @@ export default function RelatoriosPage() {
     }, [viewMode, dateRange]);
 
 
-    const handlePrint = () => {
+    const handlePrint = async () => {
+        setIsLoading(true);
         try {
+            const today = new Date();
+            const dailyData = await getHistoricoAtendimentosPorPeriodo({
+                dateFrom: startOfDay(today),
+                dateTo: endOfDay(today),
+            });
             const printData = {
-                title: reportTitle,
-                items: filteredReportData
+                title: `Relatório Diário - ${format(today, 'dd/MM/yyyy')}`,
+                items: dailyData
             };
             localStorage.setItem('print-data', JSON.stringify(printData));
             window.open('/print', '_blank');
@@ -272,9 +278,11 @@ export default function RelatoriosPage() {
             console.error("Erro ao preparar impressão:", error);
             toast({
                 title: "Erro ao imprimir",
-                description: "Não foi possível abrir a página de impressão. Verifique as permissões de pop-up do seu navegador.",
+                description: "Não foi possível gerar o relatório diário. Tente novamente.",
                 variant: "destructive"
             });
+        } finally {
+            setIsLoading(false);
         }
     }
     
@@ -360,8 +368,8 @@ export default function RelatoriosPage() {
                                 />
                                 </PopoverContent>
                             </Popover>
-                                <Button variant="outline" onClick={handlePrint} disabled={filteredReportData.length === 0} size="sm">
-                                <Printer className="mr-2 h-4 w-4" />
+                                <Button variant="outline" onClick={handlePrint} disabled={isLoading} size="sm">
+                                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
                                 Imprimir Relatório
                             </Button>
                         </div>
@@ -377,7 +385,7 @@ export default function RelatoriosPage() {
                  <Card className="flex flex-col flex-1 min-h-0">
                     <CardContent className="p-0 flex-1 flex flex-col">
                         <div className="flex-1 flex flex-col min-h-0">
-                            {isLoading ? (
+                            {isLoading && !hasSearched ? (
                                 <div className="flex flex-col items-center justify-center h-full py-10">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                     <p className="mt-4 text-muted-foreground">Carregando relatório...</p>
@@ -419,5 +427,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
