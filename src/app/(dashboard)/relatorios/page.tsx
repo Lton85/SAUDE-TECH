@@ -261,7 +261,15 @@ export default function RelatoriosPage() {
     const hasActiveDateFilter = React.useMemo(() => {
         if (!dateRange?.from) return false;
         if (viewMode === 'personalizado') return !!dateRange.to;
-        return !isEqual(dateRange.from, startOfDay(new Date())) || !isEqual(dateRange.to, startOfDay(new Date()));
+        
+        const today = startOfDay(new Date());
+        // Compare only the date part, ignoring time
+        const fromIsToday = isEqual(startOfDay(dateRange.from), today);
+        const toIsToday = dateRange.to ? isEqual(startOfDay(dateRange.to), today) : false;
+
+        if(viewMode === 'diario') return !fromIsToday || !toIsToday;
+        
+        return true; // for weekly/monthly, any range is considered an active filter
     }, [dateRange, viewMode]);
 
     const hasActiveFilters = hasActiveSelectFilters || hasActiveDateFilter;
@@ -425,6 +433,7 @@ export default function RelatoriosPage() {
                                         pagedNavigation
                                         initialFocus
                                         mode="range"
+                                        defaultMonth={calendarMonth}
                                         month={calendarMonth}
                                         onMonthChange={setCalendarMonth}
                                         selected={dateRange}
@@ -501,3 +510,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
