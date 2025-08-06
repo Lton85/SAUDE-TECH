@@ -40,3 +40,5 @@ export const saveOrUpdateEmpresa = async (data: Empresa): Promise<void> => {
         throw new Error("Não foi possível salvar as informações da empresa.");
     }
 };
+
+    

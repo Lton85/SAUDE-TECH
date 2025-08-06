@@ -69,7 +69,7 @@ export default function EmpresaPage() {
     
     useEffect(() => {
         fetchEmpresaData();
-    }, [toast]);
+    }, []);
     
     useEffect(() => {
         const fetchCities = async () => {
@@ -258,3 +258,5 @@ export default function EmpresaPage() {
         </Card>
     );
 }
+
+    
