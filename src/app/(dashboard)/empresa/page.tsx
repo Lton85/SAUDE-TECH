@@ -56,13 +56,13 @@ export default function EmpresaPage() {
                             <Label htmlFor="bairro">Bairro</Label>
                             <Input id="bairro" placeholder="Ex: Centro" />
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="cidade">Cidade</Label>
-                            <Input id="cidade" placeholder="Ex: São Paulo" />
-                        </div>
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="uf">Estado (UF)</Label>
                             <Input id="uf" placeholder="Ex: SP" />
+                        </div>
+                        <div className="space-y-2 col-span-12 md:col-span-2">
+                            <Label htmlFor="cidade">Cidade</Label>
+                            <Input id="cidade" placeholder="Ex: São Paulo" />
                         </div>
                     </div>
                     
