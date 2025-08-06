@@ -1,45 +1,46 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regras para Pacientes
-    match /pacientes/{pacienteId} {
-      allow read, write: if true; 
-    }
-
-    // Regras para Médicos
-    match /medicos/{medicoId} {
-      allow read, write: if true;
-    }
-
-    // Regras para Enfermeiros
-    match /enfermeiros/{enfermeiroId} {
-      allow read, write: if true;
-    }
-
-    // Regras para Departamentos
-    match /departamentos/{departamentoId} {
-      allow read, write: if true;
-    }
-
-    // Regras para a Fila de Espera
-    match /filaDeEspera/{filaId} {
-      allow read, write: if true;
-    }
-    
-    // Regras para as Chamadas do Painel
-    match /chamadas/{chamadaId} {
-        allow read, write: if true;
-    }
-
-    // Regras para Contadores
+    // Regras para contadores de senhas e códigos
     match /counters/{counterId} {
       allow read, write: if true;
     }
 
-    // Regras para Relatórios de Atendimentos
-    match /relatorios_atendimentos/{relatorioId} {
+    // Regras para o cadastro de departamentos
+    match /departamentos/{departamentoId} {
       allow read, write: if true;
+    }
+
+    // Regras para o cadastro de enfermeiros
+    match /enfermeiros/{enfermeiroId} {
+      allow read, write: if true;
+    }
+
+    // Regras para a fila de espera em tempo real
+    match /filaDeEspera/{filaId} {
+      allow read, write: if true;
+    }
+
+    // Regras para o cadastro de médicos
+    match /medicos/{medicoId} {
+      allow read, write: if true;
+    }
+
+    // Regras para o cadastro de pacientes
+    match /pacientes/{pacienteId} {
+      allow read, write: if true;
+    }
+    
+    // Regras para o painel de chamadas
+    match /chamadas/{chamadaId} {
+        allow read, write: if true;
+    }
+
+    // Regras para o histórico/prontuário de atendimentos
+    match /relatorios_atendimentos/{relatorioId} {
+        allow read, write: if true;
     }
   }
 }
