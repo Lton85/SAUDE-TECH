@@ -328,9 +328,12 @@ export default function RelatoriosPage() {
         setViewMode('personalizado');
         setDateRange(range);
         if (range?.from && !range.to) {
-           setCalendarMonth(range.from);
+            setCalendarMonth(range.from);
+        } else if (!range?.from) {
+            setCalendarMonth(new Date());
         }
     };
+    
     
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
@@ -491,3 +494,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
