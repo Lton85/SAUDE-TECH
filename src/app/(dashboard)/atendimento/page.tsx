@@ -228,6 +228,9 @@ export default function AtendimentoPage() {
 
             // Then, return the patient to the queue
             await retornarPacienteParaFila(item.id);
+            
+            // Finally, clear the panel display
+            await clearPainel();
 
             toast({
                 title: "Paciente Retornou para a Fila!",
