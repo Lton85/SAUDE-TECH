@@ -51,24 +51,21 @@ export default function EmpresaPage() {
                         </div>
                     </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div className="space-y-2 col-span-12 md:col-span-8">
                             <Label htmlFor="bairro">Bairro</Label>
                             <Input id="bairro" placeholder="Ex: Centro" />
                         </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
+                        <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cidade">Cidade</Label>
                             <Input id="cidade" placeholder="Ex: São Paulo" />
                         </div>
-                         <div className="space-y-2">
+                         <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="uf">Estado (UF)</Label>
                             <Input id="uf" placeholder="Ex: SP" />
                         </div>
                     </div>
-
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="telefone">Telefone</Label>
