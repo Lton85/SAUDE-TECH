@@ -1,45 +1,45 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra geral: permite leitura e escrita em todas as coleções por padrão.
-    // Para um ambiente de produção, é altamente recomendável restringir
-    // o acesso a usuários autenticados e validar os dados.
-    match /{document=**} {
+
+    // Counters: Allow read and write for all users
+    match /counters/{counter} {
       allow read, write: if true;
     }
 
-    // Regras específicas por coleção
-    match /pacientes/{pacienteId} {
-      allow read, write: if true;
-    }
-
-    match /medicos/{medicoId} {
-      allow read, write: if true;
-    }
-
-    match /enfermeiros/{enfermeiroId} {
-      allow read, write: if true;
-    }
-
-    match /departamentos/{departamentoId} {
-      allow read, write: if true;
-    }
-
-    match /filaDeEspera/{filaId} {
-      allow read, write: if true;
-    }
-    
-    match /relatorios_atendimentos/{relatorioId} {
-      allow read, write: if true;
-    }
-
+    // Chamadas: Allow read and write for all users
     match /chamadas/{chamadaId} {
       allow read, write: if true;
     }
 
-    match /counters/{counterId} {
+    // Fila de Espera: Allow read and write for all users
+    match /filaDeEspera/{filaId} {
+      allow read, write: if true;
+    }
+    
+    // Relatorios de Atendimentos: Allow read and write for all users
+    match /relatorios_atendimentos/{relatorioId} {
+       allow read, write: if true;
+    }
+
+    // Pacientes: Allow read and write for all users
+    match /pacientes/{pacienteId} {
+      allow read, write: if true;
+    }
+
+    // Medicos: Allow read and write for all users
+    match /medicos/{medicoId} {
+      allow read, write: if true;
+    }
+
+    // Enfermeiros: Allow read and write for all users
+    match /enfermeiros/{enfermeiroId} {
+      allow read, write: if true;
+    }
+
+    // Departamentos: Allow read and write for all users
+    match /departamentos/{departamentoId} {
       allow read, write: if true;
     }
   }
