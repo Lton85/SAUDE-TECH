@@ -327,8 +327,11 @@ export default function RelatoriosPage() {
     const handleManualDateSearch = (range: DateRange | undefined) => {
         setViewMode('personalizado');
         setDateRange(range);
-        if (range?.from && !range.to) {
+        if (range?.from) {
+            // Se o 'to' não estiver definido, o segundo painel deve espelhar o primeiro
             setCalendarMonth(range.from);
+        } else {
+             setCalendarMonth(new Date());
         }
     };
     
