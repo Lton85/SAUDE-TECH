@@ -217,7 +217,7 @@ export default function RelatoriosPage() {
         const today = new Date();
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setCalendarMonth(startOfMonth(today)); // Open calendar to current month
+             setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -331,7 +331,7 @@ export default function RelatoriosPage() {
            setCalendarMonth(range.from);
         }
     };
-
+    
     const selectedDays = React.useMemo(() => {
         if (dateRange?.from && dateRange.to) {
             const days = differenceInDays(dateRange.to, dateRange.from);
@@ -491,3 +491,5 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
