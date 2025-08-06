@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock } from "lucide-react";
 import type { DateRange } from "react-day-picker";
@@ -107,7 +107,7 @@ export default function RelatoriosPage() {
 
     const today = new Date();
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [month, setMonth] = React.useState<Date>(dateRange?.from || today);
+    const [calendarMonth, setCalendarMonth] = React.useState<Date>(dateRange?.from || today);
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -217,7 +217,7 @@ export default function RelatoriosPage() {
         const today = new Date();
         if (mode === 'personalizado') {
              setDateRange(undefined);
-             setMonth(today);
+             setCalendarMonth(today);
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
@@ -327,7 +327,11 @@ export default function RelatoriosPage() {
         setViewMode('personalizado');
         setDateRange(range);
         if (range?.from) {
-            setMonth(range.from);
+            // Se 'to' não estiver definido, significa que estamos no meio da seleção de um intervalo.
+            // Travamos o mês visível no mês da data de início.
+            if (!range.to) {
+                setCalendarMonth(range.from);
+            }
         }
     }
 
@@ -406,8 +410,8 @@ export default function RelatoriosPage() {
                                 <Calendar
                                     initialFocus
                                     mode="range"
-                                    month={month}
-                                    onMonthChange={setMonth}
+                                    month={calendarMonth}
+                                    onMonthChange={setCalendarMonth}
                                     selected={dateRange}
                                     onSelect={handleManualDateSearch}
                                     numberOfMonths={2}
@@ -477,4 +481,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
