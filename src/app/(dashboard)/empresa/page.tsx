@@ -54,13 +54,11 @@ export default function EmpresaPage() {
             if (data) {
                 setFormData(data);
                 if (data.uf) {
-                    // Pre-load cities if UF exists, but do it silently in the background
-                    // The user will see the loaded cities when they click edit.
                     fetchCitiesForUf(data.uf);
                 }
             } else {
                 setFormData(initialEmpresaState);
-                setIsEditing(true); // If no data, start in edit mode
+                setIsEditing(true); 
             }
         } catch (error) {
             toast({
@@ -114,6 +112,41 @@ export default function EmpresaPage() {
     const handleSelectChange = (id: keyof Omit<Empresa, 'uf'>, value: string) => {
         setFormData(prev => ({...prev, [id]: value }));
     }
+    
+    const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+        const cep = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+        if (cep.length !== 8) return;
+
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            if (data.erro) {
+                toast({
+                    title: "CEP não encontrado",
+                    description: "Por favor, verifique o CEP digitado.",
+                    variant: "destructive",
+                });
+            } else {
+                 setFormData(prev => ({
+                    ...prev,
+                    endereco: data.logradouro,
+                    bairro: data.bairro,
+                    cidade: data.localidade,
+                    uf: data.uf,
+                }));
+                 await fetchCitiesForUf(data.uf);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar CEP:", error);
+            toast({
+                title: "Erro ao buscar CEP",
+                description: "Ocorreu um problema ao tentar buscar o endereço pelo CEP.",
+                variant: "destructive",
+            });
+        }
+    };
+
 
     const handleEditToggle = () => setIsEditing(true);
 
@@ -178,7 +211,7 @@ export default function EmpresaPage() {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                          <div className="space-y-2 col-span-12 md:col-span-2">
                             <Label htmlFor="cep">CEP</Label>
-                            <Input id="cep" value={formData.cep} onChange={handleInputChange} placeholder="00000-000" disabled={!isEditing}/>
+                            <Input id="cep" value={formData.cep} onChange={handleInputChange} onBlur={handleCepBlur} placeholder="00000-000" disabled={!isEditing}/>
                         </div>
                         <div className="space-y-2 col-span-12 md:col-span-8">
                             <Label htmlFor="endereco">Endereço (Rua)</Label>
