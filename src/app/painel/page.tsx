@@ -128,7 +128,7 @@ export default function PainelPage() {
             </div>
             {time ? (
                 <div className="text-right">
-                    <p className="font-bold">{time.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })} - {time.toLocaleTimeString('pt-BR')}</p>
+                    <p className="font-bold">{time.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                 </div>
             ) : (
                 <div className="h-6 w-48 bg-gray-700/80 rounded-md animate-pulse"></div>
