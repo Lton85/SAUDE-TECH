@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import * as React from "react";
 import {
   Home,
@@ -55,7 +54,7 @@ const menuItems = [
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage },
-  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null },
+  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank" },
 ];
 
 type Tab = (typeof menuItems)[number];
