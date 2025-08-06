@@ -107,7 +107,8 @@ export default function RelatoriosPage() {
 
     const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
-    const [calendarMonth, setCalendarMonth] = React.useState<Date>(today);
+    const [fromMonth, setFromMonth] = React.useState<Date>(startOfMonth(today));
+    const [toMonth, setToMonth] = React.useState<Date>(startOfMonth(addDays(today, 30)));
     const [viewMode, setViewMode] = React.useState<'diario' | 'semanal' | 'mensal' | 'personalizado'>('diario');
 
 
@@ -231,11 +232,13 @@ export default function RelatoriosPage() {
              setFilteredReportData([]);
              setAllReportData([]);
              setHasSearched(false);
-             setCalendarMonth(today);
+             setFromMonth(startOfMonth(today));
+             setToMonth(startOfMonth(addDays(today, 30)));
              return; // Stop here for custom mode
         }
         setDateRange({ from: newFrom, to: newTo });
-        setCalendarMonth(newFrom);
+        setFromMonth(startOfMonth(newFrom));
+        setToMonth(startOfMonth(addDays(newFrom, 30)));
     }
 
 
@@ -344,7 +347,13 @@ export default function RelatoriosPage() {
         setViewMode('personalizado');
         setDateRange(range);
         if (range?.from) {
-            setCalendarMonth(range.from);
+            setFromMonth(startOfMonth(range.from));
+        }
+        if (range?.to) {
+            setToMonth(startOfMonth(range.to));
+        } else if (range?.from) {
+            // When only `from` is selected, make both panes show the same month
+            setToMonth(startOfMonth(range.from));
         }
     };
     
@@ -432,9 +441,10 @@ export default function RelatoriosPage() {
                                     <Calendar
                                         initialFocus
                                         mode="range"
-                                        month={calendarMonth}
-                                        onMonthChange={setCalendarMonth}
-                                        pagedNavigation
+                                        fromMonth={fromMonth}
+                                        toMonth={toMonth}
+                                        onFromMonthChange={setFromMonth}
+                                        onToMonthChange={setToMonth}
                                         selected={dateRange}
                                         onSelect={handleManualDateSearch}
                                         numberOfMonths={2}
