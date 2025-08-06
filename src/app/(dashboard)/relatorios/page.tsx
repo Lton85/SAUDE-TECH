@@ -337,8 +337,6 @@ export default function RelatoriosPage() {
         setDateRange(range);
         if (range?.from) {
             setCalendarMonth(startOfDay(range.from));
-        } else {
-             setCalendarMonth(startOfDay(new Date()));
         }
     };
     
@@ -427,7 +425,6 @@ export default function RelatoriosPage() {
                                         pagedNavigation
                                         initialFocus
                                         mode="range"
-                                        defaultMonth={calendarMonth}
                                         month={calendarMonth}
                                         onMonthChange={setCalendarMonth}
                                         selected={dateRange}
@@ -504,5 +501,7 @@ export default function RelatoriosPage() {
         </div>
     );
 }
+
+    
 
     
