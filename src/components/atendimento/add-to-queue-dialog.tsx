@@ -119,7 +119,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       } catch (error) {
          toast({
           title: "Erro ao carregar profissionais",
-          description: "Não foi possível carregar a lista de médicos e enfermeiros.",
+          description: "Não foi possível carregar a lista de médicos.",
           variant: "destructive",
         });
       } finally {
