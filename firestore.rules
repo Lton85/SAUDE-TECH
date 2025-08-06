@@ -1,44 +1,34 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Permite acesso irrestrito para prototipagem.
-    // Lembre-se de configurar regras de segurança detalhadas para produção.
-    match /{document=**} {
-      allow read, write: if true;
-    }
-
-    // Regras específicas por coleção para clareza
+    // Regras para cadastros
     match /pacientes/{pacienteId} {
       allow read, write: if true;
     }
-
     match /medicos/{medicoId} {
       allow read, write: if true;
     }
-
     match /enfermeiros/{enfermeiroId} {
       allow read, write: if true;
     }
-
     match /departamentos/{departamentoId} {
       allow read, write: if true;
     }
 
+    // Regras para fluxo de atendimento
     match /filaDeEspera/{filaId} {
       allow read, write: if true;
     }
-    
     match /relatorios_atendimentos/{relatorioId} {
-        allow read, write: if true;
+      allow read, write: if true;
     }
-
     match /chamadas/{chamadaId} {
       allow read, write: if true;
     }
 
+    // Regras para contadores
     match /counters/{counterId} {
       allow read, write: if true;
     }
