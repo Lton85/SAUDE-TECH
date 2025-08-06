@@ -139,12 +139,7 @@ function PrintPageContent() {
                                     <TableCell className="px-2 py-1 border-b border-gray-200">
                                         <Badge
                                             variant="outline"
-                                            className={cn(
-                                                'text-xs font-semibold border',
-                                                item.classificacao === 'Urgência' && 'bg-red-100 text-red-800 border-red-300',
-                                                item.classificacao === 'Preferencial' && 'bg-amber-100 text-amber-800 border-amber-300',
-                                                item.classificacao === 'Normal' && 'bg-green-100 text-green-800 border-green-300'
-                                            )}
+                                            className="text-xs font-semibold border-black text-black"
                                         >
                                             {item.classificacao}
                                         </Badge>
