@@ -298,13 +298,13 @@ export default function AtendimentoPage() {
                             <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                             <Button onClick={handleClearPainel} variant="outline" size="sm">
-                                <Eraser className="mr-2 h-4 w-4" />
-                                Limpar Painel
-                            </Button>
-                            <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
+                             <Button onClick={() => { setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Adicionar Paciente à Fila
+                            </Button>
+                            <Button onClick={handleClearPainel} variant="destructive" size="icon" className="h-9 w-9">
+                                <Eraser className="h-4 w-4" />
+                                <span className="sr-only">Limpar Painel</span>
                             </Button>
                         </div>
                     </CardHeader>
