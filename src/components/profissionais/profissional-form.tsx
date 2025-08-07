@@ -77,28 +77,6 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
                 </FormItem>
               )}
             />
-             <FormField
-                control={form.control}
-                name="sexo"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Sexo</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Selecione o sexo" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="Masculino">Masculino</SelectItem>
-                        <SelectItem value="Feminino">Feminino</SelectItem>
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-
             <FormField
               control={form.control}
               name="especialidade"
@@ -125,7 +103,27 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
                 </FormItem>
               )}
             />
-
+            <FormField
+                control={form.control}
+                name="sexo"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Sexo</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Selecione o sexo" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="Masculino">Masculino</SelectItem>
+                        <SelectItem value="Feminino">Feminino</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
              <FormField
                   control={form.control}
                   name="dataNascimento"
