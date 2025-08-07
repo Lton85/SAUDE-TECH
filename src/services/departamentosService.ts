@@ -10,7 +10,12 @@ const departamentosCollection = collection(db, 'departamentos');
 
 export const getDepartamentos = async (): Promise<Departamento[]> => {
     const snapshot = await getDocs(departamentosCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Departamento)).sort((a, b) => parseInt(a.codigo) - parseInt(b.codigo));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Departamento)).sort((a, b) => {
+        if (a.codigo && b.codigo) {
+            return a.codigo.localeCompare(b.codigo);
+        }
+        return 0;
+    });
 };
 
 const checkSalaExists = async (numero: string, currentId?: string): Promise<boolean> => {
@@ -19,10 +24,12 @@ const checkSalaExists = async (numero: string, currentId?: string): Promise<bool
     const snapshot = await getDocs(q);
     if (snapshot.empty) return false;
     
+    // If we are updating, exclude the current document from the check
     if (currentId) {
         return snapshot.docs.some(doc => doc.id !== currentId);
     }
     
+    // If we are adding, any result means the room number exists
     return true;
 };
 
@@ -84,3 +91,5 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
 
     await deleteDoc(departamentoDoc);
 };
+
+    

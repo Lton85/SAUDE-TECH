@@ -8,8 +8,6 @@ import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
-import { getProfissionais } from './profissionaisService';
-
 
 interface SearchFilters {
     dateFrom: Date;
@@ -32,7 +30,7 @@ const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDe
     }
 }
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> & { prioridade?: FilaDeEsperaItem['prioridade'] } ) => {
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> ) => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
@@ -58,7 +56,7 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
             chegadaEm: serverTimestamp(),
             chamadaEm: null,
             finalizadaEm: null,
-            status: 'aguardando' // Explicitly set status
+            status: 'aguardando'
         });
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);
@@ -132,7 +130,6 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
         throw new Error("ID do item da fila não encontrado.");
     }
 
-    // 1. Get the department details to find the room number
     const departamentoDocRef = doc(db, 'departamentos', item.departamentoId);
     const departamentoSnap = await getDoc(departamentoDocRef);
 
@@ -147,16 +144,14 @@ export const chamarPaciente = async (item: FilaDeEsperaItem) => {
     }
 
 
-    // 2. Register the call on the public panel
     await createChamada({
         senha: item.senha,
         departamentoNome: sala,
         profissionalNome: item.profissionalNome,
         pacienteNome: item.pacienteNome,
-        atendimentoId: item.id, // Adiciona o ID do atendimento na chamada
+        atendimentoId: item.id,
     });
     
-    // 3. Update the patient's status in the queue
     const filaDocRef = doc(db, "filaDeEspera", item.id);
     await updateDoc(filaDocRef, {
         status: "em-atendimento",
@@ -174,7 +169,6 @@ export const finalizarAtendimento = async (id: string) => {
     
     const atendimentoData = filaDocSnap.data() as FilaDeEsperaItem;
 
-    // Create a new document in relatorios_atendimentos
     const relatoriosCollectionRef = collection(db, 'relatorios_atendimentos');
     await addDoc(relatoriosCollectionRef, {
         ...atendimentoData,
@@ -182,7 +176,6 @@ export const finalizarAtendimento = async (id: string) => {
         finalizadaEm: serverTimestamp()
     });
 
-    // Delete the document from filaDeEspera
     await deleteDoc(filaDocRef);
 };
 
@@ -203,19 +196,13 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
     try {
         const q = query(
             collection(db, "relatorios_atendimentos"),
-            where("pacienteId", "==", pacienteId)
+            where("pacienteId", "==", pacienteId),
+            orderBy("finalizadaEm", "desc")
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
         
-        // Sort in-memory after fetching to show most recent first
-        data.sort((a, b) => {
-            const timeA = a.finalizadaEm?.toMillis() || 0;
-            const timeB = b.finalizadaEm?.toMillis() || 0;
-            return timeB - timeA;
-        });
-
         return data;
 
     } catch (error) {
@@ -235,18 +222,12 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         const q = query(
             collection(db, "relatorios_atendimentos"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
-            where("finalizadaEm", "<=", Timestamp.fromDate(end))
+            where("finalizadaEm", "<=", Timestamp.fromDate(end)),
+            orderBy("finalizadaEm", "desc")
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
-        
-        // Sort in-memory after fetching to show most recent first
-        data.sort((a, b) => {
-            const timeA = a.finalizadaEm?.toMillis() || 0;
-            const timeB = b.finalizadaEm?.toMillis() || 0;
-            return timeB - timeA;
-        });
         
         return data;
 
@@ -327,7 +308,7 @@ export const retornarPacienteParaFila = async (id: string): Promise<void> => {
     const filaDocRef = doc(db, "filaDeEspera", id);
     await updateDoc(filaDocRef, {
         status: "aguardando",
-        chamadaEm: null // Reseta o horário da chamada
+        chamadaEm: null
     });
 };
 
@@ -339,7 +320,7 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
 
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
-            return 0; // Nenhum documento para excluir
+            return 0;
         }
 
         const batch = writeBatch(db);
@@ -354,3 +335,5 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
+
+    

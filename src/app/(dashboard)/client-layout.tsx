@@ -363,7 +363,7 @@ export default function DashboardClientLayout({
   React.useEffect(() => {
     const currentUser = getCurrentUser();
     if (currentUser) {
-        if (currentUser.usuario === 'usuarioteste') {
+        if (currentUser.usuario === 'master') {
             setUserMenuItems(allMenuItems);
         } else {
              const userPermissions = currentUser.permissoes || [];
@@ -405,7 +405,7 @@ export default function DashboardClientLayout({
     
     if (item.id === '/') {
         setActiveContentId(item.id);
-        setActiveTab(item.id); // Set active tab to home to highlight sidebar item
+        setActiveTab(item.id);
         return;
     }
     
@@ -423,7 +423,6 @@ export default function DashboardClientLayout({
   }
 
   const handleTabClose = (tabId: string) => {
-    // Prevent closing the home tab
     if (tabId === '/') return;
 
     const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
@@ -433,7 +432,6 @@ export default function DashboardClientLayout({
     if (activeContentId === tabId) {
         // Find the next logical tab to activate
         newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1];
-        // If the only other tab is the (hidden) home tab, find another one
         if (newActiveTab?.id === '/') {
             newActiveTab = openTabs.filter(t => t.id !== '/' && t.id !== tabId)[0];
         }
@@ -446,7 +444,9 @@ export default function DashboardClientLayout({
         setActiveTab(newActiveTab.id);
         setActiveContentId(newActiveTab.id);
     } else if (newOpenTabs.length > 0 && activeContentId === tabId) {
-        // If the closed tab was active, default to home content
+        setActiveTab(homeDefaultTab.id);
+        setActiveContentId(homeDefaultTab.id);
+    } else if (newOpenTabs.length === 1 && newOpenTabs[0].id === '/') {
         setActiveTab(homeDefaultTab.id);
         setActiveContentId(homeDefaultTab.id);
     }
@@ -457,7 +457,7 @@ export default function DashboardClientLayout({
       <div className="flex">
         <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} />
         <MainContent 
-            openTabs={openTabs} 
+            openTabs={openTabs.filter(tab => tab.id !== '/')} 
             activeTab={activeTab}
             activeContentId={activeContentId}
             onTabClick={handleTabClick}
@@ -468,3 +468,5 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
+
+    

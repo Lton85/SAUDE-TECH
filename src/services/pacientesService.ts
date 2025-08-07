@@ -8,7 +8,6 @@ import { getCurrentUser } from './authService';
 
 const pacientesCollection = collection(db, 'pacientes');
 
-// Obtém todos os pacientes do banco de dados.
 export const getPacientes = async (): Promise<Paciente[]> => {
     const q = query(pacientesCollection, orderBy("codigo"));
     const snapshot = await getDocs(q);
@@ -16,12 +15,11 @@ export const getPacientes = async (): Promise<Paciente[]> => {
 };
 
 
-// Obtém todos os pacientes em tempo real.
 export const getPacientesRealtime = (
     onUpdate: (data: Paciente[]) => void,
     onError: (error: string) => void
 ) => {
-    const q = query(collection(db, "pacientes"), orderBy("codigo"));
+    const q = query(collection(db, "pacientes"), orderBy("codigo", "desc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: Paciente[] = snapshot.docs.map(doc => ({
@@ -38,8 +36,6 @@ export const getPacientesRealtime = (
     return unsubscribe;
 };
 
-
-// Adiciona um novo paciente ao banco de dados.
 export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('pacientes_v2');
     const codigo = String(nextId).padStart(3, '0');
@@ -59,7 +55,6 @@ export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'hi
     return docRef.id;
 };
 
-// Atualiza um paciente existente no banco de dados.
 export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
     const docSnap = await getDoc(pacienteDoc);
@@ -83,8 +78,9 @@ export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente
     await updateDoc(pacienteDoc, updatedData);
 };
 
-// Exclui um paciente do banco de dados.
 export const deletePaciente = async (id: string): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
     await deleteDoc(pacienteDoc);
 };
+
+    

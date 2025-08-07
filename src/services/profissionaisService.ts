@@ -8,14 +8,12 @@ import { getCurrentUser } from './authService';
 
 const profissionaisCollection = collection(db, 'profissionais');
 
-// Obtém todos os profissionais do banco de dados.
 export const getProfissionais = async (): Promise<Profissional[]> => {
     const q = query(profissionaisCollection, orderBy("codigo"));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profissional));
 };
 
-// Adiciona um novo profissional ao banco de dados.
 export const addProfissional = async (profissional: Omit<Profissional, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('profissionais_v2');
     const codigo = String(nextId).padStart(3, '0');
@@ -34,7 +32,6 @@ export const addProfissional = async (profissional: Omit<Profissional, 'id' | 'c
     return docRef.id;
 };
 
-// Atualiza um profissional existente no banco de dados.
 export const updateProfissional = async (id: string, profissional: Partial<Omit<Profissional, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
     const profissionalDocRef = doc(db, 'profissionais', id);
     const profissionalSnap = await getDoc(profissionalDocRef);
@@ -55,8 +52,17 @@ export const updateProfissional = async (id: string, profissional: Partial<Omit<
     await updateDoc(profissionalDocRef, profissionalToUpdate);
 };
 
-// Exclui um profissional do banco de dados.
 export const deleteProfissional = async (id: string): Promise<void> => {
     const profissionalDoc = doc(db, 'profissionais', id);
+    
+    // Check if professional is in use in filaDeEspera
+    const q = query(collection(db, "filaDeEspera"), where("profissionalId", "==", id));
+    const activePatientsInQueue = await getDocs(q);
+    if (!activePatientsInQueue.empty) {
+        throw new Error(`Não é possível excluir. Este profissional está atendendo ${activePatientsInQueue.size} paciente(s) no momento.`);
+    }
+
     await deleteDoc(profissionalDoc);
 };
+
+    
