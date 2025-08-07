@@ -14,6 +14,7 @@ import { startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
+import { Tab, menuItems } from "./client-layout";
 
 const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading, color }: {
     title: string;
@@ -53,7 +54,11 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
     </Card>
 );
 
-export default function DashboardPage() {
+interface DashboardPageProps {
+  onCardClick: (item: Tab) => void;
+}
+
+export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const [totalPacientes, setTotalPacientes] = React.useState(0);
     const [pacientesInativos, setPacientesInativos] = React.useState(0);
     const [totalProfissionais, setTotalProfissionais] = React.useState(0);
@@ -116,8 +121,7 @@ export default function DashboardPage() {
         };
     }, []);
 
-
-    const features = [
+    const navFeatures = [
         { href: "/atendimento", title: "Atendimento", description: "Monitore o tempo de cada consulta.", icon: Clock },
         { href: "/cadastros", title: "Cadastros", description: "Gerencie pacientes, médicos e enfermeiros.", icon: Users },
         { href: "/triagem", title: "Departamentos", description: "Gerencie os departamentos e suas prioridades.", icon: ClipboardList },
@@ -125,11 +129,22 @@ export default function DashboardPage() {
         { href: "/painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2, target: "_blank" },
     ];
 
+    const handleCardClick = (feature: typeof navFeatures[number]) => {
+      const menuItem = menuItems.find(m => m.href === feature.href);
+      if (menuItem) {
+        if (feature.target === "_blank") {
+           window.open(feature.href, "_blank");
+        } else {
+           onCardClick(menuItem);
+        }
+      }
+    };
+
   return (
     <div className="space-y-8">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        {features.map((feature) => (
-          <Link key={feature.title} href={feature.href} target={feature.target || "_self"} className="flex">
+        {navFeatures.map((feature) => (
+          <div key={feature.title} onClick={() => handleCardClick(feature)} className="flex cursor-pointer">
               <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
                 <CardHeader className="p-0 mb-4">
                   <feature.icon className="h-8 w-8 text-primary mx-auto" />
@@ -141,7 +156,7 @@ export default function DashboardPage() {
                   </CardDescription>
                 </CardContent>
               </Card>
-          </Link>
+          </div>
         ))}
       </div>
       

@@ -54,7 +54,7 @@ const UsuariosPage = React.lazy(() => import('./usuarios/page'));
 const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 
 
-const menuItems = [
+export const menuItems = [
   { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage },
   { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage },
@@ -66,7 +66,7 @@ const menuItems = [
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank" },
 ];
 
-type Tab = (typeof menuItems)[number];
+export type Tab = (typeof menuItems)[number];
 
 const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; }) => {
     const { state } = useSidebar();
@@ -146,15 +146,17 @@ const DateTimeDisplay = () => {
     const [currentTime, setCurrentTime] = React.useState<Date | null>(null);
 
     React.useEffect(() => {
+        // This useEffect runs only on the client
         setCurrentTime(new Date());
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, []); // Empty dependency array ensures this runs once on mount
 
     if (!currentTime) {
+        // Render a placeholder on the server and initial client render
         return <Skeleton className="h-5 w-48" />;
     }
 
@@ -170,12 +172,13 @@ const DateTimeDisplay = () => {
 };
 
 
-const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, onMenuItemClick }: { 
     openTabs: Tab[];
     activeTab: string;
     activeContentId: string;
     onTabClick: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
+    onMenuItemClick: (item: Tab) => void;
 }) => {
   const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
   const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
@@ -209,6 +212,9 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
     if (activeComponentInfo.id === '/empresa') {
         props.onEmpresaDataChange = handleEmpresaDataChange;
         props.empresaData = empresa;
+    }
+    if (activeComponentInfo.id === '/') {
+        props.onCardClick = onMenuItemClick;
     }
     return React.createElement(activeComponentInfo.component, props);
   }
@@ -341,6 +347,7 @@ export default function DashboardClientLayout({
             activeContentId={activeContentId}
             onTabClick={handleTabClick}
             onTabClose={handleTabClose}
+            onMenuItemClick={handleMenuItemClick}
         />
       </div>
     </SidebarProvider>
