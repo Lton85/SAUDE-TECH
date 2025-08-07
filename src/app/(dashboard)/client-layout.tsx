@@ -18,6 +18,7 @@ import {
   Building,
   X,
   KeyRound,
+  Loader2,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -36,6 +37,8 @@ import { clearPainel } from "@/services/chamadasService";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { getEmpresa } from "@/services/empresaService";
+import type { Empresa } from "@/types/empresa";
 
 // Import page components dynamically
 const DashboardPage = React.lazy(() => import('./page'));
@@ -136,22 +139,31 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     );
 }
 
-const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, empresa, isLoadingEmpresa }: { 
     openTabs: Tab[];
     activeTab: string;
     activeContentId: string;
     onTabClick: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
+    empresa: Empresa | null;
+    isLoadingEmpresa: boolean;
 }) => {
   const activeComponent = menuItems.find(item => item.id === activeContentId)?.component;
 
   return (
     <SidebarInset>
-      <header className="flex h-12 items-center gap-4 border-b bg-card px-2 sticky top-0 z-30">
-        <SidebarTrigger className="md:hidden"/>
-        <nav className="flex-1 h-full overflow-x-auto">
+      <header className="sticky top-0 z-30 flex flex-col bg-card border-b">
+         <div className="flex h-14 items-center gap-4 px-4">
+            <SidebarTrigger className="md:hidden"/>
+            {isLoadingEmpresa ? (
+                 <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+                <h1 className="text-xl font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
+            )}
+        </div>
+        <nav className="flex-1 h-11 overflow-x-auto border-t">
             <AnimatePresence initial={false}>
-                <div className="flex h-full items-end gap-1">
+                <div className="flex h-full items-end gap-1 px-2">
                     {openTabs.map(tab => (
                         <motion.div
                             key={tab.id}
@@ -209,6 +221,23 @@ export default function DashboardClientLayout({
   // activeContentId tracks the component to render in the main content area
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
 
+  const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
+  const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
+  
+  React.useEffect(() => {
+    const fetchEmpresaData = async () => {
+        try {
+            const data = await getEmpresa();
+            setEmpresa(data);
+        } catch (error) {
+            console.error("Failed to fetch empresa data", error);
+        } finally {
+            setIsLoadingEmpresa(false);
+        }
+    };
+    fetchEmpresaData();
+  }, []);
+
 
   const handleMenuItemClick = (item: Tab) => {
     // If 'Início' is clicked, just show the dashboard content.
@@ -264,6 +293,8 @@ export default function DashboardClientLayout({
             activeContentId={activeContentId}
             onTabClick={handleTabClick}
             onTabClose={handleTabClose}
+            empresa={empresa}
+            isLoadingEmpresa={isLoadingEmpresa}
         />
       </div>
     </SidebarProvider>
