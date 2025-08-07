@@ -131,7 +131,7 @@ export function ProfissionaisList() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Profissionais</CardTitle>
+            <CardTitle>Lista de Profissionais</CardTitle>
             <CardDescription>Gerencie a equipe de profissionais da saúde.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -272,5 +272,7 @@ export function ProfissionaisList() {
     </>
   );
 }
+
+    
 
     

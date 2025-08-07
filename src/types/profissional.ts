@@ -5,7 +5,7 @@ export interface Profissional {
     nome: string;
     crm: string;
     cns: string;
-    sexo: 'Masculino' | 'Feminino';
+    sexo: 'Masculino' | 'Feminino' | '';
     especialidade: string;
     cpf: string;
     dataNascimento: string;

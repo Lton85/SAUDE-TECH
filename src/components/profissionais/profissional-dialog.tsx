@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -160,3 +161,5 @@ export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profission
     </Dialog>
   );
 }
+
+    

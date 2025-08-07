@@ -356,3 +356,5 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
+
+    

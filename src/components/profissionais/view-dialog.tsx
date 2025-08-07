@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { User, Stethoscope, FileText, BadgeInfo, IdCard, Calendar, Venus, Mars, Phone, Clock, Activity, Fingerprint } from "lucide-react";
@@ -98,3 +99,5 @@ export function ViewProfissionalDialog({ isOpen, onOpenChange, profissional }: V
     </Dialog>
   );
 }
+
+    
