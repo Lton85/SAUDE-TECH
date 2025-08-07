@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -122,6 +123,24 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        {features.map((feature) => (
+          <Link key={feature.title} href={feature.href} target={feature.target || "_self"} className="flex">
+              <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
+                <CardHeader className="p-0 mb-4">
+                  <feature.icon className="h-8 w-8 text-primary mx-auto" />
+                </CardHeader>
+                <CardContent className="p-0 flex-grow">
+                  <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+          </Link>
+        ))}
+      </div>
+      
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
            <StatCard 
                 title="Pacientes Cadastrados"
@@ -154,24 +173,6 @@ export default function DashboardPage() {
                 isLoading={isLoading}
            />
        </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        {features.map((feature) => (
-          <Link key={feature.title} href={feature.href} target={feature.target || "_self"} className="flex">
-              <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
-                <CardHeader className="p-0 mb-4">
-                  <feature.icon className="h-8 w-8 text-primary mx-auto" />
-                </CardHeader>
-                <CardContent className="p-0 flex-grow">
-                  <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }
