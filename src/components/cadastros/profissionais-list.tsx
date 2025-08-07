@@ -114,7 +114,7 @@ export function ProfissionaisList() {
       } catch (error) {
          toast({
           title: "Erro ao excluir profissional",
-          description: "Não foi possível remover o profissional.",
+          description: (error as Error).message,
           variant: "destructive",
         });
       } finally {

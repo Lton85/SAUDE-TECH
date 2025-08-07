@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy, where } from 'firebase/firestore';
 import type { Profissional } from '@/types/profissional';
 import { getNextCounter } from './countersService';
 import { getCurrentUser } from './authService';
@@ -64,5 +64,3 @@ export const deleteProfissional = async (id: string): Promise<void> => {
 
     await deleteDoc(profissionalDoc);
 };
-
-    
