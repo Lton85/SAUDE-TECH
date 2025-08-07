@@ -38,6 +38,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Import page components dynamically
 const DashboardPage = React.lazy(() => import('./page'));
@@ -138,6 +141,38 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     );
 }
 
+const DateTimeDisplay = () => {
+    const [currentTime, setCurrentTime] = React.useState<Date | null>(null);
+
+    React.useEffect(() => {
+        // Set initial time on client mount
+        setCurrentTime(new Date());
+        
+        // Update time every second
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        // Cleanup interval on unmount
+        return () => clearInterval(timer);
+    }, []);
+
+    if (!currentTime) {
+        return <Skeleton className="h-5 w-48" />;
+    }
+
+    const formattedDate = format(currentTime, "eeee, dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    const formattedTime = format(currentTime, "HH:mm:ss", { locale: ptBR });
+    
+    return (
+        <div className="text-right">
+            <p className="text-sm font-semibold capitalize">{formattedDate}</p>
+            <p className="text-xs text-muted-foreground">{formattedTime}</p>
+        </div>
+    );
+};
+
+
 const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose }: { 
     openTabs: Tab[];
     activeTab: string;
@@ -184,13 +219,16 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
   return (
     <SidebarInset>
       <header className="sticky top-0 z-30 flex flex-col bg-card border-b">
-         <div className="flex h-14 items-center gap-4 px-4">
-            <SidebarTrigger className="md:hidden"/>
-            {isLoadingEmpresa ? (
-                 <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-                <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
-            )}
+         <div className="flex h-14 items-center justify-between gap-4 px-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden"/>
+              {isLoadingEmpresa ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                  <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
+              )}
+            </div>
+             <DateTimeDisplay />
         </div>
         <nav className="flex-1 h-12 overflow-x-auto border-t">
             <AnimatePresence initial={false}>
