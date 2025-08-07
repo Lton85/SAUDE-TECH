@@ -146,15 +146,11 @@ const DateTimeDisplay = () => {
     const [currentTime, setCurrentTime] = React.useState<Date | null>(null);
 
     React.useEffect(() => {
-        // Set initial time on client mount
         setCurrentTime(new Date());
-        
-        // Update time every second
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
-        // Cleanup interval on unmount
         return () => clearInterval(timer);
     }, []);
 
@@ -243,9 +239,9 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
                             className={cn(
-                                "flex items-center h-[calc(100%-4px)] px-4 py-2 rounded-t-md border-b-2 cursor-pointer",
+                                "flex items-center h-[calc(100%-4px)] px-4 py-2 rounded-t-md cursor-pointer",
                                 activeTab === tab.id
-                                    ? "bg-primary border-primary text-primary-foreground font-semibold"
+                                    ? "bg-primary text-primary-foreground font-semibold"
                                     : "bg-muted/50 border-transparent hover:bg-muted"
                             )}
                             onClick={() => onTabClick(tab.id)}
@@ -269,7 +265,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
             </AnimatePresence>
         </nav>
       </header>
-      <main className="flex-1 p-4 bg-muted/30">
+      <main className="flex-1 p-4 bg-background">
         <React.Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
              {renderComponent()}
         </React.Suspense>
