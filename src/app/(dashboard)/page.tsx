@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardList, Clock, Tv2, Settings, UserPlus, Stethoscope, CalendarCheck, CalendarDays, UserMinus } from "lucide-react";
+import { Users, ClipboardList, Clock, Tv2, Settings, UserPlus, Stethoscope, CalendarCheck, CalendarDays, UserMinus, BarChart3, Building, KeyRound } from "lucide-react";
 import { getPacientesRealtime } from "@/services/pacientesService";
 import { getProfissionais } from "@/services/profissionaisService";
 import type { Paciente } from "@/types/paciente";
@@ -122,10 +122,13 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     }, []);
 
     const navFeatures = [
-        { href: "/atendimento", title: "Atendimento", description: "Monitore o tempo de cada consulta.", icon: Clock },
-        { href: "/cadastros", title: "Cadastros", description: "Gerencie pacientes, médicos e enfermeiros.", icon: Users },
-        { href: "/triagem", title: "Departamentos", description: "Gerencie os departamentos e suas prioridades.", icon: ClipboardList },
-        { href: "/configuracoes", title: "Configurações", description: "Ajuste as configurações gerais do sistema.", icon: Settings },
+        { href: "/atendimento", title: "Atendimento", description: "Acompanhe a fila de espera e chamadas.", icon: Clock },
+        { href: "/cadastros", title: "Cadastros", description: "Gerencie pacientes e profissionais.", icon: Users },
+        { href: "/triagem", title: "Departamentos", description: "Gerencie os locais de atendimento.", icon: ClipboardList },
+        { href: "/relatorios", title: "Relatórios", description: "Exporte e analise os dados de atendimento.", icon: BarChart3 },
+        { href: "/empresa", title: "Empresa", description: "Configure os dados da sua unidade de saúde.", icon: Building },
+        { href: "/usuarios", title: "Usuários", description: "Gerencie os acessos e permissões.", icon: KeyRound },
+        { href: "/configuracoes", title: "Configurações", description: "Ajuste os parâmetros gerais do sistema.", icon: Settings },
         { href: "/painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2, target: "_blank" },
     ];
 
@@ -142,7 +145,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {navFeatures.map((feature) => (
           <div key={feature.title} onClick={() => handleCardClick(feature)} className="flex cursor-pointer">
               <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
