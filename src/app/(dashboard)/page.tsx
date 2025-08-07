@@ -155,28 +155,26 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     
   return (
     <div className="flex flex-col gap-6">
-        <div className="p-4 border bg-card rounded-lg">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {navFeatures.map((feature) => (
-                    <Card 
-                        key={feature.id} 
-                        className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group text-center"
-                        onClick={() => handleCardClick(feature.id)}
-                    >
-                        <CardHeader className="items-center pb-2">
-                            <div className="p-3 rounded-full bg-primary/10 mb-2">
-                                <feature.icon className="h-6 w-6 text-primary transition-colors" />
-                            </div>
-                            <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-xs text-muted-foreground">
-                               {feature.description}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {navFeatures.map((feature) => (
+                <Card 
+                    key={feature.id} 
+                    className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group text-center"
+                    onClick={() => handleCardClick(feature.id)}
+                >
+                    <CardHeader className="items-center pb-2">
+                        <div className="p-3 rounded-full bg-primary/10 mb-2">
+                            <feature.icon className="h-6 w-6 text-primary transition-colors" />
+                        </div>
+                        <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-xs text-muted-foreground">
+                           {feature.description}
+                        </p>
+                    </CardContent>
+                </Card>
+            ))}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -211,5 +209,3 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     </div>
   );
 }
-
-    
