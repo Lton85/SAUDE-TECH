@@ -192,7 +192,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                 <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
             )}
         </div>
-        <nav className="flex-1 h-11 overflow-x-auto border-t">
+        <nav className="flex-1 h-12 overflow-x-auto border-t">
             <AnimatePresence initial={false}>
                 <div className="flex h-full items-end gap-1 px-2">
                     {openTabs.map(tab => (
@@ -204,7 +204,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
                             className={cn(
-                                "flex items-center h-[calc(100%-4px)] px-4 rounded-t-md border-b-2 cursor-pointer",
+                                "flex items-center h-[calc(100%-4px)] px-4 py-2 rounded-t-md border-b-2 cursor-pointer",
                                 activeTab === tab.id
                                     ? "bg-primary/10 border-primary text-primary font-semibold"
                                     : "bg-muted/50 border-transparent hover:bg-muted"
