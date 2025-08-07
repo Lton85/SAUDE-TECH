@@ -20,6 +20,7 @@ import {
   KeyRound,
   Loader2,
   LogOut,
+  UserCircle,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -32,6 +33,8 @@ import {
   SidebarInset,
   SidebarTrigger,
   useSidebar,
+  SidebarFooter,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { clearPainel } from "@/services/chamadasService";
@@ -80,6 +83,14 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
     const { toast } = useToast();
     const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
     const router = useRouter();
+    const [userName, setUserName] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        const user = getCurrentUser();
+        if (user) {
+            setUserName(user.nome);
+        }
+    }, []);
 
     const handleOpenPainel = async () => {
         try {
@@ -166,6 +177,23 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
                   ))}
                 </SidebarMenu>
               </SidebarContent>
+                <SidebarFooter>
+                    <SidebarSeparator />
+                     <div className="p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-2 flex justify-center">
+                        {state === 'expanded' ? (
+                            userName ? (
+                                <div className="flex items-center gap-2 text-xs text-sidebar-foreground/70 px-2 py-1 bg-sidebar-accent rounded-md">
+                                    <UserCircle className="h-4 w-4" />
+                                    <span>Usuário: <span className="font-semibold">{userName}</span></span>
+                                </div>
+                            ) : (
+                                <Skeleton className="h-5 w-3/4" />
+                            )
+                        ) : (
+                            <UserCircle className="h-5 w-5 text-sidebar-foreground/70" />
+                        )}
+                    </div>
+                </SidebarFooter>
             </Sidebar>
             <ExitConfirmationDialog
                 isOpen={isExitDialogOpen}
