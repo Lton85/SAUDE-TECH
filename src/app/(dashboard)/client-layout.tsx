@@ -204,7 +204,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
                             className={cn(
-                                "flex items-center h-[calc(100%-4px)] px-3 rounded-t-md border-b-2 cursor-pointer",
+                                "flex items-center h-[calc(100%-4px)] px-4 rounded-t-md border-b-2 cursor-pointer",
                                 activeTab === tab.id
                                     ? "bg-primary/10 border-primary text-primary font-semibold"
                                     : "bg-muted/50 border-transparent hover:bg-muted"
