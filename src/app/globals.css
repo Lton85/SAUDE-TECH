@@ -80,6 +80,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: hsl(var(--muted) / 0.3);
   }
 }
