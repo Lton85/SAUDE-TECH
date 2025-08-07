@@ -13,7 +13,10 @@ import { collection, onSnapshot, query, where, Timestamp } from "firebase/firest
 import { startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Tab, menuItems } from "./client-layout";
+import type { Tab } from "./client-layout";
+import { allMenuItems } from "./client-layout";
+import { getCurrentUser } from "@/services/authService";
+
 
 const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading, color, valueLabel }: {
     title: string;
@@ -74,6 +77,21 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const [atendimentosHoje, setAtendimentosHoje] = React.useState(0);
     const [atendimentosMes, setAtendimentosMes] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
+
+    React.useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            if (currentUser.usuario === 'usuarioteste') {
+                setUserMenuItems(allMenuItems);
+            } else {
+                const allowedMenuItems = allMenuItems.filter(item => 
+                    !item.permissionRequired || (currentUser.permissoes && currentUser.permissoes.includes(item.id))
+                );
+                setUserMenuItems(allowedMenuItems);
+            }
+        }
+    }, []);
 
      React.useEffect(() => {
         setIsLoading(true);
@@ -135,10 +153,17 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
         { href: "/triagem", title: "Departamentos", description: "Gerencie os locais de atendimento.", icon: ClipboardList },
         { href: "/relatorios", title: "Relatórios", description: "Exporte e analise os dados de atendimento.", icon: BarChart3 },
         { href: "/painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2, target: "_blank" },
-    ];
+    ].filter(feature => {
+        // Find the corresponding menu item from the user's allowed menu items
+        return userMenuItems.some(item => {
+             // Handle special case for /painel which doesn't have a leading slash in its id
+            if (feature.href === '/painel') return item.id === 'painel';
+            return item.href === feature.href;
+        });
+    });
 
     const handleCardClick = (feature: typeof navFeatures[number]) => {
-      const menuItem = menuItems.find(m => m.href === feature.href);
+      const menuItem = allMenuItems.find(m => m.href === feature.href || m.id === feature.href);
       if (menuItem) {
         if (feature.target === "_blank") {
            window.open(feature.href, "_blank");

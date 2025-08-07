@@ -4,6 +4,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
 import type { Usuario } from '@/types/usuario';
 import { getNextCounter } from './countersService';
+import { getCurrentUser } from './authService';
 
 const usuariosCollection = collection(db, 'usuarios');
 
@@ -16,14 +17,15 @@ export const getUsuarios = async (): Promise<Usuario[]> => {
 export const addUsuario = async (usuario: Omit<Usuario, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('usuarios');
     const codigo = String(nextId).padStart(3, '0');
+    const loggedUser = getCurrentUser();
     const newUsuario = {
         ...usuario,
         codigo,
         historico: {
             criadoEm: new Date().toISOString(),
-            criadoPor: 'Admin (Cadastro)',
+            criadoPor: loggedUser?.nome || 'Admin',
             alteradoEm: new Date().toISOString(),
-            alteradoPor: 'Admin (Cadastro)',
+            alteradoPor: loggedUser?.nome || 'Admin',
         }
     }
     const docRef = await addDoc(usuariosCollection, newUsuario);
@@ -37,13 +39,14 @@ export const updateUsuario = async (id: string, usuario: Partial<Omit<Usuario, '
         throw new Error("Usuário não encontrado");
     }
     const existingUsuario = usuarioSnap.data() as Usuario;
+    const loggedUser = getCurrentUser();
 
-    const usuarioToUpdate: Partial<Omit<Usuario, 'id'>> = {
+    const usuarioToUpdate: Partial<Omit<Usuario, 'id' | 'codigo'>> = {
         ...usuario,
         historico: {
             ...existingUsuario.historico,
             alteradoEm: new Date().toISOString(),
-            alteradoPor: 'Admin (Edição)',
+            alteradoPor: loggedUser?.nome || 'Admin',
         }
     }
     await updateDoc(usuarioDocRef, usuarioToUpdate);

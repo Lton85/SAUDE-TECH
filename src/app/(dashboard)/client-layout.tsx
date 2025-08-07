@@ -44,7 +44,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExitConfirmationDialog } from "@/components/ui/exit-dialog";
-import { logout } from "@/services/authService";
+import { logout, getCurrentUser } from "@/services/authService";
 import { useRouter } from "next/navigation";
 
 
@@ -59,22 +59,22 @@ const UsuariosPage = React.lazy(() => import('./usuarios/page'));
 const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 
 
-export const menuItems = [
-  { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage },
-  { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage },
-  { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage },
-  { id: "/triagem", href: "/triagem", label: "Departamentos", icon: ClipboardList, component: DepartamentosPage },
-  { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage },
-  { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage },
-  { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage },
-  { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage },
-  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank" },
-  { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null },
+export const allMenuItems = [
+  { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
+  { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage, permissionRequired: true },
+  { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
+  { id: "/triagem", href: "/triagem", label: "Departamentos", icon: ClipboardList, component: DepartamentosPage, permissionRequired: true },
+  { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage, permissionRequired: true },
+  { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
+  { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
+  { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage, permissionRequired: true },
+  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: false },
+  { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
 ];
 
-export type Tab = (typeof menuItems)[number];
+export type Tab = (typeof allMenuItems)[number];
 
-const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; }) => {
+const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[] }) => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
     const { toast } = useToast();
@@ -110,7 +110,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
         return menuItems.filter(item => 
             item.label.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [searchTerm]);
+    }, [searchTerm, menuItems]);
     
     const handleButtonClick = (item: Tab) => {
         if (item.id === 'painel') {
@@ -236,7 +236,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
     setEmpresa(prev => prev ? { ...prev, ...newData } : null);
   };
 
-  const activeComponentInfo = menuItems.find(item => item.id === activeContentId);
+  const activeComponentInfo = allMenuItems.find(item => item.id === activeContentId);
 
   const renderComponent = () => {
     if (!activeComponentInfo || !activeComponentInfo.component) {
@@ -322,27 +322,31 @@ export default function DashboardClientLayout({
 }) {
 
   const [openTabs, setOpenTabs] = React.useState<Tab[]>([]);
-  // activeTab tracks the visually highlighted tab
   const [activeTab, setActiveTab] = React.useState<string>("/");
-  // activeContentId tracks the component to render in the main content area
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
+  const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
   
+  React.useEffect(() => {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+        if (currentUser.usuario === 'usuarioteste') {
+            setUserMenuItems(allMenuItems);
+        } else {
+            const allowedMenuItems = allMenuItems.filter(item => 
+                !item.permissionRequired || (currentUser.permissoes && currentUser.permissoes.includes(item.id))
+            );
+            setUserMenuItems(allowedMenuItems);
+        }
+    }
+  }, []);
+
   const handleMenuItemClick = (item: Tab) => {
     if (!item.component) return;
-
-    // If 'Início' is clicked, just show the dashboard content.
-    // Don't change the active tab, just the content view.
-    if (item.id === '/') {
-        setActiveContentId('/');
-        return;
-    }
     
-    // If tab is not open, add it
     if (!openTabs.some(tab => tab.id === item.id)) {
         setOpenTabs(prev => [...prev, item]);
     }
     
-    // Set both the active tab and content to the clicked item
     setActiveTab(item.id);
     setActiveContentId(item.id);
   }
@@ -356,27 +360,24 @@ export default function DashboardClientLayout({
     const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
     if (closingTabIndex === -1) return;
 
-    // Determine the new active tab/content before removing the closed one
     if (activeContentId === tabId) {
-        const newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1];
+        const newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1] || userMenuItems.find(item => item.id === "/");
         if (newActiveTab) {
             setActiveTab(newActiveTab.id);
             setActiveContentId(newActiveTab.id);
         } else {
-            // If no other tabs, go back to home/dashboard view
             setActiveTab('/');
             setActiveContentId('/');
         }
     }
     
-    // Remove the closed tab
     setOpenTabs(prev => prev.filter(tab => tab.id !== tabId));
   }
 
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} />
+        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} />
         <MainContent 
             openTabs={openTabs} 
             activeTab={activeTab}

@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { updateUsuario } from "@/services/usuariosService";
 import { Label } from "../ui/label";
+import { allMenuItems } from "@/app/(dashboard)/client-layout";
 
 interface PermissionsDialogProps {
   isOpen: boolean;
@@ -18,15 +19,8 @@ interface PermissionsDialogProps {
   usuario?: Usuario | null;
 }
 
-const allMenus = [
-    { id: "/atendimento", label: "Fila de Atendimento" },
-    { id: "/cadastros", label: "Cadastros" },
-    { id: "/triagem", label: "Departamentos" },
-    { id: "/relatorios", label: "Relatórios" },
-    { id: "/empresa", label: "Empresa" },
-    { id: "/usuarios", label: "Usuários" },
-    { id: "/configuracoes", label: "Configurações" },
-];
+const permissionableMenus = allMenuItems.filter(item => item.permissionRequired);
+
 
 export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: PermissionsDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -46,10 +40,10 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: 
   };
   
   const handleSelectAll = () => {
-    if (selectedPermissions.length === allMenus.length) {
+    if (selectedPermissions.length === permissionableMenus.length) {
       setSelectedPermissions([]);
     } else {
-      setSelectedPermissions(allMenus.map(menu => menu.id));
+      setSelectedPermissions(permissionableMenus.map(menu => menu.id));
     }
   };
 
@@ -95,14 +89,14 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: 
             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer" onClick={handleSelectAll}>
                 <Checkbox
                     id="select-all"
-                    checked={selectedPermissions.length === allMenus.length}
+                    checked={selectedPermissions.length === permissionableMenus.length}
                     onCheckedChange={handleSelectAll}
                 />
                 <Label htmlFor="select-all" className="font-semibold cursor-pointer">
                     Selecionar Todos
                 </Label>
             </div>
-            {allMenus.map(menu => (
+            {permissionableMenus.map(menu => (
                 <div key={menu.id} className="flex items-center space-x-2 pl-4 pr-2 py-1 rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => handlePermissionChange(menu.id, !selectedPermissions.includes(menu.id))}>
                     <Checkbox 
                         id={menu.id}
