@@ -19,6 +19,7 @@ import {
   X,
   KeyRound,
   Loader2,
+  LogOut,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -42,6 +43,7 @@ import type { Empresa } from "@/types/empresa";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExitConfirmationDialog } from "@/components/ui/exit-dialog";
 
 // Import page components dynamically
 const DashboardPage = React.lazy(() => import('./page'));
@@ -64,6 +66,7 @@ export const menuItems = [
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank" },
+  { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null },
 ];
 
 export type Tab = (typeof menuItems)[number];
@@ -72,6 +75,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
     const { toast } = useToast();
+    const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
 
     const handleOpenPainel = async () => {
         try {
@@ -85,6 +89,14 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
             });
         }
     };
+    
+    const handleExit = () => {
+        setIsExitDialogOpen(true);
+    };
+
+    const handleExitConfirm = () => {
+        window.close();
+    };
 
     const filteredMenuItems = React.useMemo(() => {
         if (!searchTerm) {
@@ -95,50 +107,67 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
         );
     }, [searchTerm]);
     
+    const handleButtonClick = (item: Tab) => {
+        if (item.id === 'painel') {
+            handleOpenPainel();
+        } else if (item.id === 'sair') {
+            handleExit();
+        } else {
+            onMenuItemClick(item);
+        }
+    };
+    
     return (
-        <Sidebar collapsible="icon">
-          <SidebarHeader className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <HeartPulse className="h-8 w-8 text-primary" />
-              <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
-                  <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
-              </div>
-            </Link>
-             <SidebarTrigger className="hidden md:flex h-7 w-7">
-                {state === 'expanded' ? <PanelLeftClose /> : <PanelLeftOpen />}
-             </SidebarTrigger>
-          </SidebarHeader>
-          <SidebarContent>
-            <div className="p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-2">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
-                    <Input 
-                        placeholder="Pesquisar..."
-                        className="pl-10 group-data-[collapsible=icon]:hidden"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                     <div className="items-center justify-center group-data-[collapsible=icon]:flex hidden">
-                        <Search className="h-5 w-5 text-muted-foreground" />
+        <>
+            <Sidebar collapsible="icon">
+              <SidebarHeader className="flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-2">
+                  <HeartPulse className="h-8 w-8 text-primary" />
+                  <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
+                      <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
+                  </div>
+                </Link>
+                 <SidebarTrigger className="hidden md:flex h-7 w-7">
+                    {state === 'expanded' ? <PanelLeftClose /> : <PanelLeftOpen />}
+                 </SidebarTrigger>
+              </SidebarHeader>
+              <SidebarContent>
+                <div className="p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-2">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                        <Input 
+                            placeholder="Pesquisar..."
+                            className="pl-10 group-data-[collapsible=icon]:hidden"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                         <div className="items-center justify-center group-data-[collapsible=icon]:flex hidden">
+                            <Search className="h-5 w-5 text-muted-foreground" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <SidebarMenu>
-              {filteredMenuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                        onClick={item.id === 'painel' ? handleOpenPainel : () => onMenuItemClick(item)}
-                        isActive={activeContentId === item.id}
-                        tooltip={{children: item.label, side: "right"}}
-                    >
-                        <item.icon />
-                        <span>{item.label}</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
+                <SidebarMenu>
+                  {filteredMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton
+                            onClick={() => handleButtonClick(item)}
+                            isActive={activeContentId === item.id}
+                            tooltip={{children: item.label, side: "right"}}
+                        >
+                            <item.icon />
+                            <span>{item.label}</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarContent>
+            </Sidebar>
+            <ExitConfirmationDialog
+                isOpen={isExitDialogOpen}
+                onOpenChange={setIsExitDialogOpen}
+                onConfirm={handleExitConfirm}
+            />
+        </>
     );
 }
 
@@ -294,6 +323,8 @@ export default function DashboardClientLayout({
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
   
   const handleMenuItemClick = (item: Tab) => {
+    if (!item.component) return;
+
     // If 'Início' is clicked, just show the dashboard content.
     // Don't change the active tab, just the content view.
     if (item.id === '/') {
