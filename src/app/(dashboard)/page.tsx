@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardList, Clock, Tv2, Settings, UserPlus, Stethoscope, CalendarCheck, CalendarDays, UserMinus, BarChart3, Building, KeyRound, CheckCircle, UserX } from "lucide-react";
+import { Users, ClipboardList, Clock, Tv2, UserPlus, Stethoscope, CalendarCheck, CalendarDays, BarChart3, CheckCircle, UserX } from "lucide-react";
 import { getPacientesRealtime } from "@/services/pacientesService";
 import { getProfissionais } from "@/services/profissionaisService";
 import type { Paciente } from "@/types/paciente";
@@ -12,7 +12,6 @@ import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, where, Timestamp } from "firebase/firestore";
 import { startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from 'next/link';
 import { cn } from "@/lib/utils";
 import { Tab, menuItems } from "./client-layout";
 

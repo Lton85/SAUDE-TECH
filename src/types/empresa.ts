@@ -14,5 +14,3 @@ export interface Empresa {
     telefone: string;
     email: string;
 }
-
-    

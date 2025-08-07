@@ -321,5 +321,3 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         </Card>
     );
 }
-
-    
