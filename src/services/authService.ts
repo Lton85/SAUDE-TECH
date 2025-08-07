@@ -42,6 +42,7 @@ export const login = async (username: string, pass: string, clientCode: string):
   if (typeof window !== 'undefined') {
     const { senha, ...userToStore } = user;
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userToStore));
+    window.location.href = '/atendimento'; // Redireciona após o login
   }
 
   const { senha, ...userToReturn } = user;

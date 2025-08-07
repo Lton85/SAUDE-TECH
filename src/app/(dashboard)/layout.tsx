@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { checkAuth, getCurrentUser } from '@/services/authService';
+import { getCurrentUser } from '@/services/authService';
 import { Loader2 } from 'lucide-react';
 import DashboardClientLayout from './client-layout';
 
@@ -19,7 +19,7 @@ export default function DashboardLayout({
     const verifyAuth = () => {
       const user = getCurrentUser();
       if (!user) {
-        router.replace('/login');
+        router.replace('/');
       } else {
         setIsAuthenticated(true);
       }
