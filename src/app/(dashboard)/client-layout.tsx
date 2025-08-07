@@ -206,7 +206,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                             className={cn(
                                 "flex items-center h-[calc(100%-4px)] px-4 py-2 rounded-t-md border-b-2 cursor-pointer",
                                 activeTab === tab.id
-                                    ? "bg-primary/10 border-primary text-primary font-semibold"
+                                    ? "bg-primary border-primary text-primary-foreground font-semibold"
                                     : "bg-muted/50 border-transparent hover:bg-muted"
                             )}
                             onClick={() => onTabClick(tab.id)}
