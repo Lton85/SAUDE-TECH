@@ -50,7 +50,7 @@ export function ViewProfissionalDialog({ isOpen, onOpenChange, profissional }: V
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <InfoRow icon={BadgeInfo} label="Código" value={profissional.codigo} />
                     <InfoRow icon={User} label="Nome Completo" value={profissional.nome} />
-                    <InfoRow icon={IdCard} label="CRM" value={profissional.crm} />
+                    <InfoRow icon={IdCard} label="Conselho" value={profissional.crm} />
                     <InfoRow icon={IdCard} label="CNS" value={profissional.cns} />
                     <InfoRow icon={Stethoscope} label="Especialidade" value={profissional.especialidade} />
                 </div>
@@ -99,5 +99,3 @@ export function ViewProfissionalDialog({ isOpen, onOpenChange, profissional }: V
     </Dialog>
   );
 }
-
-    

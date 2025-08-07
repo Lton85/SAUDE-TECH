@@ -69,7 +69,7 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
               name="crm"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CRM / Conselho</FormLabel>
+                  <FormLabel>Conselho</FormLabel>
                   <FormControl>
                     <Input placeholder="000000/BR" {...field} />
                   </FormControl>
@@ -233,5 +233,3 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
 }
 
 ProfissionalForm.SituacaoCheckbox = SituacaoCheckbox;
-
-    
