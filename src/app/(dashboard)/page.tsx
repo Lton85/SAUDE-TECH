@@ -135,9 +135,6 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
         { href: "/cadastros", title: "Cadastros", description: "Gerencie pacientes e profissionais.", icon: Users },
         { href: "/triagem", title: "Departamentos", description: "Gerencie os locais de atendimento.", icon: ClipboardList },
         { href: "/relatorios", title: "Relatórios", description: "Exporte e analise os dados de atendimento.", icon: BarChart3 },
-        { href: "/empresa", title: "Empresa", description: "Configure os dados da sua unidade de saúde.", icon: Building },
-        { href: "/usuarios", title: "Usuários", description: "Gerencie os acessos e permissões.", icon: KeyRound },
-        { href: "/configuracoes", title: "Configurações", description: "Ajuste os parâmetros gerais do sistema.", icon: Settings },
         { href: "/painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2, target: "_blank" },
     ];
 
