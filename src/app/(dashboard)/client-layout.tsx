@@ -189,7 +189,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
             {isLoadingEmpresa ? (
                  <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-                <h1 className="text-xl font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
+                <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
             )}
         </div>
         <nav className="flex-1 h-11 overflow-x-auto border-t">
