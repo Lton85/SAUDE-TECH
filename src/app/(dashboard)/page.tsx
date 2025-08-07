@@ -51,7 +51,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
                             </span>
                         )}
                     </div>
-                    {subValue !== undefined && subLabel && SubIcon && (
+                    {subValue !== undefined && subValue > 0 && subLabel && SubIcon && (
                         <p className="text-xs text-red-600 font-semibold flex items-center gap-1 mt-1">
                             <SubIcon className="h-3 w-3" />
                             {subValue} {subLabel}

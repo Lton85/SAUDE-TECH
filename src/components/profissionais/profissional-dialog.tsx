@@ -130,7 +130,7 @@ export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profission
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <Stethoscope />}

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -97,7 +98,7 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <PlusCircle />}
