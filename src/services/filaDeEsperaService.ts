@@ -139,8 +139,7 @@ export const getFilaDeEspera = (
     const q = query(
         collection(db, "filaDeEspera"),
         where("status", "==", "aguardando"),
-        orderBy("prioridade"),
-        orderBy("chegadaEm")
+        orderBy("chegadaEm", "asc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
