@@ -1,4 +1,6 @@
 
+"use client";
+
 import * as z from "zod";
 
 const anexoSchema = z.object({
@@ -9,7 +11,7 @@ const anexoSchema = z.object({
 
 export const UsuarioFormSchema = z.object({
   nome: z.string().min(3, "O nome é obrigatório."),
-  cpf: z.string().min(11, "O CPF é obrigatório."),
+  cpf: z.string().optional(),
   usuario: z.string().min(3, "O nome de usuário é obrigatório."),
   senha: z.string().min(1, "A senha é obrigatória."),
   confirmarSenha: z.string(),
