@@ -87,7 +87,7 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
         await addUsuario(usuarioData as Omit<Usuario, 'id' | 'codigo' | 'historico'>);
         toast({
           title: "Usuário Cadastrado!",
-          description: `O usuário ${values.nome} foi adicionado.`,
+          description: `O usuário ${values.nome} foi adicionado com sucesso.`,
           className: "bg-green-500 text-white"
         });
       }
@@ -106,7 +106,7 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <KeyRound />}
@@ -137,5 +137,3 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
     </Dialog>
   );
 }
-
-    

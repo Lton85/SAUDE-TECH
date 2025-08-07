@@ -159,7 +159,7 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!isSubmitting) onOpenChange(open) }}>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-4xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? <Pencil /> : <UserPlus />}

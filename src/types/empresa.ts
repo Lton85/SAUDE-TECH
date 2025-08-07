@@ -1,7 +1,7 @@
 
 export interface Empresa {
     id: string;
-    codigoCliente?: string;
+    codigoCliente: string;
     razaoSocial: string;
     nomeFantasia: string;
     cnpj: string;
