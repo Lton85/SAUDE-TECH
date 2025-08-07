@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, where, getDocs } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { endOfDay, startOfDay } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface DashboardPageProps {
   onCardClick: (item: Tab) => void;
@@ -21,9 +22,10 @@ interface SummaryCardProps {
     icon: React.ElementType;
     description?: string;
     isLoading: boolean;
+    inactiveCount?: number | null;
 }
 
-const SummaryCard = ({ title, value, icon: Icon, description, isLoading }: SummaryCardProps) => (
+const SummaryCard = ({ title, value, icon: Icon, description, isLoading, inactiveCount }: SummaryCardProps) => (
     <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -33,17 +35,23 @@ const SummaryCard = ({ title, value, icon: Icon, description, isLoading }: Summa
             {isLoading ? (
                 <>
                     <Skeleton className="h-8 w-16" />
-                    {description && <Skeleton className="h-4 w-24 mt-1" />}
+                    <Skeleton className="h-4 w-24 mt-1" />
                 </>
             ) : (
                 <>
                     <div className="text-2xl font-bold">{value}</div>
-                    {description && <p className="text-xs text-muted-foreground">{description}</p>}
+                    {description && !inactiveCount && <p className="text-xs text-muted-foreground">{description}</p>}
+                    {inactiveCount !== null && inactiveCount !== undefined && (
+                         <p className={cn("text-xs", inactiveCount > 0 ? "text-red-500 font-semibold" : "text-muted-foreground")}>
+                            {inactiveCount} inativos
+                        </p>
+                    )}
                 </>
             )}
         </CardContent>
     </Card>
 );
+
 
 export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const currentUser = getCurrentUser();
@@ -126,7 +134,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             { id: "/atendimento", title: "Atendimento", description: "Monitore o tempo de cada consulta.", icon: Clock },
             { id: "/cadastros", title: "Cadastros", description: "Gerencie pacientes, médicos e enfermeiros.", icon: Users },
             { id: "/triagem", title: "Departamentos", description: "Gerencie os departamentos e suas prioridades.", icon: ClipboardList },
-            { id: "/configuracoes", title: "Configurações", description: "Ajuste as configurações gerais do sistema.", icon: Settings },
+            { id: "/relatorios", title: "Relatórios", description: "Consulte o histórico de atendimentos.", icon: BarChart3 },
             { id: "painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2 },
         ];
 
@@ -182,7 +190,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 title="Pacientes Cadastrados"
                 value={pacientesCount}
                 icon={Users2}
-                description={pacientesInativosCount !== null ? `${pacientesInativosCount} inativos` : undefined}
+                inactiveCount={pacientesInativosCount}
                 isLoading={pacientesCount === null}
             />
              <SummaryCard 
@@ -195,7 +203,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 title="Profissionais"
                 value={profissionaisCount}
                 icon={Stethoscope}
-                description={profissionaisInativosCount !== null ? `${profissionaisInativosCount} inativos` : undefined}
+                inactiveCount={profissionaisInativosCount}
                 isLoading={profissionaisCount === null}
             />
             <SummaryCard 
@@ -209,3 +217,4 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     </div>
   );
 }
+
