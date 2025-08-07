@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -139,16 +138,48 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     );
 }
 
-const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, empresa, isLoadingEmpresa }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose }: { 
     openTabs: Tab[];
     activeTab: string;
     activeContentId: string;
     onTabClick: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
-    empresa: Empresa | null;
-    isLoadingEmpresa: boolean;
 }) => {
-  const activeComponent = menuItems.find(item => item.id === activeContentId)?.component;
+  const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
+  const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchEmpresaData = async () => {
+        setIsLoadingEmpresa(true);
+        try {
+            const data = await getEmpresa();
+            setEmpresa(data);
+        } catch (error) {
+            console.error("Failed to fetch empresa data", error);
+        } finally {
+            setIsLoadingEmpresa(false);
+        }
+    };
+    fetchEmpresaData();
+  }, []);
+
+  const handleEmpresaDataChange = (newData: Partial<Empresa>) => {
+    setEmpresa(prev => prev ? { ...prev, ...newData } : null);
+  };
+
+  const activeComponentInfo = menuItems.find(item => item.id === activeContentId);
+
+  const renderComponent = () => {
+    if (!activeComponentInfo || !activeComponentInfo.component) {
+        return null;
+    }
+    const props: any = {};
+    if (activeComponentInfo.id === '/empresa') {
+        props.onEmpresaDataChange = handleEmpresaDataChange;
+        props.empresaData = empresa;
+    }
+    return React.createElement(activeComponentInfo.component, props);
+  }
 
   return (
     <SidebarInset>
@@ -201,7 +232,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
       </header>
       <main className="flex-1 p-2 bg-background">
         <React.Suspense fallback={<div className="p-4">Carregando...</div>}>
-            {activeComponent && React.createElement(activeComponent)}
+             {renderComponent()}
         </React.Suspense>
       </main>
     </SidebarInset>
@@ -220,25 +251,7 @@ export default function DashboardClientLayout({
   const [activeTab, setActiveTab] = React.useState<string>("/");
   // activeContentId tracks the component to render in the main content area
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
-
-  const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
-  const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
   
-  React.useEffect(() => {
-    const fetchEmpresaData = async () => {
-        try {
-            const data = await getEmpresa();
-            setEmpresa(data);
-        } catch (error) {
-            console.error("Failed to fetch empresa data", error);
-        } finally {
-            setIsLoadingEmpresa(false);
-        }
-    };
-    fetchEmpresaData();
-  }, []);
-
-
   const handleMenuItemClick = (item: Tab) => {
     // If 'Início' is clicked, just show the dashboard content.
     // Don't change the active tab, just the content view.
@@ -293,8 +306,6 @@ export default function DashboardClientLayout({
             activeContentId={activeContentId}
             onTabClick={handleTabClick}
             onTabClose={handleTabClose}
-            empresa={empresa}
-            isLoadingEmpresa={isLoadingEmpresa}
         />
       </div>
     </SidebarProvider>

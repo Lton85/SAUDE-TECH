@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Building, Save, Loader2, Pencil, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
+import { saveOrUpdateEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,7 +38,12 @@ const initialEmpresaState: Empresa = {
     email: "",
 };
 
-export default function EmpresaPage() {
+interface EmpresaPageProps {
+    empresaData: Empresa | null;
+    onEmpresaDataChange: (newData: Partial<Empresa>) => void;
+}
+
+export default function EmpresaPage({ empresaData, onEmpresaDataChange }: EmpresaPageProps) {
     const [formData, setFormData] = useState<Empresa>(initialEmpresaState);
     const [cities, setCities] = useState<string[]>([]);
     const [isCitiesLoading, setIsCitiesLoading] = useState(false);
@@ -47,29 +52,19 @@ export default function EmpresaPage() {
     const [isEditing, setIsEditing] = useState(false);
     const { toast } = useToast();
 
-    const fetchEmpresaData = async () => {
+    useEffect(() => {
         setIsLoading(true);
-        try {
-            const data = await getEmpresa();
-            if (data) {
-                setFormData(data);
-                if (data.uf) {
-                    await fetchCitiesForUf(data.uf);
-                }
-            } else {
-                setFormData(initialEmpresaState);
-                setIsEditing(true); 
+        if (empresaData) {
+            setFormData(empresaData);
+            if (empresaData.uf) {
+                fetchCitiesForUf(empresaData.uf);
             }
-        } catch (error) {
-            toast({
-                title: "Erro ao carregar dados",
-                description: "Não foi possível buscar as informações da empresa.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsLoading(false);
+        } else {
+            setFormData(initialEmpresaState);
+            setIsEditing(true); 
         }
-    };
+        setIsLoading(false);
+    }, [empresaData]);
     
     const fetchCitiesForUf = async (uf: string) => {
         if (!uf) {
@@ -95,26 +90,30 @@ export default function EmpresaPage() {
         }
     }
     
-    useEffect(() => {
-        fetchEmpresaData();
-    }, []);
-    
     const handleUfChange = (uf: string) => {
-        setFormData(prev => ({ ...prev, uf, cidade: "" })); // Reset city when UF changes
+        const newFormData = { ...formData, uf, cidade: "" };
+        setFormData(newFormData);
+        onEmpresaDataChange({ uf, cidade: "" });
         fetchCitiesForUf(uf);
     }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
-        setFormData(prev => ({...prev, [id]: value }));
+        const newFormData = {...formData, [id]: value };
+        setFormData(newFormData);
+        if (id === 'razaoSocial') {
+            onEmpresaDataChange({ razaoSocial: value });
+        }
     }
 
     const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf'>, value: string) => {
-        setFormData(prev => ({...prev, [id]: value }));
+        const newFormData = { ...formData, [id]: value };
+        setFormData(newFormData);
+        onEmpresaDataChange({ [id]: value });
     }
     
     const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const cep = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+        const cep = e.target.value.replace(/\D/g, '');
         if (cep.length !== 8) return;
 
         try {
@@ -128,14 +127,21 @@ export default function EmpresaPage() {
                     variant: "destructive",
                 });
             } else {
-                 setFormData(prev => ({
-                    ...prev,
+                const newFormData = {
+                    ...formData,
                     endereco: data.logradouro,
                     bairro: data.bairro,
                     cidade: data.localidade,
                     uf: data.uf,
-                    cep: prev.cep, // keep formatted cep
-                }));
+                    cep: formData.cep,
+                };
+                 setFormData(newFormData);
+                 onEmpresaDataChange({
+                     endereco: data.logradouro,
+                     bairro: data.bairro,
+                     cidade: data.localidade,
+                     uf: data.uf
+                 });
                  await fetchCitiesForUf(data.uf);
             }
         } catch (error) {
@@ -158,7 +164,10 @@ export default function EmpresaPage() {
 
     const handleCancel = () => {
         setIsEditing(false);
-        fetchEmpresaData(); // Refetch original data on cancel to discard changes
+        if (empresaData) {
+            setFormData(empresaData);
+            onEmpresaDataChange(empresaData);
+        }
     };
 
     const handleSave = async () => {
@@ -307,5 +316,3 @@ export default function EmpresaPage() {
         </Card>
     );
 }
-
-    
