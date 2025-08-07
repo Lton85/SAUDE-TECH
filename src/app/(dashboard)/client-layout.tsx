@@ -338,8 +338,12 @@ export default function DashboardClientLayout({
         if (currentUser.usuario === 'usuarioteste') {
             setUserMenuItems(allMenuItems);
         } else {
+             const userPermissions = currentUser.permissoes || [];
+             // Adiciona a permissão de configuração se não existir, para garantir que o menu sempre apareça
+             const permissions = [...new Set([...userPermissions, '/configuracoes', '/'])];
+
              const allowedMenuItems = allMenuItems.filter(item => 
-                !item.permissionRequired || (currentUser.permissoes && currentUser.permissoes.includes(item.id))
+                !item.permissionRequired || permissions.includes(item.id)
             );
             // Always add the Home and Sair menus
             const baseMenus = allMenuItems.filter(item => !item.permissionRequired);
@@ -431,3 +435,5 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
+
+    

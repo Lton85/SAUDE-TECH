@@ -3,12 +3,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Building, Clock, KeyRound, Settings, Tv2, Users, ClipboardList, Home, UserCheck, Stethoscope, Users2, Hourglass } from "lucide-react";
+import { BarChart3, Building, Clock, KeyRound, Settings, Tv2, Users, ClipboardList, Home, UserCheck, Stethoscope, Users2, Hourglass, CalendarDays } from "lucide-react";
 import { allMenuItems, Tab } from "./client-layout";
 import { getCurrentUser } from "@/services/authService";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where, getDocs } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { endOfDay, startOfDay } from "date-fns";
 
 interface DashboardPageProps {
   onCardClick: (item: Tab) => void;
@@ -18,7 +19,7 @@ interface SummaryCardProps {
     title: string;
     value: number | null;
     icon: React.ElementType;
-    description: string;
+    description?: string;
     isLoading: boolean;
 }
 
@@ -30,38 +31,91 @@ const SummaryCard = ({ title, value, icon: Icon, description, isLoading }: Summa
         </CardHeader>
         <CardContent>
             {isLoading ? (
-                <Skeleton className="h-8 w-16" />
+                <>
+                    <Skeleton className="h-8 w-16" />
+                    {description && <Skeleton className="h-4 w-24 mt-1" />}
+                </>
             ) : (
-                <div className="text-2xl font-bold">{value}</div>
+                <>
+                    <div className="text-2xl font-bold">{value}</div>
+                    {description && <p className="text-xs text-muted-foreground">{description}</p>}
+                </>
             )}
-            <p className="text-xs text-muted-foreground">{description}</p>
         </CardContent>
     </Card>
 );
 
 export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const currentUser = getCurrentUser();
-    const [filaCount, setFilaCount] = useState<number | null>(null);
-    const [emAtendimentoCount, setEmAtendimentoCount] = useState<number | null>(null);
+    
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
+    const [pacientesInativosCount, setPacientesInativosCount] = useState<number | null>(null);
+
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
+    const [profissionaisInativosCount, setProfissionaisInativosCount] = useState<number | null>(null);
+
+    const [atendimentosDiaCount, setAtendimentosDiaCount] = useState<number | null>(null);
+    const [atendimentosMesCount, setAtendimentosMesCount] = useState<number | null>(null);
 
     useEffect(() => {
-        const qFila = query(collection(db, "filaDeEspera"), where("status", "==", "aguardando"));
-        const unsubscribeFila = onSnapshot(qFila, (snapshot) => setFilaCount(snapshot.size));
-
-        const qAtendimento = query(collection(db, "filaDeEspera"), where("status", "==", "em-atendimento"));
-        const unsubscribeAtendimento = onSnapshot(qAtendimento, (snapshot) => setEmAtendimentoCount(snapshot.size));
-
+        // Pacientes
         const qPacientes = query(collection(db, "pacientes"));
-        const unsubscribePacientes = onSnapshot(qPacientes, (snapshot) => setPacientesCount(snapshot.size));
+        const unsubscribePacientes = onSnapshot(qPacientes, (snapshot) => {
+            let inativos = 0;
+            snapshot.docs.forEach(doc => {
+                if (doc.data().situacao === 'Inativo') {
+                    inativos++;
+                }
+            });
+            setPacientesCount(snapshot.size);
+            setPacientesInativosCount(inativos);
+        });
 
-        const qProfissionais = query(collection(db, "profissionais"), where("situacao", "==", "Ativo"));
-        const unsubscribeProfissionais = onSnapshot(qProfissionais, (snapshot) => setProfissionaisCount(snapshot.size));
+        // Profissionais
+        const qProfissionais = query(collection(db, "profissionais"));
+        const unsubscribeProfissionais = onSnapshot(qProfissionais, (snapshot) => {
+             let inativos = 0;
+            snapshot.docs.forEach(doc => {
+                if (doc.data().situacao === 'Inativo') {
+                    inativos++;
+                }
+            });
+            setProfissionaisCount(snapshot.size);
+            setProfissionaisInativosCount(inativos);
+        });
+        
+        // Atendimentos no Dia
+        const fetchAtendimentosDia = async () => {
+             const startOfToday = startOfDay(new Date());
+             const endOfToday = endOfDay(new Date());
+             const qDia = query(
+                 collection(db, "relatorios_atendimentos"), 
+                 where("finalizadaEm", ">=", startOfToday), 
+                 where("finalizadaEm", "<=", endOfToday)
+             );
+             const snapshotDia = await getDocs(qDia);
+             setAtendimentosDiaCount(snapshotDia.size);
+        }
+        
+         // Atendimentos no Mês
+        const fetchAtendimentosMes = async () => {
+             const today = new Date();
+             const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+             const endOfThisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+             const qMes = query(
+                 collection(db, "relatorios_atendimentos"), 
+                 where("finalizadaEm", ">=", startOfThisMonth), 
+                 where("finalizadaEm", "<=", endOfThisMonth)
+             );
+             const snapshotMes = await getDocs(qMes);
+             setAtendimentosMesCount(snapshotMes.size);
+        }
+
+        fetchAtendimentosDia();
+        fetchAtendimentosMes();
+
 
         return () => {
-            unsubscribeFila();
-            unsubscribeAtendimento();
             unsubscribePacientes();
             unsubscribeProfissionais();
         };
@@ -69,10 +123,10 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
     const navFeatures = useMemo(() => {
         const allFeatures = [
-            { id: "/atendimento", title: "Fila de Atendimento", description: "Gerencie a fila de espera dos pacientes.", icon: Clock },
-            { id: "/cadastros", title: "Cadastros", description: "Acesse os cadastros de pacientes e profissionais.", icon: Users },
-            { id: "/triagem", title: "Departamentos", description: "Cadastre e gerencie os locais de atendimento.", icon: ClipboardList },
-            { id: "/relatorios", title: "Relatórios", description: "Exporte e analise os dados de atendimento.", icon: BarChart3 },
+            { id: "/atendimento", title: "Atendimento", description: "Monitore o tempo de cada consulta.", icon: Clock },
+            { id: "/cadastros", title: "Cadastros", description: "Gerencie pacientes, médicos e enfermeiros.", icon: Users },
+            { id: "/triagem", title: "Departamentos", description: "Gerencie os departamentos e suas prioridades.", icon: ClipboardList },
+            { id: "/configuracoes", title: "Configurações", description: "Ajuste as configurações gerais do sistema.", icon: Settings },
             { id: "painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2 },
         ];
 
@@ -82,9 +136,13 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             return allFeatures;
         }
 
+        const userPermissions = currentUser.permissoes || [];
+        // Adiciona "painel" e "/" às permissões do usuário para garantir que sempre apareçam
+        const permissions = [...new Set([...userPermissions, 'painel', '/'])];
+
         return allFeatures.filter(feature =>
             !allMenuItems.find(item => item.id === feature.id)?.permissionRequired ||
-            (currentUser.permissoes && currentUser.permissoes.includes(feature.id))
+            permissions.includes(feature.id)
         );
     }, [currentUser]);
 
@@ -96,24 +154,20 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     };
     
   return (
-    <div className="flex flex-col gap-8">
-        <header>
-            <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao Saúde Fácil!</h1>
-            <p className="text-muted-foreground mt-1">Seu sistema completo para gestão de atendimento em saúde.</p>
-        </header>
-
-         <div>
-            <h2 className="text-xl font-semibold tracking-tight mb-4">Acessos Rápidos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+    <div className="flex flex-col gap-6">
+        <div className="p-4 border bg-card rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {navFeatures.map((feature) => (
                     <Card 
                         key={feature.id} 
-                        className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group"
+                        className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group text-center"
                         onClick={() => handleCardClick(feature.id)}
                     >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">{feature.title}</CardTitle>
-                            <feature.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <CardHeader className="items-center pb-2">
+                            <div className="p-3 rounded-full bg-primary/10 mb-2">
+                                <feature.icon className="h-6 w-6 text-primary transition-colors" />
+                            </div>
+                            <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-xs text-muted-foreground">
@@ -127,35 +181,35 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <SummaryCard 
-                title="Pacientes na Fila"
-                value={filaCount}
-                icon={Hourglass}
-                description="Aguardando para serem chamados"
-                isLoading={filaCount === null}
-            />
-             <SummaryCard 
-                title="Em Atendimento"
-                value={emAtendimentoCount}
-                icon={UserCheck}
-                description="Pacientes sendo atendidos agora"
-                isLoading={emAtendimentoCount === null}
-            />
-            <SummaryCard 
                 title="Pacientes Cadastrados"
                 value={pacientesCount}
                 icon={Users2}
-                description="Total de pacientes no sistema"
+                description={pacientesInativosCount !== null ? `${pacientesInativosCount} inativos` : undefined}
                 isLoading={pacientesCount === null}
             />
+             <SummaryCard 
+                title="Atendimentos no Dia"
+                value={atendimentosDiaCount}
+                icon={CalendarDays}
+                isLoading={atendimentosDiaCount === null}
+            />
             <SummaryCard 
-                title="Profissionais Ativos"
+                title="Profissionais"
                 value={profissionaisCount}
                 icon={Stethoscope}
-                description="Profissionais disponíveis"
+                description={profissionaisInativosCount !== null ? `${profissionaisInativosCount} inativos` : undefined}
                 isLoading={profissionaisCount === null}
+            />
+            <SummaryCard 
+                title="Atendimentos no Mês"
+                value={atendimentosMesCount}
+                icon={CalendarDays}
+                isLoading={atendimentosMesCount === null}
             />
         </div>
 
     </div>
   );
 }
+
+    
