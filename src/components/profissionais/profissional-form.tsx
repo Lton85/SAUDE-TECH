@@ -90,7 +90,7 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="cpf"
               render={({ field }) => (
@@ -124,7 +124,7 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
                 </FormItem>
                 )}
             />
-             <FormField
+            <FormField
                   control={form.control}
                   name="dataNascimento"
                   render={({ field }) => (
