@@ -29,8 +29,8 @@ interface SummaryCardProps {
 const SummaryCard = ({ title, value, icon: Icon, color, isLoading, inactiveCount }: SummaryCardProps) => (
     <Card className="hover:shadow-lg transition-shadow">
         <CardContent className="p-4 flex items-center gap-4">
-             <div className={cn("flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white", color)}>
-                <Icon className="h-5 w-5" />
+             <div className={cn("flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white", color)}>
+                <Icon className="h-4 w-4" />
             </div>
             <div className="flex-1">
                 {isLoading ? (
