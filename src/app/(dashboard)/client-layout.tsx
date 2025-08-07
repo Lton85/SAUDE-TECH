@@ -17,6 +17,7 @@ import {
   Search,
   Building,
   X,
+  KeyRound,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -43,6 +44,7 @@ const CadastrosPage = React.lazy(() => import('./cadastros/page'));
 const DepartamentosPage = React.lazy(() => import('./triagem/page'));
 const RelatoriosPage = React.lazy(() => import('./relatorios/page'));
 const EmpresaPage = React.lazy(() => import('./empresa/page'));
+const UsuariosPage = React.lazy(() => import('./usuarios/page'));
 const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 
 
@@ -53,6 +55,7 @@ const menuItems = [
   { id: "/triagem", href: "/triagem", label: "Departamentos", icon: ClipboardList, component: DepartamentosPage },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage },
+  { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank" },
 ];
@@ -266,5 +269,3 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
-
-    
