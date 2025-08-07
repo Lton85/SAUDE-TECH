@@ -330,6 +330,7 @@ export default function DashboardClientLayout({
   const [activeTab, setActiveTab] = React.useState<string>("/");
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
   const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
+  const { toast } = useToast();
   
   React.useEffect(() => {
     const currentUser = getCurrentUser();
@@ -349,7 +350,25 @@ export default function DashboardClientLayout({
     }
   }, []);
 
+  const handleOpenPainel = async () => {
+    try {
+        await clearPainel();
+        window.open("/painel", "_blank");
+    } catch (error) {
+        toast({
+            title: "Erro ao abrir o painel",
+            description: "Não foi possível limpar o painel antes de abrir.",
+            variant: "destructive",
+        });
+    }
+  };
+
   const handleMenuItemClick = (item: Tab) => {
+    if (item.id === 'painel') {
+        handleOpenPainel();
+        return;
+    }
+    
     if (!item.component) return;
     
     if (!openTabs.some(tab => tab.id === item.id)) {
