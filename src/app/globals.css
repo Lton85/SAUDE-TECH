@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 94.1%;
+    --background: 0 0% 98%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
@@ -80,5 +80,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: hsl(var(--muted) / 0.3);
   }
 }

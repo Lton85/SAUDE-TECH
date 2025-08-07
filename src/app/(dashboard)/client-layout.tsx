@@ -269,8 +269,8 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
             </AnimatePresence>
         </nav>
       </header>
-      <main className="flex-1 p-2 bg-background">
-        <React.Suspense fallback={<div className="p-4">Carregando...</div>}>
+      <main className="flex-1 p-4 bg-muted/30">
+        <React.Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
              {renderComponent()}
         </React.Suspense>
       </main>
@@ -350,5 +350,3 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
-
-    
