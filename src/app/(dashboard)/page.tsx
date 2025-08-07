@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays } from "lucide-react";
