@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Building, Clock, KeyRound, Settings, Tv2, Users, ClipboardList, Home, UserCheck, Stethoscope, Users2, Hourglass, CalendarDays } from "lucide-react";
+import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays } from "lucide-react";
 import { allMenuItems, Tab } from "./client-layout";
 import { getCurrentUser } from "@/services/authService";
 import { db } from "@/lib/firebase";
@@ -64,6 +64,23 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
     const [atendimentosDiaCount, setAtendimentosDiaCount] = useState<number | null>(null);
     const [atendimentosMesCount, setAtendimentosMesCount] = useState<number | null>(null);
+
+    const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
+
+    useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            if (currentUser.usuario === 'master') {
+                setUserMenuItems(allMenuItems);
+            } else {
+                const userPermissions = currentUser.permissoes || [];
+                const allowedMenuItems = allMenuItems.filter(item => 
+                    !item.permissionRequired || userPermissions.includes(item.id)
+                );
+                setUserMenuItems(allowedMenuItems);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         // Pacientes
@@ -130,29 +147,23 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     }, []);
 
     const navFeatures = useMemo(() => {
-        const allFeatures = [
-            { id: "/atendimento", title: "Atendimento", description: "Monitore o tempo de cada consulta.", icon: Clock },
-            { id: "/cadastros", title: "Cadastros", description: "Gerencie pacientes, médicos e enfermeiros.", icon: Users },
-            { id: "/triagem", title: "Departamentos", description: "Gerencie os departamentos e suas prioridades.", icon: ClipboardList },
-            { id: "/relatorios", title: "Relatórios", description: "Consulte o histórico de atendimentos.", icon: BarChart3 },
-            { id: "painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2 },
-        ];
+        const featureDescriptions: { [key: string]: string } = {
+            "/atendimento": "Monitore o tempo de cada consulta.",
+            "/cadastros": "Gerencie pacientes, médicos e enfermeiros.",
+            "/triagem": "Gerencie os departamentos e suas prioridades.",
+            "/relatorios": "Consulte o histórico de atendimentos.",
+            "painel": "Exiba as senhas de atendimento na TV.",
+        };
 
-        if (!currentUser) return [];
-
-        if (currentUser.usuario === 'usuarioteste') {
-            return allFeatures;
-        }
-
-        const userPermissions = currentUser.permissoes || [];
-        // Adiciona "painel" e "/" às permissões do usuário para garantir que sempre apareçam
-        const permissions = [...new Set([...userPermissions, 'painel', '/'])];
-
-        return allFeatures.filter(feature =>
-            !allMenuItems.find(item => item.id === feature.id)?.permissionRequired ||
-            permissions.includes(feature.id)
-        );
-    }, [currentUser]);
+        return userMenuItems
+            .filter(item => item.id !== '/' && item.id !== '/configuracoes' && item.id !== '/empresa' && item.id !== '/usuarios' && item.id !== 'sair')
+            .map(item => ({
+                id: item.id,
+                title: item.label,
+                description: featureDescriptions[item.id] || "Acesse a funcionalidade.",
+                icon: item.icon,
+            }));
+    }, [userMenuItems]);
 
     const handleCardClick = (featureId: string) => {
       const menuItem = allMenuItems.find(m => m.id === featureId);
