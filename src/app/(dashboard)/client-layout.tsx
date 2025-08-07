@@ -292,7 +292,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                         >
                             <tab.icon className="mr-2 h-4 w-4 shrink-0" />
                             <span className="text-sm whitespace-nowrap">{tab.label}</span>
-                            
+                             {tab.id !== '/' && (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -302,7 +302,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
-                           
+                            )}
                         </motion.div>
                     ))}
                 </div>
