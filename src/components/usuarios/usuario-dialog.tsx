@@ -66,6 +66,9 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
       const usuarioData: Partial<Usuario> = {
           ...rest,
           situacao: values.situacao ? 'Ativo' : 'Inativo',
+          nome: values.nome || "",
+          cpf: values.cpf || "",
+          usuario: values.usuario || "",
       };
       
       // Remove a senha se não for fornecida no modo de edição
