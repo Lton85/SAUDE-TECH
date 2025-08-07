@@ -29,8 +29,8 @@ interface SummaryCardProps {
 const SummaryCard = ({ title, value, icon: Icon, color, isLoading, inactiveCount }: SummaryCardProps) => (
     <Card className="hover:shadow-lg transition-shadow">
         <CardContent className="p-4 flex items-center gap-4">
-             <div className={cn("flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white", color)}>
-                <Icon className="h-6 w-6" />
+             <div className={cn("flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white", color)}>
+                <Icon className="h-5 w-5" />
             </div>
             <div className="flex-1">
                 {isLoading ? (
@@ -73,12 +73,10 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 setUserMenuItems(allMenuItems);
             } else {
                 const userPermissions = currentUser.permissoes || [];
-                // Itens que não requerem permissão são sempre incluídos
-                const baseItems = allMenuItems.filter(item => !item.permissionRequired);
-                const allowedItems = allMenuItems.filter(item => 
-                    item.permissionRequired && userPermissions.includes(item.id)
+                const allowedMenuItems = allMenuItems.filter(item => 
+                    !item.permissionRequired || userPermissions.includes(item.id)
                 );
-                setUserMenuItems([...baseItems, ...allowedItems]);
+                setUserMenuItems(allowedMenuItems);
             }
         }
     }, []);
@@ -175,10 +173,10 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     
   return (
     <div className="flex flex-col gap-6">
-      <div className="mb-2">
+        <div>
           <h2 className="text-xl font-bold tracking-tight">Acessos Rápidos</h2>
           <p className="text-muted-foreground">Navegue pelas principais funcionalidades do sistema.</p>
-      </div>
+        </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {navFeatures.map((feature) => (
               <Card 
