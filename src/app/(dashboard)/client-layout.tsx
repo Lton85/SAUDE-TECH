@@ -44,6 +44,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExitConfirmationDialog } from "@/components/ui/exit-dialog";
+import { logout } from "@/services/authService";
+import { useRouter } from "next/navigation";
+
 
 // Import page components dynamically
 const DashboardPage = React.lazy(() => import('./page'));
@@ -76,6 +79,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     const [searchTerm, setSearchTerm] = React.useState("");
     const { toast } = useToast();
     const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
+    const router = useRouter();
 
     const handleOpenPainel = async () => {
         try {
@@ -95,7 +99,8 @@ const AppSidebar = ({ onMenuItemClick, activeContentId }: { onMenuItemClick: (it
     };
 
     const handleExitConfirm = () => {
-        window.close();
+        logout();
+        router.push('/login');
     };
 
     const filteredMenuItems = React.useMemo(() => {

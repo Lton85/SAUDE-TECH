@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "../ui/checkbox";
 import type { UsuarioFormValues } from "./usuario-form-schema";
+import { Label } from "../ui/label";
 
 export const UsuarioForm = ({ isEditMode }: { isEditMode: boolean }) => {
     const form = useFormContext<UsuarioFormValues>();
@@ -107,9 +108,9 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
                     />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                    <FormLabel>
+                    <Label>
                         Cadastro Ativo
-                    </FormLabel>
+                    </Label>
                     </div>
                     <FormMessage />
                 </FormItem>
@@ -120,5 +121,3 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
 }
 
 UsuarioForm.SituacaoCheckbox = SituacaoCheckbox;
-
-    

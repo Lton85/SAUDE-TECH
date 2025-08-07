@@ -1,25 +1,23 @@
 
 import * as z from "zod";
 
-export const UsuarioFormSchema = z.object({
-  nome: z.string().optional(),
-  cpf: z.string().optional(),
-  usuario: z.string().optional(),
-  senha: z.string().optional(),
-  confirmarSenha: z.string().optional(),
-  situacao: z.boolean().default(true),
-}).refine(data => {
-    // A validação de senha só se aplica se uma senha for fornecida
-    if(data.senha || data.confirmarSenha) {
-        return data.senha === data.confirmarSenha;
-    }
-    return true;
-}, {
-    message: "As senhas não coincidem.",
-    path: ["confirmarSenha"],
+const anexoSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  type: z.string(),
 });
 
+export const UsuarioFormSchema = z.object({
+  nome: z.string().min(3, "O nome é obrigatório."),
+  cpf: z.string().min(11, "O CPF é obrigatório."),
+  usuario: z.string().min(3, "O nome de usuário é obrigatório."),
+  senha: z.string().min(1, "A senha é obrigatória."),
+  confirmarSenha: z.string(),
+  situacao: z.boolean().default(true),
+  anexos: z.array(anexoSchema).optional(),
+}).refine(data => data.senha === data.confirmarSenha, {
+  message: "As senhas não coincidem.",
+  path: ["confirmarSenha"],
+});
 
 export type UsuarioFormValues = z.infer<typeof UsuarioFormSchema>;
-
-    
