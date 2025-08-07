@@ -274,7 +274,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
         <nav className="flex-1 h-12 overflow-x-auto border-t">
             <AnimatePresence initial={false}>
                 <div className="flex h-full items-end gap-1 px-2">
-                    {openTabs.map(tab => (
+                    {openTabs.filter(t => t.id !== '/').map(tab => (
                         <motion.div
                             key={tab.id}
                             layout
@@ -375,6 +375,12 @@ export default function DashboardClientLayout({
     
     if (!item.component) return;
     
+    if (item.id === '/') {
+        setActiveContentId(item.id);
+        setActiveTab(item.id); // Set active tab to home to highlight sidebar item
+        return;
+    }
+    
     if (!openTabs.some(tab => tab.id === item.id)) {
         setOpenTabs(prev => [...prev, item]);
     }
@@ -397,7 +403,12 @@ export default function DashboardClientLayout({
 
     let newActiveTab: Tab | undefined;
     if (activeContentId === tabId) {
+        // Find the next logical tab to activate
         newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1];
+        // If the only other tab is the (hidden) home tab, find another one
+        if (newActiveTab?.id === '/') {
+            newActiveTab = openTabs.filter(t => t.id !== '/' && t.id !== tabId)[0];
+        }
     }
     
     const newOpenTabs = openTabs.filter(tab => tab.id !== tabId);
@@ -407,13 +418,7 @@ export default function DashboardClientLayout({
         setActiveTab(newActiveTab.id);
         setActiveContentId(newActiveTab.id);
     } else if (newOpenTabs.length > 0 && activeContentId === tabId) {
-        // If the closed tab was active and there's no adjacent tab, default to the last one
-        const lastTab = newOpenTabs[newOpenTabs.length - 1];
-        setActiveTab(lastTab.id);
-        setActiveContentId(lastTab.id);
-    } else if (newOpenTabs.length === 0) {
-        // If all tabs are closed, go back to the default
-        setOpenTabs([homeDefaultTab]);
+        // If the closed tab was active, default to home content
         setActiveTab(homeDefaultTab.id);
         setActiveContentId(homeDefaultTab.id);
     }
@@ -435,5 +440,3 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
-
-    
