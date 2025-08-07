@@ -151,7 +151,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
   return (
     <div className="space-y-8">
-       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         {navFeatures.map((feature) => (
           <div key={feature.title} onClick={() => handleCardClick(feature)} className="flex cursor-pointer">
               <Card className="w-full hover:border-primary/80 hover:shadow-lg transition-all flex flex-col justify-center items-center text-center p-6">
