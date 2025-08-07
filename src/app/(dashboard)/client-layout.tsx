@@ -60,6 +60,7 @@ const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 
 
 export const allMenuItems = [
+  { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
   { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage, permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
   { id: "/triagem", href: "/triagem", label: "Departamentos", icon: ClipboardList, component: DepartamentosPage, permissionRequired: true },
@@ -125,7 +126,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
         <>
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex items-center justify-between">
-                <Link href="/atendimento" className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2">
                   <HeartPulse className="h-8 w-8 text-primary" />
                   <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
                       <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
@@ -240,11 +241,8 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
 
   const renderComponent = () => {
     if (!activeComponentInfo || !activeComponentInfo.component) {
-        // If no component is found (e.g., for 'sair'), redirect or handle appropriately.
-        // For now, we can show a default message or the last valid component.
-        // Or if the activeContentId is the initial one but has no component, load Atendimento.
-        if (activeContentId === '/atendimento') {
-             return React.createElement(AtendimentoPage);
+        if (activeContentId === '/') {
+             return React.createElement(DashboardPage, {onCardClick: onMenuItemClick});
         }
         return null;
     }
@@ -327,10 +325,10 @@ export default function DashboardClientLayout({
   children: React.ReactNode;
 }) {
 
-  const atendimentoDefaultTab = allMenuItems.find(item => item.id === "/atendimento")!;
-  const [openTabs, setOpenTabs] = React.useState<Tab[]>([atendimentoDefaultTab]);
-  const [activeTab, setActiveTab] = React.useState<string>("/atendimento");
-  const [activeContentId, setActiveContentId] = React.useState<string>("/atendimento");
+  const homeDefaultTab = allMenuItems.find(item => item.id === "/")!;
+  const [openTabs, setOpenTabs] = React.useState<Tab[]>([homeDefaultTab]);
+  const [activeTab, setActiveTab] = React.useState<string>("/");
+  const [activeContentId, setActiveContentId] = React.useState<string>("/");
   const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
   
   React.useEffect(() => {
@@ -339,10 +337,14 @@ export default function DashboardClientLayout({
         if (currentUser.usuario === 'usuarioteste') {
             setUserMenuItems(allMenuItems);
         } else {
-            const allowedMenuItems = allMenuItems.filter(item => 
+             const allowedMenuItems = allMenuItems.filter(item => 
                 !item.permissionRequired || (currentUser.permissoes && currentUser.permissoes.includes(item.id))
             );
-            setUserMenuItems(allowedMenuItems);
+            // Always add the Home and Sair menus
+            const baseMenus = allMenuItems.filter(item => !item.permissionRequired);
+            // remove duplicates
+            const finalMenu = [...new Map([...allowedMenuItems, ...baseMenus].map(item => [item.id, item])).values()];
+            setUserMenuItems(finalMenu);
         }
     }
   }, []);
@@ -364,6 +366,9 @@ export default function DashboardClientLayout({
   }
 
   const handleTabClose = (tabId: string) => {
+    // Prevent closing the home tab
+    if (tabId === '/') return;
+
     const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
     if (closingTabIndex === -1) return;
 
@@ -385,9 +390,9 @@ export default function DashboardClientLayout({
         setActiveContentId(lastTab.id);
     } else if (newOpenTabs.length === 0) {
         // If all tabs are closed, go back to the default
-        setOpenTabs([atendimentoDefaultTab]);
-        setActiveTab(atendimentoDefaultTab.id);
-        setActiveContentId(atendimentoDefaultTab.id);
+        setOpenTabs([homeDefaultTab]);
+        setActiveTab(homeDefaultTab.id);
+        setActiveContentId(homeDefaultTab.id);
     }
   }
 
