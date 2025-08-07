@@ -11,6 +11,7 @@ import { Checkbox } from "../ui/checkbox";
 import { updateUsuario } from "@/services/usuariosService";
 import { Label } from "../ui/label";
 import { allMenuItems } from "@/app/(dashboard)/client-layout";
+import { Separator } from "../ui/separator";
 
 interface PermissionsDialogProps {
   isOpen: boolean;
@@ -85,27 +86,30 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: 
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 space-y-4">
-            <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer" onClick={handleSelectAll}>
+        <div className="py-4 space-y-2">
+            <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer" onClick={handleSelectAll}>
                 <Checkbox
                     id="select-all"
                     checked={selectedPermissions.length === permissionableMenus.length}
                     onCheckedChange={handleSelectAll}
                 />
-                <Label htmlFor="select-all" className="font-semibold cursor-pointer">
+                <Label htmlFor="select-all" className="font-semibold cursor-pointer text-base">
                     Selecionar Todos
                 </Label>
             </div>
+             <Separator />
+            <div className="space-y-2 pt-2">
             {permissionableMenus.map(menu => (
-                <div key={menu.id} className="flex items-center space-x-2 pl-4 pr-2 py-1 rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => handlePermissionChange(menu.id, !selectedPermissions.includes(menu.id))}>
+                <div key={menu.id} className="flex items-center space-x-3 pl-2 pr-2 py-1 rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => handlePermissionChange(menu.id, !selectedPermissions.includes(menu.id))}>
                     <Checkbox 
                         id={menu.id}
                         checked={selectedPermissions.includes(menu.id)}
                         onCheckedChange={(checked) => handlePermissionChange(menu.id, !!checked)}
                     />
-                    <Label htmlFor={menu.id} className="cursor-pointer">{menu.label}</Label>
+                    <Label htmlFor={menu.id} className="cursor-pointer font-normal">{menu.label}</Label>
                 </div>
             ))}
+            </div>
         </div>
 
         <DialogFooter>

@@ -4,7 +4,7 @@
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays, Activity } from "lucide-react";
+import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays, Activity, Tablet } from "lucide-react";
 import { allMenuItems, Tab } from "./client-layout";
 import { getCurrentUser } from "@/services/authService";
 import { db } from "@/lib/firebase";
@@ -152,6 +152,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             "/triagem": "Gerencie os departamentos e suas prioridades.",
             "/relatorios": "Consulte o histórico de atendimentos.",
             "painel": "Exiba as senhas de atendimento na TV.",
+            "tablet": "Funções especiais para tablet.",
         };
 
         return userMenuItems

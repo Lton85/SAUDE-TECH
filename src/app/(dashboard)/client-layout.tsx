@@ -21,6 +21,7 @@ import {
   Loader2,
   LogOut,
   UserCircle,
+  Tablet,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -71,6 +72,7 @@ export const allMenuItems = [
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
+  { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage, permissionRequired: true },
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
 ];
@@ -92,16 +94,20 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
         }
     }, []);
 
-    const handleOpenPainel = async () => {
-        try {
-            await clearPainel();
-            window.open("/painel", "_blank");
-        } catch (error) {
-            toast({
-                title: "Erro ao abrir o painel",
-                description: "Não foi possível limpar o painel antes de abrir.",
-                variant: "destructive",
-            });
+    const handleOpenInNewTab = async (url: string) => {
+        if (url === '/painel') {
+            try {
+                await clearPainel();
+                window.open(url, "_blank");
+            } catch (error) {
+                toast({
+                    title: "Erro ao abrir o painel",
+                    description: "Não foi possível limpar o painel antes de abrir.",
+                    variant: "destructive",
+                });
+            }
+        } else {
+            window.open(url, "_blank");
         }
     };
     
@@ -124,8 +130,8 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
     }, [searchTerm, menuItems]);
     
     const handleButtonClick = (item: Tab) => {
-        if (item.id === 'painel') {
-            handleOpenPainel();
+        if (item.target === '_blank' && item.href) {
+            handleOpenInNewTab(item.href);
         } else if (item.id === 'sair') {
             handleExit();
         } else {
@@ -368,29 +374,33 @@ export default function DashboardClientLayout({
         } else {
              const userPermissions = currentUser.permissoes || [];
              const allowedMenuItems = allMenuItems.filter(item => 
-                !item.permissionRequired || userPermissions.includes(item.id)
+                !item.permissionRequired || userPermissions.includes(item.id) || !item.permissionRequired
             );
             setUserMenuItems(allowedMenuItems);
         }
     }
   }, []);
 
-  const handleOpenPainel = async () => {
-    try {
-        await clearPainel();
-        window.open("/painel", "_blank");
-    } catch (error) {
-        toast({
-            title: "Erro ao abrir o painel",
-            description: "Não foi possível limpar o painel antes de abrir.",
-            variant: "destructive",
-        });
+  const handleOpenInNewTab = async (url: string) => {
+    if (url === '/painel') {
+        try {
+            await clearPainel();
+            window.open(url, "_blank");
+        } catch (error) {
+            toast({
+                title: "Erro ao abrir o painel",
+                description: "Não foi possível limpar o painel antes de abrir.",
+                variant: "destructive",
+            });
+        }
+    } else {
+        window.open(url, "_blank");
     }
   };
 
   const handleMenuItemClick = (item: Tab) => {
-    if (item.id === 'painel') {
-        handleOpenPainel();
+    if (item.target === '_blank' && item.href) {
+        handleOpenInNewTab(item.href);
         return;
     }
     
