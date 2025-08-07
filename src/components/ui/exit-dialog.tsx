@@ -22,7 +22,7 @@ interface ExitConfirmationDialogProps {
 export function ExitConfirmationDialog({ isOpen, onOpenChange, onConfirm }: ExitConfirmationDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent onInteractOutside={(e) => e.preventDefault()}>
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
