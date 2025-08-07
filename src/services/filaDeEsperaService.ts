@@ -114,7 +114,6 @@ export const getAtendimentosPendentes = (
     const q = query(
         collection(db, "filaDeEspera"), 
         where("status", "==", "pendente"),
-        orderBy("status"),
         orderBy("chegadaEm")
     );
 
