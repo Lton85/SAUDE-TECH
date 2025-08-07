@@ -382,7 +382,7 @@ export default function AtendimentoPage() {
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-64 text-center">
+                                        <TableCell colSpan={6} className="h-24 text-center">
                                             Nenhum paciente aguardando atendimento.
                                         </TableCell>
                                     </TableRow>

@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
@@ -98,7 +97,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     );
   }, [searchQuery, pacientes]);
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setSelectedPaciente(null);
     setSelectedDepartamentoId("");
     setSelectedProfissionalId("");
@@ -108,7 +107,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setShowPatientList(false);
     setHighlightedIndex(-1);
     setSenha("");
-  }
+  }, []);
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -140,6 +139,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     } else {
         resetState();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, toast]);
   
 
@@ -262,6 +262,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     if(patientToAdd && isOpen) {
         handleSelectPatient(patientToAdd);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientToAdd, isOpen]);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -448,7 +449,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <div className="space-y-2">
                         <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                        <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])} disabled={!selectedPaciente}>
+                        <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])} disabled={!selectedPaciente || isCompleting}>
                             <SelectTrigger id="classification">
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
