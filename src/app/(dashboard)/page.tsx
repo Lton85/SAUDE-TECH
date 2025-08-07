@@ -13,8 +13,9 @@ import { collection, onSnapshot, query, where, Timestamp } from "firebase/firest
 import { startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from 'next/link';
+import { cn } from "@/lib/utils";
 
-const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading }: {
+const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading, color }: {
     title: string;
     value: number;
     subValue?: number;
@@ -22,11 +23,14 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
     subIcon?: React.ElementType;
     subLabel?: string;
     isLoading: boolean;
+    color?: string;
 }) => (
-    <Card>
+    <Card className="hover:border-primary/50 hover:shadow-md transition-all">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg text-white", color)}>
+                <Icon className="h-5 w-5" />
+            </div>
         </CardHeader>
         <CardContent>
             {isLoading ? (
@@ -38,7 +42,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
                 <>
                     <div className="text-2xl font-bold">{value}</div>
                     {subValue !== undefined && subLabel && SubIcon && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                             <SubIcon className="h-3 w-3" />
                             {subValue} {subLabel}
                         </p>
@@ -150,12 +154,14 @@ export default function DashboardPage() {
                 subIcon={UserMinus}
                 subLabel="inativos"
                 isLoading={isLoading}
+                color="bg-sky-500"
            />
             <StatCard 
                 title="Atendimentos no Dia"
                 value={atendimentosHoje}
                 icon={CalendarCheck}
                 isLoading={isLoading}
+                color="bg-amber-500"
            />
            <StatCard 
                 title="Profissionais"
@@ -165,12 +171,14 @@ export default function DashboardPage() {
                 subIcon={UserMinus}
                 subLabel="inativos"
                 isLoading={isLoading}
+                color="bg-violet-500"
            />
             <StatCard 
                 title="Atendimentos no Mês"
                 value={atendimentosMes}
                 icon={CalendarDays}
                 isLoading={isLoading}
+                color="bg-green-500"
            />
        </div>
     </div>
