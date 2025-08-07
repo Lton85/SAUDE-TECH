@@ -137,7 +137,7 @@ export const getFilaDeEspera = (
     onError: (error: string) => void
 ) => {
     const q = query(
-        collection(db, "filaDeEspera"), 
+        collection(db, "filaDeEspera"),
         where("status", "==", "aguardando"),
         orderBy("prioridade"),
         orderBy("chegadaEm")
@@ -322,7 +322,12 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
     }
 
     if (filters.profissionalId && filters.profissionalId !== 'todos') {
-        data = data.filter(item => item.profissionalId === filters.profissionalId);
+        const docRef = doc(db, 'profissionais', filters.profissionalId);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()){
+            const profissional = docSnap.data();
+            data = data.filter(item => item.profissionalNome === `Dr(a). ${profissional.nome}`);
+        }
     }
 
     if (filters.departamentoId && filters.departamentoId !== 'todos') {

@@ -164,9 +164,16 @@ export default function RelatoriosPage() {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const data = await getHistoricoAtendimentosPorPeriodoComFiltros({ dateFrom: dateRange.from, dateTo: dateRange.to });
+            const data = await getHistoricoAtendimentosPorPeriodoComFiltros({ 
+                dateFrom: dateRange.from, 
+                dateTo: dateRange.to,
+                pacienteId: selectedPacienteId === 'todos' ? undefined : selectedPacienteId,
+                profissionalId: selectedProfissionalId === 'todos' ? undefined : selectedProfissionalId,
+                departamentoId: selectedDepartamentoId === 'todos' ? undefined : selectedDepartamentoId,
+                classificacao: selectedClassificacao === 'todos' ? undefined : selectedClassificacao,
+            });
             setAllReportData(data);
-            applyClientSideFilters(data);
+            setFilteredReportData(data); // No need for client-side filtering anymore
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             toast({
@@ -179,7 +186,7 @@ export default function RelatoriosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [dateRange, applyClientSideFilters, toast]);
+    }, [dateRange, toast, selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao]);
 
      React.useEffect(() => {
         if (!isMounted) return;
@@ -218,13 +225,6 @@ export default function RelatoriosPage() {
         fetchFiltersData();
     }, [toast]);
     
-    // re-apply client filters when they change
-    React.useEffect(() => {
-        if(hasSearched){
-            applyClientSideFilters(allReportData);
-        }
-    },[selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, allReportData, hasSearched, applyClientSideFilters])
-
 
     // Handle quick date selection (Diário, Semanal, Mensal)
     const handleViewModeChange = (mode: 'diario' | 'semanal' | 'mensal' | 'personalizado') => {
