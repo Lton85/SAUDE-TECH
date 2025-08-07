@@ -25,6 +25,7 @@ interface IbgeCityResponse {
 
 const initialEmpresaState: Empresa = {
     id: "config",
+    codigoCliente: "",
     razaoSocial: "",
     nomeFantasia: "",
     cnpj: "",
@@ -209,15 +210,19 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
             <CardContent>
                 <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12 md:col-span-5">
+                        <div className="space-y-2 col-span-12 md:col-span-2">
+                            <Label htmlFor="codigoCliente">Código do Cliente</Label>
+                            <Input id="codigoCliente" value={formData.codigoCliente || ''} onChange={handleInputChange} placeholder="Ex: 001" disabled={!isEditing}/>
+                        </div>
+                        <div className="space-y-2 col-span-12 md:col-span-4">
                             <Label htmlFor="razaoSocial">Razão Social</Label>
                             <Input id="razaoSocial" value={formData.razaoSocial} onChange={handleInputChange} placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-5">
+                        <div className="space-y-2 col-span-12 md:col-span-3">
                             <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
                             <Input id="nomeFantasia" value={formData.nomeFantasia} onChange={handleInputChange} placeholder="Ex: UBS Central" disabled={!isEditing}/>
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-2">
+                        <div className="space-y-2 col-span-12 md:col-span-3">
                             <Label htmlFor="cnpj">CNPJ</Label>
                             <Input id="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" disabled={!isEditing}/>
                         </div>
