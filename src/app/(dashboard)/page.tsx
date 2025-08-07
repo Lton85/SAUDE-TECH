@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardList, Clock, Tv2, Settings, UserPlus, Stethoscope, CalendarCheck, CalendarDays, UserMinus, BarChart3, Building, KeyRound } from "lucide-react";
+import { Users, ClipboardList, Clock, Tv2, Settings, UserPlus, Stethoscope, CalendarCheck, CalendarDays, UserMinus, BarChart3, Building, KeyRound, CheckCircle, UserX } from "lucide-react";
 import { getPacientesRealtime } from "@/services/pacientesService";
 import { getProfissionais } from "@/services/profissionaisService";
 import type { Paciente } from "@/types/paciente";
@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { cn } from "@/lib/utils";
 import { Tab, menuItems } from "./client-layout";
 
-const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading, color }: {
+const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLabel, isLoading, color, valueLabel }: {
     title: string;
     value: number;
     subValue?: number;
@@ -25,6 +25,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
     subLabel?: string;
     isLoading: boolean;
     color?: string;
+    valueLabel?: string;
 }) => (
     <Card className="hover:border-primary/50 hover:shadow-md transition-all">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -41,9 +42,17 @@ const StatCard = ({ title, value, subValue, icon: Icon, subIcon: SubIcon, subLab
                  </>
             ) : (
                 <>
-                    <div className="text-2xl font-bold">{value}</div>
+                    <div className="text-2xl font-bold flex items-center gap-2">
+                        {value} 
+                        {valueLabel && (
+                            <span className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                                <CheckCircle className="h-4 w-4" />
+                                {valueLabel}
+                            </span>
+                        )}
+                    </div>
                     {subValue !== undefined && subLabel && SubIcon && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <p className="text-xs text-red-600 font-semibold flex items-center gap-1 mt-1">
                             <SubIcon className="h-3 w-3" />
                             {subValue} {subLabel}
                         </p>
@@ -166,11 +175,12 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
            <StatCard 
                 title="Pacientes Cadastrados"
-                value={totalPacientes}
+                value={totalPacientes - pacientesInativos}
+                valueLabel="Ativos"
                 subValue={pacientesInativos}
                 icon={UserPlus}
-                subIcon={UserMinus}
-                subLabel="inativos"
+                subIcon={UserX}
+                subLabel="Inativos"
                 isLoading={isLoading}
                 color="bg-sky-500"
            />
@@ -183,11 +193,12 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
            />
            <StatCard 
                 title="Profissionais"
-                value={totalProfissionais}
+                value={totalProfissionais - profissionaisInativos}
+                valueLabel="Ativos"
                 subValue={profissionaisInativos}
                 icon={Stethoscope}
-                subIcon={UserMinus}
-                subLabel="inativos"
+                subIcon={UserX}
+                subLabel="Inativos"
                 isLoading={isLoading}
                 color="bg-violet-500"
            />
