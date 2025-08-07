@@ -102,7 +102,30 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             <p className="text-muted-foreground mt-1">Seu sistema completo para gestão de atendimento em saúde.</p>
         </header>
 
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+         <div>
+            <h2 className="text-xl font-semibold tracking-tight mb-4">Acessos Rápidos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                {navFeatures.map((feature) => (
+                    <Card 
+                        key={feature.id} 
+                        className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group"
+                        onClick={() => handleCardClick(feature.id)}
+                    >
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">{feature.title}</CardTitle>
+                            <feature.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-xs text-muted-foreground">
+                               {feature.description}
+                            </p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <SummaryCard 
                 title="Pacientes na Fila"
                 value={filaCount}
@@ -133,28 +156,6 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             />
         </div>
 
-        <div>
-            <h2 className="text-xl font-bold tracking-tight mb-4">Acessos Rápidos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                {navFeatures.map((feature) => (
-                    <Card 
-                        key={feature.id} 
-                        className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group"
-                        onClick={() => handleCardClick(feature.id)}
-                    >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">{feature.title}</CardTitle>
-                            <feature.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-xs text-muted-foreground">
-                               {feature.description}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        </div>
     </div>
   );
 }
