@@ -120,3 +120,5 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
 }
 
 UsuarioForm.SituacaoCheckbox = SituacaoCheckbox;
+
+    
