@@ -16,7 +16,7 @@ import { Button } from "../ui/button";
 const ProfissionalFormSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
   cns: z.string().min(15, { message: "O CNS é obrigatório." }),
-  crm: z.string().min(4, { message: "O CRM é obrigatório." }),
+  crm: z.string().min(4, { message: "O Conselho é obrigatório." }),
   especialidade: z.string().min(3, { message: "A especialidade é obrigatória." }),
   sexo: z.enum(['Masculino', 'Feminino', '']).optional(),
   cpf: z.string().optional(),
@@ -161,5 +161,3 @@ export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profission
     </Dialog>
   );
 }
-
-    

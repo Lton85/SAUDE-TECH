@@ -91,5 +91,3 @@ export const deleteProfissional = async (id: string): Promise<void> => {
     const profissionalDoc = doc(db, 'profissionais', id);
     await deleteDoc(profissionalDoc);
 };
-
-    

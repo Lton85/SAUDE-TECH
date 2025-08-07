@@ -77,7 +77,7 @@ export function ProfissionalForm({ isEditMode }: ProfissionalFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="especialidade"
               render={({ field }) => (

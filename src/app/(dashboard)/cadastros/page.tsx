@@ -28,7 +28,3 @@ export default function CadastrosPage() {
     </Tabs>
   );
 }
-
-    
-
-    

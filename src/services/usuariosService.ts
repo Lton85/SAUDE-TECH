@@ -30,7 +30,7 @@ export const addUsuario = async (usuario: Omit<Usuario, 'id' | 'codigo' | 'histo
     return docRef.id;
 };
 
-export const updateUsuario = async (id: string, usuario: Partial<Omit<Usuario, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
+export const updateUsuario = async (id: string, usuario: Partial<Omit<Usuario, 'id' | 'codigo' | 'historico' | 'permissoes'>> & { permissoes?: string[] }): Promise<void> => {
     const usuarioDocRef = doc(db, 'usuarios', id);
     const usuarioSnap = await getDoc(usuarioDocRef);
     if (!usuarioSnap.exists()) {
