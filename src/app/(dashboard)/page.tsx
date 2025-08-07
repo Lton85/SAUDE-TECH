@@ -4,7 +4,7 @@
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays } from "lucide-react";
+import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, CalendarDays, Activity } from "lucide-react";
 import { allMenuItems, Tab } from "./client-layout";
 import { getCurrentUser } from "@/services/authService";
 import { db } from "@/lib/firebase";
@@ -21,42 +21,40 @@ interface SummaryCardProps {
     title: string;
     value: number | null;
     icon: React.ElementType;
-    description?: string;
+    color: string;
     isLoading: boolean;
     inactiveCount?: number | null;
 }
 
-const SummaryCard = ({ title, value, icon: Icon, description, isLoading, inactiveCount }: SummaryCardProps) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            {isLoading ? (
-                <>
-                    <Skeleton className="h-8 w-16" />
-                    <Skeleton className="h-4 w-24 mt-1" />
-                </>
-            ) : (
-                <>
-                    <div className="text-2xl font-bold">{value}</div>
-                    {description && !inactiveCount && <p className="text-xs text-muted-foreground">{description}</p>}
-                    {inactiveCount !== null && inactiveCount !== undefined && (
-                         <p className={cn("text-xs", inactiveCount > 0 ? "text-red-500 font-semibold" : "text-muted-foreground")}>
-                            {inactiveCount} inativos
-                        </p>
-                    )}
-                </>
-            )}
+const SummaryCard = ({ title, value, icon: Icon, color, isLoading, inactiveCount }: SummaryCardProps) => (
+    <Card className="hover:shadow-lg transition-shadow">
+        <CardContent className="p-4 flex items-center gap-4">
+             <div className={cn("flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white", color)}>
+                <Icon className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+                {isLoading ? (
+                    <>
+                        <Skeleton className="h-7 w-16 mb-1" />
+                        <Skeleton className="h-4 w-24" />
+                    </>
+                ) : (
+                    <>
+                        <p className="text-2xl font-bold">{value}</p>
+                        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+                        {inactiveCount !== null && inactiveCount !== undefined && (
+                            <p className={cn("text-xs", inactiveCount > 0 ? "text-red-500 font-semibold" : "text-muted-foreground")}>
+                                {inactiveCount} inativos
+                            </p>
+                        )}
+                    </>
+                )}
+            </div>
         </CardContent>
     </Card>
 );
 
-
 export default function DashboardPage({ onCardClick }: DashboardPageProps) {
-    const currentUser = getCurrentUser();
-    
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [pacientesInativosCount, setPacientesInativosCount] = useState<number | null>(null);
 
@@ -75,10 +73,12 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 setUserMenuItems(allMenuItems);
             } else {
                 const userPermissions = currentUser.permissoes || [];
-                const allowedMenuItems = allMenuItems.filter(item => 
-                    !item.permissionRequired || userPermissions.includes(item.id)
+                // Itens que não requerem permissão são sempre incluídos
+                const baseItems = allMenuItems.filter(item => !item.permissionRequired);
+                const allowedItems = allMenuItems.filter(item => 
+                    item.permissionRequired && userPermissions.includes(item.id)
                 );
-                setUserMenuItems(allowedMenuItems);
+                setUserMenuItems([...baseItems, ...allowedItems]);
             }
         }
     }, []);
@@ -175,33 +175,38 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     
   return (
     <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {navFeatures.map((feature) => (
-                <Card 
-                    key={feature.id} 
-                    className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group text-center"
-                    onClick={() => handleCardClick(feature.id)}
-                >
-                    <CardHeader className="items-center pb-2">
-                        <div className="p-3 rounded-full bg-primary/10 mb-2">
-                            <feature.icon className="h-6 w-6 text-primary transition-colors" />
-                        </div>
-                        <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-xs text-muted-foreground">
-                           {feature.description}
-                        </p>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
+      <div className="mb-2">
+          <h2 className="text-xl font-bold tracking-tight">Acessos Rápidos</h2>
+          <p className="text-muted-foreground">Navegue pelas principais funcionalidades do sistema.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {navFeatures.map((feature) => (
+              <Card 
+                  key={feature.id} 
+                  className="hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group text-center"
+                  onClick={() => handleCardClick(feature.id)}
+              >
+                  <CardHeader className="items-center pb-2">
+                      <div className="p-3 rounded-full bg-primary/10 mb-2">
+                          <feature.icon className="h-6 w-6 text-primary transition-colors" />
+                      </div>
+                      <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <p className="text-xs text-muted-foreground">
+                          {feature.description}
+                      </p>
+                  </CardContent>
+              </Card>
+          ))}
+      </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <SummaryCard 
                 title="Pacientes Cadastrados"
                 value={pacientesCount}
                 icon={Users2}
+                color="bg-blue-500"
                 inactiveCount={pacientesInativosCount}
                 isLoading={pacientesCount === null}
             />
@@ -209,19 +214,22 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 title="Atendimentos no Dia"
                 value={atendimentosDiaCount}
                 icon={CalendarDays}
+                color="bg-orange-500"
                 isLoading={atendimentosDiaCount === null}
             />
             <SummaryCard 
                 title="Profissionais"
                 value={profissionaisCount}
                 icon={Stethoscope}
+                color="bg-green-500"
                 inactiveCount={profissionaisInativosCount}
                 isLoading={profissionaisCount === null}
             />
             <SummaryCard 
                 title="Atendimentos no Mês"
                 value={atendimentosMesCount}
-                icon={CalendarDays}
+                icon={Activity}
+                color="bg-purple-500"
                 isLoading={atendimentosMesCount === null}
             />
         </div>
