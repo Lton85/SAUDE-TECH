@@ -73,9 +73,6 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             { id: "/cadastros", title: "Cadastros", description: "Acesse os cadastros de pacientes e profissionais.", icon: Users },
             { id: "/triagem", title: "Departamentos", description: "Cadastre e gerencie os locais de atendimento.", icon: ClipboardList },
             { id: "/relatorios", title: "Relatórios", description: "Exporte e analise os dados de atendimento.", icon: BarChart3 },
-            { id: "/empresa", title: "Empresa", description: "Gerencie as informações da sua unidade.", icon: Building },
-            { id: "/usuarios", title: "Usuários", description: "Controle os acessos de usuários ao sistema.", icon: KeyRound },
-            { id: "/configuracoes", title: "Configurações", description: "Ajuste os parâmetros gerais do sistema.", icon: Settings },
             { id: "painel", title: "Painel de Senhas", description: "Exiba as senhas de atendimento na TV.", icon: Tv2 },
         ];
 
