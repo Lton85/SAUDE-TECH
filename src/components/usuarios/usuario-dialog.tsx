@@ -60,6 +60,16 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
   }, [usuario, isOpen, form]);
 
   const handleSubmit = async (values: UsuarioFormValues) => {
+    if (isEditMode && !values.senha && values.confirmarSenha) {
+        form.setError("senha", { type: "manual", message: "A senha é obrigatória se a confirmação for preenchida." });
+        return;
+    }
+
+    if (values.senha && values.senha.length > 0 && values.senha !== values.confirmarSenha) {
+        form.setError("confirmarSenha", { type: "manual", message: "As senhas não coincidem." });
+        return;
+    }
+
     setIsSubmitting(true);
     try {
       const { confirmarSenha, ...rest } = values;
@@ -72,8 +82,12 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
       };
       
       // Remove a senha se não for fornecida no modo de edição
-      if (isEditMode && !values.senha) {
+      if (isEditMode && (!values.senha || values.senha.length === 0)) {
           delete usuarioData.senha;
+      } else if (!isEditMode && (!values.senha || values.senha.length === 0)) {
+          form.setError("senha", { type: "manual", message: "A senha é obrigatória." });
+          setIsSubmitting(false);
+          return;
       }
 
       if (isEditMode && usuario) {
