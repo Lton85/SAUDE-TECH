@@ -217,4 +217,3 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     </div>
   );
 }
-
