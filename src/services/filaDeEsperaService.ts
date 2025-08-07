@@ -8,6 +8,8 @@ import type { FilaDeEsperaItem } from '@/types/fila';
 import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
+import { getNextCounter } from './countersService';
+
 
 interface SearchFilters {
     dateFrom: Date;
@@ -30,34 +32,72 @@ const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDe
     }
 }
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> ) => {
+export const addPreCadastroToFila = async (classificacao: FilaDeEsperaItem['classificacao']): Promise<string> => {
+    try {
+        const filaDeEsperaCollection = collection(db, 'filaDeEspera');
+        const prioridade = getPrioridade(classificacao);
+
+        const counterName = classificacao === 'Urgência' ? 'senha_emergencia' : (classificacao === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
+        const ticketNumber = await getNextCounter(counterName, true);
+        const ticketPrefix = classificacao === 'Urgência' ? 'U' : (classificacao === 'Preferencial' ? 'P' : 'N');
+        const senha = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+
+        await addDoc(filaDeEsperaCollection, {
+            senha,
+            classificacao,
+            prioridade,
+            chegadaEm: serverTimestamp(),
+            status: 'pendente'
+        });
+        
+        return senha;
+
+    } catch (error) {
+        console.error("Erro ao adicionar pré-cadastro à fila: ", error);
+        throw new Error("Não foi possível gerar a senha no Firestore.");
+    }
+}
+
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'>, atendimentoPendenteId?: string ) => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
         // Check if patient is already in queue ('aguardando' or 'em-atendimento')
-        const q = query(
-            filaDeEsperaCollection, 
-            where("pacienteId", "==", item.pacienteId), 
-            where("status", "in", ["aguardando", "em-atendimento"])
-        );
-        const querySnapshot = await getDocs(q);
+        if (item.pacienteId) {
+            const q = query(
+                filaDeEsperaCollection, 
+                where("pacienteId", "==", item.pacienteId), 
+                where("status", "in", ["aguardando", "em-atendimento"])
+            );
+            const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-             const doc = querySnapshot.docs[0].data();
-             const status = doc.status === 'aguardando' ? 'aguardando atendimento' : 'em atendimento';
-            throw new Error(`Este paciente já está ${status} e não pode ser adicionado novamente à fila.`);
+            if (!querySnapshot.empty) {
+                 const doc = querySnapshot.docs[0].data();
+                 const status = doc.status === 'aguardando' ? 'aguardando atendimento' : 'em atendimento';
+                throw new Error(`Este paciente já está ${status} e não pode ser adicionado novamente à fila.`);
+            }
         }
         
         const prioridade = getPrioridade(item.classificacao);
 
-        await addDoc(filaDeEsperaCollection, {
-            ...item,
-            prioridade,
-            chegadaEm: serverTimestamp(),
-            chamadaEm: null,
-            finalizadaEm: null,
-            status: 'aguardando'
-        });
+        // If it's completing a pending registration, update it
+        if (atendimentoPendenteId) {
+            const docRef = doc(db, "filaDeEspera", atendimentoPendenteId);
+             await updateDoc(docRef, {
+                ...item,
+                prioridade,
+                status: 'aguardando'
+            });
+        } else { // Otherwise, create a new one
+            await addDoc(filaDeEsperaCollection, {
+                ...item,
+                prioridade,
+                chegadaEm: serverTimestamp(),
+                chamadaEm: null,
+                finalizadaEm: null,
+                status: 'aguardando'
+            });
+        }
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);
         if (error instanceof Error) {
@@ -66,6 +106,31 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
         throw new Error("Não foi possível adicionar o paciente à fila no Firestore.");
     }
 };
+
+export const getAtendimentosPendentes = (
+    onUpdate: (data: FilaDeEsperaItem[]) => void,
+    onError: (error: string) => void
+) => {
+    const q = query(
+        collection(db, "filaDeEspera"), 
+        where("status", "==", "pendente"),
+        orderBy("chegadaEm")
+    );
+
+     const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem));
+        
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching pending queue: ", error);
+        onError("Não foi possível buscar as senhas pendentes.");
+    });
+
+    return unsubscribe;
+}
 
 export const getFilaDeEspera = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
@@ -125,30 +190,40 @@ export const getAtendimentosEmAndamento = (
 }
 
 
-export const chamarPaciente = async (item: FilaDeEsperaItem) => {
+export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atendimento' | 'triagem' = 'atendimento') => {
     if (!item.id) {
         throw new Error("ID do item da fila não encontrado.");
     }
-
-    const departamentoDocRef = doc(db, 'departamentos', item.departamentoId);
-    const departamentoSnap = await getDoc(departamentoDocRef);
-
-    if (!departamentoSnap.exists()) {
-        throw new Error("Departamento não encontrado.");
-    }
-    const departamentoData = departamentoSnap.data();
     
-    let sala = item.departamentoNome;
-    if (departamentoData.numero) {
-        sala = `${item.departamentoNome} - SALA ${departamentoData.numero}`;
+    let sala = "Triagem";
+    let profissional = "Triagem";
+    let paciente = item.pacienteNome || "Paciente";
+
+    if (tipoChamada === 'atendimento') {
+         if (!item.departamentoId || !item.profissionalNome) {
+            throw new Error("Dados do departamento ou profissional ausentes para esta chamada.");
+        }
+        const departamentoDocRef = doc(db, 'departamentos', item.departamentoId);
+        const departamentoSnap = await getDoc(departamentoDocRef);
+
+        if (!departamentoSnap.exists()) {
+            throw new Error("Departamento não encontrado.");
+        }
+        const departamentoData = departamentoSnap.data();
+        
+        sala = item.departamentoNome || "Departamento";
+        if (departamentoData.numero) {
+            sala = `${item.departamentoNome} - SALA ${departamentoData.numero}`;
+        }
+        profissional = item.profissionalNome;
     }
 
 
     await createChamada({
         senha: item.senha,
         departamentoNome: sala,
-        profissionalNome: item.profissionalNome,
-        pacienteNome: item.pacienteNome,
+        profissionalNome: profissional,
+        pacienteNome: paciente,
         atendimentoId: item.id,
     });
     
@@ -335,5 +410,3 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
-
-    

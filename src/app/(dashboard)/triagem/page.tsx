@@ -1,249 +1,674 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PlusCircle, Pencil, Trash2, Eye, History } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { getDepartamentos, deleteDepartamento } from "@/services/departamentosService";
-import type { Departamento } from "@/types/departamento";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DepartamentoDialog } from "@/components/departamentos/departamento-dialog";
-import { DeleteDepartamentoDialog } from "@/components/departamentos/delete-dialog";
-import { ViewDepartamentoDialog } from "@/components/departamentos/view-dialog";
-import { HistoryDepartamentoDialog } from "@/components/departamentos/history-dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2, Eraser, UserPlus, Fingerprint, Tags, AlertOctagon } from "lucide-react";
+import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
+import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Skeleton } from "@/components/ui/skeleton";
+import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
+import type { Paciente } from "@/types/paciente";
+import type { Departamento } from "@/types/departamento";
+import { getPacientesRealtime } from "@/services/pacientesService";
+import { getDepartamentos } from "@/services/departamentosService";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
+import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
+import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
+import { getProfissionais } from "@/services/profissionaisService";
+import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
+import { PatientDialog } from "@/components/patients/patient-dialog";
+import { cn } from "@/lib/utils";
+import { clearPainel, getUltimaChamada } from "@/services/chamadasService";
 
-export default function DepartamentosPage() {
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const [selectedDepartamento, setSelectedDepartamento] = useState<Departamento | null>(null);
-  const [departamentoToDelete, setDepartamentoToDelete] = useState<Departamento | null>(null);
-  const { toast } = useToast();
-  const router = useRouter();
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const deptosData = await getDepartamentos();
-      setDepartamentos(deptosData);
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar a lista de departamentos.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+function TempoDeEspera({ chegadaEm }: { chegadaEm: FilaDeEsperaItem['chegadaEm'] }) {
+    const [tempoDeEspera, setTempoDeEspera] = useState("");
+
+    useEffect(() => {
+        const updateTempo = () => {
+             if (chegadaEm) {
+                const chegada = chegadaEm.toDate(); // Convert Firestore Timestamp to JS Date
+                setTempoDeEspera(formatDistanceToNow(chegada, { addSuffix: true, locale: ptBR }));
+            }
+        };
+
+        updateTempo();
+        const interval = setInterval(updateTempo, 60000); // Update every minute
+
+        return () => clearInterval(interval);
+    }, [chegadaEm]);
+
+    return (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{tempoDeEspera}</span>
+        </div>
+    );
+}
+
+interface Profissional {
+  id: string;
+  nome: string;
+}
+
+export default function TriagemPage() {
+    const [pendentes, setPendentes] = useState<FilaDeEsperaItem[]>([]);
+    const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
+    const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
+    const [pacientes, setPacientes] = useState<Paciente[]>([]);
+    const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+    const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
+    const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
+    const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
+
+    const router = useRouter();
+
+    const { toast } = useToast();
+    
+    const fetchPacientes = () => {
+       return getPacientesRealtime(
+            (data) => setPacientes(data),
+            (error) => {
+                toast({
+                    title: "Erro ao carregar pacientes",
+                    description: error,
+                    variant: "destructive",
+                });
+            }
+        );
     }
-  };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-  
-  const statusCounts = useMemo(() => {
-    return departamentos.reduce((acc, depto) => {
-        if (depto.situacao === 'Ativo') {
-            acc.ativos++;
-        } else {
-            acc.inativos++;
+    useEffect(() => {
+        const fetchData = async () => {
+             try {
+                const [deptoData, profissionaisData] = await Promise.all([
+                    getDepartamentos(),
+                    getProfissionais(),
+                ]);
+
+                setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
+                
+                const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+                setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
+
+             } catch (error) {
+                  toast({
+                    title: "Erro ao carregar dados de apoio",
+                    description: "Não foi possível carregar departamentos ou profissionais.",
+                    variant: "destructive",
+                });
+             }
         }
-        return acc;
-    }, { ativos: 0, inativos: 0 });
-  }, [departamentos]);
 
-  const handleSuccess = () => {
-    fetchData();
-    setIsDialogOpen(false);
-    setSelectedDepartamento(null);
-  };
-
-  const handleAddNew = () => {
-    setSelectedDepartamento(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (departamento: Departamento) => {
-    setSelectedDepartamento(departamento);
-    setIsDialogOpen(true);
-  };
-  
-  const handleView = (departamento: Departamento) => {
-    setSelectedDepartamento(departamento);
-    setIsViewDialogOpen(true);
-  };
-  
-  const handleHistory = (departamento: Departamento) => {
-    setSelectedDepartamento(departamento);
-    setIsHistoryDialogOpen(true);
-  };
-
-  const handleDelete = (departamento: Departamento) => {
-    setDepartamentoToDelete(departamento);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (departamentoToDelete) {
-      try {
-        await deleteDepartamento(departamentoToDelete.id);
         fetchData();
-        toast({
-          title: "Departamento Excluído!",
-          description: `O registro de ${departamentoToDelete.nome} foi removido.`,
+
+        const unsubscribePacientes = fetchPacientes();
+
+        const unsubscribePendentes = getAtendimentosPendentes((data) => {
+            setPendentes(data);
+            setIsLoading(false);
+        }, (error) => {
+             toast({
+                title: "Erro ao carregar senhas pendentes",
+                description: error,
+                variant: "destructive",
+            });
+            setIsLoading(false);
         });
-      } catch (error) {
-        toast({
-          title: "Erro ao excluir",
-          description: (error as Error).message || "Não foi possível remover o registro.",
-          variant: "destructive",
+
+        const unsubscribeFila = getFilaDeEspera((data) => {
+            setFila(data);
+            setIsLoading(false);
+        }, (error) => {
+            toast({
+                title: "Erro ao carregar a fila",
+                description: error,
+                variant: "destructive",
+            });
+            setIsLoading(false);
         });
-      } finally {
-        setIsDeleteDialogOpen(false);
-        setDepartamentoToDelete(null);
-      }
+        
+        const unsubscribeEmAtendimento = getAtendimentosEmAndamento((data) => {
+            const sortedData = data.sort((a, b) => {
+                if (a.chamadaEm && b.chamadaEm) {
+                    return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+            setEmAtendimento(sortedData);
+        }, (error) => {
+             toast({
+                title: "Erro ao carregar atendimentos",
+                description: error,
+                variant: "destructive",
+            });
+        });
+
+        return () => {
+            unsubscribePacientes();
+            unsubscribePendentes();
+            unsubscribeFila();
+            if (unsubscribeEmAtendimento) unsubscribeEmAtendimento();
+        };
+    }, [toast]);
+    
+    const handleOpenNewPatientDialog = () => {
+        setIsAddToQueueDialogOpen(false);
+        setIsPatientDialogOpen(true);
+    };
+
+    const handlePatientDialogSuccess = (newPatient: Paciente) => {
+        setIsPatientDialogOpen(false);
+        setPatientToAdd(newPatient); // Store the new patient
+        setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
+    };
+    
+    const handleChamarPendente = async (item: FilaDeEsperaItem) => {
+        try {
+            await chamarPaciente(item, "triagem");
+            toast({
+                title: "Senha Chamada para Triagem!",
+                description: `A senha ${item.senha} foi chamada no painel.`,
+                className: "bg-green-500 text-white"
+            });
+        } catch(error) {
+            toast({
+                title: "Erro ao chamar senha",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
     }
-  };
+    
+    const handleCompletarCadastro = (item: FilaDeEsperaItem) => {
+        setAtendimentoParaCompletar(item);
+        setPatientToAdd(null);
+        setIsAddToQueueDialogOpen(true);
+    };
+    
+    const handleChamarPaciente = async (item: FilaDeEsperaItem) => {
+        try {
+            await chamarPaciente(item);
+            toast({
+                title: "Paciente Chamado!",
+                description: `${item.pacienteNome} foi chamado(a) no painel.`,
+                className: "bg-green-500 text-white"
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao chamar paciente",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
+    
+    const handleClearPainel = async () => {
+        try {
+            await clearPainel();
+             toast({
+                title: "Painel Limpo!",
+                description: `O painel de senhas foi redefinido.`,
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao limpar o painel",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
 
-  return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Departamentos</CardTitle>
-              <CardDescription>Gerencie os locais de atendimento.</CardDescription>
-            </div>
-            <Button onClick={handleAddNew}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Departamento
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-2 py-2 text-xs w-[100px]">Código</TableHead>
-                <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                <TableHead className="px-2 py-2 text-xs">Nº da Sala</TableHead>
-                <TableHead className="px-2 py-2 text-xs">Situação</TableHead>
-                <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                [...Array(3)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[...Array(5)].map((_, j) => (
-                      <TableCell key={j} className="px-2 py-1 text-xs"><Skeleton className="h-4 w-full" /></TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : departamentos.length > 0 ? (
-                departamentos.map((departamento) => (
-                  <TableRow key={departamento.id}>
-                    <TableCell className="font-mono px-2 py-1 text-xs"><Badge variant="outline">{departamento.codigo}</Badge></TableCell>
-                    <TableCell className="font-medium px-2 py-1 text-xs">{departamento.nome}</TableCell>
-                    <TableCell className="px-2 py-1 text-xs">{departamento.numero || "N/A"}</TableCell>
-                    <TableCell className="px-2 py-1 text-xs">
-                      <Badge variant={departamento.situacao === 'Ativo' ? 'default' : 'destructive'} className={`${departamento.situacao === 'Ativo' ? 'bg-green-500 hover:bg-green-600' : ''} text-xs`}>
-                        {departamento.situacao}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-2 py-1">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleView(departamento)}>
-                          <Eye className="h-3 w-3" />
-                          <span className="sr-only">Visualizar</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(departamento)}>
-                          <Pencil className="h-3 w-3" />
-                          <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleHistory(departamento)}>
-                          <History className="h-3 w-3" />
-                          <span className="sr-only">Histórico</span>
-                        </Button>
-                         <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => handleDelete(departamento)}>
-                          <Trash2 className="h-3 w-3" />
-                          <span className="sr-only">Excluir</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                    Nenhum departamento cadastrado.
-                    </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-         <CardFooter className="py-3 px-6 border-t flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">
-                Exibindo <strong>{departamentos.length}</strong> {departamentos.length === 1 ? 'registro' : 'registros'}
-            </div>
-            <div className="flex items-center gap-4 text-xs">
-                <span className="text-green-600 font-medium">Ativos: <strong>{statusCounts.ativos}</strong></span>
-                <span className="text-red-600 font-medium">Inativos: <strong>{statusCounts.inativos}</strong></span>
-            </div>
-        </CardFooter>
-      </Card>
+    const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
+        try {
+            await finalizarAtendimento(item.id);
+             toast({
+                title: "Atendimento Finalizado!",
+                description: `O atendimento de ${item.pacienteNome} foi concluído.`,
+            });
+        } catch (error) {
+             toast({
+                title: "Erro ao finalizar",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
+    
+    const handleReturnToQueue = (item: FilaDeEsperaItem) => {
+        setItemToReturn(item);
+    };
 
-      <DepartamentoDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSuccess={handleSuccess}
-        departamento={selectedDepartamento}
-      />
+    const handleReturnToQueueConfirm = async (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => {
+        try {
+            // First, update the item with any changes
+            await updateFilaItem(item.id, updates);
 
-      {selectedDepartamento && (
-        <ViewDepartamentoDialog
-          isOpen={isViewDialogOpen}
-          onOpenChange={(isOpen) => {
-            setIsViewDialogOpen(isOpen);
-            if (!isOpen) {
-              setSelectedDepartamento(null);
+            // Then, return the patient to the queue
+            await retornarPacienteParaFila(item.id);
+            
+            // Check if the returned patient is the one on the panel
+            const ultimaChamada = await getUltimaChamada();
+            if (ultimaChamada?.atendimentoId === item.id) {
+                await clearPainel();
             }
-          }}
-          departamento={selectedDepartamento}
-        />
-      )}
-      
-       {selectedDepartamento && (
-        <HistoryDepartamentoDialog
-          isOpen={isHistoryDialogOpen}
-          onOpenChange={(isOpen) => {
-            setIsHistoryDialogOpen(isOpen);
-            if (!isOpen) {
-              setSelectedDepartamento(null);
-            }
-          }}
-          departamento={selectedDepartamento}
-        />
-      )}
 
-      {departamentoToDelete && (
-        <DeleteDepartamentoDialog
-          isOpen={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          onConfirm={handleDeleteConfirm}
-          departamentoName={departamentoToDelete.nome}
-        />
-      )}
-    </>
-  );
+            toast({
+                title: "Paciente Retornou para a Fila!",
+                description: `${item.pacienteNome} foi retornado para a fila de espera.`,
+                variant: "default"
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao retornar paciente",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setItemToReturn(null);
+        }
+    };
+
+    
+    const handleEdit = (item: FilaDeEsperaItem) => {
+        setItemToEdit(item);
+    };
+
+    const handleEditFromHistory = (item: FilaDeEsperaItem) => {
+        setItemToHistory(null); // Close history dialog
+        setItemToEditFromHistory(item); // Open edit dialog for history item
+    };
+    
+    const handleDelete = (item: FilaDeEsperaItem) => {
+        setItemToDelete(item);
+    };
+    
+    const handleHistory = (item: FilaDeEsperaItem) => {
+        setItemToHistory(item);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (itemToDelete) {
+            try {
+                await deleteFilaItem(itemToDelete.id);
+                toast({
+                    title: "Item removido da fila!",
+                    description: `O item com a senha ${itemToDelete.senha} foi removido(a) da fila de atendimento.`,
+                });
+            } catch (error) {
+                toast({
+                    title: "Erro ao remover da fila",
+                    description: (error as Error).message,
+                    variant: "destructive",
+                });
+            } finally {
+                setItemToDelete(null);
+            }
+        }
+    };
+    
+    return (
+        <>
+            <div className="space-y-6">
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                             <CardTitle className="flex items-center gap-2">
+                                <AlertOctagon className="h-5 w-5 text-amber-500" />
+                                Senhas Pendentes de Triagem
+                            </CardTitle>
+                            <CardDescription>Senhas geradas pelo totem que aguardam identificação e triagem.</CardDescription>
+                        </div>
+                         <div className="flex items-center gap-2">
+                            <Button onClick={handleClearPainel} variant="destructive" size="icon" className="h-9 w-9">
+                                <Eraser className="h-4 w-4" />
+                                <span className="sr-only">Limpar Painel</span>
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                             <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Tempo de Espera</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                             <TableBody>
+                                {isLoading ? (
+                                    [...Array(2)].map((_, i) => (
+                                        <TableRow key={i}>
+                                            {[...Array(4)].map((_, j) => (
+                                                <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : pendentes.length > 0 ? (
+                                    pendentes.map((item) => (
+                                         <TableRow key={item.id} className="hover:bg-muted/50 bg-amber-50/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs"><Badge variant="secondary" className="text-base">{item.senha}</Badge></TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                 <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                             <TableCell className="px-2 py-1 text-xs"><TempoDeEspera chegadaEm={item.chegadaEm}/></TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
+                                                 <div className="flex items-center justify-end gap-2">
+                                                    <Button size="sm" variant="outline" onClick={() => handleCompletarCadastro(item)} className="h-7 px-2 text-xs border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700">
+                                                        <Fingerprint className="mr-2 h-3 w-3" />
+                                                        Identificar Paciente
+                                                    </Button>
+                                                     <Button size="sm" onClick={() => handleChamarPendente(item)} className="h-7 px-2 text-xs">
+                                                        <Megaphone className="mr-2 h-3 w-3" />
+                                                        Chamar para Triagem
+                                                    </Button>
+                                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(item)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                        <span className="sr-only">Excluir Senha</span>
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                            Nenhuma senha aguardando triagem.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                         </Table>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                             <CardTitle className="flex items-center gap-2">
+                                <Tags className="h-5 w-5 text-primary" />
+                                Fila de Atendimento
+                            </CardTitle>
+                            <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Button onClick={() => { setAtendimentoParaCompletar(null); setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Adicionar Paciente à Fila
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    [...Array(3)].map((_, i) => (
+                                        <TableRow key={i}>
+                                            {[...Array(6)].map((_, j) => (
+                                                <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : fila.length > 0 ? (
+                                    fila.map((item) => (
+                                        <TableRow key={item.id} className="hover:bg-muted/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs"><Badge variant="secondary">{item.senha}</Badge></TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <TempoDeEspera chegadaEm={item.chegadaEm}/>
+                                                    <Button size="sm" onClick={() => handleChamarPaciente(item)} className="h-7 px-2 text-xs">
+                                                        <Megaphone className="mr-2 h-3 w-3" />
+                                                        Chamar
+                                                    </Button>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-7 w-7 p-0">
+                                                                <span className="sr-only">Abrir menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Outras Ações</DropdownMenuLabel>
+                                                            <DropdownMenuItem onClick={() => handleEdit(item)}>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                <span>Editar</span>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleHistory(item)}>
+                                                                <FileText className="mr-2 h-4 w-4" />
+                                                                <span>Prontuário</span>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(item)}>
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                <span>Excluir da Fila</span>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-24 text-center">
+                                            Nenhum paciente aguardando atendimento.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className="py-3 px-6 border-t">
+                        <div className="text-xs text-muted-foreground">
+                            Exibindo <strong>{fila.length}</strong> {fila.length === 1 ? 'registro' : 'registros'}
+                        </div>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Hourglass className="h-5 w-5 text-primary" />
+                            Atendimentos em Andamento
+                        </CardTitle>
+                        <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                    </TableRow>
+                                ) : emAtendimento.length > 0 ? (
+                                    emAtendimento.map((item) => (
+                                        <TableRow key={item.id} className="hover:bg-muted/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
+                                            <TableCell className="px-2 py-1 text-xs">
+                                                <div className="flex items-center gap-2 text-muted-foreground">
+                                                    <Clock className="h-3 w-3" />
+                                                    {item.chamadaEm ? new Date(item.chamadaEm.seconds * 1000).toLocaleTimeString('pt-BR') : 'N/A'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
+                                            <div className="flex items-center justify-end gap-2">
+                                                    <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
+                                                        <Undo2 className="mr-2 h-3 w-3" />
+                                                        Retornar à Fila
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
+                                                        <CheckCircle className="mr-2 h-3 w-3" />
+                                                        Finalizar Atendimento
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-24 text-center">
+                                            Nenhum paciente em atendimento no momento.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className="py-3 px-6 border-t">
+                        <div className="text-xs text-muted-foreground">
+                            Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
+                        </div>
+                    </CardFooter>
+                </Card>
+            </div>
+
+
+            <AddToQueueDialog
+                isOpen={isAddToQueueDialogOpen}
+                onOpenChange={setIsAddToQueueDialogOpen}
+                pacientes={pacientes}
+                departamentos={departamentos}
+                onAddNewPatient={handleOpenNewPatientDialog}
+                patientToAdd={patientToAdd}
+                atendimentoParaCompletar={atendimentoParaCompletar}
+                onSuccess={() => {}}
+            />
+
+            <PatientDialog
+                isOpen={isPatientDialogOpen}
+                onOpenChange={setIsPatientDialogOpen}
+                onSuccess={handlePatientDialogSuccess}
+                paciente={null}
+            />
+
+            {itemToEdit && (
+                <EditQueueItemDialog
+                    isOpen={!!itemToEdit}
+                    onOpenChange={() => setItemToEdit(null)}
+                    item={itemToEdit}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onSave={updateFilaItem}
+                    isHistory={false}
+                />
+            )}
+
+            {itemToEditFromHistory && (
+                <EditQueueItemDialog
+                    isOpen={!!itemToEditFromHistory}
+                    onOpenChange={() => setItemToEditFromHistory(null)}
+                    item={itemToEditFromHistory}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onSave={updateHistoricoItem}
+                    isHistory={true}
+                />
+            )}
+            
+            {itemToReturn && (
+                <ReturnToQueueDialog
+                    isOpen={!!itemToReturn}
+                    onOpenChange={() => setItemToReturn(null)}
+                    item={itemToReturn}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onConfirm={handleReturnToQueueConfirm}
+                />
+            )}
+            
+            {itemToHistory && (
+                <ProntuarioDialog
+                    isOpen={!!itemToHistory}
+                    onOpenChange={() => setItemToHistory(null)}
+                    item={itemToHistory}
+                    onEdit={handleEditFromHistory}
+                />
+            )}
+
+            {itemToDelete && (
+                <DeleteQueueItemDialog
+                    isOpen={!!itemToDelete}
+                    onOpenChange={() => setItemToDelete(null)}
+                    onConfirm={handleDeleteConfirm}
+                    itemName={itemToDelete.pacienteNome || `Senha ${itemToDelete.senha}`}
+                />
+            )}
+        </>
+    );
 }

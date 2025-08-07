@@ -545,13 +545,9 @@ export default function AtendimentoPage() {
                     isOpen={!!itemToDelete}
                     onOpenChange={() => setItemToDelete(null)}
                     onConfirm={handleDeleteConfirm}
-                    itemName={itemToDelete.pacienteNome}
+                    itemName={itemToDelete.pacienteNome || ''}
                 />
             )}
         </>
     );
 }
-
-    
-
-    

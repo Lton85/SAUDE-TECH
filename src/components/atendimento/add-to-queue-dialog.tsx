@@ -33,6 +33,7 @@ interface AddToQueueDialogProps {
   departamentos: Departamento[]
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
+  atendimentoParaCompletar?: FilaDeEsperaItem | null;
   onSuccess: () => void;
 }
 
@@ -48,7 +49,7 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
     );
 }
 
-export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, onSuccess }: AddToQueueDialogProps) {
+export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
@@ -57,7 +58,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [senha, setSenha] = useState("");
-  const [senhaNumero, setSenhaNumero] = useState<number | null>(null);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientList, setShowPatientList] = useState(false);
@@ -66,6 +66,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
   
   const { toast } = useToast()
+  
+  const isCompleting = !!atendimentoParaCompletar;
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
 
@@ -106,7 +108,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setShowPatientList(false);
     setHighlightedIndex(-1);
     setSenha("");
-    setSenhaNumero(null);
   }
 
   useEffect(() => {
@@ -132,50 +133,41 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       if (patientToAdd) {
         handleSelectPatient(patientToAdd);
       }
+      if (atendimentoParaCompletar) {
+        setSenha(atendimentoParaCompletar.senha);
+        setClassification(atendimentoParaCompletar.classificacao);
+      }
     } else {
         resetState();
     }
   }, [isOpen, toast]);
+  
 
   const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
-    if (selectedPaciente) {
+    if (selectedPaciente && !isCompleting) {
         try {
             const counterName = currentClassification === 'Urgência' ? 'senha_emergencia' : (currentClassification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
             setSenha("Gerando...");
             const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-            setSenhaNumero(ticketNumber);
+            const ticketPrefix = currentClassification === 'Urgência' ? 'U' : (currentClassification === 'Preferencial' ? 'P' : 'N');
+            const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+            setSenha(ticket);
         } catch (error) {
             console.error("Erro ao gerar senha:", error);
             setSenha("Erro");
             toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
         }
     }
-  }, [selectedPaciente, toast]);
+  }, [selectedPaciente, toast, isCompleting]);
+
 
   useEffect(() => {
-    if(selectedPaciente) {
+    if (selectedPaciente && !isCompleting) {
         generateTicketPreview(classification);
-    } else {
+    } else if (!isCompleting) {
         setSenha("");
-        setSenhaNumero(null);
     }
-  }, [selectedPaciente, generateTicketPreview, classification]);
-
-  useEffect(() => {
-    const updateTicketDisplay = () => {
-        if (senhaNumero !== null) {
-            const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
-            const ticket = `${ticketPrefix}-${String(senhaNumero).padStart(3, '0')}`;
-            setSenha(ticket);
-        } else if (selectedPaciente && senha !== "Erro") {
-            setSenha("Gerando...");
-        } else {
-            setSenha("");
-        }
-    };
-    updateTicketDisplay();
-  }, [classification, senhaNumero, selectedPaciente, senha]);
-
+  }, [selectedPaciente, generateTicketPreview, classification, isCompleting]);
 
 
   useEffect(() => {
@@ -212,17 +204,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
     setIsSubmitting(true)
     try {
-      const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
-      const ticketNumber = await getNextCounter(counterName, true); // true = increment counter
-      const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
-      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
-
       if (!selectedDepartamento) throw new Error("Departamento não encontrado")
-
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      await addPacienteToFila({
+      const item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
         pacienteId: selectedPaciente.id,
         pacienteNome: selectedPaciente.nome,
         departamentoId: selectedDepartamento.id,
@@ -230,13 +216,15 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         departamentoNumero: selectedDepartamento.numero,
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
-        senha: ticket,
+        senha: senha,
         status: "aguardando",
         classificacao: classification,
-      })
+      }
+
+      await addPacienteToFila(item, atendimentoParaCompletar?.id);
 
       toast({
-        title: "Paciente Enviado!",
+        title: isCompleting ? "Cadastro Completado!" : "Paciente Enviado!",
         description: `${selectedPaciente.nome} foi enviado para a fila de ${selectedDepartamento.nome}.`,
         className: "bg-green-500 text-white",
       })
@@ -303,10 +291,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
-            Adicionar Paciente à Fila
+             {isCompleting ? `Completar Cadastro da Senha ${atendimentoParaCompletar.senha}` : 'Adicionar Paciente à Fila'}
           </DialogTitle>
           <DialogDescription>
-            Selecione o paciente e para qual departamento e profissional ele será encaminhado.
+            {isCompleting ? 'Identifique o paciente e complete o cadastro para enviá-lo à fila de atendimento.' : 'Selecione o paciente e para qual departamento e profissional ele será encaminhado.'}
           </DialogDescription>
         </DialogHeader>
         

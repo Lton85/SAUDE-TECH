@@ -50,13 +50,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ExitConfirmationDialog } from "@/components/ui/exit-dialog";
 import { logout, getCurrentUser } from "@/services/authService";
 import { useRouter } from "next/navigation";
+import { getAtendimentosPendentes } from "@/services/filaDeEsperaService";
 
 
 // Import page components dynamically
 const DashboardPage = React.lazy(() => import('./page'));
 const AtendimentoPage = React.lazy(() => import('./atendimento/page'));
 const CadastrosPage = React.lazy(() => import('./cadastros/page'));
-const DepartamentosPage = React.lazy(() => import('./triagem/page'));
+const TriagemPage = React.lazy(() => import('./triagem/page'));
 const RelatoriosPage = React.lazy(() => import('./relatorios/page'));
 const EmpresaPage = React.lazy(() => import('./empresa/page'));
 const UsuariosPage = React.lazy(() => import('./usuarios/page'));
@@ -67,7 +68,7 @@ export const allMenuItems = [
   { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
   { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage, permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
-  { id: "/triagem", href: "/triagem", label: "Departamentos", icon: ClipboardList, component: DepartamentosPage, permissionRequired: true },
+  { id: "/triagem", href: "/triagem", label: "Triagem", icon: ClipboardList, component: TriagemPage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
@@ -77,7 +78,7 @@ export const allMenuItems = [
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
 ];
 
-export type Tab = (typeof allMenuItems)[number];
+export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number };
 
 const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[] }) => {
     const { state } = useSidebar();
@@ -178,6 +179,9 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
                         >
                             <item.icon />
                             <span>{item.label}</span>
+                             {item.notificationCount && item.notificationCount > 0 && (
+                                <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            )}
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
@@ -369,17 +373,30 @@ export default function DashboardClientLayout({
   React.useEffect(() => {
     const currentUser = getCurrentUser();
     if (currentUser) {
-        if (currentUser.usuario === 'master') {
-            setUserMenuItems(allMenuItems);
-        } else {
-             const userPermissions = currentUser.permissoes || [];
-             const allowedMenuItems = allMenuItems.filter(item => 
-                !item.permissionRequired || userPermissions.includes(item.id) || !item.permissionRequired
+        const items = currentUser.usuario === 'master'
+            ? allMenuItems
+            : allMenuItems.filter(item => 
+                !item.permissionRequired || (currentUser.permissoes || []).includes(item.id)
             );
-            setUserMenuItems(allowedMenuItems);
-        }
+        setUserMenuItems(items);
     }
   }, []);
+
+  // Effect to check for pending appointments and update notifications
+    React.useEffect(() => {
+        const unsubscribe = getAtendimentosPendentes((pendentes) => {
+            setUserMenuItems(prevItems => prevItems.map(item => {
+                if (item.id === '/triagem') {
+                    return { ...item, notificationCount: pendentes.length };
+                }
+                return item;
+            }));
+        }, (error) => {
+            console.error("Failed to get pending appointments for notification:", error);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
   const handleOpenInNewTab = async (url: string) => {
     if (url === '/painel') {

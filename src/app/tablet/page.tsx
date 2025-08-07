@@ -1,23 +1,36 @@
 
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Star, AlertTriangle, ChevronRight } from "lucide-react";
+import { ArrowRight, Star, AlertTriangle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-
+import type { FilaDeEsperaItem } from "@/types/fila";
+import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
 
 export default function TabletPage() {
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
 
-    const handleSelection = (type: 'Normal' | 'Preferencial' | 'Urgência') => {
-        // Lógica para gerar senha e imprimir
-        // (Será implementado em uma próxima etapa)
-        toast({
-            title: `Senha ${type} Selecionada!`,
-            description: `Sua senha do tipo ${type} foi gerada. Aguarde a impressão.`,
-            className: "bg-green-500 text-white"
-        });
+    const handleSelection = async (type: FilaDeEsperaItem['classificacao']) => {
+        setIsLoading(type);
+        try {
+            const senha = await addPreCadastroToFila(type);
+            toast({
+                title: `Senha Gerada: ${senha}`,
+                description: `Sua senha do tipo ${type} foi gerada. Aguarde ser chamado.`,
+                className: "bg-green-500 text-white"
+            });
+        } catch (error) {
+             toast({
+                title: `Erro ao gerar senha`,
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(null);
+        }
     };
 
     const cardVariants = {
@@ -56,10 +69,8 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Normal')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                            <div className="flex items-center justify-center h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/50 mb-6 transition-colors duration-300 group-hover:bg-green-200 dark:group-hover:bg-green-900">
-                                <ArrowRight className="h-10 w-10 text-green-600 dark:text-green-400" />
-                            </div>
-                            <h2 className="text-2xl md:text-4xl font-bold text-green-700 dark:text-green-300">NORMAL</h2>
+                            {isLoading === 'Normal' ? <Loader2 className="h-10 w-10 animate-spin text-green-600" /> : <ArrowRight className="h-10 w-10 text-green-600 dark:text-green-400" />}
+                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-green-700 dark:text-green-300">NORMAL</h2>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -70,10 +81,8 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Preferencial')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                            <div className="flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 dark:bg-blue-900/50 mb-6 transition-colors duration-300 group-hover:bg-blue-200 dark:group-hover:bg-blue-900">
-                                <Star className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>
+                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : <Star className="h-10 w-10 text-blue-600 dark:text-blue-400" />}
+                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -84,10 +93,8 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Urgência')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                            <div className="flex items-center justify-center h-20 w-20 rounded-full bg-red-100 dark:bg-red-900/50 mb-6 transition-colors duration-300 group-hover:bg-red-200 dark:group-hover:bg-red-900">
-                                <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />
-                            </div>
-                            <h2 className="text-2xl md:text-4xl font-bold text-red-700 dark:text-red-300">URGÊNCIA</h2>
+                            {isLoading === 'Urgência' ? <Loader2 className="h-10 w-10 animate-spin text-red-600" /> : <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />}
+                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-red-700 dark:text-red-300">URGÊNCIA</h2>
                         </CardContent>
                     </Card>
                 </motion.div>
