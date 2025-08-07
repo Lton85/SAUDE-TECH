@@ -367,17 +367,10 @@ export default function DashboardClientLayout({
             setUserMenuItems(allMenuItems);
         } else {
              const userPermissions = currentUser.permissoes || [];
-             // Adiciona a permissão de configuração se não existir, para garantir que o menu sempre apareça
-             const permissions = [...new Set([...userPermissions, '/configuracoes', '/'])];
-
              const allowedMenuItems = allMenuItems.filter(item => 
-                !item.permissionRequired || permissions.includes(item.id)
+                !item.permissionRequired || userPermissions.includes(item.id)
             );
-            // Always add the Home and Sair menus
-            const baseMenus = allMenuItems.filter(item => !item.permissionRequired);
-            // remove duplicates
-            const finalMenu = [...new Map([...allowedMenuItems, ...baseMenus].map(item => [item.id, item])).values()];
-            setUserMenuItems(finalMenu);
+            setUserMenuItems(allowedMenuItems);
         }
     }
   }, []);
