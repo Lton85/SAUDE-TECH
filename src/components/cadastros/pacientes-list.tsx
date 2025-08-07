@@ -17,7 +17,7 @@ import { PatientDialog } from "@/components/patients/patient-dialog";
 import type { Paciente } from "@/types/paciente";
 import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { getPacientes, deletePaciente } from "@/services/pacientesService";
+import { getPacientesRealtime, deletePaciente } from "@/services/pacientesService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
 import { getDepartamentos } from "@/services/departamentosService";
@@ -51,16 +51,12 @@ export function PacientesList() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const fetchData = async () => {
-    setIsLoading(true);
+   const fetchData = async () => {
     try {
-      const [pacientesData, departamentosData, profissionaisData] = await Promise.all([
-        getPacientes(), 
+      const [departamentosData, profissionaisData] = await Promise.all([
         getDepartamentos(),
         getProfissionais(),
       ]);
-      setPacientes(pacientesData);
-      setFilteredPacientes(pacientesData);
       setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
       
       const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
@@ -68,18 +64,34 @@ export function PacientesList() {
 
     } catch (error) {
       toast({
-        title: "Erro ao buscar dados",
-        description: "Não foi possível carregar a lista de pacientes ou departamentos.",
+        title: "Erro ao buscar dados de apoio",
+        description: "Não foi possível carregar a lista de departamentos ou profissionais.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(); // Fetch non-realtime data
+
+    const unsubscribe = getPacientesRealtime(
+        (pacientesData) => {
+            setPacientes(pacientesData);
+            setFilteredPacientes(pacientesData);
+            setIsLoading(false);
+        },
+        (error) => {
+            toast({
+                title: "Erro ao buscar pacientes",
+                description: error,
+                variant: "destructive",
+            });
+            setIsLoading(false);
+        }
+    );
+
+    return () => unsubscribe();
+  }, [toast]);
 
   const statusCounts = useMemo(() => {
     return pacientes.reduce((acc, p) => {
@@ -122,8 +134,7 @@ export function PacientesList() {
     setFilteredPacientes(filteredData);
   }, [searchTerm, pacientes]);
 
-  const handleSuccess = () => {
-    fetchData();
+  const handleSuccess = (paciente: Paciente) => {
     setSelectedPatient(null);
   };
 
@@ -158,7 +169,6 @@ export function PacientesList() {
     if (patientToDelete) {
       try {
         await deletePaciente(patientToDelete.id);
-        fetchData();
         toast({
           title: "Paciente Excluído!",
           description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,

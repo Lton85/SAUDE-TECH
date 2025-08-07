@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -6,36 +7,24 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send, FileText } from "lucide-react";
+import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, Trash2, Send, FileText, Lock } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { HistoryDialog } from "@/components/patients/history-dialog";
-import { ViewDialog } from "@/components/patients/view-dialog";
-import { PatientDialog } from "@/components/patients/patient-dialog";
-import type { Paciente } from "@/types/paciente";
-import { DeleteConfirmationDialog } from "@/components/profissionais/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { getProfissionais, deleteProfissional } from "@/services/profissionaisService";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
-import { getDepartamentos } from "@/services/departamentosService";
-import type { Departamento } from "@/types/departamento";
-import { ProntuarioDialog } from "@/components/pacientes/prontuario-dialog";
-import { EditQueueItemDialog } from "../atendimento/edit-dialog";
-import { FilaDeEsperaItem } from "@/types/fila";
-import { updateHistoricoItem } from "@/services/filaDeEsperaService";
 import type { Profissional } from "@/types/profissional";
 import { ProfissionalDialog } from "../profissionais/profissional-dialog";
 import { ViewProfissionalDialog } from "../profissionais/view-dialog";
 import { HistoryProfissionalDialog } from "../profissionais/history-dialog";
+import { DeleteConfirmationDialog } from "../profissionais/delete-dialog";
 
 
 export function ProfissionaisList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [filteredProfissionais, setFilteredProfissionais] = useState<Profissional[]>([]);
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   
   const [selectedProfissionalForHistory, setSelectedProfissionalForHistory] = useState<Profissional | null>(null);
   const [selectedProfissionalForView, setSelectedProfissionalForView] = useState<Profissional | null>(null);
@@ -44,8 +33,6 @@ export function ProfissionaisList() {
   const [selectedProfissional, setSelectedProfissional] = useState<Profissional | null>(null);
   const [profissionalToDelete, setProfissionalToDelete] = useState<Profissional | null>(null);
   
-  const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
-  
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
@@ -53,18 +40,13 @@ export function ProfissionaisList() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [profissionaisData, departamentosData] = await Promise.all([
-        getProfissionais(), 
-        getDepartamentos(),
-      ]);
+      const profissionaisData = await getProfissionais();
       setProfissionais(profissionaisData);
       setFilteredProfissionais(profissionaisData);
-      setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
-
     } catch (error) {
       toast({
         title: "Erro ao buscar dados",
-        description: "Não foi possível carregar a lista de profissionais ou departamentos.",
+        description: "Não foi possível carregar a lista de profissionais.",
         variant: "destructive",
       });
     } finally {
@@ -74,7 +56,7 @@ export function ProfissionaisList() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [toast]);
 
   const statusCounts = useMemo(() => {
     return profissionais.reduce((acc, p) => {
@@ -90,7 +72,6 @@ export function ProfissionaisList() {
   useEffect(() => {
     const lowercasedQuery = searchTerm.toLowerCase();
     
-    // General filter
     const filteredData = profissionais.filter((item) => {
       return (
         item.nome.toLowerCase().includes(lowercasedQuery) ||

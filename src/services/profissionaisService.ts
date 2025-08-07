@@ -4,45 +4,12 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
 import type { Profissional } from '@/types/profissional';
 import { getNextCounter } from './countersService';
+import { getCurrentUser } from './authService';
 
 const profissionaisCollection = collection(db, 'profissionais');
 
-// Dados de exemplo para popular a coleção, se estiver vazia.
-const profissionaisData: Omit<Profissional, 'id' | 'codigo' | 'historico'>[] = [];
-
-// Popula a coleção de profissionais se ela estiver vazia.
-export const seedProfissionais = async () => {
-    try {
-        const snapshot = await getDocs(profissionaisCollection);
-        if (snapshot.empty && profissionaisData.length > 0) {
-            const batch = writeBatch(db);
-            for (const profissional of profissionaisData) {
-                const docRef = doc(profissionaisCollection);
-                const nextId = await getNextCounter('profissionais_v2');
-                const codigo = String(nextId).padStart(3, '0');
-                const profissionalWithHistory = {
-                    ...profissional,
-                    codigo,
-                    historico: {
-                        criadoEm: new Date().toISOString(),
-                        criadoPor: 'Admin (Seed)',
-                        alteradoEm: new Date().toISOString(),
-                        alteradoPor: 'Admin (Seed)',
-                    }
-                }
-                batch.set(docRef, profissionalWithHistory);
-            }
-            await batch.commit();
-            console.log('Profissionais collection has been seeded.');
-        }
-    } catch (error) {
-        console.error("Error seeding profissionais: ", error);
-    }
-};
-
 // Obtém todos os profissionais do banco de dados.
 export const getProfissionais = async (): Promise<Profissional[]> => {
-    // await seedProfissionais(); // Comentado para não popular
     const q = query(profissionaisCollection, orderBy("codigo"));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profissional));
@@ -52,14 +19,15 @@ export const getProfissionais = async (): Promise<Profissional[]> => {
 export const addProfissional = async (profissional: Omit<Profissional, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('profissionais_v2');
     const codigo = String(nextId).padStart(3, '0');
+    const loggedUser = getCurrentUser();
     const newProfissional = {
         ...profissional,
         codigo,
         historico: {
             criadoEm: new Date().toISOString(),
-            criadoPor: 'Admin (Cadastro)',
+            criadoPor: loggedUser?.nome || 'Admin',
             alteradoEm: new Date().toISOString(),
-            alteradoPor: 'Admin (Cadastro)',
+            alteradoPor: loggedUser?.nome || 'Admin',
         }
     }
     const docRef = await addDoc(profissionaisCollection, newProfissional);
@@ -74,13 +42,14 @@ export const updateProfissional = async (id: string, profissional: Partial<Omit<
         throw new Error("Profissional não encontrado");
     }
     const existingProfissional = profissionalSnap.data() as Profissional;
+    const loggedUser = getCurrentUser();
 
     const profissionalToUpdate: Partial<Omit<Profissional, 'id'>> = {
         ...profissional,
         historico: {
             ...existingProfissional.historico,
             alteradoEm: new Date().toISOString(),
-            alteradoPor: 'Admin (Edição)',
+            alteradoPor: loggedUser?.nome || 'Admin',
         }
     }
     await updateDoc(profissionalDocRef, profissionalToUpdate);

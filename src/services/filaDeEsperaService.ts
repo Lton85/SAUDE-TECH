@@ -266,9 +266,7 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
     }
 
     if (filters.profissionalId && filters.profissionalId !== 'todos') {
-        const profissionais = await getProfissionais();
-        const profissional = profissionais.find(m => m.id === filters.profissionalId);
-        if(profissional) data = data.filter(item => item.profissionalNome === `Dr(a). ${profissional.nome}`);
+        data = data.filter(item => item.profissionalId === filters.profissionalId);
     }
 
     if (filters.departamentoId && filters.departamentoId !== 'todos') {
