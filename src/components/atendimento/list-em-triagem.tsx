@@ -23,12 +23,23 @@ const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify:
             item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
         )}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
-                <span className={cn(
-                    "font-bold text-base tracking-tight",
-                     item.classificacao === "Urgência" && "text-red-600",
-                    item.classificacao === "Preferencial" && "text-amber-600",
-                    item.classificacao === "Normal" && "text-green-600",
-                )}>{item.senha}</span>
+                 <div className="flex items-center gap-2">
+                    <span className={cn(
+                        "font-bold text-base tracking-tight",
+                         item.classificacao === "Urgência" && "text-red-600",
+                        item.classificacao === "Preferencial" && "text-amber-600",
+                        item.classificacao === "Normal" && "text-green-600",
+                    )}>{item.senha}</span>
+                     <Badge variant={
+                        item.classificacao === 'Urgência' ? 'destructive' :
+                        item.classificacao === 'Preferencial' ? 'default' : 'secondary'
+                    } className={cn("text-xs",
+                        item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                        item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
+                    )}>
+                        {item.classificacao}
+                    </Badge>
+                </div>
                 
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
                     <Clock className="h-3 w-3" />
@@ -73,7 +84,7 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
 
 export function EmTriagemList({ emTriagem, isLoading, onIdentify }: { emTriagem: FilaDeEsperaItem[], isLoading: boolean, onIdentify: (item: FilaDeEsperaItem) => void }) {
     
-    if (isLoading) {
+    if (isLoading && emTriagem.length === 0) {
         return (
             <div className="flex gap-4 h-full">
                  <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-red-600"/>
@@ -87,7 +98,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify }: { emTriagem:
     const preferencialItems = emTriagem.filter(item => item.classificacao === 'Preferencial');
     const normalItems = emTriagem.filter(item => item.classificacao === 'Normal');
 
-    if (emTriagem.length === 0) {
+    if (emTriagem.length === 0 && !isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
                 <p className="text-muted-foreground">Nenhuma senha em triagem.</p>
