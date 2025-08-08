@@ -10,6 +10,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
+  ToastOverlay,
 } from "@/components/ui/toast"
 
 export function Toaster() {
@@ -18,7 +19,9 @@ export function Toaster() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Space' || event.code === 'Escape' || event.code === 'Enter') {
-        dismiss();
+        if(toasts.length > 0) {
+          dismiss(toasts[0].id);
+        }
       }
     };
 
@@ -27,11 +30,11 @@ export function Toaster() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [dismiss]);
-
+  }, [dismiss, toasts]);
 
   return (
     <ToastProvider>
+      {toasts.length > 0 && <ToastOverlay onClick={() => dismiss()} />}
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
@@ -42,7 +45,6 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
           </Toast>
         )
       })}
