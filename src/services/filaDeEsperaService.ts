@@ -220,17 +220,18 @@ export const getAtendimentosEmAndamento = (
 }
 
 /**
- * Esta função requer DOIS índices compostos no Firestore.
+ * Esta função requer DOIS índices compostos no Firestore para ordenação.
+ * As consultas básicas por data já são otimizadas.
  *
  * 1) Para Atendimentos Finalizados
  * Coleção: relatorios_atendimentos
  * Campos: finalizadaEm (Descendente)
- * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRAC&create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ * Link: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRACGgwKCF9fbmFtZV9fEAI
  *
  * 2) Para Atendimentos Cancelados
  * Coleção: relatorios_atendimentos
  * Campos: canceladaEm (Descendente)
- * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ * Link: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDAoKX19uYW1lX18QAQ==
  */
 export const getAtendimentosFinalizadosHoje = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
