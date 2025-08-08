@@ -205,9 +205,9 @@ export default function AtendimentosPage() {
     };
     
     return (
-        <>
-            <Tabs defaultValue="pendentes" className="w-full">
-                 <TabsList className="grid w-full grid-cols-5">
+        <div className="flex flex-col h-full">
+            <Tabs defaultValue="pendentes" className="flex flex-col flex-1">
+                 <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10">
                     <TabsTrigger value="pendentes">
                         <AlertTriangle className="mr-2 h-4 w-4" />
                         Senhas Pendentes
@@ -235,53 +235,55 @@ export default function AtendimentosPage() {
                     </TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="pendentes" className="mt-4">
-                    <SenhasPendentesList 
-                        pendentes={pendentes} 
-                        isLoading={isLoading} 
-                        onCall={handleChamarParaTriagem}
-                        onCancel={setItemToCancel}
-                    />
-                </TabsContent>
-                
-                <TabsContent value="em-triagem" className="mt-4">
-                    <EmTriagemList 
-                        emTriagem={emTriagem}
-                        isLoading={isLoading}
-                        onIdentify={handleCompletarCadastro}
-                        onCancel={setItemToCancel}
-                    />
-                </TabsContent>
+                <div className="flex-1 overflow-y-auto mt-4">
+                    <TabsContent value="pendentes">
+                        <SenhasPendentesList 
+                            pendentes={pendentes} 
+                            isLoading={isLoading} 
+                            onCall={handleChamarParaTriagem}
+                            onCancel={setItemToCancel}
+                        />
+                    </TabsContent>
+                    
+                    <TabsContent value="em-triagem">
+                        <EmTriagemList 
+                            emTriagem={emTriagem}
+                            isLoading={isLoading}
+                            onIdentify={handleCompletarCadastro}
+                            onCancel={setItemToCancel}
+                        />
+                    </TabsContent>
 
-                <TabsContent value="fila-atendimento" className="mt-4">
-                    <FilaDeAtendimentoList
-                        fila={fila}
-                        isLoading={isLoading}
-                        onCall={handleChamarParaAtendimento}
-                        onEdit={setItemToEdit}
-                        onHistory={setItemToHistory}
-                        onCancel={setItemToCancel}
-                        onAddToQueue={handleAddToQueue}
-                        onClearPanel={handleClearPanel}
-                    />
-                </TabsContent>
+                    <TabsContent value="fila-atendimento">
+                        <FilaDeAtendimentoList
+                            fila={fila}
+                            isLoading={isLoading}
+                            onCall={handleChamarParaAtendimento}
+                            onEdit={setItemToEdit}
+                            onHistory={setItemToHistory}
+                            onCancel={setItemToCancel}
+                            onAddToQueue={handleAddToQueue}
+                            onClearPanel={handleClearPanel}
+                        />
+                    </TabsContent>
 
-                 <TabsContent value="em-andamento" className="mt-4">
-                    <EmAndamentoList
-                        emAtendimento={emAtendimento}
-                        isLoading={isLoading}
-                        onReturnToQueue={setItemToReturn}
-                        onFinalize={handleFinalizarAtendimento}
-                        onCancel={setItemToCancel}
-                    />
-                </TabsContent>
+                     <TabsContent value="em-andamento">
+                        <EmAndamentoList
+                            emAtendimento={emAtendimento}
+                            isLoading={isLoading}
+                            onReturnToQueue={setItemToReturn}
+                            onFinalize={handleFinalizarAtendimento}
+                            onCancel={setItemToCancel}
+                        />
+                    </TabsContent>
 
-                <TabsContent value="finalizados" className="mt-4">
-                    <FinalizadosList
-                        finalizados={finalizados}
-                        isLoading={isLoading}
-                    />
-                </TabsContent>
+                    <TabsContent value="finalizados">
+                        <FinalizadosList
+                            finalizados={finalizados}
+                            isLoading={isLoading}
+                        />
+                    </TabsContent>
+                </div>
             </Tabs>
             
              {/* Dialogs */}
@@ -380,6 +382,6 @@ export default function AtendimentosPage() {
                     }}
                 />
             )}
-        </>
+        </div>
     );
 }
