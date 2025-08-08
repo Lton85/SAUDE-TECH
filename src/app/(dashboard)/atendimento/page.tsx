@@ -22,6 +22,7 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 
 interface Profissional {
@@ -188,19 +189,22 @@ export default function AtendimentosPage() {
                     <TabsTrigger value="pendentes">
                         <AlertTriangle className="mr-2 h-4 w-4" />
                         Senhas Pendentes
-                        {pendentes.length > 0 && <span className="ml-2 flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>}
+                        {pendentes.length > 0 && <Badge variant="destructive" className="ml-2 animate-pulse">{pendentes.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="em-triagem">
                         <Fingerprint className="mr-2 h-4 w-4" />
                         Em Triagem
+                        {emTriagem.length > 0 && <Badge className="ml-2">{emTriagem.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="fila-atendimento">
                         <Tags className="mr-2 h-4 w-4" />
                         Fila de Atendimento
+                        {fila.length > 0 && <Badge className="ml-2">{fila.length}</Badge>}
                     </TabsTrigger>
                      <TabsTrigger value="em-andamento">
                         <Hourglass className="mr-2 h-4 w-4" />
                         Em Andamento
+                        {emAtendimento.length > 0 && <Badge className="ml-2">{emAtendimento.length}</Badge>}
                     </TabsTrigger>
                 </TabsList>
                 
