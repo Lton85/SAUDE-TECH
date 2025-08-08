@@ -22,7 +22,6 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
-import { finalizarAtendimento as finalizarAtendimentoService } from "@/services/filaDeEsperaService";
 
 
 interface Profissional {
@@ -166,7 +165,7 @@ export default function AtendimentosPage() {
     
     const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
         try {
-            await finalizarAtendimentoService(item.id);
+            await finalizarAtendimento(item.id);
             toast({
                 title: "Atendimento Finalizado!",
                 description: `O atendimento de ${item.pacienteNome} foi finalizado.`,
