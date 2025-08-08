@@ -6,9 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Clock, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface EmTriagemListProps {
@@ -71,7 +69,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify }: EmTriagemLis
     
     if (isLoading) {
         return (
-            <div className="flex gap-4 h-[calc(100vh-220px)]">
+            <div className="flex gap-4 h-full">
                  <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-red-600"/>
                  <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-amber-600"/>
                  <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-green-600"/>
@@ -92,7 +90,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify }: EmTriagemLis
     }
     
     return (
-         <div className="flex gap-4 h-[calc(100vh-220px)]">
+         <div className="flex gap-4 h-full">
             <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-red-600"/>
             <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-amber-600"/>
             <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-green-600"/>
