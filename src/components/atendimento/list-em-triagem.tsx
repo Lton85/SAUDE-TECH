@@ -19,13 +19,15 @@ const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify:
         <Card key={item.id} className={cn(
             "w-full",
             item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
-            item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5"
+            item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5",
+            item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
         )}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
                 <span className={cn(
-                    "font-bold text-lg tracking-tight",
-                    item.classificacao === "Urgência" && "text-red-600",
-                    item.classificacao === "Preferencial" && "text-amber-600"
+                    "font-bold text-base tracking-tight",
+                     item.classificacao === "Urgência" && "text-red-600",
+                    item.classificacao === "Preferencial" && "text-amber-600",
+                    item.classificacao === "Normal" && "text-green-600",
                 )}>{item.senha}</span>
                 
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
