@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -50,14 +51,16 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
                 return (
                      <Card key={item.id} className={cn(
                         item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
-                        item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5"
+                        item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5",
+                        item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
                             <Badge variant={
                                 item.classificacao === 'Urgência' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                             } className={cn("text-base",
-                                item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600'
+                                item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                                item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
                             )}>
                                 {item.senha}
                             </Badge>
