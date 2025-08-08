@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { Megaphone, Trash2 } from "lucide-react";
+import { Megaphone, Trash2, Clock } from "lucide-react";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface SenhasPendentesListProps {
     pendentes: FilaDeEsperaItem[];
@@ -21,9 +22,10 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {[...Array(6)].map((_, i) => (
                     <Card key={i}>
-                        <CardContent className="p-3 flex items-center justify-between">
-                            <Skeleton className="h-6 w-20" />
-                            <div className="flex gap-1">
+                        <CardContent className="p-2 space-y-2">
+                             <Skeleton className="h-6 w-16" />
+                             <Skeleton className="h-4 w-20" />
+                            <div className="flex gap-1 justify-end">
                                 <Skeleton className="h-7 w-7 rounded-md" />
                                 <Skeleton className="h-7 w-7 rounded-md" />
                             </div>
@@ -43,20 +45,32 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
     }
     
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {pendentes.map((item) => (
-                <Card key={item.id} className={cn(
-                    item.classificacao === "Urgência" && "border-red-500/50",
-                    item.classificacao === "Preferencial" && "border-amber-500/50"
-                )}>
-                    <CardContent className="p-3 flex items-center justify-between">
-                        <span className={cn(
-                           "font-bold text-xl",
-                           item.classificacao === "Urgência" && "text-red-600",
-                           item.classificacao === "Preferencial" && "text-amber-600"
-                        )}>{item.senha}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+            {pendentes.map((item) => {
+                const chegada = item.chegadaEm ? item.chegadaEm.toDate() : null;
+                const formattedTime = chegada ? format(chegada, "HH:mm:ss") : '-';
+                const formattedDate = chegada ? format(chegada, "dd/MM") : '-';
 
-                        <div className="flex items-center gap-1">
+                return (
+                    <Card key={item.id} className={cn(
+                        "flex flex-col justify-between",
+                        item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
+                        item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5"
+                    )}>
+                        <CardContent className="p-2 flex-grow">
+                             <div className="flex justify-between items-start">
+                                <span className={cn(
+                                   "font-bold text-lg",
+                                   item.classificacao === "Urgência" && "text-red-600",
+                                   item.classificacao === "Preferencial" && "text-amber-600"
+                                )}>{item.senha}</span>
+                                <div className="text-right">
+                                     <p className="text-xs font-mono text-muted-foreground">{formattedTime}</p>
+                                     <p className="text-xs font-mono text-muted-foreground">{formattedDate}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                        <div className="flex items-center justify-end gap-1 p-2 border-t mt-2">
                              <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)}>
                                 <Megaphone className="h-4 w-4" />
                                 <span className="sr-only">Chamar para Triagem</span>
@@ -66,9 +80,9 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
                                 <span className="sr-only">Excluir</span>
                             </Button>
                         </div>
-                    </CardContent>
-                </Card>
-            ))}
+                    </Card>
+                )
+            })}
         </div>
     );
 }
