@@ -91,7 +91,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                     <TableCell className="px-3 py-2 text-xs">
                                         <div className="flex items-center gap-2">
                                             <Clock className="h-3 w-3" />
-                                            {formatDistanceToNow(item.chegadaEm.toDate(), { addSuffix: true, locale: ptBR })}
+                                            {item.chegadaEm ? formatDistanceToNow(item.chegadaEm.toDate(), { addSuffix: true, locale: ptBR }) : 'N/A'}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right px-3 py-2">
