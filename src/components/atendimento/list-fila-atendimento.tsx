@@ -9,7 +9,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Pencil, FileText, Trash2, Megaphone, PlusCircle } from "lucide-react";
+import { Clock, User, Building, Pencil, FileText, Trash2, Megaphone, PlusCircle, Eraser } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FilaDeAtendimentoListProps {
@@ -34,7 +34,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                     </div>
                     <div className="flex items-center gap-2">
                          <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9">
-                            <Trash2 className="h-4 w-4" />
+                            <Eraser className="h-4 w-4" />
                             <span className="sr-only">Limpar Painel</span>
                         </Button>
                         <Button onClick={onAddToQueue}>
