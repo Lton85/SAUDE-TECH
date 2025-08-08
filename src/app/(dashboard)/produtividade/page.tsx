@@ -2,22 +2,39 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays, isEqual, isValid } from "date-fns";
+import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays, isEqual, isValid, differenceInMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, BarChart, Clock, Timer } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 import { AtendimentosChart } from "../relatorios/atendimentos-chart";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+
+const KpiCard = ({ title, value, icon: Icon, isLoading }: { title: string, value: string, icon: React.ElementType, isLoading: boolean }) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+            {isLoading ? (
+                <div className="h-8 w-24 bg-muted animate-pulse rounded-md" />
+            ) : (
+                <div className="text-2xl font-bold">{value}</div>
+            )}
+        </CardContent>
+    </Card>
+);
+
 
 export default function ProdutividadePage() {
     const { toast } = useToast();
@@ -149,6 +166,38 @@ export default function ProdutividadePage() {
              }
         }
     };
+    
+    const kpiData = React.useMemo(() => {
+        if (isLoading || reportData.length === 0) {
+            return { total: 0, avgWait: 0, avgService: 0 };
+        }
+
+        const validFinalized = reportData.filter(item => 
+            item.status === 'finalizado' && 
+            item.chegadaEm && 
+            item.chamadaEm &&
+            item.finalizadaEm
+        );
+
+        const totalWaitMinutes = validFinalized.reduce((sum, item) => {
+             const wait = differenceInMinutes(item.chamadaEm!.toDate(), item.chegadaEm!.toDate());
+             return sum + wait;
+        }, 0);
+
+        const totalServiceMinutes = validFinalized.reduce((sum, item) => {
+             const service = differenceInMinutes(item.finalizadaEm!.toDate(), item.chamadaEm!.toDate());
+             return sum + service;
+        }, 0);
+        
+        const avgWait = validFinalized.length > 0 ? totalWaitMinutes / validFinalized.length : 0;
+        const avgService = validFinalized.length > 0 ? totalServiceMinutes / validFinalized.length : 0;
+
+        return {
+            total: reportData.length,
+            avgWait: Math.round(avgWait),
+            avgService: Math.round(avgService)
+        }
+    }, [reportData, isLoading]);
 
     if (!isMounted) {
         return (
@@ -258,22 +307,31 @@ export default function ProdutividadePage() {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                 {isLoading ? (
-                     <Card className="w-full h-72 flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </Card>
-                 ) : hasSearched && reportData.length === 0 ? (
-                     <Card className="w-full h-72 flex items-center justify-center">
-                        <p className="text-muted-foreground">Nenhum dado encontrado para o período.</p>
-                    </Card>
-                 ) : hasSearched && reportData.length > 0 ? (
-                     <AtendimentosChart data={reportData} />
-                 ) : (
-                    <Card className="w-full h-72 flex items-center justify-center">
-                        <p className="text-muted-foreground">Selecione um período para ver os gráficos.</p>
-                    </Card>
-                 )}
+             <div className="space-y-4">
+                {hasSearched && (
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <KpiCard title="Total de Atendimentos" value={kpiData.total.toString()} icon={BarChart} isLoading={isLoading} />
+                        <KpiCard title="Tempo Médio de Espera" value={`${kpiData.avgWait} min`} icon={Clock} isLoading={isLoading} />
+                        <KpiCard title="Tempo Médio de Atendimento" value={`${kpiData.avgService} min`} icon={Timer} isLoading={isLoading} />
+                    </div>
+                )}
+                 <div className="grid grid-cols-1 gap-4">
+                     {isLoading ? (
+                         <Card className="w-full h-96 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </Card>
+                     ) : hasSearched && reportData.length === 0 ? (
+                         <Card className="w-full h-96 flex items-center justify-center">
+                            <p className="text-muted-foreground">Nenhum dado encontrado para o período.</p>
+                        </Card>
+                     ) : hasSearched && reportData.length > 0 ? (
+                         <AtendimentosChart data={reportData} />
+                     ) : (
+                        <Card className="w-full h-96 flex items-center justify-center">
+                            <p className="text-muted-foreground">Selecione um período para ver os gráficos.</p>
+                        </Card>
+                     )}
+                </div>
             </div>
         </div>
     );
