@@ -47,7 +47,7 @@ export default function AtendimentosPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
-    const [showCanceledOnly, setShowCanceledOnly] = useState(false);
+    const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('finalizado');
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
@@ -282,8 +282,8 @@ export default function AtendimentosPage() {
                         <FinalizadosList
                             finalizados={finalizados}
                             isLoading={isLoading}
-                            showCanceledOnly={showCanceledOnly}
-                            onShowCanceledOnlyChange={setShowCanceledOnly}
+                            filter={finalizadosFilter}
+                            onFilterChange={setFinalizadosFilter}
                         />
                     </TabsContent>
                 </div>

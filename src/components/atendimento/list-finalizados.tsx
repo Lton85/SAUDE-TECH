@@ -9,20 +9,31 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { Switch } from "../ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "../ui/label";
 
 interface FinalizadosListProps {
     finalizados: FilaDeEsperaItem[];
     isLoading: boolean;
-    showCanceledOnly: boolean;
-    onShowCanceledOnlyChange: (checked: boolean) => void;
+    filter: 'todos' | 'finalizado' | 'cancelado';
+    onFilterChange: (value: 'todos' | 'finalizado' | 'cancelado') => void;
 }
 
-export function FinalizadosList({ finalizados, isLoading, showCanceledOnly, onShowCanceledOnlyChange }: FinalizadosListProps) {
+export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange }: FinalizadosListProps) {
+    
+    const counts = React.useMemo(() => {
+        const finalized = finalizados.filter(item => item.status === 'finalizado').length;
+        const canceled = finalizados.filter(item => item.status === 'cancelado').length;
+        const all = finalizados.length;
+        return { finalized, canceled, all };
+    }, [finalizados]);
+    
     const filteredList = React.useMemo(() => {
-        return finalizados.filter(item => showCanceledOnly ? item.status === 'cancelado' : item.status === 'finalizado');
-    }, [finalizados, showCanceledOnly]);
+        if (filter === 'todos') {
+            return finalizados;
+        }
+        return finalizados.filter(item => item.status === filter);
+    }, [finalizados, filter]);
 
     if (isLoading) {
         return (
@@ -44,20 +55,31 @@ export function FinalizadosList({ finalizados, isLoading, showCanceledOnly, onSh
     
     return (
          <div className="space-y-2">
-            <div className="flex items-center justify-end space-x-2 pr-2">
-              <Label htmlFor="canceled-switch">Finalizados</Label>
-              <Switch 
-                id="canceled-switch" 
-                checked={showCanceledOnly}
-                onCheckedChange={onShowCanceledOnlyChange}
-              />
-              <Label htmlFor="canceled-switch">Cancelados</Label>
-            </div>
+             <div className="flex items-center justify-end p-2 border-b">
+                 <RadioGroup
+                    value={filter}
+                    onValueChange={onFilterChange}
+                    className="flex items-center gap-4"
+                >
+                     <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="finalizado" id="r-finalizado" />
+                        <Label htmlFor="r-finalizado" className="cursor-pointer">Finalizados <Badge variant="secondary" className="ml-1">{counts.finalized}</Badge></Label>
+                    </div>
+                     <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="cancelado" id="r-cancelado" />
+                        <Label htmlFor="r-cancelado" className="cursor-pointer">Cancelados <Badge variant="destructive" className="ml-1">{counts.canceled}</Badge></Label>
+                    </div>
+                     <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="todos" id="r-todos" />
+                        <Label htmlFor="r-todos" className="cursor-pointer">Todos <Badge variant="outline" className="ml-1">{counts.all}</Badge></Label>
+                    </div>
+                </RadioGroup>
+             </div>
 
             {filteredList.length === 0 ? (
                  <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
                     <p className="text-muted-foreground">
-                        {showCanceledOnly ? "Nenhum atendimento cancelado hoje." : "Nenhum atendimento finalizado hoje."}
+                        Nenhum registro encontrado para este filtro.
                     </p>
                 </div>
             ) : (
