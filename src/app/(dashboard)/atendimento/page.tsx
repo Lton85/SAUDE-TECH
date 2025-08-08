@@ -2,25 +2,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Clock, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2 } from "lucide-react";
-import { getFilaDeEspera, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getDepartamentos } from "@/services/departamentosService";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
-import { getProfissionais } from "@/services/profissionaisService";
-import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
-import { cn } from "@/lib/utils";
-import { clearPainel, getUltimaChamada } from "@/services/chamadasService";
+import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
+import { getPacientesRealtime } from "@/services/pacientesService";
+import { getDepartamentos } from "@/services/departamentosService";
+import { getProfissionais } from "@/services/profissionaisService";
+import { PatientDialog } from "@/components/patients/patient-dialog";
+import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
+import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
+import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
+import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
+import { SenhasPendentesList } from "@/components/atendimento/list-pendentes";
+import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
+import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
+import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
+import { AlertTriangle, Fingerprint, Hourglass, Tags } from "lucide-react";
 
 
 interface Profissional {
@@ -28,20 +29,35 @@ interface Profissional {
   nome: string;
 }
 
-export default function AtendimentoPage() {
+export default function AtendimentosPage() {
+    // Data states
+    const [pendentes, setPendentes] = useState<FilaDeEsperaItem[]>([]);
+    const [emTriagem, setEmTriagem] = useState<FilaDeEsperaItem[]>([]);
+    const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
     const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
+    const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+    
+    // UI states
     const [isLoading, setIsLoading] = useState(true);
+    const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
+    const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    
+    // Dialog item states
+    const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
-    const router = useRouter();
-
-    const { toast } = useToast();
+    const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
+    const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
+    const { toast } = useToast();
+
+    // Data Fetching and Realtime Subscriptions
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchSupportData = async () => {
              try {
                 const [deptoData, profissionaisData] = await Promise.all([
                     getDepartamentos(),
@@ -49,7 +65,6 @@ export default function AtendimentoPage() {
                 ]);
 
                 setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
-                
                 const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
 
@@ -61,181 +76,167 @@ export default function AtendimentoPage() {
                 });
              }
         }
+        fetchSupportData();
 
-        fetchData();
-
-        const unsubscribeEmAtendimento = getAtendimentosEmAndamento((data) => {
-            const sortedData = data.sort((a, b) => {
-                if (a.chamadaEm && b.chamadaEm) {
-                    return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
-                }
-                return 0;
-            });
-            setEmAtendimento(sortedData);
+        const unsubPacientes = getPacientesRealtime(setPacientes, (error) => toast({ title: "Erro ao carregar pacientes", description: error, variant: "destructive" }));
+        
+        const unsubPendentes = getAtendimentosPendentes((data) => {
+            setPendentes(data.sort((a, b) => (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0)));
             setIsLoading(false);
         }, (error) => {
-             toast({
-                title: "Erro ao carregar atendimentos",
-                description: error,
-                variant: "destructive",
+             toast({ title: "Erro ao carregar senhas pendentes", description: error, variant: "destructive" });
+             setIsLoading(false);
+        });
+
+        const unsubEmTriagem = getAtendimentosEmTriagem((data) => {
+            setEmTriagem(data.sort((a, b) => (b.chamadaEm?.toDate().getTime() ?? 0) - (a.chamadaEm?.toDate().getTime() ?? 0)));
+        }, (error) => toast({ title: "Erro ao carregar senhas em triagem", description: error, variant: "destructive" }));
+        
+        const unsubFila = getFilaDeEspera((data) => {
+             const sortedData = data.sort((a, b) => {
+                if (a.prioridade !== b.prioridade) return a.prioridade - b.prioridade;
+                return (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0);
             });
+            setFila(sortedData);
+            setIsLoading(false);
+        }, (error) => {
+            toast({ title: "Erro ao carregar a fila", description: error, variant: "destructive" });
+            setIsLoading(false);
+        });
+
+        const unsubEmAtendimento = getAtendimentosEmAndamento((data) => {
+            setEmAtendimento(data.sort((a, b) => (b.chamadaEm?.toDate().getTime() ?? 0) - (a.chamadaEm?.toDate().getTime() ?? 0)));
+            setIsLoading(false);
+        }, (error) => {
+            toast({ title: "Erro ao carregar atendimentos", description: error, variant: "destructive" });
             setIsLoading(false);
         });
 
         return () => {
-            if (unsubscribeEmAtendimento) unsubscribeEmAtendimento();
+            unsubPacientes();
+            unsubPendentes();
+            unsubEmTriagem();
+            unsubFila();
+            unsubEmAtendimento();
         };
     }, [toast]);
     
-    const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
-        try {
-            await finalizarAtendimento(item.id);
-             toast({
-                title: "Atendimento Finalizado!",
-                description: `O atendimento de ${item.pacienteNome} foi concluído.`,
-            });
-        } catch (error) {
-             toast({
-                title: "Erro ao finalizar",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        }
+    // Handlers for dialogs and actions
+    const handleOpenNewPatientDialog = () => {
+        setIsAddToQueueDialogOpen(false);
+        setIsPatientDialogOpen(true);
+    };
+
+    const handlePatientDialogSuccess = (newPatient: Paciente) => {
+        setIsPatientDialogOpen(false);
+        setPatientToAdd(newPatient);
+        setTimeout(() => setIsAddToQueueDialogOpen(true), 100);
+    };
+
+    const handleCompletarCadastro = (item: FilaDeEsperaItem) => {
+        setAtendimentoParaCompletar(item);
+        setPatientToAdd(null);
+        setIsAddToQueueDialogOpen(true);
     };
     
-    const handleReturnToQueue = (item: FilaDeEsperaItem) => {
-        setItemToReturn(item);
-    };
-
-    const handleReturnToQueueConfirm = async (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => {
-        try {
-            // First, update the item with any changes
-            await updateFilaItem(item.id, updates);
-
-            // Then, return the patient to the queue
-            await retornarPacienteParaFila(item.id);
-            
-            // Check if the returned patient is the one on the panel
-            const ultimaChamada = await getUltimaChamada();
-            if (ultimaChamada?.atendimentoId === item.id) {
-                await clearPainel();
-            }
-
-            toast({
-                title: "Paciente Retornou para a Fila!",
-                description: `${item.pacienteNome} foi retornado para a fila de espera.`,
-                variant: "default"
-            });
-        } catch (error) {
-            toast({
-                title: "Erro ao retornar paciente",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        } finally {
-            setItemToReturn(null);
-        }
-    };
-
-    const handleEditFromHistory = (item: FilaDeEsperaItem) => {
-        setItemToHistory(null); // Close history dialog
-        setItemToEditFromHistory(item); // Open edit dialog for history item
-    };
-    
-    const handleHistory = (item: FilaDeEsperaItem) => {
-        setItemToHistory(item);
-    };
+    const handleAddToQueue = () => {
+        setAtendimentoParaCompletar(null); 
+        setPatientToAdd(null);
+        setIsAddToQueueDialogOpen(true);
+    }
     
     return (
         <>
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Hourglass className="h-5 w-5 text-primary" />
-                            Atendimentos em Andamento
-                        </CardTitle>
-                        <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
-                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                    [...Array(3)].map((_, i) => (
-                                         <TableRow key={i}>
-                                            {[...Array(6)].map((_, j) => (
-                                                <TableCell key={j} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
-                                            ))}
-                                        </TableRow>
-                                    ))
-                                ) : emAtendimento.length > 0 ? (
-                                    emAtendimento.map((item) => (
-                                        <TableRow key={item.id} className="hover:bg-muted/50">
-                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">
-                                                <Badge
-                                                    className={cn(
-                                                        'text-xs',
-                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                                                    )}
-                                                >
-                                                    {item.classificacao}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    <Clock className="h-3 w-3" />
-                                                    {item.chamadaEm ? new Date(item.chamadaEm.seconds * 1000).toLocaleTimeString('pt-BR') : 'N/A'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right px-2 py-1 text-xs">
-                                            <div className="flex items-center justify-end gap-2">
-                                                    <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
-                                                        <Undo2 className="mr-2 h-3 w-3" />
-                                                        Retornar à Fila
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
-                                                        <CheckCircle className="mr-2 h-3 w-3" />
-                                                        Finalizar Atendimento
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            Nenhum paciente em atendimento no momento.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                    <CardFooter className="py-3 px-6 border-t">
-                        <div className="text-xs text-muted-foreground">
-                            Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
-                        </div>
-                    </CardFooter>
-                </Card>
-            </div>
+            <Tabs defaultValue="pendentes" className="w-full">
+                 <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="pendentes">
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        Senhas Pendentes
+                        {pendentes.length > 0 && <span className="ml-2 flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>}
+                    </TabsTrigger>
+                    <TabsTrigger value="em-triagem">
+                        <Fingerprint className="mr-2 h-4 w-4" />
+                        Em Triagem
+                    </TabsTrigger>
+                    <TabsTrigger value="fila-atendimento">
+                        <Tags className="mr-2 h-4 w-4" />
+                        Fila de Atendimento
+                    </TabsTrigger>
+                     <TabsTrigger value="em-andamento">
+                        <Hourglass className="mr-2 h-4 w-4" />
+                        Em Andamento
+                    </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="pendentes" className="mt-4">
+                    <SenhasPendentesList 
+                        pendentes={pendentes} 
+                        isLoading={isLoading} 
+                        onDelete={setItemToDelete}
+                    />
+                </TabsContent>
+                
+                <TabsContent value="em-triagem" className="mt-4">
+                    <EmTriagemList 
+                        emTriagem={emTriagem}
+                        isLoading={isLoading}
+                        onCompletarCadastro={handleCompletarCadastro}
+                    />
+                </TabsContent>
 
-            {itemToEditFromHistory && (
+                <TabsContent value="fila-atendimento" className="mt-4">
+                    <FilaDeAtendimentoList
+                        fila={fila}
+                        isLoading={isLoading}
+                        onEdit={setItemToEdit}
+                        onHistory={setItemToHistory}
+                        onDelete={setItemToDelete}
+                        onAddToQueue={handleAddToQueue}
+                    />
+                </TabsContent>
+
+                 <TabsContent value="em-andamento" className="mt-4">
+                    <EmAndamentoList
+                        emAtendimento={emAtendimento}
+                        isLoading={isLoading}
+                        onReturnToQueue={setItemToReturn}
+                    />
+                </TabsContent>
+            </Tabs>
+            
+             {/* Dialogs */}
+            <AddToQueueDialog
+                isOpen={isAddToQueueDialogOpen}
+                onOpenChange={setIsAddToQueueDialogOpen}
+                pacientes={pacientes}
+                departamentos={departamentos}
+                onAddNewPatient={handleOpenNewPatientDialog}
+                patientToAdd={patientToAdd}
+                atendimentoParaCompletar={atendimentoParaCompletar}
+                onSuccess={() => {}}
+            />
+
+            <PatientDialog
+                isOpen={isPatientDialogOpen}
+                onOpenChange={setIsPatientDialogOpen}
+                onSuccess={handlePatientDialogSuccess}
+                paciente={null}
+            />
+
+            {itemToEdit && (
                 <EditQueueItemDialog
+                    isOpen={!!itemToEdit}
+                    onOpenChange={() => setItemToEdit(null)}
+                    item={itemToEdit}
+                    departamentos={departamentos}
+                    profissionais={profissionais}
+                    onSave={updateFilaItem}
+                    isHistory={false}
+                />
+            )}
+            
+            {itemToEditFromHistory && (
+                 <EditQueueItemDialog
                     isOpen={!!itemToEditFromHistory}
                     onOpenChange={() => setItemToEditFromHistory(null)}
                     item={itemToEditFromHistory}
@@ -245,7 +246,36 @@ export default function AtendimentoPage() {
                     isHistory={true}
                 />
             )}
-            
+
+            {itemToHistory && (
+                <ProntuarioDialog
+                    isOpen={!!itemToHistory}
+                    onOpenChange={() => setItemToHistory(null)}
+                    item={itemToHistory}
+                    onEdit={handleEditFromHistory}
+                />
+            )}
+
+            {itemToDelete && (
+                <DeleteQueueItemDialog
+                    isOpen={!!itemToDelete}
+                    onOpenChange={() => setItemToDelete(null)}
+                    onConfirm={async () => {
+                        if (itemToDelete) {
+                            try {
+                                await deleteFilaItem(itemToDelete.id);
+                                toast({ title: "Item removido!", description: `O item com a senha ${itemToDelete.senha} foi removido.` });
+                            } catch (error) {
+                                toast({ title: "Erro ao remover", description: (error as Error).message, variant: "destructive" });
+                            } finally {
+                                setItemToDelete(null);
+                            }
+                        }
+                    }}
+                    itemName={itemToDelete.pacienteNome || `Senha ${itemToDelete.senha}`}
+                />
+            )}
+
             {itemToReturn && (
                 <ReturnToQueueDialog
                     isOpen={!!itemToReturn}
@@ -253,16 +283,17 @@ export default function AtendimentoPage() {
                     item={itemToReturn}
                     departamentos={departamentos}
                     profissionais={profissionais}
-                    onConfirm={handleReturnToQueueConfirm}
-                />
-            )}
-            
-            {itemToHistory && (
-                <ProntuarioDialog
-                    isOpen={!!itemToHistory}
-                    onOpenChange={() => setItemToHistory(null)}
-                    item={itemToHistory}
-                    onEdit={handleEditFromHistory}
+                    onConfirm={async (item, updates) => {
+                         try {
+                            await updateFilaItem(item.id, updates);
+                            await retornarPacienteParaFila(item.id);
+                            toast({ title: "Paciente Retornou para a Fila!", description: `${item.pacienteNome} está de volta na fila.` });
+                        } catch (error) {
+                            toast({ title: "Erro ao retornar paciente", description: (error as Error).message, variant: "destructive" });
+                        } finally {
+                            setItemToReturn(null);
+                        }
+                    }}
                 />
             )}
         </>
