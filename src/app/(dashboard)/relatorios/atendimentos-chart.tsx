@@ -76,7 +76,7 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
       <CardContent className="p-0 pl-2">
         <ChartContainer config={chartConfig} className="h-52 w-full">
            <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} accessibilityLayer stackOffset="sign">
+            <BarChart data={chartData} accessibilityLayer stackOffset="sign" margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis
                     dataKey="hour"
@@ -101,3 +101,4 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
     </Card>
   )
 }
+
