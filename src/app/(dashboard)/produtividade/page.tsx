@@ -336,4 +336,3 @@ export default function ProdutividadePage() {
         </div>
     );
 }
-
