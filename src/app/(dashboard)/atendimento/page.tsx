@@ -97,11 +97,7 @@ export default function AtendimentosPage() {
         }, (error) => toast({ title: "Erro ao carregar senhas em triagem", description: error, variant: "destructive" }));
         
         const unsubFila = getFilaDeEspera((data) => {
-             const sortedData = data.sort((a, b) => {
-                if (a.prioridade !== b.prioridade) return a.prioridade - b.prioridade;
-                return (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0);
-            });
-            setFila(sortedData);
+            setFila(data);
             setIsLoading(false);
         }, (error) => {
             toast({ title: "Erro ao carregar a fila", description: error, variant: "destructive" });
