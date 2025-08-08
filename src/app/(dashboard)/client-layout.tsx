@@ -58,6 +58,7 @@ const DashboardPage = React.lazy(() => import('./page'));
 const AtendimentoPage = React.lazy(() => import('./atendimento/page'));
 const CadastrosPage = React.lazy(() => import('./cadastros/page'));
 const TriagemPage = React.lazy(() => import('./triagem/page'));
+const DepartamentosPage = React.lazy(() => import('./departamentos/page'));
 const RelatoriosPage = React.lazy(() => import('./relatorios/page'));
 const EmpresaPage = React.lazy(() => import('./empresa/page'));
 const UsuariosPage = React.lazy(() => import('./usuarios/page'));
@@ -68,14 +69,15 @@ export const allMenuItems = [
   { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
   { id: "/atendimento", href: "/atendimento", label: "Fila de Atendimento", icon: Clock, component: AtendimentoPage, permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
-  { id: "/triagem", href: "/triagem", label: "Triagem", icon: ClipboardList, component: TriagemPage, permissionRequired: true },
+  { id: "/departamentos", href: "/departamentos", label: "Departamentos", icon: Building, component: DepartamentosPage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
-  { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage, permissionRequired: true },
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
+  { id: "/triagem", href: "/triagem", label: "Triagem", icon: ClipboardList, component: TriagemPage, permissionRequired: true },
+  { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
 ];
 
 export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number };
@@ -385,9 +387,17 @@ export default function DashboardClientLayout({
   // Effect to check for pending appointments and update notifications
     React.useEffect(() => {
         const unsubscribe = getAtendimentosPendentes((pendentes) => {
+            // Sort by arrival time on the client-side
+            const sortedPendentes = pendentes.sort((a, b) => {
+                if (a.chegadaEm && b.chegadaEm) {
+                    return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+
             setUserMenuItems(prevItems => prevItems.map(item => {
                 if (item.id === '/triagem') {
-                    return { ...item, notificationCount: pendentes.length };
+                    return { ...item, notificationCount: sortedPendentes.length };
                 }
                 return item;
             }));
