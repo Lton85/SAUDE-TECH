@@ -33,13 +33,13 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                         <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9">
-                            <Eraser className="h-4 w-4" />
-                            <span className="sr-only">Limpar Painel</span>
-                        </Button>
                         <Button onClick={onAddToQueue}>
                           <PlusCircle className="mr-2 h-4 w-4" />
                             Adicionar na Fila
+                        </Button>
+                        <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9">
+                            <Eraser className="h-4 w-4" />
+                            <span className="sr-only">Limpar Painel</span>
                         </Button>
                     </div>
                 </div>
