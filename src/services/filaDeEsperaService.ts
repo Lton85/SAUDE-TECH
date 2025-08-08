@@ -133,7 +133,7 @@ export const getAtendimentosPendentes = (
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching pending queue: ", error);
-        onError("Não foi possível buscar as senhas pendentes.");
+        onError("Não foi possível buscar as senhas pendentes. Verifique se o índice do Firestore foi criado. O link para criação está nos comentários do código no arquivo 'filaDeEsperaService.ts'.");
     });
 
     return unsubscribe;
@@ -189,7 +189,7 @@ export const getFilaDeEspera = (
         onUpdate(data);
     }, (error) => {
         console.error("Error fetching queue: ", error);
-        onError("Não foi possível buscar a fila de atendimento. Pode ser necessário criar um índice no Firestore. Verifique o console para um link de criação.");
+        onError("Não foi possível buscar a fila de atendimento. Verifique se o índice do Firestore foi criado. O link para criação está nos comentários do código no arquivo 'filaDeEsperaService.ts'.");
     });
 
     return unsubscribe;
@@ -220,11 +220,17 @@ export const getAtendimentosEmAndamento = (
 }
 
 /**
- * Consulta que requer dois índices no Firestore.
- * 1) Coleção: relatorios_atendimentos, Campos: finalizadaEm (Descendente)
- * Link: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRAC&create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
- * 2) Coleção: relatorios_atendimentos, Campos: canceladaEm (Descendente)
- * Link: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ * Esta função requer DOIS índices compostos no Firestore.
+ *
+ * 1) Para Atendimentos Finalizados
+ * Coleção: relatorios_atendimentos
+ * Campos: finalizadaEm (Descendente)
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRAC&create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ *
+ * 2) Para Atendimentos Cancelados
+ * Coleção: relatorios_atendimentos
+ * Campos: canceladaEm (Descendente)
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
  */
 export const getAtendimentosFinalizadosHoje = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
@@ -265,7 +271,7 @@ export const getAtendimentosFinalizadosHoje = (
         combineAndUpdate(finalizadosData, canceladosData);
     }, (error) => {
         console.error("Error fetching today's finalized appointments: ", error);
-        onError("Não foi possível buscar os atendimentos finalizados de hoje.");
+        onError("Não foi possível buscar os atendimentos finalizados de hoje. Verifique os índices do Firestore.");
     });
 
     const unsubCancelados = onSnapshot(qCanceled, (snapshot) => {
@@ -276,7 +282,7 @@ export const getAtendimentosFinalizadosHoje = (
         combineAndUpdate(finalizadosData, canceladosData);
     }, (error) => {
         console.error("Error fetching today's canceled appointments: ", error);
-        onError("Não foi possível buscar os atendimentos cancelados de hoje.");
+        onError("Não foi possível buscar os atendimentos cancelados de hoje. Verifique os índices do Firestore.");
     });
 
 
@@ -386,7 +392,7 @@ export const deleteFilaItem = async (id: string): Promise<void> => {
  * Consulta que requer um índice composto no Firestore.
  * Coleção: relatorios_atendimentos
  * Campos: pacienteId (Ascendente), finalizadaEm (Descendente)
- * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCnBhY2llbnRlSWQQARIPCgtmaW5hbGl6YWRhRW0QAhpACgtfX25hbWVfXxAB
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCnBhY2llbnRlSWQQARIPCgtmaW5hbGl6YWRhRW0QAhpACgtfX25hbWVfXxAB
  */
 export const getHistoricoAtendimentos = async (pacienteId: string): Promise<FilaDeEsperaItem[]> => {
     if (!pacienteId) {
@@ -406,7 +412,7 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
 
     } catch (error) {
         console.error("Erro ao buscar histórico de atendimentos:", error);
-        throw new Error("Não foi possível carregar o histórico do paciente.");
+        throw new Error("Não foi possível carregar o histórico do paciente. Verifique se o índice do Firestore foi criado. O link para criação está nos comentários do código.");
     }
 };
 
