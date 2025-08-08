@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Clock, UserPlus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface EmTriagemListProps {
     emTriagem: FilaDeEsperaItem[];
