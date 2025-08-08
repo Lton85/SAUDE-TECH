@@ -6,7 +6,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, CheckCircle, BadgeInfo } from "lucide-react";
+import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FinalizadosListProps {
@@ -43,41 +43,54 @@ export function FinalizadosList({ finalizados, isLoading }: FinalizadosListProps
     
     return (
         <div className="space-y-2">
-            {finalizados.map((item) => (
-                <div key={item.id} className={cn(
-                    "flex items-center justify-between p-2 border rounded-lg bg-muted/30"
-                )}>
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300 text-xs font-semibold">
-                           <CheckCircle className="h-3 w-3 mr-1.5" />
-                           Finalizado
-                        </Badge>
-                        <div className="flex-1 min-w-0">
-                             <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
-                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <div className="flex items-center gap-1.5 truncate">
-                                    <Building className="h-3 w-3" />
-                                    <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 truncate">
-                                    <User className="h-3 w-3" />
-                                    <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
-                                </div>
-                                 <div className="flex items-center gap-1.5 truncate">
-                                    <BadgeInfo className="h-3 w-3" />
-                                    <span className="truncate" title={item.classificacao}>Classificação: {item.classificacao}</span>
+            {finalizados.map((item) => {
+                const isCanceled = item.status === 'cancelado';
+                const eventTime = isCanceled ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
+                
+                return (
+                    <div key={item.id} className={cn(
+                        "flex items-center justify-between p-2 border rounded-lg",
+                        isCanceled ? "bg-red-500/5" : "bg-muted/30"
+                    )}>
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                            {isCanceled ? (
+                                <Badge variant="destructive" className="text-xs font-semibold">
+                                   <XCircle className="h-3 w-3 mr-1.5" />
+                                   Cancelado
+                                </Badge>
+                            ) : (
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300 text-xs font-semibold">
+                                   <CheckCircle className="h-3 w-3 mr-1.5" />
+                                   Finalizado
+                                </Badge>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                 <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
+                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-1.5 truncate">
+                                        <Building className="h-3 w-3" />
+                                        <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 truncate">
+                                        <User className="h-3 w-3" />
+                                        <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
+                                    </div>
+                                     <div className="flex items-center gap-1.5 truncate">
+                                        <BadgeInfo className="h-3 w-3" />
+                                        <span className="truncate" title={item.classificacao}>Classificação: {item.classificacao}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div className="flex items-center gap-4 ml-4">
+                            <p className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                                <Clock className="h-3 w-3" />
+                                 {eventTime ? format(eventTime, "HH:mm:ss") : '-'}
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4 ml-4">
-                        <p className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
-                            <Clock className="h-3 w-3" />
-                             {item.finalizadaEm ? format(item.finalizadaEm.toDate(), "HH:mm:ss") : '-'}
-                        </p>
-                    </div>
-                </div>
-            ))}
+                )
+            })}
         </div>
     );
 }

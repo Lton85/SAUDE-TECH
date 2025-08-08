@@ -58,7 +58,7 @@ export const addPreCadastroToFila = async (classificacao: FilaDeEsperaItem['clas
     }
 }
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'>, atendimentoPendenteId?: string ) => {
+export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'>, atendimentoPendenteId?: string ) => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
@@ -210,27 +210,59 @@ export const getAtendimentosFinalizadosHoje = (
     onError: (error: string) => void
 ) => {
     const startOfToday = startOfDay(new Date());
-    const endOfToday = endOfDay(new Date());
 
     const q = query(
         collection(db, "relatorios_atendimentos"),
         where("finalizadaEm", ">=", startOfToday),
-        where("finalizadaEm", "<=", endOfToday),
         orderBy("finalizadaEm", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+    const qCanceled = query(
+        collection(db, "relatorios_atendimentos"),
+        where("canceladaEm", ">=", startOfToday),
+        orderBy("canceladaEm", "desc")
+    );
+
+    const combineAndUpdate = (finalizados: FilaDeEsperaItem[], cancelados: FilaDeEsperaItem[]) => {
+        const combined = [...finalizados, ...cancelados];
+        combined.sort((a, b) => {
+            const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
+            const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
+            return timeB - timeA;
+        });
+        onUpdate(combined);
+    };
+
+    let finalizadosData: FilaDeEsperaItem[] = [];
+    let canceladosData: FilaDeEsperaItem[] = [];
+
+    const unsubFinalizados = onSnapshot(q, (snapshot) => {
+        finalizadosData = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         } as FilaDeEsperaItem));
-        onUpdate(data);
+        combineAndUpdate(finalizadosData, canceladosData);
     }, (error) => {
         console.error("Error fetching today's finalized appointments: ", error);
         onError("Não foi possível buscar os atendimentos finalizados de hoje.");
     });
 
-    return unsubscribe;
+    const unsubCancelados = onSnapshot(qCanceled, (snapshot) => {
+        canceladosData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem));
+        combineAndUpdate(finalizadosData, canceladosData);
+    }, (error) => {
+        console.error("Error fetching today's canceled appointments: ", error);
+        onError("Não foi possível buscar os atendimentos cancelados de hoje.");
+    });
+
+
+    return () => {
+        unsubFinalizados();
+        unsubCancelados();
+    };
 };
 
 
@@ -297,6 +329,27 @@ export const finalizarAtendimento = async (id: string) => {
         ...atendimentoData,
         status: "finalizado",
         finalizadaEm: serverTimestamp()
+    });
+
+    await deleteDoc(filaDocRef);
+};
+
+
+export const cancelarAtendimento = async (id: string) => {
+    if (!id) throw new Error("ID do item da fila não encontrado.");
+
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    const filaDocSnap = await getDoc(filaDocRef);
+
+    if (!filaDocSnap.exists()) throw new Error("Atendimento não encontrado na fila.");
+    
+    const atendimentoData = filaDocSnap.data() as FilaDeEsperaItem;
+
+    const relatoriosCollectionRef = collection(db, 'relatorios_atendimentos');
+    await addDoc(relatoriosCollectionRef, {
+        ...atendimentoData,
+        status: "cancelado",
+        canceladaEm: serverTimestamp(),
     });
 
     await deleteDoc(filaDocRef);

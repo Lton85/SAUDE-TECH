@@ -9,7 +9,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Pencil, FileText, Trash2, Megaphone, PlusCircle, Eraser } from "lucide-react";
+import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FilaDeAtendimentoListProps {
@@ -18,12 +18,12 @@ interface FilaDeAtendimentoListProps {
     onCall: (item: FilaDeEsperaItem) => void;
     onEdit: (item: FilaDeEsperaItem) => void;
     onHistory: (item: FilaDeEsperaItem) => void;
-    onDelete: (item: FilaDeEsperaItem) => void;
+    onCancel: (item: FilaDeEsperaItem) => void;
     onAddToQueue: () => void;
     onClearPanel: () => void;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onDelete, onAddToQueue, onClearPanel }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -108,9 +108,9 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                                 <FileText className="h-3 w-3" />
                                                 <span className="sr-only">Prontuário</span>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => onDelete(item)}>
-                                                <Trash2 className="h-3 w-3" />
-                                                <span className="sr-only">Excluir</span>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => onCancel(item)}>
+                                                <XCircle className="h-4 w-4" />
+                                                <span className="sr-only">Cancelar</span>
                                             </Button>
                                         </div>
                                     </TableCell>

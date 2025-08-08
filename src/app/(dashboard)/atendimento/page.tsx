@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import type { Paciente } from "@/types/paciente";
@@ -14,7 +14,7 @@ import { getProfissionais } from "@/services/profissionaisService";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import { AddToQueueDialog } from "@/components/atendimento/add-to-queue-dialog";
 import { EditQueueItemDialog } from "@/components/atendimento/edit-dialog";
-import { DeleteQueueItemDialog } from "@/components/atendimento/delete-dialog";
+import { CancelAtendimentoDialog } from "@/components/atendimento/cancel-dialog";
 import { ProntuarioDialog } from "@/components/atendimento/prontuario-dialog";
 import { ReturnToQueueDialog } from "@/components/atendimento/return-to-queue-dialog";
 import { SenhasPendentesList } from "@/components/atendimento/list-pendentes";
@@ -49,6 +49,7 @@ export default function AtendimentosPage() {
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
     
     // Dialog item states
+    const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
     const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
@@ -259,7 +260,7 @@ export default function AtendimentosPage() {
                         onCall={handleChamarParaAtendimento}
                         onEdit={setItemToEdit}
                         onHistory={setItemToHistory}
-                        onDelete={setItemToDelete}
+                        onCancel={setItemToCancel}
                         onAddToQueue={handleAddToQueue}
                         onClearPanel={handleClearPanel}
                     />
@@ -334,23 +335,27 @@ export default function AtendimentosPage() {
                 />
             )}
 
-            {itemToDelete && (
-                <DeleteQueueItemDialog
-                    isOpen={!!itemToDelete}
-                    onOpenChange={() => setItemToDelete(null)}
+            {itemToCancel && (
+                <CancelAtendimentoDialog
+                    isOpen={!!itemToCancel}
+                    onOpenChange={() => setItemToCancel(null)}
                     onConfirm={async () => {
-                        if (itemToDelete) {
+                        if (itemToCancel) {
                             try {
-                                await deleteFilaItem(itemToDelete.id);
-                                toast({ title: "Item removido!", description: `O item com a senha ${itemToDelete.senha} foi removido.` });
+                                await cancelarAtendimento(itemToCancel.id);
+                                toast({
+                                    title: "Atendimento Cancelado!",
+                                    description: `O atendimento de ${itemToCancel.pacienteNome} foi cancelado com sucesso.`,
+                                    className: "bg-orange-500 text-white"
+                                });
                             } catch (error) {
-                                toast({ title: "Erro ao remover", description: (error as Error).message, variant: "destructive" });
+                                toast({ title: "Erro ao cancelar", description: (error as Error).message, variant: "destructive" });
                             } finally {
-                                setItemToDelete(null);
+                                setItemToCancel(null);
                             }
                         }
                     }}
-                    itemName={itemToDelete.pacienteNome || `Senha ${itemToDelete.senha}`}
+                    itemName={itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`}
                 />
             )}
 
