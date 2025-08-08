@@ -58,6 +58,7 @@ const DashboardPage = React.lazy(() => import('./page'));
 const AtendimentosPage = React.lazy(() => import('./atendimento/page'));
 const CadastrosPage = React.lazy(() => import('./cadastros/page'));
 const DepartamentosPage = React.lazy(() => import('./departamentos/page'));
+const ProdutividadePage = React.lazy(() => import('./produtividade/page'));
 const RelatoriosPage = React.lazy(() => import('./relatorios/page'));
 const EmpresaPage = React.lazy(() => import('./empresa/page'));
 const UsuariosPage = React.lazy(() => import('./usuarios/page'));
@@ -69,7 +70,8 @@ export const allMenuItems = [
   { id: "/atendimento", href: "/atendimento", label: "Atendimentos", icon: Clock, component: AtendimentosPage, permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
   { id: "/departamentos", href: "/departamentos", label: "Departamentos", icon: Building, component: DepartamentosPage, permissionRequired: true },
-  { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: BarChart3, component: RelatoriosPage, permissionRequired: true },
+  { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
+  { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
@@ -495,3 +497,5 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
+
+    

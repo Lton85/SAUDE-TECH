@@ -150,6 +150,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             "/atendimento": "Monitore o tempo de cada consulta.",
             "/cadastros": "Gerencie pacientes, médicos e enfermeiros.",
             "/departamentos": "Gerencie os locais de atendimento.",
+            "/produtividade": "Veja gráficos de desempenho.",
             "/relatorios": "Consulte o histórico de atendimentos.",
             "painel": "Exiba as senhas de atendimento na TV.",
             "tablet": "Funções especiais para tablet.",
@@ -236,3 +237,5 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     </div>
   );
 }
+
+    
