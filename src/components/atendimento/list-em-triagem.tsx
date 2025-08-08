@@ -6,24 +6,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
 
 const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void }) => {
+    const horaChegada = item.chegadaEm ? format(item.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
+    
     return (
         <Card key={item.id} className={cn(
             "w-full",
             item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
             item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5"
         )}>
-            <CardContent className="p-2 flex items-center justify-between gap-2">
-                 <span className={cn(
-                    "font-bold text-lg tracking-tight",
-                     item.classificacao === "Urgência" && "text-red-600",
-                     item.classificacao === "Preferencial" && "text-amber-600"
-                 )}>{item.senha}</span>
+            <CardContent className="p-2 flex flex-col items-center justify-center gap-2">
+                 <div className="flex items-center justify-between w-full">
+                    <span className={cn(
+                        "font-bold text-lg tracking-tight",
+                        item.classificacao === "Urgência" && "text-red-600",
+                        item.classificacao === "Preferencial" && "text-amber-600"
+                    )}>{item.senha}</span>
 
-                <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)}>
+                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                        <Clock className="h-3 w-3" />
+                        <span>{horaChegada}</span>
+                    </div>
+                 </div>
+
+                <Button size="sm" className="h-7 px-2 text-xs w-full" onClick={() => onIdentify(item)}>
                     <UserPlus className="mr-1 h-3 w-3"/>
                     Identificar
                 </Button>
@@ -44,7 +56,7 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
             <CardContent className="p-2 space-y-2 h-full overflow-y-auto">
                  {isLoading ? (
                     [...Array(5)].map((_, i) => (
-                         <Card key={i}><CardContent className="p-2"><Skeleton className="h-7 w-full" /></CardContent></Card>
+                         <Card key={i}><CardContent className="p-2"><Skeleton className="h-12 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
                     items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} />)
@@ -59,7 +71,7 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
 }
 
 
-export function EmTriagemList({ emTriagem, isLoading, onIdentify }: EmTriagemListProps) {
+export function EmTriagemList({ emTriagem, isLoading, onIdentify }: { emTriagem: FilaDeEsperaItem[], isLoading: boolean, onIdentify: (item: FilaDeEsperaItem) => void }) {
     
     if (isLoading) {
         return (
