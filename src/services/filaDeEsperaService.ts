@@ -203,6 +203,34 @@ export const getAtendimentosEmAndamento = (
     return unsubscribe;
 }
 
+export const getAtendimentosFinalizadosHoje = (
+    onUpdate: (data: FilaDeEsperaItem[]) => void,
+    onError: (error: string) => void
+) => {
+    const startOfToday = startOfDay(new Date());
+    const endOfToday = endOfDay(new Date());
+
+    const q = query(
+        collection(db, "relatorios_atendimentos"),
+        where("finalizadaEm", ">=", startOfToday),
+        where("finalizadaEm", "<=", endOfToday),
+        orderBy("finalizadaEm", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem));
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching today's finalized appointments: ", error);
+        onError("Não foi possível buscar os atendimentos finalizados de hoje.");
+    });
+
+    return unsubscribe;
+};
+
 
 export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atendimento' | 'triagem' = 'atendimento') => {
     if (!item.id) {

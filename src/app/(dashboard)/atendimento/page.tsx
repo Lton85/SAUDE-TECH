@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import type { Paciente } from "@/types/paciente";
@@ -21,6 +21,7 @@ import { SenhasPendentesList } from "@/components/atendimento/list-pendentes";
 import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
+import { FinalizadosList } from "@/components/atendimento/list-finalizados";
 import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
@@ -37,6 +38,7 @@ export default function AtendimentosPage() {
     const [emTriagem, setEmTriagem] = useState<FilaDeEsperaItem[]>([]);
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
     const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
+    const [finalizados, setFinalizados] = useState<FilaDeEsperaItem[]>([]);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -113,6 +115,12 @@ export default function AtendimentosPage() {
             toast({ title: "Erro ao carregar atendimentos", description: error, variant: "destructive" });
             setIsLoading(false);
         });
+        
+        const unsubFinalizados = getAtendimentosFinalizadosHoje((data) => {
+            setFinalizados(data);
+        }, (error) => {
+            toast({ title: "Erro ao carregar finalizados", description: error, variant: "destructive" });
+        });
 
         return () => {
             unsubPacientes();
@@ -120,6 +128,7 @@ export default function AtendimentosPage() {
             unsubEmTriagem();
             unsubFila();
             unsubEmAtendimento();
+            unsubFinalizados();
         };
     }, [toast]);
     
@@ -202,7 +211,7 @@ export default function AtendimentosPage() {
     return (
         <>
             <Tabs defaultValue="pendentes" className="w-full">
-                 <TabsList className="grid w-full grid-cols-4">
+                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="pendentes">
                         <AlertTriangle className="mr-2 h-4 w-4" />
                         Senhas Pendentes
@@ -222,6 +231,11 @@ export default function AtendimentosPage() {
                         <Hourglass className="mr-2 h-4 w-4" />
                         Em Andamento
                         {emAtendimento.length > 0 && <Badge className="ml-2">{emAtendimento.length}</Badge>}
+                    </TabsTrigger>
+                     <TabsTrigger value="finalizados">
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Finalizados
+                        {finalizados.length > 0 && <Badge variant="secondary" className="ml-2">{finalizados.length}</Badge>}
                     </TabsTrigger>
                 </TabsList>
                 
@@ -261,6 +275,13 @@ export default function AtendimentosPage() {
                         isLoading={isLoading}
                         onReturnToQueue={setItemToReturn}
                         onFinalize={handleFinalizarAtendimento}
+                    />
+                </TabsContent>
+
+                <TabsContent value="finalizados" className="mt-4">
+                    <FinalizadosList
+                        finalizados={finalizados}
+                        isLoading={isLoading}
                     />
                 </TabsContent>
             </Tabs>
