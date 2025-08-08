@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, User, Stethoscope, X, Search, ShieldQuestion, Building } from "lucide-react";
+import { Filter, Loader2, User, Stethoscope, X, Search, ShieldQuestion, Building, Activity } from "lucide-react";
 import type { Profissional } from "@/types/profissional";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
@@ -23,6 +23,8 @@ interface FiltrosRelatorioProps {
     onDepartamentoChange: (id: string) => void;
     selectedClassificacao: string;
     onClassificacaoChange: (value: string) => void;
+    selectedStatus: string;
+    onStatusChange: (value: string) => void;
     onSearch: () => void;
     isLoading: boolean;
     onClearFilters: () => void;
@@ -41,6 +43,8 @@ export function FiltrosRelatorio({
     onDepartamentoChange,
     selectedClassificacao,
     onClassificacaoChange,
+    selectedStatus,
+    onStatusChange,
     onSearch,
     isLoading,
     onClearFilters,
@@ -136,6 +140,23 @@ export function FiltrosRelatorio({
                             <SelectItem value="Normal">Atendimento Normal</SelectItem>
                             <SelectItem value="Preferencial">Atendimento Preferencial</SelectItem>
                             <SelectItem value="Urgência">Atendimento de Urgência</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="status-filter" className="flex items-center gap-2 text-sm"><Activity className="h-4 w-4"/>Status do Atendimento</Label>
+                    <Select
+                        value={selectedStatus}
+                        onValueChange={onStatusChange}
+                        disabled={isLoading}
+                    >
+                        <SelectTrigger id="status-filter">
+                            <SelectValue placeholder="Filtrar por status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="todos">Todos os Status</SelectItem>
+                            <SelectItem value="finalizado">Finalizados</SelectItem>
+                            <SelectItem value="cancelado">Cancelados</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

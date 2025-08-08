@@ -21,6 +21,7 @@ interface FullSearchFilters extends SearchFilters {
     profissionalId?: string;
     departamentoId?: string;
     classificacao?: string;
+    status?: string;
 }
 
 const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
@@ -395,17 +396,35 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         const start = startOfDay(dateFrom);
         const end = endOfDay(dateTo);
         
-        const q = query(
+        // Query for finalized appointments
+        const qFinalizados = query(
             collection(db, "relatorios_atendimentos"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
-            where("finalizadaEm", "<=", Timestamp.fromDate(end)),
-            orderBy("finalizadaEm", "desc")
+            where("finalizadaEm", "<=", Timestamp.fromDate(end))
         );
 
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        // Query for canceled appointments
+        const qCancelados = query(
+            collection(db, "relatorios_atendimentos"),
+            where("canceladaEm", ">=", Timestamp.fromDate(start)),
+            where("canceladaEm", "<=", Timestamp.fromDate(end))
+        );
+
+        const [finalizadosSnapshot, canceladosSnapshot] = await Promise.all([
+            getDocs(qFinalizados),
+            getDocs(qCancelados)
+        ]);
+
+        const finalizadosData = finalizadosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        const canceladosData = canceladosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+
+        const allData = [...finalizadosData, ...canceladosData].sort((a, b) => {
+            const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
+            const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
+            return timeB - timeA;
+        });
         
-        return data;
+        return allData;
 
     } catch (error) {
         console.error("Erro ao buscar histórico de atendimentos por período:", error);
@@ -437,6 +456,10 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
     
     if (filters.classificacao && filters.classificacao !== 'todos') {
         data = data.filter(item => item.classificacao === filters.classificacao);
+    }
+
+    if (filters.status && filters.status !== 'todos') {
+        data = data.filter(item => item.status === filters.status);
     }
     
     return data;

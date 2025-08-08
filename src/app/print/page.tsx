@@ -67,6 +67,7 @@ function PrintPageContent() {
                             profissionalId: searchParams.get('profissionalId') || undefined,
                             departamentoId: searchParams.get('departamentoId') || undefined,
                             classificacao: searchParams.get('classificacao') || undefined,
+                            status: searchParams.get('status') || undefined,
                         };
                         const items = await getHistoricoAtendimentosPorPeriodoComFiltros(filters);
                         printData = { title, items };
@@ -138,12 +139,13 @@ function PrintPageContent() {
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Departamento</TableHead>
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Profissional</TableHead>
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Classificação</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {data.items.map(item => {
-                            const dataFinalizacao = item.finalizadaEm?.toDate();
-                            const dataFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yy HH:mm", { locale: ptBR }) : 'N/A';
+                             const eventTime = item.status === 'cancelado' ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
+                            const dataFormatada = eventTime ? format(eventTime, "dd/MM/yy HH:mm", { locale: ptBR }) : 'N/A';
                             
                             return (
                                 <TableRow key={item.id} className="text-xs">
@@ -153,6 +155,9 @@ function PrintPageContent() {
                                     <TableCell className="px-2 py-1 border-b border-gray-200">{item.profissionalNome}</TableCell>
                                     <TableCell className="px-2 py-1 border-b border-gray-200 font-semibold">
                                         {item.classificacao}
+                                    </TableCell>
+                                     <TableCell className="px-2 py-1 border-b border-gray-200 font-semibold capitalize">
+                                        {item.status}
                                     </TableCell>
                                 </TableRow>
                             )

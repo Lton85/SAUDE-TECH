@@ -4,7 +4,7 @@
 import * as React from "react";
 import { addDays, format, startOfWeek, endOfWeek, startOfMonth, isToday, endOfMonth, startOfDay, endOfDay, parse, differenceInDays, isEqual, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock, ArrowRight } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Printer, Loader2, User, Building, CheckCircle, LogIn, Megaphone, Check, Filter, ShieldQuestion, Fingerprint, Clock, ArrowRight, XCircle } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -30,8 +30,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (itemId: string) => void }) => {
-    const dataFinalizacao = atendimento.finalizadaEm?.toDate();
-    const dataHoraFormatada = dataFinalizacao ? format(dataFinalizacao, "dd/MM/yyyy - HH:mm:ss", { locale: ptBR }) : 'N/A';
+    const isCanceled = atendimento.status === 'cancelado';
+    const eventTime = isCanceled ? atendimento.canceladaEm?.toDate() : atendimento.finalizadaEm?.toDate();
+    const dataHoraFormatada = eventTime ? format(eventTime, "dd/MM/yyyy - HH:mm:ss", { locale: ptBR }) : 'N/A';
 
     return (
         <div className="w-full border-b last:border-b-0">
@@ -72,10 +73,17 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                     >
                         {atendimento.classificacao}
                     </Badge>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Finalizado
-                    </Badge>
+                     {isCanceled ? (
+                        <Badge variant="destructive" className="text-xs font-semibold">
+                           <XCircle className="h-3 w-3 mr-1.5" />
+                           Cancelado
+                        </Badge>
+                    ) : (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                           <CheckCircle className="h-3 w-3 mr-1" />
+                           Finalizado
+                        </Badge>
+                    )}
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onPrintItem(atendimento.id)} title="Imprimir Atendimento">
                         <Printer className="h-3 w-3" />
                     </Button>
@@ -95,6 +103,7 @@ export default function RelatoriosPage() {
     const [selectedProfissionalId, setSelectedProfissionalId] = React.useState<string>("todos");
     const [selectedDepartamentoId, setSelectedDepartamentoId] = React.useState<string>("todos");
     const [selectedClassificacao, setSelectedClassificacao] = React.useState<string>("todos");
+    const [selectedStatus, setSelectedStatus] = React.useState<string>("todos");
 
 
     const [allReportData, setAllReportData] = React.useState<FilaDeEsperaItem[]>([]);
@@ -170,6 +179,7 @@ export default function RelatoriosPage() {
                 profissionalId: selectedProfissionalId === 'todos' ? undefined : selectedProfissionalId,
                 departamentoId: selectedDepartamentoId === 'todos' ? undefined : selectedDepartamentoId,
                 classificacao: selectedClassificacao === 'todos' ? undefined : selectedClassificacao,
+                status: selectedStatus === 'todos' ? undefined : selectedStatus,
             });
             setAllReportData(data);
             setFilteredReportData(data); // No need for client-side filtering anymore
@@ -185,7 +195,7 @@ export default function RelatoriosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [dateRange, toast, selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao]);
+    }, [dateRange, toast, selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, selectedStatus]);
 
      React.useEffect(() => {
         if (!isMounted) return;
@@ -289,6 +299,7 @@ export default function RelatoriosPage() {
         setSelectedProfissionalId('todos');
         setSelectedDepartamentoId('todos');
         setSelectedClassificacao('todos');
+        setSelectedStatus('todos');
         handleViewModeChange('diario');
     };
 
@@ -297,9 +308,10 @@ export default function RelatoriosPage() {
             selectedPacienteId !== 'todos' ||
             selectedProfissionalId !== 'todos' ||
             selectedDepartamentoId !== 'todos' ||
-            selectedClassificacao !== 'todos'
+            selectedClassificacao !== 'todos' ||
+            selectedStatus !== 'todos'
         );
-    }, [selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao]);
+    }, [selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, selectedStatus]);
 
     const hasActiveDateFilter = React.useMemo(() => {
         if (!dateRange?.from) return false;
@@ -364,6 +376,7 @@ export default function RelatoriosPage() {
         if (selectedProfissionalId !== 'todos') queryParams.set('profissionalId', selectedProfissionalId);
         if (selectedDepartamentoId !== 'todos') queryParams.set('departamentoId', selectedDepartamentoId);
         if (selectedClassificacao !== 'todos') queryParams.set('classificacao', selectedClassificacao);
+        if (selectedStatus !== 'todos') queryParams.set('status', selectedStatus);
 
         window.open(`/print?${queryParams.toString()}`, '_blank');
     }
@@ -404,6 +417,8 @@ export default function RelatoriosPage() {
                     onDepartamentoChange={setSelectedDepartamentoId}
                     selectedClassificacao={selectedClassificacao}
                     onClassificacaoChange={setSelectedClassificacao}
+                    selectedStatus={selectedStatus}
+                    onStatusChange={setSelectedStatus}
                     onSearch={handleSearch}
                     isLoading={isLoading}
                     onClearFilters={handleClearFilters}
@@ -568,5 +583,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    
