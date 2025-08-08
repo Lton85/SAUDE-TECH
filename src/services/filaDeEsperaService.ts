@@ -167,7 +167,7 @@ export const getAtendimentosEmTriagem = (
  * Consulta que requer um índice composto no Firestore.
  * Coleção: filaDeEspera
  * Campos: status (Ascendente), prioridade (Ascendente), chegadaEm (Ascendente)
- * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Cl5wcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABEgYKBnN0YXR1cxABEg4KCnByaW9yaWRhZGUQARINCgljaGVnYWRhRW0QARoNCgtfX25hbWVfXxAB
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Cl5wcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABGgoKBnN0YXR1cxABEg4KCnByaW9yaWRhZGUQARINCgljaGVnYWRhRW0QARoMCghfX25hbWVfXxAB
  */
 export const getFilaDeEspera = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
