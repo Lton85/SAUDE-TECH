@@ -207,7 +207,7 @@ export default function AtendimentosPage() {
     return (
         <div className="flex flex-col h-full">
             <Tabs defaultValue="pendentes" className="flex flex-col flex-1">
-                 <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10">
+                 <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10 bg-card">
                     <TabsTrigger value="pendentes">
                         <AlertTriangle className="mr-2 h-4 w-4" />
                         Senhas Pendentes
@@ -385,5 +385,3 @@ export default function AtendimentosPage() {
         </div>
     );
 }
-
-    
