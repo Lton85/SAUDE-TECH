@@ -67,7 +67,7 @@ function PrintPageContent() {
                             profissionalId: searchParams.get('profissionalId') || undefined,
                             departamentoId: searchParams.get('departamentoId') || undefined,
                             classificacao: searchParams.get('classificacao') || undefined,
-                            status: searchParams.get('status') || undefined,
+                            status: searchParams.get('status') || 'todos', // Pass status filter
                         };
                         const items = await getHistoricoAtendimentosPorPeriodoComFiltros(filters);
                         printData = { title, items };
