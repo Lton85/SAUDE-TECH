@@ -22,7 +22,7 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
-import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
+import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
 
@@ -215,7 +215,7 @@ export default function AtendimentosPage() {
                         {pendentes.length > 0 && <Badge variant="destructive" className="ml-2 animate-pulse">{pendentes.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="em-triagem">
-                        <Fingerprint className="mr-2 h-4 w-4" />
+                        <HeartPulse className="mr-2 h-4 w-4" />
                         Em Triagem
                         {emTriagem.length > 0 && <Badge className="ml-2">{emTriagem.length}</Badge>}
                     </TabsTrigger>
