@@ -21,21 +21,19 @@ const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify:
             item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
             item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5"
         )}>
-            <CardContent className="p-2 flex flex-col items-center justify-center gap-2">
-                 <div className="flex items-center justify-between w-full">
-                    <span className={cn(
-                        "font-bold text-lg tracking-tight",
-                        item.classificacao === "Urgência" && "text-red-600",
-                        item.classificacao === "Preferencial" && "text-amber-600"
-                    )}>{item.senha}</span>
-
-                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
-                        <Clock className="h-3 w-3" />
-                        <span>{horaChegada}</span>
-                    </div>
-                 </div>
-
-                <Button size="sm" className="h-7 px-2 text-xs w-full" onClick={() => onIdentify(item)}>
+             <CardContent className="p-2 flex items-center justify-between gap-2">
+                <span className={cn(
+                    "font-bold text-lg tracking-tight",
+                    item.classificacao === "Urgência" && "text-red-600",
+                    item.classificacao === "Preferencial" && "text-amber-600"
+                )}>{item.senha}</span>
+                
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                    <Clock className="h-3 w-3" />
+                    <span>{horaChegada}</span>
+                </div>
+                
+                <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)}>
                     <UserPlus className="mr-1 h-3 w-3"/>
                     Identificar
                 </Button>
@@ -56,7 +54,7 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
             <CardContent className="p-2 space-y-2 h-full overflow-y-auto">
                  {isLoading ? (
                     [...Array(5)].map((_, i) => (
-                         <Card key={i}><CardContent className="p-2"><Skeleton className="h-12 w-full" /></CardContent></Card>
+                         <Card key={i}><CardContent className="p-2"><Skeleton className="h-8 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
                     items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} />)
