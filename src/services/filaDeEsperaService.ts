@@ -131,6 +131,30 @@ export const getAtendimentosPendentes = (
     return unsubscribe;
 }
 
+export const getAtendimentosEmTriagem = (
+    onUpdate: (data: FilaDeEsperaItem[]) => void,
+    onError: (error: string) => void
+) => {
+    const q = query(
+        collection(db, "filaDeEspera"), 
+        where("status", "==", "chamado-triagem")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data: FilaDeEsperaItem[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as FilaDeEsperaItem));
+        
+        onUpdate(data);
+    }, (error) => {
+        console.error("Error fetching in-triage queue: ", error);
+        onError("Não foi possível buscar as senhas em triagem.");
+    });
+
+    return unsubscribe;
+};
+
 export const getFilaDeEspera = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
     onError: (error: string) => void
@@ -188,6 +212,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
     let sala = "Triagem";
     let profissional = "Triagem";
     let paciente = item.pacienteNome || "Paciente";
+    let novoStatus: FilaDeEsperaItem['status'] = "em-atendimento";
 
     if (tipoChamada === 'atendimento') {
          if (!item.departamentoId || !item.profissionalNome) {
@@ -206,6 +231,9 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
             sala = `${item.departamentoNome} - SALA ${departamentoData.numero}`;
         }
         profissional = item.profissionalNome;
+        novoStatus = "em-atendimento";
+    } else {
+        novoStatus = "chamado-triagem";
     }
 
 
@@ -219,7 +247,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
     
     const filaDocRef = doc(db, "filaDeEspera", item.id);
     await updateDoc(filaDocRef, {
-        status: "em-atendimento",
+        status: novoStatus,
         chamadaEm: serverTimestamp()
     });
 };
@@ -405,3 +433,5 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o prontuário dos pacientes.");
     }
 };
+
+    

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2, Eraser, UserPlus, Fingerprint, Tags, AlertOctagon } from "lucide-react";
-import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem } from "@/services/filaDeEsperaService";
+import { Megaphone, Clock, PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, CheckCircle, Hourglass, Undo2, Eraser, UserPlus, Fingerprint, Tags, AlertOctagon, Stethoscope } from "lucide-react";
+import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +62,7 @@ interface Profissional {
 
 export default function TriagemPage() {
     const [pendentes, setPendentes] = useState<FilaDeEsperaItem[]>([]);
+    const [emTriagem, setEmTriagem] = useState<FilaDeEsperaItem[]>([]);
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
     const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -139,6 +140,22 @@ export default function TriagemPage() {
             setIsLoading(false);
         });
 
+        const unsubscribeEmTriagem = getAtendimentosEmTriagem((data) => {
+             const sortedData = data.sort((a, b) => {
+                if (a.chamadaEm && b.chamadaEm) {
+                    return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+            setEmTriagem(sortedData);
+        }, (error) => {
+             toast({
+                title: "Erro ao carregar senhas em triagem",
+                description: error,
+                variant: "destructive",
+            });
+        });
+
         const unsubscribeFila = getFilaDeEspera((data) => {
             const sortedData = data.sort((a, b) => {
                 if (a.prioridade !== b.prioridade) {
@@ -179,6 +196,7 @@ export default function TriagemPage() {
         return () => {
             unsubscribePacientes();
             unsubscribePendentes();
+            unsubscribeEmTriagem();
             unsubscribeFila();
             if (unsubscribeEmAtendimento) unsubscribeEmAtendimento();
         };
@@ -349,7 +367,7 @@ export default function TriagemPage() {
                                 <AlertOctagon className="h-5 w-5 text-amber-500" />
                                 Senhas Pendentes de Triagem
                             </CardTitle>
-                            <CardDescription>Senhas geradas pelo totem que aguardam identificação e triagem.</CardDescription>
+                            <CardDescription>Senhas geradas pelo totem que aguardam o primeiro chamado para a triagem.</CardDescription>
                         </div>
                          <div className="flex items-center gap-2">
                             <Button onClick={handleClearPainel} variant="destructive" size="icon" className="h-9 w-9">
@@ -396,10 +414,6 @@ export default function TriagemPage() {
                                              <TableCell className="px-2 py-1 text-xs"><TempoDeEspera chegadaEm={item.chegadaEm}/></TableCell>
                                             <TableCell className="text-right px-2 py-1 text-xs">
                                                  <div className="flex items-center justify-end gap-2">
-                                                    <Button size="sm" variant="outline" onClick={() => handleCompletarCadastro(item)} className="h-7 px-2 text-xs border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700">
-                                                        <Fingerprint className="mr-2 h-3 w-3" />
-                                                        Identificar Paciente
-                                                    </Button>
                                                      <Button size="sm" onClick={() => handleChamarPendente(item)} className="h-7 px-2 text-xs">
                                                         <Megaphone className="mr-2 h-3 w-3" />
                                                         Chamar para Triagem
@@ -425,13 +439,78 @@ export default function TriagemPage() {
                 </Card>
 
                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Stethoscope className="h-5 w-5 text-blue-500" />
+                            Em Triagem
+                        </CardTitle>
+                        <CardDescription>Pacientes chamados para a triagem inicial. Identifique o paciente para prosseguir.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="px-2 py-2 text-xs">Senha</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
+                                    <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
+                                    <TableHead className="text-right px-2 py-2 text-xs">Ação</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
+                                    </TableRow>
+                                ) : emTriagem.length > 0 ? (
+                                    emTriagem.map((item) => (
+                                        <TableRow key={item.id} className="hover:bg-muted/50 bg-blue-50/50">
+                                            <TableCell className="font-medium px-2 py-1 text-xs"><Badge variant="secondary" className="text-base">{item.senha}</Badge></TableCell>
+                                             <TableCell className="px-2 py-1 text-xs">
+                                                <Badge
+                                                    className={cn(
+                                                        'text-xs',
+                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                                    )}
+                                                >
+                                                    {item.classificacao}
+                                                </Badge>
+                                            </TableCell>
+                                             <TableCell className="px-2 py-1 text-xs">
+                                                <div className="flex items-center gap-2 text-muted-foreground">
+                                                    <Clock className="h-3 w-3" />
+                                                    {item.chamadaEm ? new Date(item.chamadaEm.seconds * 1000).toLocaleTimeString('pt-BR') : 'N/A'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right px-2 py-1 text-xs">
+                                                <Button size="sm" variant="outline" onClick={() => handleCompletarCadastro(item)} className="h-7 px-2 text-xs border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700">
+                                                    <Fingerprint className="mr-2 h-3 w-3" />
+                                                    Identificar Paciente
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                            Nenhum paciente em triagem.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
                              <CardTitle className="flex items-center gap-2">
                                 <Tags className="h-5 w-5 text-primary" />
                                 Fila de Atendimento
                             </CardTitle>
-                            <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
+                            <CardDescription>Pacientes aguardando para serem chamados para o atendimento final.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
                              <Button onClick={() => { setAtendimentoParaCompletar(null); setPatientToAdd(null); setIsAddToQueueDialogOpen(true); }}>
@@ -687,3 +766,5 @@ export default function TriagemPage() {
         </>
     );
 }
+
+    
