@@ -9,12 +9,6 @@ import { cn } from "@/lib/utils";
 import { UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-interface EmTriagemListProps {
-    emTriagem: FilaDeEsperaItem[];
-    isLoading: boolean;
-    onIdentify: (item: FilaDeEsperaItem) => void;
-}
-
 const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void }) => {
     return (
         <Card key={item.id} className={cn(
@@ -24,7 +18,7 @@ const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify:
         )}>
             <CardContent className="p-2 flex items-center justify-between gap-2">
                  <span className={cn(
-                    "font-bold text-xl tracking-tight",
+                    "font-bold text-lg tracking-tight",
                      item.classificacao === "Urgência" && "text-red-600",
                      item.classificacao === "Preferencial" && "text-amber-600"
                  )}>{item.senha}</span>
