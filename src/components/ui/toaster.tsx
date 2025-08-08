@@ -17,7 +17,7 @@ export function Toaster() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
+      if (event.code === 'Space' || event.code === 'Escape' || event.code === 'Enter') {
         dismiss();
       }
     };
@@ -42,7 +42,7 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
+            {/* <ToastClose /> */}
           </Toast>
         )
       })}
