@@ -64,7 +64,6 @@ export default function TriagemPage() {
     const [pendentes, setPendentes] = useState<FilaDeEsperaItem[]>([]);
     const [emTriagem, setEmTriagem] = useState<FilaDeEsperaItem[]>([]);
     const [fila, setFila] = useState<FilaDeEsperaItem[]>([]);
-    const [emAtendimento, setEmAtendimento] = useState<FilaDeEsperaItem[]>([]);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -157,6 +156,7 @@ export default function TriagemPage() {
         });
 
         const unsubscribeFila = getFilaDeEspera((data) => {
+            // Sort by priority (1: Urgência, 2: Preferencial, 3: Normal), then by arrival time
             const sortedData = data.sort((a, b) => {
                 if (a.prioridade !== b.prioridade) {
                     return a.prioridade - b.prioridade;
@@ -176,29 +176,12 @@ export default function TriagemPage() {
             });
             setIsLoading(false);
         });
-        
-        const unsubscribeEmAtendimento = getAtendimentosEmAndamento((data) => {
-            const sortedData = data.sort((a, b) => {
-                if (a.chamadaEm && b.chamadaEm) {
-                    return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
-                }
-                return 0;
-            });
-            setEmAtendimento(sortedData);
-        }, (error) => {
-             toast({
-                title: "Erro ao carregar atendimentos",
-                description: error,
-                variant: "destructive",
-            });
-        });
 
         return () => {
             unsubscribePacientes();
             unsubscribePendentes();
             unsubscribeEmTriagem();
             unsubscribeFila();
-            if (unsubscribeEmAtendimento) unsubscribeEmAtendimento();
         };
     }, [toast]);
     
@@ -268,57 +251,6 @@ export default function TriagemPage() {
             });
         }
     };
-
-    const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
-        try {
-            await finalizarAtendimento(item.id);
-             toast({
-                title: "Atendimento Finalizado!",
-                description: `O atendimento de ${item.pacienteNome} foi concluído.`,
-            });
-        } catch (error) {
-             toast({
-                title: "Erro ao finalizar",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        }
-    };
-    
-    const handleReturnToQueue = (item: FilaDeEsperaItem) => {
-        setItemToReturn(item);
-    };
-
-    const handleReturnToQueueConfirm = async (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => {
-        try {
-            // First, update the item with any changes
-            await updateFilaItem(item.id, updates);
-
-            // Then, return the patient to the queue
-            await retornarPacienteParaFila(item.id);
-            
-            // Check if the returned patient is the one on the panel
-            const ultimaChamada = await getUltimaChamada();
-            if (ultimaChamada?.atendimentoId === item.id) {
-                await clearPainel();
-            }
-
-            toast({
-                title: "Paciente Retornou para a Fila!",
-                description: `${item.pacienteNome} foi retornado para a fila de espera.`,
-                variant: "default"
-            });
-        } catch (error) {
-            toast({
-                title: "Erro ao retornar paciente",
-                description: (error as Error).message,
-                variant: "destructive",
-            });
-        } finally {
-            setItemToReturn(null);
-        }
-    };
-
     
     const handleEdit = (item: FilaDeEsperaItem) => {
         setItemToEdit(item);
@@ -610,86 +542,6 @@ export default function TriagemPage() {
                         </div>
                     </CardFooter>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Hourglass className="h-5 w-5 text-primary" />
-                            Atendimentos em Andamento
-                        </CardTitle>
-                        <CardDescription>Pacientes que já foram chamados e estão sendo atendidos.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="px-2 py-2 text-xs">Nome</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Classificação</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Departamento</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Profissional</TableHead>
-                                    <TableHead className="px-2 py-2 text-xs">Horário da Chamada</TableHead>
-                                    <TableHead className="text-right px-2 py-2 text-xs">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="px-2 py-1"><Skeleton className="h-5 w-full" /></TableCell>
-                                    </TableRow>
-                                ) : emAtendimento.length > 0 ? (
-                                    emAtendimento.map((item) => (
-                                        <TableRow key={item.id} className="hover:bg-muted/50">
-                                            <TableCell className="font-medium px-2 py-1 text-xs">{item.pacienteNome}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">
-                                                <Badge
-                                                    className={cn(
-                                                        'text-xs',
-                                                        item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                                        item.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
-                                                        item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
-                                                    )}
-                                                >
-                                                    {item.classificacao}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">{item.profissionalNome}</TableCell>
-                                            <TableCell className="px-2 py-1 text-xs">
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    <Clock className="h-3 w-3" />
-                                                    {item.chamadaEm ? new Date(item.chamadaEm.seconds * 1000).toLocaleTimeString('pt-BR') : 'N/A'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right px-2 py-1 text-xs">
-                                            <div className="flex items-center justify-end gap-2">
-                                                    <Button size="sm" variant="outline" onClick={() => handleReturnToQueue(item)} className="h-7 px-2 text-xs border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
-                                                        <Undo2 className="mr-2 h-3 w-3" />
-                                                        Retornar à Fila
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" onClick={() => handleFinalizarAtendimento(item)} className="h-7 px-2 text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700">
-                                                        <CheckCircle className="mr-2 h-3 w-3" />
-                                                        Finalizar Atendimento
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            Nenhum paciente em atendimento no momento.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                    <CardFooter className="py-3 px-6 border-t">
-                        <div className="text-xs text-muted-foreground">
-                            Exibindo <strong>{emAtendimento.length}</strong> {emAtendimento.length === 1 ? 'registro' : 'registros'}
-                        </div>
-                    </CardFooter>
-                </Card>
             </div>
 
 
@@ -735,17 +587,6 @@ export default function TriagemPage() {
                 />
             )}
             
-            {itemToReturn && (
-                <ReturnToQueueDialog
-                    isOpen={!!itemToReturn}
-                    onOpenChange={() => setItemToReturn(null)}
-                    item={itemToReturn}
-                    departamentos={departamentos}
-                    profissionais={profissionais}
-                    onConfirm={handleReturnToQueueConfirm}
-                />
-            )}
-            
             {itemToHistory && (
                 <ProntuarioDialog
                     isOpen={!!itemToHistory}
@@ -766,5 +607,3 @@ export default function TriagemPage() {
         </>
     );
 }
-
-    
