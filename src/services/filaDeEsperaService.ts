@@ -108,6 +108,12 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
     }
 };
 
+/**
+ * Consulta que requer um índice composto no Firestore.
+ * Coleção: filaDeEspera
+ * Campos: status (Ascendente), chegadaEm (Ascendente)
+ * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=ClJwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABEgYKBnN0YXR1cxABEg0KCWNoZWdhZGFFbRABGg0KC19fbmFtZV9fEAE=
+ */
 export const getAtendimentosPendentes = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
     onError: (error: string) => void
@@ -157,6 +163,12 @@ export const getAtendimentosEmTriagem = (
     return unsubscribe;
 };
 
+/**
+ * Consulta que requer um índice composto no Firestore.
+ * Coleção: filaDeEspera
+ * Campos: status (Ascendente), prioridade (Ascendente), chegadaEm (Ascendente)
+ * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Cl5wcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABEgYKBnN0YXR1cxABEg4KCnByaW9yaWRhZGUQARINCgljaGVnYWRhRW0QARoNCgtfX25hbWVfXxAB
+ */
 export const getFilaDeEspera = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
     onError: (error: string) => void
@@ -207,6 +219,13 @@ export const getAtendimentosEmAndamento = (
     return unsubscribe;
 }
 
+/**
+ * Consulta que requer dois índices no Firestore.
+ * 1) Coleção: relatorios_atendimentos, Campos: finalizadaEm (Descendente)
+ * Link: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRAC&create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ * 2) Coleção: relatorios_atendimentos, Campos: canceladaEm (Descendente)
+ * Link: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDQoLX19uYW1lX18QAQ==
+ */
 export const getAtendimentosFinalizadosHoje = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
     onError: (error: string) => void
@@ -363,7 +382,12 @@ export const deleteFilaItem = async (id: string): Promise<void> => {
     await deleteDoc(filaDocRef);
 };
 
-
+/**
+ * Consulta que requer um índice composto no Firestore.
+ * Coleção: relatorios_atendimentos
+ * Campos: pacienteId (Ascendente), finalizadaEm (Descendente)
+ * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCnBhY2llbnRlSWQQARIPCgtmaW5hbGl6YWRhRW0QAhpACgtfX25hbWVfXxAB
+ */
 export const getHistoricoAtendimentos = async (pacienteId: string): Promise<FilaDeEsperaItem[]> => {
     if (!pacienteId) {
         return [];
