@@ -8,7 +8,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Undo2, CheckCircle } from "lucide-react";
+import { Clock, User, Building, Undo2, CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface EmAndamentoListProps {
@@ -16,9 +16,10 @@ interface EmAndamentoListProps {
     isLoading: boolean;
     onReturnToQueue: (item: FilaDeEsperaItem) => void;
     onFinalize: (item: FilaDeEsperaItem) => void;
+    onCancel: (item: FilaDeEsperaItem) => void;
 }
 
-export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onFinalize }: EmAndamentoListProps) {
+export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onFinalize, onCancel }: EmAndamentoListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -93,6 +94,10 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
                              <Button size="sm" className="h-7 bg-green-600 hover:bg-green-700 text-xs px-2" onClick={() => onFinalize(item)}>
                                 <CheckCircle className="mr-1 h-3 w-3" />
                                 Finalizar
+                            </Button>
+                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => onCancel(item)}>
+                                <XCircle className="mr-1 h-3 w-3" />
+                                Cancelar
                             </Button>
                         </div>
                     </div>

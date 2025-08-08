@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { Megaphone, Trash2, Clock } from "lucide-react";
+import { Megaphone, XCircle, Clock } from "lucide-react";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "../ui/badge";
@@ -15,10 +15,10 @@ interface SenhasPendentesListProps {
     pendentes: FilaDeEsperaItem[];
     isLoading: boolean;
     onCall: (item: FilaDeEsperaItem) => void;
-    onDelete: (item: FilaDeEsperaItem) => void;
+    onCancel: (item: FilaDeEsperaItem) => void;
 }
 
-export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: SenhasPendentesListProps) {
+export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: SenhasPendentesListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -50,12 +50,13 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
 
                 return (
                      <Card key={item.id} className={cn(
+                        "hover:bg-muted/50 transition-colors",
                         item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
                         item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5",
                         item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
-                            <Badge variant={
+                             <Badge variant={
                                 item.classificacao === 'Urgência' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                             } className={cn("text-base",
@@ -71,13 +72,13 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onDelete }: 
                             </div>
 
                             <div className="flex items-center gap-1.5">
-                                 <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)}>
+                                 <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)} title="Chamar para Triagem">
                                     <Megaphone className="h-4 w-4" />
                                     <span className="sr-only">Chamar para Triagem</span>
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onDelete(item)}>
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Excluir</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)} title="Cancelar Senha">
+                                    <XCircle className="h-4 w-4" />
+                                    <span className="sr-only">Cancelar Senha</span>
                                 </Button>
                             </div>
                         </CardContent>

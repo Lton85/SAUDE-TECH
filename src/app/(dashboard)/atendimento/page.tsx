@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, deleteFilaItem, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { useToast } from "@/hooks/use-toast";
 import type { Paciente } from "@/types/paciente";
@@ -50,7 +50,6 @@ export default function AtendimentosPage() {
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
-    const [itemToDelete, setItemToDelete] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEdit, setItemToEdit] = useState<FilaDeEsperaItem | null>(null);
     const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
@@ -86,7 +85,7 @@ export default function AtendimentosPage() {
         const unsubPacientes = getPacientesRealtime(setPacientes, (error) => toast({ title: "Erro ao carregar pacientes", description: error, variant: "destructive" }));
         
         const unsubPendentes = getAtendimentosPendentes((data) => {
-            setPendentes(data.sort((a, b) => (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0)));
+            setPendentes(data);
             setIsLoading(false);
         }, (error) => {
              toast({ title: "Erro ao carregar senhas pendentes", description: error, variant: "destructive" });
@@ -241,7 +240,7 @@ export default function AtendimentosPage() {
                         pendentes={pendentes} 
                         isLoading={isLoading} 
                         onCall={handleChamarParaTriagem}
-                        onDelete={setItemToDelete}
+                        onCancel={setItemToCancel}
                     />
                 </TabsContent>
                 
@@ -250,6 +249,7 @@ export default function AtendimentosPage() {
                         emTriagem={emTriagem}
                         isLoading={isLoading}
                         onIdentify={handleCompletarCadastro}
+                        onCancel={setItemToCancel}
                     />
                 </TabsContent>
 
@@ -272,6 +272,7 @@ export default function AtendimentosPage() {
                         isLoading={isLoading}
                         onReturnToQueue={setItemToReturn}
                         onFinalize={handleFinalizarAtendimento}
+                        onCancel={setItemToCancel}
                     />
                 </TabsContent>
 
@@ -342,10 +343,10 @@ export default function AtendimentosPage() {
                     onConfirm={async () => {
                         if (itemToCancel) {
                             try {
-                                await cancelarAtendimento(itemToCancel.id);
+                                await cancelarAtendimento(itemToCancel);
                                 toast({
                                     title: "Atendimento Cancelado!",
-                                    description: `O atendimento de ${itemToCancel.pacienteNome} foi cancelado com sucesso.`,
+                                    description: `O atendimento de ${itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`} foi cancelado.`,
                                     className: "bg-orange-500 text-white"
                                 });
                             } catch (error) {

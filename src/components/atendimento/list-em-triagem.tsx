@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { UserPlus, Clock } from "lucide-react";
+import { UserPlus, Clock, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 
-const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void }) => {
+const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void }) => {
     const horaChegada = item.chegadaEm ? format(item.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
     return (
@@ -46,16 +46,22 @@ const TriagemCard = ({ item, onIdentify }: { item: FilaDeEsperaItem, onIdentify:
                     <span>{horaChegada}</span>
                 </div>
                 
-                <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)}>
-                    <UserPlus className="mr-1 h-3 w-3"/>
-                    Identificar
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)}>
+                        <UserPlus className="mr-1 h-3 w-3"/>
+                        Identificar
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)}>
+                        <XCircle className="h-4 w-4" />
+                        <span className="sr-only">Cancelar</span>
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     )
 }
 
-const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string }) => {
+const TriagemColumn = ({ title, items, onIdentify, onCancel, isLoading, colorClass }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string }) => {
     return (
         <Card className="flex-1 flex flex-col">
             <CardHeader className="p-3 border-b">
@@ -70,7 +76,7 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
                          <Card key={i}><CardContent className="p-2"><Skeleton className="h-8 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
-                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} />)
+                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} />)
                 ) : (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                         Nenhuma senha.
@@ -82,14 +88,14 @@ const TriagemColumn = ({ title, items, onIdentify, isLoading, colorClass }: { ti
 }
 
 
-export function EmTriagemList({ emTriagem, isLoading, onIdentify }: { emTriagem: FilaDeEsperaItem[], isLoading: boolean, onIdentify: (item: FilaDeEsperaItem) => void }) {
+export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { emTriagem: FilaDeEsperaItem[], isLoading: boolean, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void }) {
     
     if (isLoading && emTriagem.length === 0) {
         return (
             <div className="flex gap-4 h-full">
-                 <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-red-600"/>
-                 <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-amber-600"/>
-                 <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} isLoading={true} colorClass="text-green-600"/>
+                 <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-red-600"/>
+                 <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-amber-600"/>
+                 <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-green-600"/>
             </div>
         )
     }
@@ -108,9 +114,9 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify }: { emTriagem:
     
     return (
          <div className="flex gap-4 h-full">
-            <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-red-600"/>
-            <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-amber-600"/>
-            <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} isLoading={isLoading} colorClass="text-green-600"/>
+            <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-red-600"/>
+            <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-amber-600"/>
+            <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-green-600"/>
         </div>
     );
 }

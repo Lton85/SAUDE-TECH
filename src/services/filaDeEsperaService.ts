@@ -114,7 +114,8 @@ export const getAtendimentosPendentes = (
 ) => {
     const q = query(
         collection(db, "filaDeEspera"), 
-        where("status", "==", "pendente")
+        where("status", "==", "pendente"),
+        orderBy("chegadaEm")
     );
 
      const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -336,23 +337,20 @@ export const finalizarAtendimento = async (id: string) => {
 };
 
 
-export const cancelarAtendimento = async (id: string) => {
-    if (!id) throw new Error("ID do item da fila não encontrado.");
+export const cancelarAtendimento = async (item: FilaDeEsperaItem) => {
+    if (!item || !item.id) throw new Error("ID do item da fila não encontrado.");
 
-    const filaDocRef = doc(db, "filaDeEspera", id);
-    const filaDocSnap = await getDoc(filaDocRef);
-
-    if (!filaDocSnap.exists()) throw new Error("Atendimento não encontrado na fila.");
+    const filaDocRef = doc(db, "filaDeEspera", item.id);
     
-    const atendimentoData = filaDocSnap.data() as FilaDeEsperaItem;
-
+    // Create a new document in relatorios_atendimentos
     const relatoriosCollectionRef = collection(db, 'relatorios_atendimentos');
     await addDoc(relatoriosCollectionRef, {
-        ...atendimentoData,
+        ...item,
         status: "cancelado",
         canceladaEm: serverTimestamp(),
     });
-
+    
+    // Delete the original document from filaDeEspera
     await deleteDoc(filaDocRef);
 };
 
