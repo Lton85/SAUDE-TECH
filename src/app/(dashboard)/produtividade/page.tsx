@@ -21,11 +21,11 @@ import { Input } from "@/components/ui/input";
 
 const KpiCard = ({ title, value, icon: Icon, isLoading }: { title: string, value: string, icon: React.ElementType, isLoading: boolean }) => (
     <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             <Icon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0">
             {isLoading ? (
                 <div className="h-8 w-24 bg-muted animate-pulse rounded-md" />
             ) : (
@@ -336,5 +336,3 @@ export default function ProdutividadePage() {
         </div>
     );
 }
-
-    
