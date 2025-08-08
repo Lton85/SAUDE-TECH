@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect } from "react";
@@ -34,7 +35,7 @@ export function Toaster() {
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
-            <div className="grid gap-1">
+            <div className="grid gap-1 text-center">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>{description}</ToastDescription>
@@ -45,7 +46,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport className="sm:top-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2" />
+      <ToastViewport className="sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2" />
     </ToastProvider>
   )
 }
