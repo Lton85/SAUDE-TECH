@@ -392,7 +392,7 @@ export const deleteFilaItem = async (id: string): Promise<void> => {
  * Consulta que requer um índice composto no Firestore.
  * Coleção: relatorios_atendimentos
  * Campos: pacienteId (Ascendente), finalizadaEm (Descendente)
- * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCnBhY2llbnRlSWQQARIPCgtmaW5hbGl6YWRhRW0QAhpACgtfX25hbWVfXxAB
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=CmFwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEAEaDgoKcGFjaWVudGVJZBABGhAKDGZpbmFsaXphZGFFbRACGgwKCF9fbmFtZV9fEAI
  */
 export const getHistoricoAtendimentos = async (pacienteId: string): Promise<FilaDeEsperaItem[]> => {
     if (!pacienteId) {
