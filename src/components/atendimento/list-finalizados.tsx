@@ -7,7 +7,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle } from "lucide-react";
+import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "../ui/label";
@@ -105,24 +105,33 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                     </Badge>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                     <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
-                                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1.5 truncate">
-                                            <Building className="h-3 w-3" />
-                                            <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
+                                    {item.pacienteNome ? (
+                                        <>
+                                            <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
+                                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1.5 truncate">
+                                                    <Building className="h-3 w-3" />
+                                                    <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 truncate">
+                                                    <User className="h-3 w-3" />
+                                                    <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <Tag className="h-3 w-3 text-muted-foreground" />
+                                            <p className="font-semibold text-sm text-foreground/80">Senha {item.senha}</p>
                                         </div>
-                                        <div className="flex items-center gap-1.5 truncate">
-                                            <User className="h-3 w-3" />
-                                            <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
-                                        </div>
-                                         <div className="flex items-center gap-1.5 truncate">
-                                            <BadgeInfo className="h-3 w-3" />
-                                            <span className="truncate" title={item.classificacao}>Classificação: {item.classificacao}</span>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 ml-4">
+                                <div className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+                                    <BadgeInfo className="h-3 w-3" />
+                                    <span className="truncate" title={item.classificacao}>Classificação: {item.classificacao}</span>
+                                </div>
                                 <p className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                                     <Clock className="h-3 w-3" />
                                      {eventTime ? format(eventTime, "HH:mm:ss") : '-'}
