@@ -169,13 +169,6 @@ export const getAtendimentosEmAndamento = (
             id: doc.id,
             ...doc.data()
         } as FilaDeEsperaItem));
-
-        data.sort((a, b) => {
-            if (a.chamadaEm && b.chamadaEm) {
-                return b.chamadaEm.toDate().getTime() - a.chamadaEm.toDate().getTime();
-            }
-            return 0;
-        });
         
         onUpdate(data);
     }, (error) => {

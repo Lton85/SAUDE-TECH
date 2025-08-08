@@ -122,7 +122,13 @@ export default function TriagemPage() {
         const unsubscribePacientes = fetchPacientes();
 
         const unsubscribePendentes = getAtendimentosPendentes((data) => {
-            setPendentes(data);
+            const sortedData = data.sort((a, b) => {
+                 if (a.chegadaEm && b.chegadaEm) {
+                    return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+            setPendentes(sortedData);
             setIsLoading(false);
         }, (error) => {
              toast({
@@ -134,7 +140,16 @@ export default function TriagemPage() {
         });
 
         const unsubscribeFila = getFilaDeEspera((data) => {
-            setFila(data);
+            const sortedData = data.sort((a, b) => {
+                if (a.prioridade !== b.prioridade) {
+                    return a.prioridade - b.prioridade;
+                }
+                if (a.chegadaEm && b.chegadaEm) {
+                    return a.chegadaEm.toDate().getTime() - b.chegadaEm.toDate().getTime();
+                }
+                return 0;
+            });
+            setFila(sortedData);
             setIsLoading(false);
         }, (error) => {
             toast({
