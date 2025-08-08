@@ -21,7 +21,8 @@ import { SenhasPendentesList } from "@/components/atendimento/list-pendentes";
 import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
-import { AlertTriangle, Fingerprint, Hourglass, Tags } from "lucide-react";
+import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
+import { finalizarAtendimento as finalizarAtendimentoService } from "@/services/filaDeEsperaService";
 
 
 interface Profissional {
@@ -145,6 +146,42 @@ export default function AtendimentosPage() {
         setIsAddToQueueDialogOpen(true);
     }
     
+    const handleChamarParaTriagem = async (item: FilaDeEsperaItem) => {
+        try {
+            await chamarPaciente(item, 'triagem');
+             toast({ title: "Senha Chamada!", description: `A senha ${item.senha} foi chamada para a triagem.` });
+        } catch (error) {
+             toast({ title: "Erro ao chamar senha", description: (error as Error).message, variant: "destructive" });
+        }
+    };
+
+    const handleChamarParaAtendimento = async (item: FilaDeEsperaItem) => {
+        try {
+            await chamarPaciente(item, 'atendimento');
+            toast({ title: "Paciente Chamado!", description: `${item.pacienteNome} foi chamado para atendimento.` });
+        } catch (error) {
+            toast({ title: "Erro ao chamar paciente", description: (error as Error).message, variant: "destructive" });
+        }
+    };
+    
+    const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
+        try {
+            await finalizarAtendimentoService(item.id);
+            toast({
+                title: "Atendimento Finalizado!",
+                description: `O atendimento de ${item.pacienteNome} foi finalizado.`,
+                className: "bg-green-500 text-white"
+            });
+        } catch (error) {
+            toast({ title: "Erro ao finalizar", description: (error as Error).message, variant: "destructive" });
+        }
+    };
+    
+    const handleEditFromHistory = (item: FilaDeEsperaItem) => {
+        setItemToHistory(null); // Close history dialog
+        setItemToEditFromHistory(item); // Open edit dialog for history item
+    };
+    
     return (
         <>
             <Tabs defaultValue="pendentes" className="w-full">
@@ -172,6 +209,7 @@ export default function AtendimentosPage() {
                     <SenhasPendentesList 
                         pendentes={pendentes} 
                         isLoading={isLoading} 
+                        onCall={handleChamarParaTriagem}
                         onDelete={setItemToDelete}
                     />
                 </TabsContent>
@@ -180,7 +218,7 @@ export default function AtendimentosPage() {
                     <EmTriagemList 
                         emTriagem={emTriagem}
                         isLoading={isLoading}
-                        onCompletarCadastro={handleCompletarCadastro}
+                        onIdentify={handleCompletarCadastro}
                     />
                 </TabsContent>
 
@@ -188,6 +226,7 @@ export default function AtendimentosPage() {
                     <FilaDeAtendimentoList
                         fila={fila}
                         isLoading={isLoading}
+                        onCall={handleChamarParaAtendimento}
                         onEdit={setItemToEdit}
                         onHistory={setItemToHistory}
                         onDelete={setItemToDelete}
@@ -200,6 +239,7 @@ export default function AtendimentosPage() {
                         emAtendimento={emAtendimento}
                         isLoading={isLoading}
                         onReturnToQueue={setItemToReturn}
+                        onFinalize={handleFinalizarAtendimento}
                     />
                 </TabsContent>
             </Tabs>
