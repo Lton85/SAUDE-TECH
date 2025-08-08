@@ -20,9 +20,10 @@ interface FilaDeAtendimentoListProps {
     onHistory: (item: FilaDeEsperaItem) => void;
     onDelete: (item: FilaDeEsperaItem) => void;
     onAddToQueue: () => void;
+    onClearPanel: () => void;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onDelete, onAddToQueue }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onDelete, onAddToQueue, onClearPanel }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -31,10 +32,16 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                         <CardTitle>Fila de Atendimento</CardTitle>
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
-                    <Button onClick={onAddToQueue}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                        Adicionar na Fila
-                    </Button>
+                    <div className="flex items-center gap-2">
+                         <Button variant="destructive" onClick={onClearPanel}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Limpar Painel
+                        </Button>
+                        <Button onClick={onAddToQueue}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                            Adicionar na Fila
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="p-0">

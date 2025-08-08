@@ -23,6 +23,7 @@ import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendi
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { AlertTriangle, Fingerprint, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { clearPainel } from "@/services/chamadasService";
 
 
 interface Profissional {
@@ -181,6 +182,22 @@ export default function AtendimentosPage() {
         setItemToHistory(null); // Close history dialog
         setItemToEditFromHistory(item); // Open edit dialog for history item
     };
+
+    const handleClearPanel = async () => {
+        try {
+            await clearPainel();
+            toast({
+                title: "Painel Limpo!",
+                description: "O painel de senhas foi reiniciado.",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao limpar painel",
+                description: (error as Error).message,
+                variant: "destructive",
+            });
+        }
+    };
     
     return (
         <>
@@ -234,6 +251,7 @@ export default function AtendimentosPage() {
                         onHistory={setItemToHistory}
                         onDelete={setItemToDelete}
                         onAddToQueue={handleAddToQueue}
+                        onClearPanel={handleClearPanel}
                     />
                 </TabsContent>
 
