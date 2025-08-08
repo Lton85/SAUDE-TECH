@@ -50,47 +50,45 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
     }
     
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {emAtendimento.map((item) => (
                 <Card key={item.id} className={cn(
-                    "flex flex-col justify-between",
+                    "flex flex-col justify-between shadow-sm hover:shadow-lg transition-shadow",
                     item.classificacao === "Urgência" && "border-red-500/50",
                     item.classificacao === "Preferencial" && "border-amber-500/50"
                 )}>
-                    <CardContent className="p-4 space-y-3">
-                        <div className="flex justify-between items-start">
-                            <span className={cn(
-                                "font-bold text-2xl tracking-tight",
-                                item.classificacao === "Urgência" && "text-red-600",
-                                item.classificacao === "Preferencial" && "text-amber-600"
-                            )}>{item.senha}</span>
-                        </div>
+                    <CardContent className="p-3 space-y-2">
+                        <span className={cn(
+                            "font-bold text-lg tracking-tight",
+                            item.classificacao === "Urgência" && "text-red-600",
+                            item.classificacao === "Preferencial" && "text-amber-600"
+                        )}>{item.senha}</span>
                         
-                        <p className="font-semibold text-lg text-primary truncate">{item.pacienteNome}</p>
+                        <p className="font-semibold text-base text-primary truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
 
-                        <div className="space-y-2 text-sm text-muted-foreground pt-2">
-                            <div className="flex items-center gap-2">
-                                <Building className="h-4 w-4" />
-                                <span className="truncate">{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
+                        <div className="space-y-1 text-xs text-muted-foreground pt-1">
+                            <div className="flex items-center gap-1.5">
+                                <Building className="h-3 w-3" />
+                                <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                <span className="truncate">{item.profissionalNome}</span>
+                            <div className="flex items-center gap-1.5">
+                                <User className="h-3 w-3" />
+                                <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
                             </div>
                         </div>
                     </CardContent>
-                    <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t bg-muted/50 rounded-b-lg gap-2">
+                    <div className="flex flex-col sm:flex-row items-center justify-between p-2 border-t bg-muted/30 rounded-b-lg gap-2">
                          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <Clock className="h-3 w-3" />
-                             Chamado {formatDistanceToNow(item.chamadaEm!.toDate(), { addSuffix: true, locale: ptBR })}
+                             {item.chamadaEm ? `Chamado ${formatDistanceToNow(item.chamadaEm.toDate(), { addSuffix: true, locale: ptBR })}` : 'Aguardando'}
                         </p>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <Button size="sm" variant="outline" className="h-8 flex-1 text-xs" onClick={() => onReturnToQueue(item)}>
-                                <Undo2 className="mr-1.5 h-3 w-3" />
+                        <div className="flex gap-1.5 w-full sm:w-auto">
+                            <Button size="sm" variant="outline" className="h-7 flex-1 text-xs px-2" onClick={() => onReturnToQueue(item)}>
+                                <Undo2 className="mr-1 h-3 w-3" />
                                 Retornar
                             </Button>
-                             <Button size="sm" className="h-8 bg-green-600 hover:bg-green-700 flex-1 text-xs" onClick={() => onFinalize(item)}>
-                                <CheckCircle className="mr-1.5 h-3 w-3" />
+                             <Button size="sm" className="h-7 bg-green-600 hover:bg-green-700 flex-1 text-xs px-2" onClick={() => onFinalize(item)}>
+                                <CheckCircle className="mr-1 h-3 w-3" />
                                 Finalizar
                             </Button>
                         </div>
