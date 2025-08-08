@@ -112,7 +112,7 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
  * Consulta que requer um índice composto no Firestore.
  * Coleção: filaDeEspera
  * Campos: status (Ascendente), chegadaEm (Ascendente)
- * Link para criação: https://console.firebase.google.com/project/saude-facil-99832/database/firestore/indexes?create_composite=ClJwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABEgYKBnN0YXR1cxABEg0KCWNoZWdhZGFFbRABGg0KC19fbmFtZV9fEAE=
+ * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=ClZwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABGgoKBnN0YXR1cxABGg0KCWNoZWdhZGFFbRABGgwKCF9fbmFtZV9fEAE
  */
 export const getAtendimentosPendentes = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
