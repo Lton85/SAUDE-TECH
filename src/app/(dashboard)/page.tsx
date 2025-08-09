@@ -156,13 +156,24 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
             "tablet": "Funções especiais para tablet.",
         };
 
-        return userMenuItems
-            .filter(item => item.id !== '/' && item.id !== '/configuracoes' && item.id !== '/empresa' && item.id !== '/usuarios' && item.id !== 'sair')
+        const orderedIds = [
+          "/atendimento", 
+          "painel", 
+          "tablet",
+          "/cadastros", 
+          "/departamentos", 
+          "/produtividade", 
+          "/relatorios", 
+        ];
+
+        return orderedIds
+            .map(id => userMenuItems.find(item => item.id === id))
+            .filter(item => item)
             .map(item => ({
-                id: item.id,
-                title: item.label,
-                description: featureDescriptions[item.id] || "Acesse a funcionalidade.",
-                icon: item.icon,
+                id: item!.id,
+                title: item!.label,
+                description: featureDescriptions[item!.id] || "Acesse a funcionalidade.",
+                icon: item!.icon,
             }));
     }, [userMenuItems]);
 
@@ -237,3 +248,5 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     </div>
   );
 }
+
+    

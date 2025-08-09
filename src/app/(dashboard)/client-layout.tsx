@@ -68,16 +68,16 @@ const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 export const allMenuItems = [
   { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
   { id: "/atendimento", href: "/atendimento", label: "Atendimentos", icon: Clock, component: AtendimentosPage, permissionRequired: true },
+  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
+  { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
   { id: "/departamentos", href: "/departamentos", label: "Departamentos", icon: Building, component: DepartamentosPage, permissionRequired: true },
   { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
   { id: "/usuarios", href: "/usuarios", label: "Usuários", icon: KeyRound, component: UsuariosPage, permissionRequired: true },
-  { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
   { id: "/configuracoes", href: "/configuracoes", label: "Configurações", icon: Settings, component: ConfiguracoesPage, permissionRequired: true },
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
-  { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
 ];
 
 export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number };
@@ -497,5 +497,7 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
+
+    
 
     
