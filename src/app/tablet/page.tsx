@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Star, AlertTriangle, Loader2, Wheelchair, PersonStanding, GitCommitHorizontal, Baby } from "lucide-react";
+import { Loader2, PersonStanding, GitCommitHorizontal, Baby } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
@@ -84,7 +84,6 @@ export default function TabletPage() {
                                 <>
                                     <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300 mb-4">PREFERENCIAL</h2>
                                     <div className="flex gap-4 text-blue-700 dark:text-blue-300">
-                                        <Wheelchair className="h-8 w-8"/>
                                         <PersonStanding className="h-8 w-8"/>
                                         <GitCommitHorizontal className="h-8 w-8"/>
                                         <Baby className="h-8 w-8"/>
