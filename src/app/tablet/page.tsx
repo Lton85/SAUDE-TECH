@@ -54,11 +54,11 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter">
+                <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter uppercase">
                     Retire sua senha
                 </h1>
                 <p className="mt-2 text-xl md:text-2xl text-slate-200">
-                    Escolha o serviço desejado
+                    Escolha o serviço desejado:
                 </p>
             </motion.div>
 
@@ -69,8 +69,7 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Normal')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                            {isLoading === 'Normal' ? <Loader2 className="h-10 w-10 animate-spin text-green-600" /> : <ArrowRight className="h-10 w-10 text-green-600 dark:text-green-400" />}
-                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-green-700 dark:text-green-300">NORMAL</h2>
+                            {isLoading === 'Normal' ? <Loader2 className="h-10 w-10 animate-spin text-green-600" /> : <h2 className="text-2xl md:text-4xl font-bold text-green-700 dark:text-green-300">NORMAL</h2>}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -81,8 +80,7 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Preferencial')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : <Star className="h-10 w-10 text-blue-600 dark:text-blue-400" />}
-                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>
+                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -93,8 +91,7 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Urgência')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                            {isLoading === 'Urgência' ? <Loader2 className="h-10 w-10 animate-spin text-red-600" /> : <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />}
-                            <h2 className="mt-6 text-2xl md:text-4xl font-bold text-red-700 dark:text-red-300">URGÊNCIA</h2>
+                            {isLoading === 'Urgência' ? <Loader2 className="h-10 w-10 animate-spin text-red-600" /> : <h2 className="text-2xl md:text-4xl font-bold text-red-700 dark:text-red-300">URGÊNCIA</h2>}
                         </CardContent>
                     </Card>
                 </motion.div>
