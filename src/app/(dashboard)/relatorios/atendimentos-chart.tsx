@@ -30,7 +30,7 @@ const chartConfig = {
   },
   cancelado: {
     label: "Cancelado",
-    color: "hsl(var(--chart-5))",
+    color: "hsl(38.8, 80.2%, 48.2%)",
   },
 } satisfies ChartConfig
 
