@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Star, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowRight, Star, AlertTriangle, Loader2, Wheelchair, PersonStanding, GitCommitHorizontal, Baby } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
@@ -55,7 +55,7 @@ export default function TabletPage() {
                 className="mb-8"
             >
                 <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter uppercase">
-                    Retire sua senha
+                    RETIRE SUA SENHA
                 </h1>
                 <p className="mt-2 text-xl md:text-2xl text-slate-200">
                     Escolha o serviço desejado:
@@ -80,7 +80,17 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Preferencial')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
-                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>}
+                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : (
+                                <>
+                                    <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300 mb-4">PREFERENCIAL</h2>
+                                    <div className="flex gap-4 text-blue-700 dark:text-blue-300">
+                                        <Wheelchair className="h-8 w-8"/>
+                                        <PersonStanding className="h-8 w-8"/>
+                                        <GitCommitHorizontal className="h-8 w-8"/>
+                                        <Baby className="h-8 w-8"/>
+                                    </div>
+                                </>
+                           )}
                         </CardContent>
                     </Card>
                 </motion.div>
