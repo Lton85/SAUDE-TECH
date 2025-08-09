@@ -28,32 +28,41 @@ const chartConfig = {
     label: "Urgência",
     color: "hsl(var(--chart-1))",
   },
+  cancelado: {
+    label: "Cancelado",
+    color: "hsl(var(--chart-5))",
+  },
 } satisfies ChartConfig
 
 export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
   const chartData = React.useMemo(() => {
-    const hourlyCounts: { [key: string]: { normal: number; preferencial: number; urgencia: number } } = {};
+    const hourlyCounts: { [key: string]: { normal: number; preferencial: number; urgencia: number; cancelado: number; } } = {};
 
     // Initialize hours from 7 AM to 10 PM
     for (let i = 7; i <= 22; i++) {
         const hour = i.toString().padStart(2, '0') + ":00";
-        hourlyCounts[hour] = { normal: 0, preferencial: 0, urgencia: 0 };
+        hourlyCounts[hour] = { normal: 0, preferencial: 0, urgencia: 0, cancelado: 0 };
     }
 
     data.forEach(item => {
-      if (item.finalizadaEm) {
-        const hour = format(item.finalizadaEm.toDate(), 'HH') + ":00";
+      const eventTime = item.status === 'cancelado' ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
+      if (eventTime) {
+        const hour = format(eventTime, 'HH') + ":00";
         if(hourlyCounts[hour]) {
-            switch(item.classificacao) {
-                case 'Normal':
-                    hourlyCounts[hour].normal++;
-                    break;
-                case 'Preferencial':
-                    hourlyCounts[hour].preferencial++;
-                    break;
-                case 'Urgência':
-                    hourlyCounts[hour].urgencia++;
-                    break;
+            if (item.status === 'cancelado') {
+                hourlyCounts[hour].cancelado++;
+            } else {
+                 switch(item.classificacao) {
+                    case 'Normal':
+                        hourlyCounts[hour].normal++;
+                        break;
+                    case 'Preferencial':
+                        hourlyCounts[hour].preferencial++;
+                        break;
+                    case 'Urgência':
+                        hourlyCounts[hour].urgencia++;
+                        break;
+                }
             }
         }
       }
@@ -61,9 +70,7 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
 
     return Object.keys(hourlyCounts).map(hour => ({
       hour,
-      normal: hourlyCounts[hour].normal,
-      preferencial: hourlyCounts[hour].preferencial,
-      urgencia: hourlyCounts[hour].urgencia,
+      ...hourlyCounts[hour],
     })).sort((a,b) => a.hour.localeCompare(b.hour));
   }, [data])
 
@@ -71,7 +78,7 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
     <Card className="w-full">
       <CardHeader className="p-4">
         <CardTitle className="text-base">Infográfico de Produtividade</CardTitle>
-        <CardDescription className="text-xs">Atendimentos finalizados por hora, divididos por tipo.</CardDescription>
+        <CardDescription className="text-xs">Atendimentos finalizados e cancelados por hora, divididos por tipo.</CardDescription>
       </CardHeader>
       <CardContent className="p-0 pl-2">
         <ChartContainer config={chartConfig} className="h-80 w-full">
@@ -93,6 +100,7 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="urgencia" fill="var(--color-urgencia)" radius={0} stackId="a" />
                 <Bar dataKey="preferencial" fill="var(--color-preferencial)" radius={0} stackId="a" />
+                <Bar dataKey="cancelado" fill="var(--color-cancelado)" radius={0} stackId="a" />
                 <Bar dataKey="normal" fill="var(--color-normal)" radius={4} stackId="a" />
             </BarChart>
           </ResponsiveContainer>
@@ -101,5 +109,3 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
     </Card>
   )
 }
-
-    
