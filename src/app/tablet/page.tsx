@@ -47,17 +47,17 @@ export default function TabletPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900 p-8 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 p-8 text-center">
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="font-display text-6xl md:text-8xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tighter">
+                <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter">
                     Retire sua senha
                 </h1>
-                <p className="mt-2 text-xl md:text-2xl text-muted-foreground">
+                <p className="mt-2 text-xl md:text-2xl text-slate-200">
                     Escolha o serviço desejado
                 </p>
             </motion.div>
