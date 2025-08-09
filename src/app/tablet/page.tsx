@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, PersonStanding, GitCommitHorizontal, Baby } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
@@ -81,14 +81,7 @@ export default function TabletPage() {
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-12 aspect-square">
                            {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-600" /> : (
-                                <>
-                                    <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300 mb-4">PREFERENCIAL</h2>
-                                    <div className="flex gap-4 text-blue-700 dark:text-blue-300">
-                                        <PersonStanding className="h-8 w-8"/>
-                                        <GitCommitHorizontal className="h-8 w-8"/>
-                                        <Baby className="h-8 w-8"/>
-                                    </div>
-                                </>
+                                <h2 className="text-2xl md:text-4xl font-bold text-blue-700 dark:text-blue-300">PREFERENCIAL</h2>
                            )}
                         </CardContent>
                     </Card>
