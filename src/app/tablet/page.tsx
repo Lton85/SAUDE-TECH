@@ -1,27 +1,39 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Loader2, CheckCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
 
+interface GeneratedTicket {
+    senha: string;
+    tipo: string;
+}
+
 export default function TabletPage() {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
+    const [generatedTicket, setGeneratedTicket] = useState<GeneratedTicket | null>(null);
+
+    useEffect(() => {
+        if (generatedTicket) {
+            const timer = setTimeout(() => {
+                setGeneratedTicket(null);
+            }, 5000); // Fica na tela por 5 segundos
+            return () => clearTimeout(timer);
+        }
+    }, [generatedTicket]);
 
     const handleSelection = async (type: FilaDeEsperaItem['classificacao']) => {
         setIsLoading(type);
+        setGeneratedTicket(null);
         try {
             const senha = await addPreCadastroToFila(type);
-            toast({
-                title: `Senha Gerada: ${senha}`,
-                description: `Sua senha do tipo ${type} foi gerada. Aguarde ser chamado.`,
-                className: "bg-green-500 text-white"
-            });
+            setGeneratedTicket({ senha, tipo: type });
         } catch (error) {
              toast({
                 title: `Erro ao gerar senha`,
@@ -47,7 +59,7 @@ export default function TabletPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 p-8 text-center">
+        <div className="relative flex flex-col items-center justify-center min-h-screen bg-slate-900 p-8 text-center overflow-hidden">
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -98,6 +110,25 @@ export default function TabletPage() {
                     </Card>
                 </motion.div>
             </div>
+            
+            <AnimatePresence>
+                {generatedTicket && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 z-10 flex items-center justify-center bg-black/50"
+                    >
+                        <div className="bg-green-600 text-white p-8 rounded-lg shadow-2xl max-w-lg text-center">
+                            <h3 className="text-2xl font-bold">Senha Gerada: {generatedTicket.senha}</h3>
+                            <p className="mt-2 text-lg">
+                                Sua senha do tipo {generatedTicket.tipo} foi gerada. Aguarde ser chamado.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
