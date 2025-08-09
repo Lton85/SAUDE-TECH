@@ -86,7 +86,13 @@ export default function AtendimentosPage() {
         const unsubPacientes = getPacientesRealtime(setPacientes, (error) => toast({ title: "Erro ao carregar pacientes", description: error, variant: "destructive" }));
         
         const unsubPendentes = getAtendimentosPendentes((data) => {
-            setPendentes(data);
+            const sortedData = data.sort((a, b) => {
+                if (a.prioridade !== b.prioridade) {
+                    return a.prioridade - b.prioridade;
+                }
+                return (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0);
+            });
+            setPendentes(sortedData);
             setIsLoading(false);
         }, (error) => {
              toast({ title: "Erro ao carregar senhas pendentes", description: error, variant: "destructive" });

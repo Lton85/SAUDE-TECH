@@ -17,6 +17,6 @@ export interface FilaDeEsperaItem {
     canceladaEm?: Timestamp;
     status: 'pendente' | 'chamado-triagem' | 'aguardando' | 'em-atendimento' | 'finalizado' | 'cancelado';
     classificacao: 'Normal' | 'Preferencial' | 'Urgência';
-    prioridade: 1 | 2 | 3; // 1: Urgência, 2: Preferencial, 3: Normal
+    prioridade: 1 | 2; // 1: Urgência/Preferencial, 2: Normal
     motivoCancelamento?: string;
 }
