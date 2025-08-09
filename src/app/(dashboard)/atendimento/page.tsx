@@ -47,7 +47,7 @@ export default function AtendimentosPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
-    const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('finalizado');
+    const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
