@@ -19,7 +19,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
         <Card key={item.id} className={cn(
             "w-full",
             item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
-            item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5",
+            item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
             item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
         )}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
@@ -27,14 +27,14 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
                     <span className={cn(
                         "font-bold text-base tracking-tight",
                          item.classificacao === "Urgência" && "text-red-600",
-                        item.classificacao === "Preferencial" && "text-amber-600",
+                        item.classificacao === "Preferencial" && "text-blue-600",
                         item.classificacao === "Normal" && "text-green-600",
                     )}>{item.senha}</span>
                      <Badge variant={
                         item.classificacao === 'Urgência' ? 'destructive' :
                         item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                     } className={cn("text-xs",
-                        item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                        item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                         item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
                     )}>
                         {item.classificacao}
@@ -94,7 +94,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
         return (
             <div className="flex gap-4 h-full">
                  <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-red-600"/>
-                 <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-amber-600"/>
+                 <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-blue-600"/>
                  <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-green-600"/>
             </div>
         )
@@ -115,7 +115,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
     return (
          <div className="flex gap-4 h-full">
             <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-red-600"/>
-            <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-amber-600"/>
+            <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-blue-600"/>
             <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-green-600"/>
         </div>
     );

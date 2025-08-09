@@ -66,7 +66,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                         className={cn(
                             'text-xs font-semibold',
                             atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                            atendimento.classificacao === 'Preferencial' && 'bg-amber-500 text-white hover:bg-amber-600',
+                            atendimento.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
                             atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
                         )}
                     >

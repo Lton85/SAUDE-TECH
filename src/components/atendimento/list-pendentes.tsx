@@ -52,7 +52,7 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                      <Card key={item.id} className={cn(
                         "hover:bg-muted/50 transition-colors",
                         item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
-                        item.classificacao === "Preferencial" && "border-amber-500/50 bg-amber-500/5",
+                        item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
                         item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
@@ -60,7 +60,7 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                                 item.classificacao === 'Urgência' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                             } className={cn("text-base",
-                                item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                                item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                                 item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
                             )}>
                                 {item.senha}

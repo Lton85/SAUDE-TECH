@@ -99,7 +99,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                        Cancelado
                                     </Badge>
                                 ) : (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300 text-xs font-semibold">
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs font-semibold">
                                        <CheckCircle className="h-3 w-3 mr-1.5" />
                                        Finalizado
                                     </Badge>
@@ -130,7 +130,16 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                             <div className="flex items-center gap-4 ml-4">
                                 <div className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
                                     <BadgeInfo className="h-3 w-3" />
-                                    <span className="truncate" title={item.classificacao}>Classificação: {item.classificacao}</span>
+                                    <Badge
+                                        className={cn(
+                                            'text-xs font-semibold',
+                                            item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                            item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
+                                            item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                        )}
+                                    >
+                                        {item.classificacao}
+                                    </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                                     <Clock className="h-3 w-3" />

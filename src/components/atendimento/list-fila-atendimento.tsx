@@ -71,7 +71,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                             fila.map((item) => (
                                 <TableRow key={item.id} className={cn(
                                     item.classificacao === 'Urgência' && "bg-red-500/10 hover:bg-red-500/20",
-                                    item.classificacao === 'Preferencial' && "bg-amber-500/10 hover:bg-amber-500/20",
+                                    item.classificacao === 'Preferencial' && "bg-blue-500/10 hover:bg-blue-500/20",
                                     item.classificacao === 'Normal' && "bg-green-500/10 hover:bg-green-500/20"
                                 )}>
                                     <TableCell className="font-mono px-3 py-2 text-sm font-bold">
@@ -79,7 +79,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                             item.classificacao === 'Urgência' ? 'destructive' : 
                                             item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                                         } className={cn(
-                                            item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                                            item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                                             item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
                                         )}>
                                             {item.senha}

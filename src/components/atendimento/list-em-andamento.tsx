@@ -53,7 +53,7 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
                 <div key={item.id} className={cn(
                     "flex items-center justify-between p-2 border rounded-lg hover:bg-muted/50 transition-colors",
                     item.classificacao === "Urgência" && "border-red-500/30 bg-red-500/5",
-                    item.classificacao === "Preferencial" && "border-amber-500/30 bg-amber-500/5",
+                    item.classificacao === "Preferencial" && "border-blue-500/30 bg-blue-500/5",
                     item.classificacao === "Normal" && "border-green-500/30 bg-green-500/5"
                 )}>
                     <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -61,7 +61,7 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
                                 item.classificacao === 'Urgência' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 'secondary'
                             } className={cn("text-base",
-                                item.classificacao === 'Preferencial' && 'bg-amber-500 hover:bg-amber-600',
+                                item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                                 item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
                             )}>
                             {item.senha}
