@@ -363,7 +363,7 @@ export const finalizarAtendimento = async (id: string) => {
 };
 
 
-export const cancelarAtendimento = async (item: FilaDeEsperaItem) => {
+export const cancelarAtendimento = async (item: FilaDeEsperaItem, motivo?: string) => {
     if (!item || !item.id) throw new Error("ID do item da fila não encontrado.");
 
     const filaDocRef = doc(db, "filaDeEspera", item.id);
@@ -373,6 +373,7 @@ export const cancelarAtendimento = async (item: FilaDeEsperaItem) => {
     await addDoc(relatoriosCollectionRef, {
         ...item,
         status: "cancelado",
+        motivoCancelamento: motivo || null,
         canceladaEm: serverTimestamp(),
     });
     

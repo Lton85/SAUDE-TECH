@@ -1,43 +1,84 @@
 
+"use client";
+
+import * as React from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { XCircle } from "lucide-react"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { XCircle, Loader2 } from "lucide-react"
+import type { FilaDeEsperaItem } from "@/types/fila"
 
 interface CancelAtendimentoDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
-  onConfirm: () => void
-  itemName: string
+  onConfirm: (motivo?: string) => void
+  item: FilaDeEsperaItem | null
 }
 
-export function CancelAtendimentoDialog({ isOpen, onOpenChange, onConfirm, itemName }: CancelAtendimentoDialogProps) {
+export function CancelAtendimentoDialog({ isOpen, onOpenChange, onConfirm, item }: CancelAtendimentoDialogProps) {
+  const [motivo, setMotivo] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleConfirm = () => {
+    setIsSubmitting(true);
+    onConfirm(motivo);
+    // The parent component will handle closing and state reset
+  }
+
+  // Reset state when dialog is closed
+  React.useEffect(() => {
+    if (!isOpen) {
+      setMotivo("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+  
+  if (!item) return null;
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <XCircle className="h-5 w-5 text-destructive" />
+            Cancelar Atendimento
+          </DialogTitle>
+          <DialogDescription>
+            Confirma o cancelamento do atendimento de <span className="font-bold text-destructive">{item.pacienteNome || `Senha ${item.senha}`}</span>?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="py-4">
+            <Label htmlFor="motivo-cancelamento">
+                Motivo do Cancelamento (Opcional)
+            </Label>
+            <Textarea 
+                id="motivo-cancelamento"
+                placeholder="Ex: Paciente não respondeu à chamada, desistência, etc."
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                className="mt-2"
+            />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            Voltar
+          </Button>
+          <Button onClick={handleConfirm} variant="destructive" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirmar Cancelamento
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Tem certeza que deseja cancelar o atendimento de <span className="font-bold text-destructive">{itemName}</span>? Esta ação moverá o atendimento para o histórico como "Cancelado".
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Voltar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
-            Sim, cancelar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

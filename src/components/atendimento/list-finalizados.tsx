@@ -7,10 +7,11 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag } from "lucide-react";
+import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag, MessageSquareWarning } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "../ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface FinalizadosListProps {
     finalizados: FilaDeEsperaItem[];
@@ -83,7 +84,8 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                     </p>
                 </div>
             ) : (
-                filteredList.map((item) => {
+                <TooltipProvider>
+                {filteredList.map((item) => {
                     const isCanceled = item.status === 'cancelado';
                     const eventTime = isCanceled ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
                     
@@ -94,10 +96,22 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                         )}>
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 {isCanceled ? (
-                                    <Badge variant="destructive" className="text-xs font-semibold">
-                                       <XCircle className="h-3 w-3 mr-1.5" />
-                                       Cancelado
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="destructive" className="text-xs font-semibold">
+                                            <XCircle className="h-3 w-3 mr-1.5" />
+                                            Cancelado
+                                        </Badge>
+                                        {item.motivoCancelamento && (
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <MessageSquareWarning className="h-4 w-4 text-destructive cursor-pointer" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-xs">{item.motivoCancelamento}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                    </div>
                                 ) : (
                                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs font-semibold">
                                        <CheckCircle className="h-3 w-3 mr-1.5" />
@@ -134,8 +148,8 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                         className={cn(
                                             'text-xs font-semibold',
                                             item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                            item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
-                                            item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                                            item.classificacao === 'Preferencial' && 'bg-blue-600 text-white hover:bg-blue-700',
+                                            item.classificacao === 'Normal' && 'bg-green-600 text-white hover:bg-green-700'
                                         )}
                                     >
                                         {item.classificacao}
@@ -148,7 +162,8 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                             </div>
                         </div>
                     )
-                })
+                })}
+                </TooltipProvider>
             )}
         </div>
     );

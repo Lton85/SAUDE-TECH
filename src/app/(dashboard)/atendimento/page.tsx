@@ -345,10 +345,10 @@ export default function AtendimentosPage() {
                 <CancelAtendimentoDialog
                     isOpen={!!itemToCancel}
                     onOpenChange={() => setItemToCancel(null)}
-                    onConfirm={async () => {
+                    onConfirm={async (motivo) => {
                         if (itemToCancel) {
                             try {
-                                await cancelarAtendimento(itemToCancel);
+                                await cancelarAtendimento(itemToCancel, motivo);
                                 toast({
                                     title: "Atendimento Cancelado!",
                                     description: `O atendimento de ${itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`} foi cancelado.`,
@@ -361,7 +361,7 @@ export default function AtendimentosPage() {
                             }
                         }
                     }}
-                    itemName={itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`}
+                    item={itemToCancel}
                 />
             )}
 
