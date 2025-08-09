@@ -79,7 +79,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                     </div>
                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="cancelado" id="r-cancelado" />
-                        <Label htmlFor="r-cancelado" className="cursor-pointer">Cancelados <Badge variant="destructive" className="ml-1">{counts.canceled}</Badge></Label>
+                        <Label htmlFor="r-cancelado" className="cursor-pointer">Cancelados <Badge variant="destructive" className="ml-1 bg-orange-500 hover:bg-orange-600">{counts.canceled}</Badge></Label>
                     </div>
                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="todos" id="r-todos" />
@@ -103,17 +103,17 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                     return (
                         <div key={item.id} className={cn(
                             "flex items-center justify-between p-2 border rounded-lg",
-                            isCanceled ? "bg-red-500/5" : "bg-muted/30"
+                            isCanceled ? "bg-orange-500/5" : "bg-muted/30"
                         )}>
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 {isCanceled ? (
                                     <div className="flex items-center gap-2">
-                                        <Badge variant="destructive" className="text-xs font-semibold">
+                                        <Badge variant="destructive" className="text-xs font-semibold bg-orange-500 hover:bg-orange-600">
                                             <XCircle className="h-3 w-3 mr-1.5" />
                                             Cancelado
                                         </Badge>
                                         {item.motivoCancelamento && (
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => setMotivoVisivel(item.motivoCancelamento || null)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700" onClick={() => setMotivoVisivel(item.motivoCancelamento || null)}>
                                                 <MessageSquareWarning className="h-4 w-4 cursor-pointer" />
                                             </Button>
                                         )}
@@ -154,7 +154,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                         className={cn(
                                             'text-xs font-semibold',
                                             item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
-                                            item.classificacao === 'Preferencial' && 'bg-blue-600 text-white hover:bg-blue-700',
+                                            item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
                                             item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700'
                                         )}
                                     >
