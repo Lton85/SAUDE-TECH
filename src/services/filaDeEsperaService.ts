@@ -26,10 +26,10 @@ interface FullSearchFilters extends SearchFilters {
 
 const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
     switch (classificacao) {
-        case 'Urgência': return 1;
         case 'Preferencial': return 1;
-        case 'Normal': return 2;
-        default: return 2;
+        case 'Urgência': return 2;
+        case 'Normal': return 3;
+        default: return 3;
     }
 }
 

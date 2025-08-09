@@ -66,6 +66,10 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
             if (!selectedDepto || !selectedProf) {
                 throw new Error("Departamento ou profissional não encontrado.");
             }
+            
+            let prioridade: FilaDeEsperaItem['prioridade'] = 3;
+            if (classification === 'Preferencial') prioridade = 1;
+            if (classification === 'Urgência') prioridade = 2;
 
             const updates: Partial<FilaDeEsperaItem> = {
                 departamentoId: selectedDepto.id,
@@ -74,7 +78,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                 profissionalId: selectedProf.id,
                 profissionalNome: selectedProf.nome,
                 classificacao: classification,
-                prioridade: classification === 'Normal' ? 2 : 1,
+                prioridade: prioridade,
             };
             
             await onConfirm(item, updates);
