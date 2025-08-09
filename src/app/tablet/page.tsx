@@ -3,20 +3,27 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
+import { cn } from "@/lib/utils";
 
 interface GeneratedTicket {
     senha: string;
-    tipo: string;
+    tipo: FilaDeEsperaItem['classificacao'];
 }
+
+const notificationColors: { [key in FilaDeEsperaItem['classificacao']]: string } = {
+    Normal: 'bg-green-600',
+    Preferencial: 'bg-blue-600',
+    Urgência: 'bg-red-600',
+};
 
 export default function TabletPage() {
     const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
+    const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
     const [generatedTicket, setGeneratedTicket] = useState<GeneratedTicket | null>(null);
 
     useEffect(() => {
@@ -120,7 +127,7 @@ export default function TabletPage() {
                         transition={{ duration: 0.3 }}
                         className="absolute inset-0 z-10 flex items-center justify-center bg-black/50"
                     >
-                        <div className="bg-green-600 text-white p-8 rounded-lg shadow-2xl max-w-lg text-center">
+                        <div className={cn("text-white p-8 rounded-lg shadow-2xl max-w-lg text-center", notificationColors[generatedTicket.tipo])}>
                             <h3 className="text-2xl font-bold">Senha Gerada: {generatedTicket.senha}</h3>
                             <p className="mt-2 text-lg">
                                 Sua senha do tipo {generatedTicket.tipo} foi gerada. Aguarde ser chamado.
