@@ -11,7 +11,16 @@ import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag, MessageSqu
 import { Badge } from "../ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "../ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog"
+import { Button } from "../ui/button";
+
 
 interface FinalizadosListProps {
     finalizados: FilaDeEsperaItem[];
@@ -22,6 +31,8 @@ interface FinalizadosListProps {
 
 export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange }: FinalizadosListProps) {
     
+    const [motivoVisivel, setMotivoVisivel] = React.useState<string | null>(null);
+
     const counts = React.useMemo(() => {
         const finalized = finalizados.filter(item => item.status === 'finalizado').length;
         const canceled = finalizados.filter(item => item.status === 'cancelado').length;
@@ -84,7 +95,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                     </p>
                 </div>
             ) : (
-                <TooltipProvider>
+                <>
                 {filteredList.map((item) => {
                     const isCanceled = item.status === 'cancelado';
                     const eventTime = isCanceled ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
@@ -102,14 +113,9 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                             Cancelado
                                         </Badge>
                                         {item.motivoCancelamento && (
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <MessageSquareWarning className="h-4 w-4 text-destructive cursor-pointer" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p className="max-w-xs">{item.motivoCancelamento}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => setMotivoVisivel(item.motivoCancelamento || null)}>
+                                                <MessageSquareWarning className="h-4 w-4 cursor-pointer" />
+                                            </Button>
                                         )}
                                     </div>
                                 ) : (
@@ -163,8 +169,25 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                         </div>
                     )
                 })}
-                </TooltipProvider>
+                </>
             )}
+
+            <AlertDialog open={!!motivoVisivel} onOpenChange={() => setMotivoVisivel(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <MessageSquareWarning />
+                            Motivo do Cancelamento
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="pt-4 text-base text-foreground">
+                           {motivoVisivel}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <Button onClick={() => setMotivoVisivel(null)}>Fechar</Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

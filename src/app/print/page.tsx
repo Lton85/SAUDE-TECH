@@ -140,6 +140,7 @@ function PrintPageContent() {
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Profissional</TableHead>
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Classificação</TableHead>
                             <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Status</TableHead>
+                            <TableHead className="px-2 py-2 text-xs border-b border-black text-black">Observação</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -159,6 +160,7 @@ function PrintPageContent() {
                                      <TableCell className="px-2 py-1 border-b border-gray-200 font-semibold capitalize">
                                         {item.status}
                                     </TableCell>
+                                    <TableCell className="px-2 py-1 border-b border-gray-200">{item.motivoCancelamento || '-'}</TableCell>
                                 </TableRow>
                             )
                         })}
