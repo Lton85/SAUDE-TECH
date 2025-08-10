@@ -325,7 +325,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
         paciente = item.pacienteNome || "Paciente";
         novoStatus = "em-atendimento";
     } else {
-        sala = "Triagem";
+        sala = "Recepção";
         novoStatus = "chamado-triagem";
         paciente = ""; // Ocultar nome do paciente na triagem
         profissional = ""; // Ocultar nome do profissional na triagem
