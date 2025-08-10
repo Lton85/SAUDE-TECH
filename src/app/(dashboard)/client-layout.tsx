@@ -280,16 +280,10 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
   const activeComponentInfo = allMenuItems.find(item => item.id === activeContentId);
 
   const renderComponent = () => {
-    if (!activeComponentInfo) {
+    if (!activeComponentInfo || !activeComponentInfo.component) {
         return React.createElement(DashboardPage, {onCardClick: onMenuItemClick});
     }
 
-    if (!activeComponentInfo.component) {
-        if (activeContentId === '/') {
-             return React.createElement(DashboardPage, {onCardClick: onMenuItemClick});
-        }
-        return null;
-    }
     const props: any = {};
     if (activeComponentInfo.id === '/empresa') {
         props.onEmpresaDataChange = handleEmpresaDataChange;
@@ -455,21 +449,31 @@ export default function DashboardClientLayout({
     setActiveContentId(tabId);
   }
 
-  const handleTabClose = (tabId: string) => {
-    if (tabId === '/') return;
+  const handleTabClose = (tabIdToClose: string) => {
+    // Prevent closing the home tab if it's the only one
+    if (tabIdToClose === '/' && openTabs.length === 1) return;
 
-    const newTabs = openTabs.filter((tab) => tab.id !== tabId);
-    
-    if (activeTab === tabId) {
-        const closingTabIndex = openTabs.findIndex((tab) => tab.id === tabId);
-        // Activate the tab to the left, or the home tab if it's the first one
-        const newActiveTab = newTabs.length > 1 ? newTabs[closingTabIndex - 1] || homeDefaultTab : homeDefaultTab;
-        setActiveTab(newActiveTab.id);
-        setActiveContentId(newActiveTab.id);
+    let newActiveId = activeContentId;
+    const closingTabIndex = openTabs.findIndex(t => t.id === tabIdToClose);
+
+    // If the closed tab was the active one, find a new active tab
+    if (activeContentId === tabIdToClose) {
+        if (closingTabIndex > 0) {
+            // Sane fallback to the tab on the left
+            newActiveId = openTabs[closingTabIndex - 1].id;
+        } else {
+            // Sane fallback to the home tab if the first tab is closed
+            newActiveId = '/';
+        }
     }
+
+    const newTabs = openTabs.filter(tab => tab.id !== tabIdToClose);
     
     setOpenTabs(newTabs);
+    setActiveTab(newActiveId);
+    setActiveContentId(newActiveId);
   }
+
 
   return (
     <SidebarProvider>

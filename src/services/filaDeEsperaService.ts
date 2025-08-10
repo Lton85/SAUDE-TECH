@@ -300,10 +300,10 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
         throw new Error("ID do item da fila não encontrado.");
     }
     
-    let sala = "Triagem";
+    let sala: string;
     let profissional: string;
     let paciente: string;
-    let novoStatus: FilaDeEsperaItem['status'] = "em-atendimento";
+    let novoStatus: FilaDeEsperaItem['status'];
 
     if (tipoChamada === 'atendimento') {
          if (!item.departamentoId || !item.profissionalNome) {
@@ -325,6 +325,7 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
         paciente = item.pacienteNome || "Paciente";
         novoStatus = "em-atendimento";
     } else {
+        sala = "Triagem";
         novoStatus = "chamado-triagem";
         paciente = ""; // Ocultar nome do paciente na triagem
         profissional = ""; // Ocultar nome do profissional na triagem
