@@ -25,6 +25,7 @@ import { FinalizadosList } from "@/components/atendimento/list-finalizados";
 import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
+import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
 
 
 interface Profissional {
@@ -47,6 +48,7 @@ export default function AtendimentosPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    const [isCancellationConfirmationDialogOpen, setIsCancellationConfirmationDialogOpen] = useState(false);
     const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
     
     // Dialog item states
@@ -57,6 +59,7 @@ export default function AtendimentosPage() {
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
+    const [cancelledItemName, setCancelledItemName] = useState<string>('');
     
     const { toast } = useToast();
 
@@ -358,12 +361,9 @@ export default function AtendimentosPage() {
                     onConfirm={async (motivo) => {
                         if (itemToCancel) {
                             try {
+                                setCancelledItemName(itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`);
                                 await cancelarAtendimento(itemToCancel, motivo);
-                                toast({
-                                    title: "Atendimento Cancelado!",
-                                    description: `O atendimento de ${itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`} foi cancelado.`,
-                                    className: "bg-orange-500 text-white"
-                                });
+                                setIsCancellationConfirmationDialogOpen(true);
                             } catch (error) {
                                 const err = error as Error;
                                 toast({ title: "Erro ao cancelar", description: err.message, variant: "destructive" });
@@ -375,6 +375,12 @@ export default function AtendimentosPage() {
                     item={itemToCancel}
                 />
             )}
+
+             <CancellationConfirmationDialog
+                isOpen={isCancellationConfirmationDialogOpen}
+                onOpenChange={setIsCancellationConfirmationDialogOpen}
+                itemName={cancelledItemName}
+            />
 
             {itemToReturn && (
                 <ReturnToQueueDialog
