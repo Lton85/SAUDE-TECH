@@ -301,8 +301,8 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
     }
     
     let sala = "Triagem";
-    let profissional = "Triagem";
-    let paciente = item.pacienteNome || "Paciente";
+    let profissional: string;
+    let paciente: string;
     let novoStatus: FilaDeEsperaItem['status'] = "em-atendimento";
 
     if (tipoChamada === 'atendimento') {
@@ -322,9 +322,12 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
             sala = `${item.departamentoNome} - SALA ${departamentoData.numero}`;
         }
         profissional = item.profissionalNome;
+        paciente = item.pacienteNome || "Paciente";
         novoStatus = "em-atendimento";
     } else {
         novoStatus = "chamado-triagem";
+        paciente = ""; // Ocultar nome do paciente na triagem
+        profissional = ""; // Ocultar nome do profissional na triagem
     }
 
 

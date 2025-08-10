@@ -115,16 +115,22 @@ export default function PainelPage() {
                         <p className="text-5xl md:text-6xl lg:text-8xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
                     </div>
 
-                    <div className="flex justify-between items-center border-t-2 border-slate-700/50 pt-6 mt-6">
-                        <div className="text-left">
-                            <h3 className="flex items-center gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><User className="w-6 h-6 md:w-7 md:h-7"/>Paciente</h3>
-                            <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
+                    {(currentCall.pacienteNome || currentCall.profissionalNome) && (
+                        <div className="flex justify-between items-center border-t-2 border-slate-700/50 pt-6 mt-6">
+                            {currentCall.pacienteNome && (
+                                <div className="text-left">
+                                    <h3 className="flex items-center gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><User className="w-6 h-6 md:w-7 md:h-7"/>Paciente</h3>
+                                    <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
+                                </div>
+                            )}
+                            {currentCall.profissionalNome && (
+                                <div className="text-right">
+                                    <h3 className="flex items-center justify-end gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><Stethoscope className="w-6 h-6 md:w-7 md:h-7"/>Profissional</h3>
+                                    <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
+                                </div>
+                            )}
                         </div>
-                        <div className="text-right">
-                            <h3 className="flex items-center justify-end gap-2 text-2xl md:text-3xl font-bold text-amber-400 uppercase"><Stethoscope className="w-6 h-6 md:w-7 md:h-7"/>Profissional</h3>
-                            <p className="text-3xl md:text-4xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
-                        </div>
-                    </div>
+                    )}
                 </motion.div>
             </AnimatePresence>
         </main>
