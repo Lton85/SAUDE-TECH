@@ -164,7 +164,8 @@ export default function AtendimentosPage() {
             await chamarPaciente(item, 'triagem');
              toast({ title: "Senha Chamada!", description: `A senha ${item.senha} foi chamada para a triagem.` });
         } catch (error) {
-             toast({ title: "Erro ao chamar senha", description: (error as Error).message, variant: "destructive" });
+            const err = error as Error;
+             toast({ title: "Erro ao chamar senha", description: err.message, variant: "destructive" });
         }
     };
 
@@ -173,7 +174,8 @@ export default function AtendimentosPage() {
             await chamarPaciente(item, 'atendimento');
             toast({ title: "Paciente Chamado!", description: `${item.pacienteNome} foi chamado para atendimento.` });
         } catch (error) {
-            toast({ title: "Erro ao chamar paciente", description: (error as Error).message, variant: "destructive" });
+            const err = error as Error;
+            toast({ title: "Erro ao chamar paciente", description: err.message, variant: "destructive" });
         }
     };
     
@@ -186,7 +188,8 @@ export default function AtendimentosPage() {
                 className: "bg-green-500 text-white"
             });
         } catch (error) {
-            toast({ title: "Erro ao finalizar", description: (error as Error).message, variant: "destructive" });
+            const err = error as Error;
+            toast({ title: "Erro ao finalizar", description: err.message, variant: "destructive" });
         }
     };
     
@@ -203,9 +206,10 @@ export default function AtendimentosPage() {
                 description: "O painel de senhas foi reiniciado.",
             });
         } catch (error) {
+            const err = error as Error;
             toast({
                 title: "Erro ao limpar painel",
-                description: (error as Error).message,
+                description: err.message,
                 variant: "destructive",
             });
         }
@@ -361,7 +365,8 @@ export default function AtendimentosPage() {
                                     className: "bg-orange-500 text-white"
                                 });
                             } catch (error) {
-                                toast({ title: "Erro ao cancelar", description: (error as Error).message, variant: "destructive" });
+                                const err = error as Error;
+                                toast({ title: "Erro ao cancelar", description: err.message, variant: "destructive" });
                             } finally {
                                 setItemToCancel(null);
                             }
@@ -384,7 +389,8 @@ export default function AtendimentosPage() {
                             await retornarPacienteParaFila(item.id);
                             toast({ title: "Paciente Retornou para a Fila!", description: `${item.pacienteNome} está de volta na fila.` });
                         } catch (error) {
-                            toast({ title: "Erro ao retornar paciente", description: (error as Error).message, variant: "destructive" });
+                            const err = error as Error;
+                            toast({ title: "Erro ao retornar paciente", description: err.message, variant: "destructive" });
                         } finally {
                             setItemToReturn(null);
                         }

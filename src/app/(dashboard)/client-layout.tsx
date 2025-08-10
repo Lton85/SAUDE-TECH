@@ -280,7 +280,11 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
   const activeComponentInfo = allMenuItems.find(item => item.id === activeContentId);
 
   const renderComponent = () => {
-    if (!activeComponentInfo || !activeComponentInfo.component) {
+    if (!activeComponentInfo) {
+        return React.createElement(DashboardPage, {onCardClick: onMenuItemClick});
+    }
+
+    if (!activeComponentInfo.component) {
         if (activeContentId === '/') {
              return React.createElement(DashboardPage, {onCardClick: onMenuItemClick});
         }
@@ -454,31 +458,17 @@ export default function DashboardClientLayout({
   const handleTabClose = (tabId: string) => {
     if (tabId === '/') return;
 
-    const closingTabIndex = openTabs.findIndex(tab => tab.id === tabId);
-    if (closingTabIndex === -1) return;
-
-    let newActiveTab: Tab | undefined;
-    if (activeContentId === tabId) {
-        // Find the next logical tab to activate
-        newActiveTab = openTabs[closingTabIndex - 1] || openTabs[closingTabIndex + 1];
-        if (newActiveTab?.id === '/') {
-            newActiveTab = openTabs.filter(t => t.id !== '/' && t.id !== tabId)[0];
-        }
-    }
+    const newTabs = openTabs.filter((tab) => tab.id !== tabId);
     
-    const newOpenTabs = openTabs.filter(tab => tab.id !== tabId);
-    setOpenTabs(newOpenTabs);
-    
-    if (newActiveTab) {
+    if (activeTab === tabId) {
+        const closingTabIndex = openTabs.findIndex((tab) => tab.id === tabId);
+        // Activate the tab to the left, or the home tab if it's the first one
+        const newActiveTab = newTabs.length > 1 ? newTabs[closingTabIndex - 1] || homeDefaultTab : homeDefaultTab;
         setActiveTab(newActiveTab.id);
         setActiveContentId(newActiveTab.id);
-    } else if (newOpenTabs.length > 0 && activeContentId === tabId) {
-        setActiveTab(homeDefaultTab.id);
-        setActiveContentId(homeDefaultTab.id);
-    } else if (newOpenTabs.length === 1 && newOpenTabs[0].id === '/') {
-        setActiveTab(homeDefaultTab.id);
-        setActiveContentId(homeDefaultTab.id);
     }
+    
+    setOpenTabs(newTabs);
   }
 
   return (
