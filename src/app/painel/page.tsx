@@ -110,9 +110,9 @@ export default function PainelPage() {
                     className="w-full h-full flex flex-col justify-between bg-slate-950/50 rounded-2xl shadow-2xl p-8"
                 >
                     <div className="text-center flex-1 flex flex-col justify-center">
-                        <h2 className="text-7xl md:text-8xl lg:text-9xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
+                        <h2 className="text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
                         <p className="font-display font-extrabold text-white tracking-tighter my-4 text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
-                        <p className="text-6xl md:text-7xl lg:text-9xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
+                        <p className="text-6xl md:text-7xl lg:text-9xl xl:text-[10rem] font-semibold text-white/90">{currentCall.departamentoNome}</p>
                     </div>
 
                     {(currentCall.pacienteNome || currentCall.profissionalNome) && (currentCall.pacienteNome !== '' || currentCall.profissionalNome !== '') && (
@@ -151,3 +151,5 @@ export default function PainelPage() {
     </div>
   );
 }
+
+    
