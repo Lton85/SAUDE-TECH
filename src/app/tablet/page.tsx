@@ -71,24 +71,24 @@ export default function TabletPage() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="mb-8 w-full"
+                className="mb-12 w-full"
             >
-                <h1 className="font-display text-5xl md:text-7xl font-black text-amber-400 tracking-tighter uppercase">
+                <h1 className="font-display text-7xl md:text-8xl lg:text-9xl font-black text-amber-400 tracking-tighter uppercase">
                     RETIRE SUA SENHA AQUI
                 </h1>
-                <p className="mt-2 text-2xl md:text-3xl text-slate-200">
+                <p className="mt-4 text-3xl md:text-4xl text-slate-200">
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
                 <motion.div custom={0} initial="hidden" animate="visible" variants={cardVariants}>
                     <Card 
                         className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-green-500/10 border-green-500/30"
                         onClick={() => handleSelection('Normal')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                            {isLoading === 'Normal' ? <Loader2 className="h-10 w-10 animate-spin text-green-400" /> : <h2 className="text-xl md:text-3xl font-bold text-green-400">NORMAL</h2>}
+                            {isLoading === 'Normal' ? <Loader2 className="h-12 w-12 animate-spin text-green-400" /> : <h2 className="text-3xl md:text-5xl font-bold text-green-400">NORMAL</h2>}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -99,8 +99,8 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Preferencial')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                           {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-400" /> : (
-                                <h2 className="text-xl md:text-3xl font-bold text-blue-400">PREFERENCIAL</h2>
+                           {isLoading === 'Preferencial' ? <Loader2 className="h-12 w-12 animate-spin text-blue-400" /> : (
+                                <h2 className="text-3xl md:text-5xl font-bold text-blue-400">PREFERENCIAL</h2>
                            )}
                         </CardContent>
                     </Card>
@@ -112,7 +112,7 @@ export default function TabletPage() {
                         onClick={() => handleSelection('Urgência')}
                     >
                         <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                            {isLoading === 'Urgência' ? <Loader2 className="h-10 w-10 animate-spin text-red-400" /> : <h2 className="text-xl md:text-3xl font-bold text-red-400">URGÊNCIA</h2>}
+                            {isLoading === 'Urgência' ? <Loader2 className="h-12 w-12 animate-spin text-red-400" /> : <h2 className="text-3xl md:text-5xl font-bold text-red-400">URGÊNCIA</h2>}
                         </CardContent>
                     </Card>
                 </motion.div>
