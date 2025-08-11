@@ -16,9 +16,9 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
+import { NotificationType } from "../ui/notification-dialog";
 
 interface Profissional {
   id: string;
@@ -33,15 +33,15 @@ interface EditQueueItemDialogProps {
   profissionais: Profissional[];
   onSave: (id: string, data: Partial<FilaDeEsperaItem>) => Promise<void>;
   isHistory?: boolean;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onSave, isHistory = false }: EditQueueItemDialogProps) {
+export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onSave, isHistory = false, onNotification }: EditQueueItemDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
     const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
     const [senha, setSenha] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
 
     useEffect(() => {
         if (item) {
@@ -54,10 +54,10 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
 
     const handleSave = async () => {
         if (!item || !selectedDepartamentoId || !selectedProfissionalId || !senha) {
-            toast({
+            onNotification({
+                type: "error",
                 title: "Campos inválidos",
-                description: "Selecione um departamento, um profissional e preencha a senha.",
-                variant: "destructive"
+                message: "Selecione um departamento, um profissional e preencha a senha.",
             });
             return;
         }
@@ -83,17 +83,17 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
             
             await onSave(item.id, updatedData);
             
-            toast({
+            onNotification({
+                type: "success",
                 title: "Atendimento Atualizado!",
-                description: `O atendimento de ${item.pacienteNome} foi atualizado.`,
-                className: "bg-green-500 text-white"
+                message: `O atendimento de ${item.pacienteNome} foi atualizado.`,
             });
             onOpenChange(false);
         } catch (error) {
-            toast({
+            onNotification({
+                type: "error",
                 title: "Erro ao atualizar",
-                description: (error as Error).message,
-                variant: "destructive"
+                message: (error as Error).message,
             });
         } finally {
             setIsSubmitting(false);

@@ -5,28 +5,28 @@ import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Lock, Loader2 } from "lucide-react";
 import type { Usuario } from "@/types/usuario";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { updateUsuario } from "@/services/usuariosService";
 import { Label } from "../ui/label";
 import { allMenuItems } from "@/app/(dashboard)/client-layout";
 import { Separator } from "../ui/separator";
+import { NotificationType } from "../ui/notification-dialog";
 
 interface PermissionsDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: () => void;
   usuario?: Usuario | null;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
 const permissionableMenus = allMenuItems.filter(item => item.permissionRequired);
 
 
-export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: PermissionsDialogProps) {
+export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, onNotification }: PermissionsDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([]);
-  const { toast } = useToast();
 
   React.useEffect(() => {
     if (usuario && isOpen) {
@@ -53,18 +53,18 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario }: 
     setIsSubmitting(true);
     try {
         await updateUsuario(usuario.id, { permissoes: selectedPermissions });
-        toast({
+        onNotification({
+            type: "success",
             title: "Permissões Atualizadas!",
-            description: `As permissões de ${usuario.nome} foram salvas.`,
-            className: "bg-green-500 text-white"
+            message: `As permissões de ${usuario.nome} foram salvas.`,
         });
         onSuccess();
         onOpenChange(false);
     } catch (error) {
-      toast({
+      onNotification({
+        type: "error",
         title: "Erro ao salvar permissões",
-        description: (error as Error).message,
-        variant: "destructive",
+        message: (error as Error).message,
       });
     } finally {
       setIsSubmitting(false);

@@ -7,11 +7,11 @@ import { Stethoscope, Pencil, Loader2 } from "lucide-react";
 import type { Profissional } from "@/types/profissional";
 import { ProfissionalForm } from "./profissional-form";
 import { addProfissional, updateProfissional } from "@/services/profissionaisService";
-import { useToast } from "@/hooks/use-toast";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "../ui/button";
+import { NotificationType } from "../ui/notification-dialog";
 
 const ProfissionalFormSchema = z.object({
   nome: z.string().min(3, { message: "O nome completo é obrigatório." }),
@@ -34,11 +34,11 @@ interface ProfissionalDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: () => void;
   profissional?: Profissional | null;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profissional }: ProfissionalDialogProps) {
+export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profissional, onNotification }: ProfissionalDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
   const isEditMode = !!profissional;
   
   const form = useForm<ProfissionalFormValues>({
@@ -102,26 +102,26 @@ export function ProfissionalDialog({ isOpen, onOpenChange, onSuccess, profission
 
       if (isEditMode && profissional) {
         await updateProfissional(profissional.id, profissionalData);
-        toast({
+        onNotification({
+          type: "success",
           title: "Profissional Atualizado!",
-          description: `Os dados de ${values.nome} foram atualizados com sucesso.`,
-          className: "bg-green-500 text-white"
+          message: `Os dados de ${values.nome} foram atualizados com sucesso.`,
         });
       } else {
         await addProfissional(profissionalData as Omit<Profissional, 'id' | 'codigo' | 'historico'>);
-        toast({
+        onNotification({
+          type: "success",
           title: "Profissional Cadastrado!",
-          description: `O profissional ${values.nome} foi adicionado com sucesso.`,
-          className: "bg-green-500 text-white"
+          message: `O profissional ${values.nome} foi adicionado com sucesso.`,
         });
       }
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast({
+      onNotification({
+        type: "error",
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} profissional`,
-        description: (error as Error).message || "Não foi possível salvar os dados do profissional. Tente novamente.",
-        variant: "destructive",
+        message: (error as Error).message || "Não foi possível salvar os dados do profissional. Tente novamente.",
       });
     } finally {
       setIsSubmitting(false);

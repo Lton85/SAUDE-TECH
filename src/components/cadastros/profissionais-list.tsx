@@ -11,7 +11,6 @@ import { MoreHorizontal, Pencil, Search, Mars, History, Eye, Venus, PlusCircle, 
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { getProfissionais, deleteProfissional } from "@/services/profissionaisService";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Profissional } from "@/types/profissional";
@@ -19,6 +18,7 @@ import { ProfissionalDialog } from "../profissionais/profissional-dialog";
 import { ViewProfissionalDialog } from "../profissionais/view-dialog";
 import { HistoryProfissionalDialog } from "../profissionais/history-dialog";
 import { DeleteConfirmationDialog } from "../profissionais/delete-dialog";
+import { NotificationDialog, NotificationType } from "../ui/notification-dialog";
 
 
 export function ProfissionaisList() {
@@ -34,7 +34,7 @@ export function ProfissionaisList() {
   const [profissionalToDelete, setProfissionalToDelete] = useState<Profissional | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const router = useRouter();
 
   const fetchData = async () => {
@@ -44,10 +44,10 @@ export function ProfissionaisList() {
       setProfissionais(profissionaisData);
       setFilteredProfissionais(profissionaisData);
     } catch (error) {
-      toast({
+      setNotification({
+        type: "error",
         title: "Erro ao buscar dados",
-        description: "Não foi possível carregar a lista de profissionais.",
-        variant: "destructive",
+        message: "Não foi possível carregar a lista de profissionais.",
       });
     } finally {
       setIsLoading(false);
@@ -56,7 +56,7 @@ export function ProfissionaisList() {
 
   useEffect(() => {
     fetchData();
-  }, [toast]);
+  }, []);
 
   const statusCounts = useMemo(() => {
     return profissionais.reduce((acc, p) => {
@@ -107,15 +107,16 @@ export function ProfissionaisList() {
       try {
         await deleteProfissional(profissionalToDelete.id);
         fetchData();
-        toast({
+        setNotification({
+          type: "success",
           title: "Profissional Excluído!",
-          description: `O profissional ${profissionalToDelete.nome} foi removido do sistema.`,
+          message: `O profissional ${profissionalToDelete.nome} foi removido do sistema.`,
         });
       } catch (error) {
-         toast({
+         setNotification({
+          type: "error",
           title: "Erro ao excluir profissional",
-          description: (error as Error).message,
-          variant: "destructive",
+          message: (error as Error).message,
         });
       } finally {
         setProfissionalToDelete(null);
@@ -254,6 +255,7 @@ export function ProfissionaisList() {
           onOpenChange={setIsProfissionalDialogOpen}
           onSuccess={handleSuccess}
           profissional={selectedProfissional}
+          onNotification={setNotification}
         />
         {profissionalToDelete && (
             <DeleteConfirmationDialog
@@ -261,6 +263,14 @@ export function ProfissionaisList() {
                 onOpenChange={() => setProfissionalToDelete(null)}
                 onConfirm={handleDeleteConfirm}
                 profissionalName={profissionalToDelete?.nome || ''}
+            />
+        )}
+        {notification && (
+            <NotificationDialog
+                type={notification.type}
+                title={notification.title}
+                message={notification.message}
+                onOpenChange={() => setNotification(null)}
             />
         )}
     </>

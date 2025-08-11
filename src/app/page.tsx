@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,8 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { login, checkAuth } from '@/services/authService';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2, HeartPulse, LogIn } from 'lucide-react';
+import { NotificationDialog, NotificationType } from '@/components/ui/notification-dialog';
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -16,8 +17,8 @@ export default function LoginPage() {
   const [codigoCliente, setCodigoCliente] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (checkAuth()) {
@@ -34,10 +35,10 @@ export default function LoginPage() {
       await login(usuario, senha, codigoCliente);
       // O redirecionamento é feito dentro do serviço de login agora
     } catch (error) {
-      toast({
+      setNotification({
+        type: 'error',
         title: 'Erro de Autenticação',
-        description: (error as Error).message,
-        variant: 'destructive',
+        message: (error as Error).message,
       });
     } finally {
       setIsLoading(false);
@@ -104,6 +105,14 @@ export default function LoginPage() {
             </CardFooter>
         </form>
       </Card>
+      {notification && (
+        <NotificationDialog
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onOpenChange={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

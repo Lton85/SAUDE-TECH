@@ -9,7 +9,6 @@ import { MoreHorizontal, Pencil, Search, PlusCircle, Trash2, History, Eye, KeyRo
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import type { Usuario } from "@/types/usuario";
-import { useToast } from "@/hooks/use-toast";
 import { getUsuarios, deleteUsuario } from "@/services/usuariosService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteUsuarioDialog } from "@/components/usuarios/delete-dialog";
@@ -17,6 +16,7 @@ import { UsuarioDialog } from "@/components/usuarios/usuario-dialog";
 import { ViewUsuarioDialog } from "./view-dialog";
 import { HistoryUsuarioDialog } from "./history-dialog";
 import { PermissionsDialog } from "./permissions-dialog";
+import { NotificationDialog, NotificationType } from "../ui/notification-dialog";
 
 export function UsuariosList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +32,7 @@ export function UsuariosList() {
   const [usuarioToDelete, setUsuarioToDelete] = useState<Usuario | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -41,10 +41,10 @@ export function UsuariosList() {
       setUsuarios(usuariosData);
       setFilteredUsuarios(usuariosData);
     } catch (error) {
-      toast({
+      setNotification({
+        type: "error",
         title: "Erro ao buscar dados",
-        description: "Não foi possível carregar a lista de usuários.",
-        variant: "destructive",
+        message: "Não foi possível carregar a lista de usuários.",
       });
     } finally {
       setIsLoading(false);
@@ -102,15 +102,16 @@ export function UsuariosList() {
       try {
         await deleteUsuario(usuarioToDelete.id);
         fetchData();
-        toast({
+        setNotification({
+          type: "success",
           title: "Usuário Excluído!",
-          description: `O usuário ${usuarioToDelete.nome} foi removido do sistema.`,
+          message: `O usuário ${usuarioToDelete.nome} foi removido do sistema.`,
         });
       } catch (error) {
-         toast({
+         setNotification({
+          type: "error",
           title: "Erro ao excluir usuário",
-          description: "Não foi possível remover o usuário.",
-          variant: "destructive",
+          message: "Não foi possível remover o usuário.",
         });
       } finally {
         setUsuarioToDelete(null);
@@ -236,6 +237,7 @@ export function UsuariosList() {
           onOpenChange={setIsUsuarioDialogOpen}
           onSuccess={handleSuccess}
           usuario={selectedUsuario}
+          onNotification={setNotification}
         />
 
       {selectedUsuarioForView && (
@@ -260,6 +262,7 @@ export function UsuariosList() {
             onOpenChange={(isOpen) => !isOpen && setSelectedUsuarioForPermissions(null)}
             usuario={selectedUsuarioForPermissions}
             onSuccess={fetchData}
+            onNotification={setNotification}
           />
       )}
 
@@ -270,6 +273,14 @@ export function UsuariosList() {
               onConfirm={handleDeleteConfirm}
               usuarioName={usuarioToDelete?.nome || ''}
           />
+      )}
+      {notification && (
+        <NotificationDialog
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onOpenChange={() => setNotification(null)}
+        />
       )}
     </>
   );

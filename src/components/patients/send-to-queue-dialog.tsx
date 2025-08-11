@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Send, Building, User, Tag, IdCard, VenetianMask, Cake, BadgeInfo, ShieldQuestion } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
-import { useToast } from "@/hooks/use-toast"
 import { addPacienteToFila } from "@/services/filaDeEsperaService"
 import { getProfissionais } from "@/services/profissionaisService"
 import { Input } from "../ui/input"
@@ -19,6 +18,7 @@ import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
 import type { FilaDeEsperaItem } from "@/types/fila"
 import { getNextCounter } from "@/services/countersService"
+import { NotificationType } from "../ui/notification-dialog"
 
 interface Profissional {
   id: string;
@@ -29,6 +29,7 @@ interface EnviarParaFilaDialogProps {
   onOpenChange: (isOpen: boolean) => void
   paciente: Paciente | null
   departamentos: Departamento[]
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
 const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | undefined }) => {
@@ -42,7 +43,7 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
     );
 }
 
-export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos }: EnviarParaFilaDialogProps) {
+export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, onNotification }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
@@ -50,7 +51,6 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
   const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [senha, setSenha] = useState("");
-  const { toast } = useToast()
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
   
@@ -63,10 +63,10 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
         setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
       } catch (error) {
-         toast({
+         onNotification({
+          type: "error",
           title: "Erro ao carregar profissionais",
-          description: "Não foi possível carregar a lista de profissionais.",
-          variant: "destructive",
+          message: "Não foi possível carregar a lista de profissionais.",
         });
       } finally {
         setIsLoading(false);
@@ -76,7 +76,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     if (isOpen) {
       fetchProfissionais();
     }
-  }, [isOpen, toast]);
+  }, [isOpen, onNotification]);
   
   useEffect(() => {
     const generateTicket = async () => {
@@ -91,21 +91,21 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
             } catch (error) {
                 console.error("Erro ao gerar senha:", error);
                 setSenha("Erro ao gerar");
-                toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+                onNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
             }
         } else {
             setSenha("");
         }
     };
     generateTicket();
-  }, [paciente, isOpen, classification, toast]);
+  }, [paciente, isOpen, classification, onNotification]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId) {
-      toast({
+      onNotification({
+        type: "error",
         title: "Campos obrigatórios",
-        description: "Por favor, selecione departamento e profissional.",
-        variant: "destructive",
+        message: "Por favor, selecione departamento e profissional.",
       })
       return
     }
@@ -138,18 +138,18 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       
       await addPacienteToFila(newItem)
 
-      toast({
+      onNotification({
+        type: "success",
         title: "Paciente Enviado!",
-        description: `${paciente.nome} foi enviado para a fila de ${departamento.nome}.`,
-        className: "bg-green-500 text-white",
+        message: `${paciente.nome} foi enviado para a fila de ${departamento.nome}.`,
       })
       onOpenChange(false)
     } catch (error) {
       console.error("Erro ao enviar paciente para a fila:", error)
-      toast({
+      onNotification({
+        type: "error",
         title: "Erro ao enviar para a fila",
-        description: (error as Error).message || "Não foi possível adicionar o paciente à fila. Tente novamente.",
-        variant: "destructive",
+        message: (error as Error).message || "Não foi possível adicionar o paciente à fila. Tente novamente.",
       })
     } finally {
       setIsSubmitting(false)

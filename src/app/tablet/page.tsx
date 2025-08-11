@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
 import { cn } from "@/lib/utils";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 interface GeneratedTicket {
     senha: string;
@@ -22,9 +22,9 @@ const notificationColors: { [key in FilaDeEsperaItem['classificacao']]: string }
 };
 
 export default function TabletPage() {
-    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
     const [generatedTicket, setGeneratedTicket] = useState<GeneratedTicket | null>(null);
+    const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     useEffect(() => {
         if (generatedTicket) {
@@ -42,10 +42,10 @@ export default function TabletPage() {
             const senha = await addPreCadastroToFila(type);
             setGeneratedTicket({ senha, tipo: type });
         } catch (error) {
-             toast({
+             setNotification({
+                type: 'error',
                 title: `Erro ao gerar senha`,
-                description: (error as Error).message,
-                variant: "destructive",
+                message: (error as Error).message,
             });
         } finally {
             setIsLoading(null);
@@ -142,6 +142,15 @@ export default function TabletPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+             {notification && (
+                <NotificationDialog
+                    type={notification.type}
+                    title={notification.title}
+                    message={notification.message}
+                    onOpenChange={() => setNotification(null)}
+                />
+            )}
         </div>
     );
 }

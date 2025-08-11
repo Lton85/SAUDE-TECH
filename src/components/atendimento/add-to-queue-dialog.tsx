@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Send, Building, User, Tag, Search, X, UserPlus, ShieldQuestion, IdCard, VenetianMask, Cake, BadgeInfo, Home, Globe, Fingerprint } from "lucide-react"
 import type { Paciente } from "@/types/paciente"
 import type { Departamento } from "@/types/departamento"
-import { useToast } from "@/hooks/use-toast"
 import { addPacienteToFila } from "@/services/filaDeEsperaService"
 import { getProfissionais } from "@/services/profissionaisService"
 import { Input } from "../ui/input"
@@ -20,6 +19,7 @@ import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { Badge } from "../ui/badge"
 import { FilaDeEsperaItem } from "@/types/fila"
+import { NotificationType } from "../ui/notification-dialog"
 
 interface Profissional {
   id: string;
@@ -33,7 +33,7 @@ interface AddToQueueDialogProps {
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
   atendimentoParaCompletar?: FilaDeEsperaItem | null;
-  onSuccess: () => void;
+  onSuccess: (message: string, description: string) => void;
 }
 
 const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: React.ElementType, label: string, value?: string, children?: React.ReactNode, className?: string }) => {
@@ -57,14 +57,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [senha, setSenha] = useState("");
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatientList, setShowPatientList] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  
-  const { toast } = useToast()
   
   const isCompleting = !!atendimentoParaCompletar;
 
@@ -117,10 +116,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
         setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
       } catch (error) {
-         toast({
+         setNotification({
+          type: "error",
           title: "Erro ao carregar profissionais",
-          description: "Não foi possível carregar a lista de profissionais.",
-          variant: "destructive",
+          message: "Não foi possível carregar a lista de profissionais.",
         });
       } finally {
         setIsLoadingProfissionais(false);
@@ -140,7 +139,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         resetState();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, toast]);
+  }, [isOpen]);
   
 
   const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
@@ -155,10 +154,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         } catch (error) {
             console.error("Erro ao gerar senha:", error);
             setSenha("Erro");
-            toast({ title: "Erro ao pré-visualizar senha", variant: "destructive" });
+            setNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
         }
     }
-  }, [selectedPaciente, toast, isCompleting]);
+  }, [selectedPaciente, isCompleting]);
 
 
   useEffect(() => {
@@ -194,10 +193,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !selectedPaciente || !selectedProfissionalId) {
-      toast({
+      setNotification({
+        type: "error",
         title: "Campos obrigatórios",
-        description: "Por favor, selecione paciente, departamento e profissional.",
-        variant: "destructive",
+        message: "Por favor, selecione paciente, departamento e profissional.",
       })
       return
     }
@@ -222,21 +221,15 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       }
 
       await addPacienteToFila(item, atendimentoParaCompletar?.id);
-
-      toast({
-        title: isCompleting ? "Cadastro Completado!" : "Paciente Enviado!",
-        description: `${selectedPaciente.nome} foi enviado para a fila de ${selectedDepartamento.nome}.`,
-        className: "bg-green-500 text-white",
-      })
       
+      onSuccess(isCompleting ? "Cadastro Completado!" : "Paciente Enviado!", `${selectedPaciente.nome} foi enviado para a fila de ${selectedDepartamento.nome}.`)
       onOpenChange(false);
-      onSuccess();
     } catch (error) {
       console.error("Erro ao enviar paciente para a fila:", error)
-      toast({
+      setNotification({
+        type: "error",
         title: "Erro ao enviar para a fila",
-        description: (error as Error).message || "Não foi possível adicionar o paciente à fila. Tente novamente.",
-        variant: "destructive",
+        message: (error as Error).message || "Não foi possível adicionar o paciente à fila. Tente novamente.",
       })
     } finally {
       setIsSubmitting(false)

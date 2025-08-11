@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
-import { useToast } from "@/hooks/use-toast";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
 import { getPacientesRealtime } from "@/services/pacientesService";
@@ -25,8 +24,7 @@ import { FinalizadosList } from "@/components/atendimento/list-finalizados";
 import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
-import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
-
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 interface Profissional {
   id: string;
@@ -48,7 +46,7 @@ export default function AtendimentosPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
-    const [isCancellationConfirmationDialogOpen, setIsCancellationConfirmationDialogOpen] = useState(false);
+    const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
     
     // Dialog item states
@@ -59,10 +57,7 @@ export default function AtendimentosPage() {
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
-    const [cancelledItemName, setCancelledItemName] = useState<string>('');
     
-    const { toast } = useToast();
-
     // Data Fetching and Realtime Subscriptions
     useEffect(() => {
         const fetchSupportData = async () => {
@@ -77,16 +72,12 @@ export default function AtendimentosPage() {
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
 
              } catch (error) {
-                  toast({
-                    title: "Erro ao carregar dados de apoio",
-                    description: "Não foi possível carregar departamentos ou profissionais.",
-                    variant: "destructive",
-                });
+                 setNotification({ type: "error", title: "Erro ao carregar dados de apoio", message: "Não foi possível carregar departamentos ou profissionais." });
              }
         }
         fetchSupportData();
 
-        const unsubPacientes = getPacientesRealtime(setPacientes, (error) => toast({ title: "Erro ao carregar pacientes", description: error, variant: "destructive" }));
+        const unsubPacientes = getPacientesRealtime(setPacientes, (error) => setNotification({ type: 'error', title: "Erro ao carregar pacientes", message: error }));
         
         const unsubPendentes = getAtendimentosPendentes((data) => {
             const sortedData = data.sort((a, b) => {
@@ -98,19 +89,19 @@ export default function AtendimentosPage() {
             setPendentes(sortedData);
             setIsLoading(false);
         }, (error) => {
-             toast({ title: "Erro ao carregar senhas pendentes", description: error, variant: "destructive" });
+             setNotification({ type: 'error', title: "Erro ao carregar senhas pendentes", message: error });
              setIsLoading(false);
         });
 
         const unsubEmTriagem = getAtendimentosEmTriagem((data) => {
             setEmTriagem(data.sort((a, b) => (b.chamadaEm?.toDate().getTime() ?? 0) - (a.chamadaEm?.toDate().getTime() ?? 0)));
-        }, (error) => toast({ title: "Erro ao carregar senhas em triagem", description: error, variant: "destructive" }));
+        }, (error) => setNotification({ type: 'error', title: "Erro ao carregar senhas em triagem", message: error }));
         
         const unsubFila = getFilaDeEspera((data) => {
             setFila(data);
             setIsLoading(false);
         }, (error) => {
-            toast({ title: "Erro ao carregar a fila", description: error, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao carregar a fila", message: error });
             setIsLoading(false);
         });
 
@@ -118,14 +109,14 @@ export default function AtendimentosPage() {
             setEmAtendimento(data.sort((a, b) => (b.chamadaEm?.toDate().getTime() ?? 0) - (a.chamadaEm?.toDate().getTime() ?? 0)));
             setIsLoading(false);
         }, (error) => {
-            toast({ title: "Erro ao carregar atendimentos", description: error, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao carregar atendimentos", message: error });
             setIsLoading(false);
         });
         
         const unsubFinalizados = getAtendimentosFinalizadosHoje((data) => {
             setFinalizados(data);
         }, (error) => {
-            toast({ title: "Erro ao carregar finalizados", description: error, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error });
         });
 
         return () => {
@@ -136,7 +127,7 @@ export default function AtendimentosPage() {
             unsubEmAtendimento();
             unsubFinalizados();
         };
-    }, [toast]);
+    }, []);
     
     // Handlers for dialogs and actions
     const handleOpenNewPatientDialog = () => {
@@ -165,34 +156,30 @@ export default function AtendimentosPage() {
     const handleChamarParaTriagem = async (item: FilaDeEsperaItem) => {
         try {
             await chamarPaciente(item, 'triagem');
-             toast({ title: "Senha Chamada!", description: `A senha ${item.senha} foi chamada para a triagem.` });
+            setNotification({ type: 'success', title: "Senha Chamada!", message: `A senha ${item.senha} foi chamada para a Recepção.` });
         } catch (error) {
             const err = error as Error;
-             toast({ title: "Erro ao chamar senha", description: err.message, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao chamar senha", message: err.message });
         }
     };
 
     const handleChamarParaAtendimento = async (item: FilaDeEsperaItem) => {
         try {
             await chamarPaciente(item, 'atendimento');
-            toast({ title: "Paciente Chamado!", description: `${item.pacienteNome} foi chamado para atendimento.` });
+            setNotification({ type: 'success', title: "Paciente Chamado!", message: `${item.pacienteNome} foi chamado para atendimento.` });
         } catch (error) {
             const err = error as Error;
-            toast({ title: "Erro ao chamar paciente", description: err.message, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao chamar paciente", message: err.message });
         }
     };
     
     const handleFinalizarAtendimento = async (item: FilaDeEsperaItem) => {
         try {
             await finalizarAtendimento(item.id);
-            toast({
-                title: "Atendimento Finalizado!",
-                description: `O atendimento de ${item.pacienteNome} foi finalizado.`,
-                className: "bg-green-500 text-white"
-            });
+            setNotification({ type: 'success', title: "Atendimento Finalizado!", message: `O atendimento de ${item.pacienteNome} foi finalizado.` });
         } catch (error) {
             const err = error as Error;
-            toast({ title: "Erro ao finalizar", description: err.message, variant: "destructive" });
+            setNotification({ type: 'error', title: "Erro ao finalizar", message: err.message });
         }
     };
     
@@ -204,17 +191,10 @@ export default function AtendimentosPage() {
     const handleClearPanel = async () => {
         try {
             await clearPainel();
-            toast({
-                title: "Painel Limpo!",
-                description: "O painel de senhas foi reiniciado.",
-            });
+            setNotification({ type: 'success', title: "Painel Limpo!", message: "O painel de senhas foi reiniciado." });
         } catch (error) {
             const err = error as Error;
-            toast({
-                title: "Erro ao limpar painel",
-                description: err.message,
-                variant: "destructive",
-            });
+            setNotification({ type: 'error', title: "Erro ao limpar painel", message: err.message });
         }
     };
     
@@ -311,7 +291,7 @@ export default function AtendimentosPage() {
                 onAddNewPatient={handleOpenNewPatientDialog}
                 patientToAdd={patientToAdd}
                 atendimentoParaCompletar={atendimentoParaCompletar}
-                onSuccess={() => {}}
+                onSuccess={(message, description) => setNotification({ type: 'success', title: message, message: description})}
             />
 
             <PatientDialog
@@ -319,6 +299,7 @@ export default function AtendimentosPage() {
                 onOpenChange={setIsPatientDialogOpen}
                 onSuccess={handlePatientDialogSuccess}
                 paciente={null}
+                onNotification={setNotification}
             />
 
             {itemToEdit && (
@@ -330,6 +311,7 @@ export default function AtendimentosPage() {
                     profissionais={profissionais}
                     onSave={updateFilaItem}
                     isHistory={false}
+                    onNotification={setNotification}
                 />
             )}
             
@@ -342,6 +324,7 @@ export default function AtendimentosPage() {
                     profissionais={profissionais}
                     onSave={updateHistoricoItem}
                     isHistory={true}
+                    onNotification={setNotification}
                 />
             )}
 
@@ -361,12 +344,11 @@ export default function AtendimentosPage() {
                     onConfirm={async (motivo) => {
                         if (itemToCancel) {
                             try {
-                                setCancelledItemName(itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`);
                                 await cancelarAtendimento(itemToCancel, motivo);
-                                setIsCancellationConfirmationDialogOpen(true);
+                                setNotification({ type: "warning", title: "Atendimento Cancelado!", message: `O atendimento de ${itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`} foi cancelado.` });
                             } catch (error) {
                                 const err = error as Error;
-                                toast({ title: "Erro ao cancelar", description: err.message, variant: "destructive" });
+                                setNotification({ type: 'error', title: "Erro ao cancelar", message: err.message });
                             } finally {
                                 setItemToCancel(null);
                             }
@@ -375,12 +357,6 @@ export default function AtendimentosPage() {
                     item={itemToCancel}
                 />
             )}
-
-             <CancellationConfirmationDialog
-                isOpen={isCancellationConfirmationDialogOpen}
-                onOpenChange={setIsCancellationConfirmationDialogOpen}
-                itemName={cancelledItemName}
-            />
 
             {itemToReturn && (
                 <ReturnToQueueDialog
@@ -393,14 +369,23 @@ export default function AtendimentosPage() {
                          try {
                             await updateFilaItem(item.id, updates);
                             await retornarPacienteParaFila(item.id);
-                            toast({ title: "Paciente Retornou para a Fila!", description: `${item.pacienteNome} está de volta na fila.` });
+                             setNotification({ type: 'success', title: "Paciente Retornou para a Fila!", message: `${item.pacienteNome} está de volta na fila.` });
                         } catch (error) {
                             const err = error as Error;
-                            toast({ title: "Erro ao retornar paciente", description: err.message, variant: "destructive" });
+                            setNotification({ type: 'error', title: "Erro ao retornar paciente", message: err.message });
                         } finally {
                             setItemToReturn(null);
                         }
                     }}
+                />
+            )}
+
+            {notification && (
+                <NotificationDialog
+                    type={notification.type}
+                    title={notification.title}
+                    message={notification.message}
+                    onOpenChange={() => setNotification(null)}
                 />
             )}
         </div>

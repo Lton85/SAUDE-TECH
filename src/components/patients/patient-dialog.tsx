@@ -7,25 +7,25 @@ import { UserPlus, Pencil, Loader2 } from "lucide-react";
 import type { Paciente } from "@/types/paciente";
 import { PatientForm } from "./patient-form";
 import { addPaciente, updatePaciente } from "@/services/pacientesService";
-import { useToast } from "@/hooks/use-toast";
 import { parse } from "date-fns";
 import { Button } from "../ui/button";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PatientFormSchema } from "./patient-form-schema";
+import { NotificationType } from "../ui/notification-dialog";
 
 interface PatientDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: (paciente: Paciente) => void;
   paciente?: Paciente | null;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
 export type PatientFormValues = z.infer<typeof PatientFormSchema>;
 
-export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: PatientDialogProps) {
+export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente, onNotification }: PatientDialogProps) {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const { toast } = useToast();
     const isEditMode = !!paciente;
 
     const form = useForm<PatientFormValues>({
@@ -125,10 +125,10 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
 
             if (isEditMode && paciente) {
                 await updatePaciente(paciente.id, patientData);
-                toast({
+                onNotification({
+                    type: "success",
                     title: "Paciente Atualizado!",
-                    description: `Os dados de ${values.nome} foram atualizados.`,
-                    className: "bg-green-500 text-white"
+                    message: `Os dados de ${values.nome} foram atualizados.`,
                 });
                 onSuccess({ ...paciente, ...patientData });
             } else {
@@ -137,20 +137,20 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente }: Pat
                     situacao: 'Ativo',
                 };
                 const newPatientId = await addPaciente(newPatient);
-                toast({
+                onNotification({
+                    type: "success",
                     title: "Paciente Cadastrado!",
-                    description: `O paciente ${values.nome} foi adicionado com sucesso.`,
-                    className: "bg-green-500 text-white"
+                    message: `O paciente ${values.nome} foi adicionado com sucesso.`,
                 });
                  onSuccess({ ...newPatient, id: newPatientId, codigo: "", historico: {} as any }); // Pass back the new patient
             }
             
             onOpenChange(false);
         } catch (error) {
-             toast({
+             onNotification({
+                type: "error",
                 title: "Erro ao salvar paciente",
-                description: (error as Error).message || "Não foi possível salvar os dados. Verifique e tente novamente.",
-                variant: "destructive",
+                message: (error as Error).message || "Não foi possível salvar os dados. Verifique e tente novamente.",
             });
         } finally {
             setIsSubmitting(false);

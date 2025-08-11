@@ -16,7 +16,6 @@ import { ViewDialog } from "@/components/patients/view-dialog";
 import { PatientDialog } from "@/components/patients/patient-dialog";
 import type { Paciente } from "@/types/paciente";
 import { DeleteConfirmationDialog } from "@/components/patients/delete-dialog";
-import { useToast } from "@/hooks/use-toast";
 import { getPacientesRealtime, deletePaciente } from "@/services/pacientesService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EnviarParaFilaDialog } from "@/components/patients/send-to-queue-dialog";
@@ -27,6 +26,7 @@ import { EditQueueItemDialog } from "../atendimento/edit-dialog";
 import { FilaDeEsperaItem } from "@/types/fila";
 import { getProfissionais } from "@/services/profissionaisService";
 import { updateHistoricoItem } from "@/services/filaDeEsperaService";
+import { NotificationDialog, NotificationType } from "../ui/notification-dialog";
 
 
 export function PacientesList() {
@@ -48,7 +48,7 @@ export function PacientesList() {
   const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const router = useRouter();
 
    const fetchData = async () => {
@@ -63,10 +63,10 @@ export function PacientesList() {
       setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
 
     } catch (error) {
-      toast({
+      setNotification({
+        type: "error",
         title: "Erro ao buscar dados de apoio",
-        description: "Não foi possível carregar a lista de departamentos ou profissionais.",
-        variant: "destructive",
+        message: "Não foi possível carregar a lista de departamentos ou profissionais.",
       });
     }
   };
@@ -81,17 +81,17 @@ export function PacientesList() {
             setIsLoading(false);
         },
         (error) => {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao buscar pacientes",
-                description: error,
-                variant: "destructive",
+                message: error,
             });
             setIsLoading(false);
         }
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const statusCounts = useMemo(() => {
     return pacientes.reduce((acc, p) => {
@@ -169,15 +169,16 @@ export function PacientesList() {
     if (patientToDelete) {
       try {
         await deletePaciente(patientToDelete.id);
-        toast({
+        setNotification({
+          type: "success",
           title: "Paciente Excluído!",
-          description: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
+          message: `O paciente ${patientToDelete.nome} foi removido do sistema.`,
         });
       } catch (error) {
-         toast({
+         setNotification({
+          type: "error",
           title: "Erro ao excluir paciente",
-          description: "Não foi possível remover o paciente.",
-          variant: "destructive",
+          message: "Não foi possível remover o paciente.",
         });
       } finally {
         setPatientToDelete(null);
@@ -345,6 +346,7 @@ export function PacientesList() {
           onOpenChange={setIsPatientDialogOpen}
           onSuccess={handleSuccess}
           paciente={selectedPatient}
+          onNotification={setNotification}
         />
         {patientToDelete && (
             <DeleteConfirmationDialog
@@ -360,6 +362,7 @@ export function PacientesList() {
                 onOpenChange={() => setSelectedPatientForQueue(null)}
                 paciente={selectedPatientForQueue}
                 departamentos={departamentos}
+                onNotification={setNotification}
             />
         )}
         {selectedPatientForProntuario && (
@@ -379,6 +382,16 @@ export function PacientesList() {
                 profissionais={profissionais}
                 onSave={updateHistoricoItem}
                 isHistory={true}
+                onNotification={setNotification}
+            />
+        )}
+
+        {notification && (
+            <NotificationDialog
+                type={notification.type}
+                title={notification.title}
+                message={notification.message}
+                onOpenChange={() => setNotification(null)}
             />
         )}
     </>

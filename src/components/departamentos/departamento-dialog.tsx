@@ -7,11 +7,11 @@ import { PlusCircle, Pencil, Loader2 } from "lucide-react";
 import type { Departamento } from "@/types/departamento";
 import { DepartamentoForm } from "./departamento-form";
 import { addDepartamento, updateDepartamento } from "@/services/departamentosService";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { NotificationType } from "../ui/notification-dialog";
 
 const DepartamentoFormSchema = z.object({
   nome: z.string().min(3, { message: "O nome é obrigatório." }),
@@ -26,11 +26,11 @@ interface DepartamentoDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: () => void;
   departamento?: Departamento | null;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamento }: DepartamentoDialogProps) {
+export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamento, onNotification }: DepartamentoDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
   const isEditMode = !!departamento;
 
   const form = useForm<DepartamentoFormValues>({
@@ -69,27 +69,27 @@ export function DepartamentoDialog({ isOpen, onOpenChange, onSuccess, departamen
 
       if (isEditMode && departamento) {
         await updateDepartamento(departamento.id, departamentoData);
-        toast({
+        onNotification({
+          type: "success",
           title: "Departamento Atualizado!",
-          description: `Os dados de ${values.nome} foram atualizados.`,
-          className: "bg-green-500 text-white"
+          message: `Os dados de ${values.nome} foram atualizados.`,
         });
       } else {
         await addDepartamento(departamentoData as Omit<Departamento, 'id' | 'codigo' | 'historico'>);
-        toast({
+        onNotification({
+          type: "success",
           title: "Departamento Cadastrado!",
-          description: `${values.nome} foi adicionado com sucesso.`,
-          className: "bg-green-500 text-white"
+          message: `${values.nome} foi adicionado com sucesso.`,
         });
       }
       onSuccess();
       onOpenChange(false);
     } catch (error) {
       console.error("Erro ao salvar departamento:", error);
-      toast({
+      onNotification({
+        type: "error",
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'}`,
-        description: (error as Error).message || `Não foi possível salvar os dados. Tente novamente.`,
-        variant: "destructive",
+        message: (error as Error).message || `Não foi possível salvar os dados. Tente novamente.`,
       });
     } finally {
       setIsSubmitting(false);

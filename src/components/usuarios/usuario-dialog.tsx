@@ -7,22 +7,22 @@ import { KeyRound, Pencil, Loader2 } from "lucide-react";
 import type { Usuario } from "@/types/usuario";
 import { UsuarioForm } from "./usuario-form";
 import { addUsuario, updateUsuario } from "@/services/usuariosService";
-import { useToast } from "@/hooks/use-toast";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UsuarioFormSchema, type UsuarioFormValues } from "./usuario-form-schema";
 import { Button } from "../ui/button";
+import { NotificationType } from "../ui/notification-dialog";
 
 interface UsuarioDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSuccess: () => void;
   usuario?: Usuario | null;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: UsuarioDialogProps) {
+export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario, onNotification }: UsuarioDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
   const isEditMode = !!usuario;
   
   const form = useForm<UsuarioFormValues>({
@@ -92,26 +92,26 @@ export function UsuarioDialog({ isOpen, onOpenChange, onSuccess, usuario }: Usua
 
       if (isEditMode && usuario) {
         await updateUsuario(usuario.id, usuarioData);
-        toast({
+        onNotification({
+          type: "success",
           title: "Usuário Atualizado!",
-          description: `Os dados de ${values.nome} foram atualizados.`,
-          className: "bg-green-500 text-white"
+          message: `Os dados de ${values.nome} foram atualizados.`,
         });
       } else {
         await addUsuario(usuarioData as Omit<Usuario, 'id' | 'codigo' | 'historico'>);
-        toast({
+        onNotification({
+          type: "success",
           title: "Usuário Cadastrado!",
-          description: `O usuário ${values.nome} foi adicionado com sucesso.`,
-          className: "bg-green-500 text-white"
+          message: `O usuário ${values.nome} foi adicionado com sucesso.`,
         });
       }
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast({
+      onNotification({
+        type: "error",
         title: `Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'}`,
-        description: (error as Error).message,
-        variant: "destructive",
+        message: (error as Error).message,
       });
     } finally {
       setIsSubmitting(false);

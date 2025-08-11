@@ -15,7 +15,7 @@ import { DepartamentoDialog } from "@/components/departamentos/departamento-dial
 import { DeleteDepartamentoDialog } from "@/components/departamentos/delete-dialog";
 import { ViewDepartamentoDialog } from "@/components/departamentos/view-dialog";
 import { HistoryDepartamentoDialog } from "@/components/departamentos/history-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 export default function DepartamentosPage() {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
@@ -26,8 +26,7 @@ export default function DepartamentosPage() {
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [selectedDepartamento, setSelectedDepartamento] = useState<Departamento | null>(null);
   const [departamentoToDelete, setDepartamentoToDelete] = useState<Departamento | null>(null);
-  const { toast } = useToast();
-  const router = useRouter();
+  const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -36,10 +35,10 @@ export default function DepartamentosPage() {
       setDepartamentos(deptosData);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
-      toast({
+      setNotification({
+        type: "error",
         title: "Erro ao carregar dados",
-        description: "Não foi possível carregar a lista de departamentos.",
-        variant: "destructive",
+        message: "Não foi possível carregar la lista de departamentos.",
       });
     } finally {
       setIsLoading(false);
@@ -97,15 +96,16 @@ export default function DepartamentosPage() {
       try {
         await deleteDepartamento(departamentoToDelete.id);
         fetchData();
-        toast({
+        setNotification({
+          type: "success",
           title: "Departamento Excluído!",
-          description: `O registro de ${departamentoToDelete.nome} foi removido.`,
+          message: `O registro de ${departamentoToDelete.nome} foi removido.`,
         });
       } catch (error) {
-        toast({
+        setNotification({
+          type: "error",
           title: "Erro ao excluir",
-          description: (error as Error).message || "Não foi possível remover o registro.",
-          variant: "destructive",
+          message: (error as Error).message || "Não foi possível remover o registro.",
         });
       } finally {
         setIsDeleteDialogOpen(false);
@@ -208,6 +208,7 @@ export default function DepartamentosPage() {
         onOpenChange={setIsDialogOpen}
         onSuccess={handleSuccess}
         departamento={selectedDepartamento}
+        onNotification={setNotification}
       />
 
       {selectedDepartamento && (
@@ -242,6 +243,15 @@ export default function DepartamentosPage() {
           onOpenChange={setIsDeleteDialogOpen}
           onConfirm={handleDeleteConfirm}
           departamentoName={departamentoToDelete.nome}
+        />
+      )}
+
+      {notification && (
+        <NotificationDialog
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onOpenChange={() => setNotification(null)}
         />
       )}
     </>
