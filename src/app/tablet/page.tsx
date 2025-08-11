@@ -74,7 +74,7 @@ export default function TabletPage() {
                 className="mb-8"
             >
                 <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter uppercase">
-                    RETIRE SUA SENHA
+                    RETIRE SUA SENHA AQUI
                 </h1>
                 <p className="mt-2 text-3xl md:text-4xl text-slate-200">
                     Escolha o tipo de atendimento:
