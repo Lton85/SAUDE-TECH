@@ -34,6 +34,8 @@ interface ReturnToQueueDialogProps {
   onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+
 export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm, onNotification }: ReturnToQueueDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
@@ -155,10 +157,9 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Normal">Normal</SelectItem>
-                                <SelectItem value="Preferencial">Preferencial</SelectItem>
-                                <SelectItem value="Urgência">Urgência</SelectItem>
-                                <SelectItem value="Outros">Outros</SelectItem>
+                                {classificationOrder.map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

@@ -42,7 +42,7 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
-    classificacoesAtendimento: ["Normal", "Preferencial", "Urgência"],
+    classificacoesAtendimento: ["Normal", "Preferencial", "Urgência", "Outros"],
 };
 
 interface EmpresaPageProps {

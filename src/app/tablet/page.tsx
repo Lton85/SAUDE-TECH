@@ -38,6 +38,7 @@ const textColors: { [key: string]: string } = {
     Outros: "text-amber-400",
 };
 
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
 
 export default function TabletPage() {
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
@@ -51,19 +52,27 @@ export default function TabletPage() {
             setIsFetchingConfig(true);
             try {
                 const empresaData = await getEmpresa();
+                let activeClassificacoes: string[];
+
                 if (empresaData?.classificacoesAtendimento?.length) {
-                    setClassificacoes(empresaData.classificacoesAtendimento);
+                    activeClassificacoes = empresaData.classificacoesAtendimento;
                 } else {
                     // Fallback para as classificações padrão se não estiver configurado
-                    setClassificacoes(["Normal", "Preferencial", "Urgência"]);
+                    activeClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"];
                 }
+
+                // Sort the active classifications based on the predefined order
+                const sortedClassificacoes = classificationOrder.filter(c => activeClassificacoes.includes(c));
+                setClassificacoes(sortedClassificacoes);
+
             } catch (error) {
                 setNotification({
                     type: 'error',
                     title: `Erro ao carregar configurações`,
                     message: (error as Error).message,
                 });
-                 setClassificacoes(["Normal", "Preferencial", "Urgência"]);
+                 // Fallback on error
+                 setClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
             } finally {
                 setIsFetchingConfig(false);
             }

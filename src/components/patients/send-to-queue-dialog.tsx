@@ -42,6 +42,8 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
     );
 }
 
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+
 export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, onNotification }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -245,10 +247,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                             <SelectValue placeholder="Selecione a classificação" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Normal">Normal</SelectItem>
-                            <SelectItem value="Preferencial">Preferencial</SelectItem>
-                            <SelectItem value="Urgência">Urgência</SelectItem>
-                            <SelectItem value="Outros">Outros</SelectItem>
+                            {classificationOrder.map(c => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>

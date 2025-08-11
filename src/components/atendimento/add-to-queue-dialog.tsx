@@ -48,6 +48,9 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
     );
 }
 
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+
+
 export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
@@ -464,10 +467,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Normal">Normal</SelectItem>
-                                <SelectItem value="Preferencial">Preferencial</SelectItem>
-                                <SelectItem value="Urgência">Urgência</SelectItem>
-                                <SelectItem value="Outros">Outros</SelectItem>
+                                {classificationOrder.map(c => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
