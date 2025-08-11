@@ -105,12 +105,13 @@ export default function PainelPage() {
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none" onClick={handleInteraction}>
         
-        {!hasInteracted ? (
+        {!hasInteracted && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm cursor-pointer">
                 <PlayCircle className="h-24 w-24 text-white/70 mb-4" />
                 <h1 className="text-4xl font-bold">Clique ou toque para ativar o som</h1>
             </div>
-        ) : (
+        )}
+
         <main className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12">
             <AnimatePresence mode="wait">
                 <motion.div
@@ -122,9 +123,9 @@ export default function PainelPage() {
                     className="w-full h-full flex flex-col justify-between bg-slate-950/50 rounded-2xl shadow-2xl p-8"
                 >
                     <div className="text-center flex-1 flex flex-col justify-center">
-                        <h2 className="text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
-                        <p className="font-display font-extrabold text-white tracking-tighter my-4 text-9xl md:text-[12rem] lg:text-[16rem] xl:text-[20rem] 2xl:text-[24rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
-                        <p className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
+                        <h2 className="text-7xl md:text-8xl lg:text-8xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
+                        <p className="font-display font-extrabold text-white tracking-tighter my-4 text-9xl md:text-[12rem] lg:text-[18rem] xl:text-[22rem] 2xl:text-[26rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
+                        <p className="text-5xl md:text-6xl lg:text-6xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
                     </div>
 
                     {(currentCall.pacienteNome || currentCall.profissionalNome) && (currentCall.pacienteNome !== '' || currentCall.profissionalNome !== '') && (
@@ -146,7 +147,6 @@ export default function PainelPage() {
                 </motion.div>
             </AnimatePresence>
         </main>
-        )}
         
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">

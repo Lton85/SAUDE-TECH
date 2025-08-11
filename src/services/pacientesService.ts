@@ -9,7 +9,7 @@ import { getCurrentUser } from './authService';
 const pacientesCollection = collection(db, 'pacientes');
 
 export const getPacientes = async (): Promise<Paciente[]> => {
-    const q = query(pacientesCollection, orderBy("codigo"));
+    const q = query(pacientesCollection, orderBy("codigo", "asc"));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Paciente));
 };
@@ -82,5 +82,3 @@ export const deletePaciente = async (id: string): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
     await deleteDoc(pacienteDoc);
 };
-
-    
