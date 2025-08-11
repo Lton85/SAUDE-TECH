@@ -36,8 +36,7 @@ export default function ConfiguracoesPage() {
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isPreferencialResetting, setIsPreferencialResetting] = useState(false);
     const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
-    const [isRelatoriosResetting, setIsRelatoriosResetting] = useState(false);
-    const [isChamadasResetting, setIsChamadasResetting] = useState(false);
+    const [isLimpezaResetting, setIsLimpezaResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isProfissionalResetting, setIsProfissionalResetting] = useState(false);
     
@@ -54,7 +53,6 @@ export default function ConfiguracoesPage() {
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
     
     const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
-    const [limpezaType, setLimpezaType] = useState<'chamadas' | 'relatorios' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
@@ -85,8 +83,7 @@ export default function ConfiguracoesPage() {
         setSenhaDialogOpen(true);
     };
     
-    const handleLimpezaRequest = (type: 'chamadas' | 'relatorios') => {
-        setLimpezaType(type);
+    const handleLimpezaRequest = () => {
         setLimpezaDialogOpen(true);
     };
 
@@ -149,40 +146,22 @@ export default function ConfiguracoesPage() {
             setNotification({ type: "error", title: "Senha Incorreta", message: "A senha de segurança fornecida está incorreta." });
             return;
         }
-
-        if (limpezaType === 'relatorios') {
-            await handleConfirmRelatoriosReset();
-        } else if (limpezaType === 'chamadas') {
-            await handleConfirmChamadasReset();
-        }
-    };
-
-    const handleConfirmRelatoriosReset = async () => {
-        setIsRelatoriosResetting(true);
+        
+        setIsLimpezaResetting(true);
         setLimpezaDialogOpen(false);
         try {
-            const count = await clearAllRelatorios();
-            setNotification({ type: "success", title: "Relatórios Zerados!", message: `${count} registros de atendimentos finalizados foram excluídos.` });
+            const [chamadasCount, relatoriosCount] = await Promise.all([
+                clearAllChamadas(),
+                clearAllRelatorios()
+            ]);
+            setNotification({ type: "success", title: "Dados Zerados!", message: `${chamadasCount} chamadas e ${relatoriosCount} relatórios foram excluídos.` });
         } catch (error) {
-             setNotification({ type: "error", title: "Erro ao zerar relatórios", message: (error as Error).message });
+             setNotification({ type: "error", title: "Erro ao zerar dados", message: (error as Error).message });
         } finally {
-            setIsRelatoriosResetting(false);
+            setIsLimpezaResetting(false);
         }
     };
-
-    const handleConfirmChamadasReset = async () => {
-        setIsChamadasResetting(true);
-        setLimpezaDialogOpen(false);
-        try {
-            const count = await clearAllChamadas();
-            setNotification({ type: "success", title: "Chamadas do Painel Zeradas!", message: `${count} registros de chamadas do painel foram excluídos.` });
-        } catch (error) {
-             setNotification({ type: "error", title: "Erro ao zerar chamadas", message: (error as Error).message });
-        } finally {
-            setIsChamadasResetting(false);
-        }
-    };
-
+    
     const handleConfirmPacienteReset = async () => {
         setIsPacienteResetting(true);
         setPacienteDialogOpen(false);
@@ -314,15 +293,14 @@ export default function ConfiguracoesPage() {
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <Trash2 className="h-6 w-6 text-destructive" />
-                    <CardTitle>Limpeza de Históricos</CardTitle>
+                    <CardTitle>Limpeza Definitiva de Dados</CardTitle>
                 </div>
                 <CardDescription>
                     Exclui permanentemente todos os registros de chamadas e relatórios.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-                 <ActionRow label="Zerar Chamadas do Painel" buttonText="Zerar Chamadas" onClick={() => handleLimpezaRequest('chamadas')} isResetting={isChamadasResetting} icon={MonitorUp} />
-                 <ActionRow label="Zerar Relatórios de Atendimento" buttonText="Zerar Relatórios" onClick={() => handleLimpezaRequest('relatorios')} isResetting={isRelatoriosResetting} icon={BarChartHorizontal} />
+                 <ActionRow label="Zerar Histórico de Dados" buttonText="Limpeza Completa" onClick={handleLimpezaRequest} isResetting={isLimpezaResetting} icon={Trash2} />
             </CardContent>
         </Card>
         
@@ -332,10 +310,10 @@ export default function ConfiguracoesPage() {
             isOpen={limpezaDialogOpen}
             onOpenChange={setLimpezaDialogOpen}
             onConfirmWithPassword={handleConfirmLimpeza}
-            isSubmitting={isChamadasResetting || isRelatoriosResetting}
-            title={limpezaType === 'chamadas' ? "Zerar Chamadas do Painel" : "Zerar Relatórios de Atendimento"}
+            isSubmitting={isLimpezaResetting}
+            title="Limpeza Definitiva de Dados"
             description={`
-                <p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha, atendimentos e finalizados.</p>
+                <p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos.<br/>- Relatórios de Atendimento.</p>
                 <p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>
             `}
             confirmText="Sim, zerar dados"
@@ -350,3 +328,4 @@ export default function ConfiguracoesPage() {
   );
 }
 
+    
