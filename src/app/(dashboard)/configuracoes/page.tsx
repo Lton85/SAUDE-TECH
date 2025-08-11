@@ -184,7 +184,7 @@ export default function ConfiguracoesPage() {
         setPacienteDialogOpen(false);
         try {
             await resetCounterByName('pacientes_v2');
-            setNotification({ type: "success", title: "Códigos de Paciente Zerados!", message: "A contagem de códigos de cadastro de paciente foi reiniciada para 001." });
+            setNotification({ type: "success", title: "Códigos de Paciente Zerados!", message: "A contagem de códigos de cadastro de paciente foi reiniciada para 01." });
         } catch (error) {
             setNotification({ type: "error", title: "Erro ao zerar códigos de paciente", message: (error as Error).message });
         } finally {
@@ -197,7 +197,7 @@ export default function ConfiguracoesPage() {
         setProfissionalDialogOpen(false);
         try {
             await resetCounterByName('profissionais_v2');
-            setNotification({ type: "success", title: "Códigos de Profissional Zerados!", message: "A contagem de códigos de cadastro de profissional foi reiniciada para 001." });
+            setNotification({ type: "success", title: "Códigos de Profissional Zerados!", message: "A contagem de códigos de cadastro de profissional foi reiniciada para 01." });
         } catch (error) {
             setNotification({ type: "error", title: "Erro ao zerar códigos de profissional", message: (error as Error).message });
         } finally {
@@ -330,8 +330,8 @@ export default function ConfiguracoesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (001)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
-                    <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (001)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                    <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (01)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                    <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (01)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
                     <Separator className="my-1" />
                     <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
                     <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />

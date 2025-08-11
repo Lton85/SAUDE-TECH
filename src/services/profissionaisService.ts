@@ -16,7 +16,7 @@ export const getProfissionais = async (): Promise<Profissional[]> => {
 
 export const addProfissional = async (profissional: Omit<Profissional, 'id' | 'codigo' | 'historico'>): Promise<string> => {
     const nextId = await getNextCounter('profissionais_v2');
-    const codigo = String(nextId).padStart(3, '0');
+    const codigo = String(nextId).padStart(2, '0');
     const loggedUser = getCurrentUser();
     const newProfissional = {
         ...profissional,

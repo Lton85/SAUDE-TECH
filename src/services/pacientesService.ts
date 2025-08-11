@@ -62,7 +62,7 @@ export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'hi
     await checkDuplicate('cns', paciente.cns);
     
     const nextId = await getNextCounter('pacientes_v2');
-    const codigo = String(nextId).padStart(3, '0');
+    const codigo = String(nextId).padStart(2, '0');
     const loggedUser = getCurrentUser();
     
     const newPatient: Omit<Paciente, 'id'> = {

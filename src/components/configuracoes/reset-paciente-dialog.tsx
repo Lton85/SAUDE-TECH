@@ -26,7 +26,7 @@ export function ResetPacienteDialog({ isOpen, onOpenChange, onConfirm }: ResetPa
             Confirmar Ação
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Você tem certeza que deseja zerar a contagem de códigos de cadastro de paciente? O próximo paciente cadastrado terá o código <span className="font-bold text-destructive">001</span>. Esta ação não pode ser desfeita.
+            Você tem certeza que deseja zerar a contagem de códigos de cadastro de paciente? O próximo paciente cadastrado terá o código <span className="font-bold text-destructive">01</span>. Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
