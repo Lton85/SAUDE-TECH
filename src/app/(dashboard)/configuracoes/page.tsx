@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import type { Empresa } from "@/types/empresa";
 
 const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: (password: string) => void, itemType: string }) => {
-    const description = `<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todos os cadastros de ${itemType}.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todos os outros dados, como históricos e relatórios.</p>`;
+    const description = `<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todos os cadastros de ${itemType}.</p>`;
     
     return (
         <LimpezaHistoricoDialog
