@@ -63,9 +63,7 @@ export function LimpezaHistoricoDialog({
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="text-sm text-foreground space-y-3">
-              <div dangerouslySetInnerHTML={{ __html: finalDescription }} />
-            </div>
+            <div className="text-sm text-foreground space-y-3" dangerouslySetInnerHTML={{ __html: finalDescription }}/>
           </AlertDialogDescription>
         </AlertDialogHeader>
         
