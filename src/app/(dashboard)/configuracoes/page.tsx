@@ -334,11 +334,12 @@ export default function ConfiguracoesPage() {
             onConfirmWithPassword={handleConfirmLimpeza}
             isSubmitting={isChamadasResetting || isRelatoriosResetting}
             title={limpezaType === 'chamadas' ? "Zerar Chamadas do Painel" : "Zerar Relatórios de Atendimento"}
-            description={
-                limpezaType === 'chamadas'
-                ? "Esta ação é <b class='text-destructive'>IRREVERSÍVEL</b> e irá apagar todos os dados de chamadas do sistema."
-                : "Esta ação é <b class='text-destructive'>IRREVERSÍVEL</b> e irá apagar todos os dados de atendimentos finalizados do sistema."
-            }
+            description={`
+                <div class="space-y-3">
+                    <p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha, atendimentos e finalizados.</p>
+                    <p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>
+                </div>
+            `}
             confirmText="Sim, zerar dados"
             onConfirm={() => {}}
         />
@@ -350,5 +351,3 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
-
-    
