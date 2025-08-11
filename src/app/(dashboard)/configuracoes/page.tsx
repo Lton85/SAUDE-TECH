@@ -363,9 +363,9 @@ export default function ConfiguracoesPage() {
     );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Coluna 1 e 2: Configurações Gerais */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
@@ -376,14 +376,14 @@ export default function ConfiguracoesPage() {
                         Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-2">
+                <CardContent>
                     <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} variant="destructive" />
                 </CardContent>
             </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <Card>
                     <CardHeader>
                         <div className="flex items-center gap-3">
@@ -471,7 +471,7 @@ export default function ConfiguracoesPage() {
         </div>
 
         {/* Coluna 3: Ações de Risco */}
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Card className="border-destructive/50">
                 <CardHeader>
                     <div className="flex items-center gap-3 text-destructive">
@@ -482,7 +482,7 @@ export default function ConfiguracoesPage() {
                         Ações que afetam os códigos e registros. Use com extrema cautela.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 pt-2">
+                <CardContent className="pt-2">
                     <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (01)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
                     <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (01)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
                     <ActionRow label="Zerar Códigos de Departamentos" buttonText="Zerar (01)" onClick={handleDepartamentoResetRequest} isResetting={isDepartamentoResetting} disabled={departamentosCount === null || departamentosCount > 0} title={departamentosCount !== null && departamentosCount > 0 ? `Existem ${departamentosCount} departamentos cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
