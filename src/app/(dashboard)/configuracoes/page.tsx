@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building, Printer, Save, Loader2 } from "lucide-react";
+import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building, Printer, Save, Loader2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllRelatorios } from "@/services/filaDeEsperaService";
@@ -63,7 +63,9 @@ export default function ConfiguracoesPage() {
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     const [nomeImpressora, setNomeImpressora] = useState("");
+    const [originalNomeImpressora, setOriginalNomeImpressora] = useState("");
     const [isSavingPrinter, setIsSavingPrinter] = useState(false);
+    const [isEditingPrinter, setIsEditingPrinter] = useState(false);
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -77,6 +79,7 @@ export default function ConfiguracoesPage() {
                 setProfissionaisCount(profissionais.length);
                 if (empresaData?.nomeImpressora) {
                     setNomeImpressora(empresaData.nomeImpressora);
+                    setOriginalNomeImpressora(empresaData.nomeImpressora);
                 }
             } catch (error) {
                 setNotification({
@@ -254,6 +257,8 @@ export default function ConfiguracoesPage() {
         setIsSavingPrinter(true);
         try {
             await saveOrUpdateEmpresa({ nomeImpressora } as Empresa);
+             setOriginalNomeImpressora(nomeImpressora);
+            setIsEditingPrinter(false);
             setNotification({
                 type: 'success',
                 title: 'Impressora Salva!',
@@ -268,6 +273,11 @@ export default function ConfiguracoesPage() {
         } finally {
             setIsSavingPrinter(false);
         }
+    };
+    
+    const handleCancelPrinterEdit = () => {
+        setNomeImpressora(originalNomeImpressora);
+        setIsEditingPrinter(false);
     };
 
 
@@ -355,13 +365,27 @@ export default function ConfiguracoesPage() {
                             id="nomeImpressora" 
                             value={nomeImpressora} 
                             onChange={(e) => setNomeImpressora(e.target.value)} 
-                            placeholder="Ex: EPSON L3250 Series" 
+                            placeholder="Ex: EPSON L3250 Series"
+                            disabled={!isEditingPrinter}
                         />
                     </div>
-                    <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
-                        {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Salvar
-                    </Button>
+                     {!isEditingPrinter ? (
+                        <Button onClick={() => setIsEditingPrinter(true)} disabled={isSavingPrinter}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Editar
+                        </Button>
+                    ) : (
+                        <>
+                            <Button variant="outline" onClick={handleCancelPrinterEdit} disabled={isSavingPrinter}>
+                                <X className="mr-2 h-4 w-4" />
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
+                                {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                Salvar
+                            </Button>
+                        </>
+                    )}
                 </div>
             </CardContent>
         </Card>
