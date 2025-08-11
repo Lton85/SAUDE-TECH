@@ -6,10 +6,9 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/com
 import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
-import { clearAllRelatorios } from "@/services/filaDeEsperaService";
-import { clearAllChamadas } from "@/services/chamadasService";
+import { clearAllRelatorios, clearAllChamadas } from "@/services/filaDeEsperaService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
-import { ResetProntuarioDialog } from "@/components/configuracoes/reset-prontuario-dialog";
+import { LimpezaHistoricoDialog } from "@/components/configuracoes/limpeza-historico-dialog";
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
 import { getPacientes, clearAllPacientes } from "@/services/pacientesService";
 import { getProfissionais, clearAllProfissionais } from "@/services/profissionaisService";
@@ -18,26 +17,16 @@ import { ResetProfissionalDialog } from "@/components/configuracoes/reset-profis
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { Separator } from "@/components/ui/separator";
 
-// New Dialog component for "Zerar Chamadas" confirmation
-const ResetChamadasDialog = ({ isOpen, onOpenChange, onConfirm }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: () => void }) => (
-    <ResetProntuarioDialog
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onConfirm={onConfirm}
-        title="Zerar Chamadas do Painel"
-        description="Esta ação excluirá permanentemente todo o histórico de chamadas exibidas no painel de senhas e não pode ser desfeita. Deseja continuar?"
-        confirmText="Sim, zerar chamadas"
-    />
-);
-
 const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: () => void, itemType: string }) => (
-    <ResetProntuarioDialog
+    <LimpezaHistoricoDialog
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        onConfirm={onConfirm}
+        onConfirm={() => {}} // This is handled by the parent now
         title={`Excluir Todos os ${itemType}`}
         description={`Esta ação excluirá PERMANENTEMENTE todos os cadastros de ${itemType} do sistema. Esta ação não pode ser desfeita. Deseja continuar?`}
         confirmText={`Sim, excluir todos`}
+        requiresPassword={false}
+        onConfirmWithPassword={onConfirm}
     />
 );
 
@@ -56,8 +45,7 @@ export default function ConfiguracoesPage() {
     const [isDeletingAllDepartamentos, setIsDeletingAllDepartamentos] = useState(false);
 
     const [senhaDialogOpen, setSenhaDialogOpen] = useState(false);
-    const [relatoriosDialogOpen, setRelatoriosDialogOpen] = useState(false);
-    const [chamadasDialogOpen, setChamadasDialogOpen] = useState(false);
+    const [limpezaDialogOpen, setLimpezaDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
     const [profissionalDialogOpen, setProfissionalDialogOpen] = useState(false);
     
@@ -65,6 +53,7 @@ export default function ConfiguracoesPage() {
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
     
     const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
+    const [limpezaType, setLimpezaType] = useState<'chamadas' | 'relatorios' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
@@ -95,8 +84,10 @@ export default function ConfiguracoesPage() {
         setSenhaDialogOpen(true);
     };
     
-    const handleRelatoriosResetRequest = () => setRelatoriosDialogOpen(true);
-    const handleChamadasResetRequest = () => setChamadasDialogOpen(true);
+    const handleLimpezaRequest = (type: 'chamadas' | 'relatorios') => {
+        setLimpezaType(type);
+        setLimpezaDialogOpen(true);
+    };
 
     const handlePacienteResetRequest = () => {
         if (pacientesCount !== null && pacientesCount > 0) {
@@ -152,9 +143,22 @@ export default function ConfiguracoesPage() {
         }
     };
     
+    const handleConfirmLimpeza = async (password: string) => {
+        if (password !== '9512') {
+            setNotification({ type: "error", title: "Senha Incorreta", message: "A senha de segurança fornecida está incorreta." });
+            return;
+        }
+
+        if (limpezaType === 'relatorios') {
+            await handleConfirmRelatoriosReset();
+        } else if (limpezaType === 'chamadas') {
+            await handleConfirmChamadasReset();
+        }
+    };
+
     const handleConfirmRelatoriosReset = async () => {
         setIsRelatoriosResetting(true);
-        setRelatoriosDialogOpen(false);
+        setLimpezaDialogOpen(false);
         try {
             const count = await clearAllRelatorios();
             setNotification({ type: "success", title: "Relatórios Zerados!", message: `${count} registros de atendimentos finalizados foram excluídos.` });
@@ -167,7 +171,7 @@ export default function ConfiguracoesPage() {
 
     const handleConfirmChamadasReset = async () => {
         setIsChamadasResetting(true);
-        setChamadasDialogOpen(false);
+        setLimpezaDialogOpen(false);
         try {
             const count = await clearAllChamadas();
             setNotification({ type: "success", title: "Chamadas do Painel Zeradas!", message: `${count} registros de chamadas do painel foram excluídos.` });
@@ -316,14 +320,28 @@ export default function ConfiguracoesPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-                 <ActionRow label="Zerar Chamadas do Painel" buttonText="Zerar Chamadas" onClick={handleChamadasResetRequest} isResetting={isChamadasResetting} icon={MonitorUp} />
-                 <ActionRow label="Zerar Relatórios de Atendimento" buttonText="Zerar Relatórios" onClick={handleRelatoriosResetRequest} isResetting={isRelatoriosResetting} icon={BarChartHorizontal} />
+                 <ActionRow label="Zerar Chamadas do Painel" buttonText="Zerar Chamadas" onClick={() => handleLimpezaRequest('chamadas')} isResetting={isChamadasResetting} icon={MonitorUp} />
+                 <ActionRow label="Zerar Relatórios de Atendimento" buttonText="Zerar Relatórios" onClick={() => handleLimpezaRequest('relatorios')} isResetting={isRelatoriosResetting} icon={BarChartHorizontal} />
             </CardContent>
         </Card>
         
-       {resetType && (<ResetSenhaDialog isOpen={senhaDialogOpen} onOpenChange={setSenhaDialogOpen} onConfirm={handleConfirmSenhaReset} tipoSenha={resetType}/>)}
-        <ResetProntuarioDialog isOpen={relatoriosDialogOpen} onOpenChange={setRelatoriosDialogOpen} onConfirm={handleConfirmRelatoriosReset} title="Zerar Relatórios de Atendimento" description="Esta ação excluirá permanentemente todos os registros de atendimentos finalizados e cancelados e não pode ser desfeita. Deseja continuar?" confirmText="Sim, zerar relatórios"/>
-        <ResetChamadasDialog isOpen={chamadasDialogOpen} onOpenChange={setChamadasDialogOpen} onConfirm={handleConfirmChamadasReset} />
+        {resetType && (<ResetSenhaDialog isOpen={senhaDialogOpen} onOpenChange={setSenhaDialogOpen} onConfirm={handleConfirmSenhaReset} tipoSenha={resetType}/>)}
+        
+        <LimpezaHistoricoDialog
+            isOpen={limpezaDialogOpen}
+            onOpenChange={setLimpezaDialogOpen}
+            onConfirmWithPassword={handleConfirmLimpeza}
+            isSubmitting={isChamadasResetting || isRelatoriosResetting}
+            title={limpezaType === 'chamadas' ? "Zerar Chamadas do Painel" : "Zerar Relatórios de Atendimento"}
+            description={
+                limpezaType === 'chamadas'
+                ? "Esta ação é <b class='text-destructive'>IRREVERSÍVEL</b> e irá apagar todos os dados de chamadas do sistema."
+                : "Esta ação é <b class='text-destructive'>IRREVERSÍVEL</b> e irá apagar todos os dados de atendimentos finalizados do sistema."
+            }
+            confirmText="Sim, zerar dados"
+            onConfirm={() => {}}
+        />
+
         <ResetPacienteDialog isOpen={pacienteDialogOpen} onOpenChange={setPacienteDialogOpen} onConfirm={handleConfirmPacienteReset} />
         <ResetProfissionalDialog isOpen={profissionalDialogOpen} onOpenChange={setProfissionalDialogOpen} onConfirm={handleConfirmProfissionalReset} />
         {deleteType && (<DeleteAllDialog isOpen={deleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} onConfirm={handleConfirmDeleteAll} itemType={deleteType} />)}
@@ -331,3 +349,5 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
+
+    
