@@ -53,7 +53,7 @@ const subtitleSizeClasses = {
 const cardSizeClasses = {
   pequeno: "text-2xl md:text-3xl",
   medio: "text-3xl md:text-4xl",
-  grande: "text-4xl md:text-5xl",
+  grande: "text-4xl",
 };
 
 
