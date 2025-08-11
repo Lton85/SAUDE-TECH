@@ -25,7 +25,11 @@ interface IbgeCityResponse {
     nome: string;
 }
 
-const allClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"];
+const allClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"].sort((a, b) => {
+    const order = { "Normal": 1, "Preferencial": 2, "Urgência": 3, "Outros": 4 };
+    return order[a as keyof typeof order] - order[b as keyof typeof order];
+});
+
 
 const initialEmpresaState: Empresa = {
     id: "config",
@@ -76,6 +80,14 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         }
         setIsLoading(false);
     }, [empresaData]);
+
+    // UseEffect to sync formData with the parent component's state
+    useEffect(() => {
+        if (formData !== empresaData) {
+            onEmpresaDataChange(formData);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData]);
     
     const fetchCitiesForUf = async (uf: string) => {
         if (!uf) {
@@ -102,23 +114,17 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
     }
     
     const handleUfChange = (uf: string) => {
-        const newFormData = { ...formData, uf, cidade: "" };
-        setFormData(newFormData);
-        onEmpresaDataChange({ uf, cidade: "" });
+        setFormData(prev => ({ ...prev, uf, cidade: "" }));
         fetchCitiesForUf(uf);
     }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
-        const newFormData = {...formData, [id]: value };
-        setFormData(newFormData);
-        onEmpresaDataChange({ [id]: value });
+        setFormData(prev => ({...prev, [id]: value }));
     }
 
     const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento'>, value: string) => {
-        const newFormData = { ...formData, [id]: value };
-        setFormData(newFormData);
-        onEmpresaDataChange({ [id]: value });
+        setFormData(prev => ({ ...prev, [id]: value }));
     }
     
      const handleClassificationChange = (classification: string, checked: boolean) => {
@@ -128,7 +134,6 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
                 ? [...currentClassifications, classification]
                 : currentClassifications.filter(c => c !== classification);
 
-            onEmpresaDataChange({ classificacoesAtendimento: newClassifications });
             return { ...prev, classificacoesAtendimento: newClassifications };
         });
     };
@@ -148,21 +153,14 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
                     message: "Por favor, verifique o CEP digitado.",
                 });
             } else {
-                const newFormData = {
-                    ...formData,
+                 setFormData(prev => ({
+                    ...prev,
                     endereco: data.logradouro,
                     bairro: data.bairro,
                     cidade: data.localidade,
                     uf: data.uf,
-                    cep: formData.cep,
-                };
-                 setFormData(newFormData);
-                 onEmpresaDataChange({
-                     endereco: data.logradouro,
-                     bairro: data.bairro,
-                     cidade: data.localidade,
-                     uf: data.uf
-                 });
+                    cep: prev.cep,
+                }));
                  await fetchCitiesForUf(data.uf);
             }
         } catch (error) {
@@ -187,7 +185,6 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         setIsEditing(false);
         if (empresaData) {
             setFormData(empresaData);
-            onEmpresaDataChange(empresaData);
         }
     };
 
