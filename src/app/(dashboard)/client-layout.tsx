@@ -268,11 +268,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
         }
     };
     fetchEmpresaData();
-  }, []);
-
-  const handleEmpresaDataChange = (newData: Partial<Empresa>) => {
-    setEmpresa(prev => prev ? { ...prev, ...newData } : null);
-  };
+  }, [activeContentId]); // Refetch when content changes, e.g., after saving on EmpresaPage
 
   const activeComponentInfo = allMenuItems.find(item => item.id === activeContentId);
 
@@ -282,10 +278,6 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
     }
 
     const props: any = {};
-    if (activeComponentInfo.id === '/empresa') {
-        props.onEmpresaDataChange = handleEmpresaDataChange;
-        props.empresaData = empresa;
-    }
     if (activeComponentInfo.id === '/') {
         props.onCardClick = onMenuItemClick;
     }
@@ -496,5 +488,3 @@ export default function DashboardClientLayout({
     </SidebarProvider>
   );
 }
-
-    

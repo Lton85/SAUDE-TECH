@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Building, Save, Loader2, Pencil, X, ShieldQuestion } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { saveOrUpdateEmpresa } from "@/services/empresaService";
+import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,12 +49,7 @@ const initialEmpresaState: Empresa = {
     classificacoesAtendimento: ["Normal", "Preferencial", "Urgência", "Outros"],
 };
 
-interface EmpresaPageProps {
-    empresaData: Empresa | null;
-    onEmpresaDataChange: (newData: Partial<Empresa>) => void;
-}
-
-export default function EmpresaPage({ empresaData, onEmpresaDataChange }: EmpresaPageProps) {
+export default function EmpresaPage() {
     const [formData, setFormData] = useState<Empresa>(initialEmpresaState);
     const [cities, setCities] = useState<string[]>([]);
     const [isCitiesLoading, setIsCitiesLoading] = useState(false);
@@ -63,32 +58,38 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
     const [isEditing, setIsEditing] = useState(false);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
-    useEffect(() => {
+    const fetchEmpresaData = async () => {
         setIsLoading(true);
-        if (empresaData) {
-             const classificacoes = empresaData.classificacoesAtendimento?.length 
-                ? empresaData.classificacoesAtendimento 
-                : initialEmpresaState.classificacoesAtendimento;
+        try {
+            const empresaData = await getEmpresa();
+            if (empresaData) {
+                const classificacoes = empresaData.classificacoesAtendimento?.length 
+                    ? empresaData.classificacoesAtendimento 
+                    : initialEmpresaState.classificacoesAtendimento;
 
-            setFormData({...empresaData, classificacoesAtendimento: classificacoes});
-            if (empresaData.uf) {
-                fetchCitiesForUf(empresaData.uf);
+                setFormData({...empresaData, classificacoesAtendimento: classificacoes});
+                if (empresaData.uf) {
+                    fetchCitiesForUf(empresaData.uf);
+                }
+            } else {
+                setFormData(initialEmpresaState);
+                setIsEditing(true); 
             }
-        } else {
-            setFormData(initialEmpresaState);
-            setIsEditing(true); 
+        } catch (error) {
+            setNotification({
+                type: "error",
+                title: "Erro ao carregar dados",
+                message: "Não foi possível buscar as informações da empresa.",
+            });
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
-    }, [empresaData]);
-
-    // UseEffect to sync formData with the parent component's state
-    useEffect(() => {
-        if (formData !== empresaData) {
-            onEmpresaDataChange(formData);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [formData]);
+    };
     
+    useEffect(() => {
+        fetchEmpresaData();
+    }, []);
+
     const fetchCitiesForUf = async (uf: string) => {
         if (!uf) {
             setCities([]);
@@ -181,11 +182,9 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         }
     };
 
-    const handleCancel = () => {
+    const handleCancel = async () => {
         setIsEditing(false);
-        if (empresaData) {
-            setFormData(empresaData);
-        }
+        await fetchEmpresaData(); // Refetch original data
     };
 
     const handleSave = async () => {
