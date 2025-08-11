@@ -73,7 +73,7 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter uppercase">
+                <h1 className="font-display text-6xl md:text-8xl font-black text-amber-400 tracking-tighter uppercase">
                     RETIRE SUA SENHA AQUI
                 </h1>
                 <p className="mt-2 text-3xl md:text-4xl text-slate-200">
