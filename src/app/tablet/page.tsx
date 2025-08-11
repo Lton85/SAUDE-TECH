@@ -146,22 +146,24 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className={cn(
-                "grid grid-cols-1 gap-8 w-full max-w-7xl",
-                classificacoes.length === 2 && "md:grid-cols-2",
-                classificacoes.length === 3 && "md:grid-cols-3",
-                classificacoes.length === 4 && "md:grid-cols-4",
-            )}>
+            <div className="flex flex-wrap justify-center items-center gap-8 w-full max-w-7xl">
                 {classificacoes.map((tipo, index) => (
-                     <motion.div key={tipo} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
+                     <motion.div 
+                        key={tipo} 
+                        custom={index} 
+                        initial="hidden" 
+                        animate="visible" 
+                        variants={cardVariants}
+                        className="w-full sm:w-64 md:w-72" // Define a fixed width for the cards
+                     >
                         <Card 
                             className={cn(
-                                "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer",
+                                "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer aspect-square",
                                 borderColors[tipo]
                             )}
                             onClick={() => handleSelection(tipo as FilaDeEsperaItem['classificacao'])}
                         >
-                            <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
+                            <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 h-full">
                                 {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("text-3xl md:text-4xl font-bold", textColors[tipo])}>{tipo.toUpperCase()}</h2>}
                             </CardContent>
                         </Card>
