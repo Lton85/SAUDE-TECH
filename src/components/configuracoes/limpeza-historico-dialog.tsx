@@ -60,7 +60,7 @@ export function LimpezaHistoricoDialog({
           <AlertDialogDescription>
             <span dangerouslySetInnerHTML={{ __html: description }} />
             {requiresPassword && (
-                <p className="mt-2">Para continuar, você precisará fornecer a senha de segurança.</p>
+                <span className="mt-2 block">Para continuar, você precisará fornecer a senha de segurança.</span>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -89,5 +89,3 @@ export function LimpezaHistoricoDialog({
     </AlertDialog>
   )
 }
-
-    
