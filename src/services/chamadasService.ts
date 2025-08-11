@@ -85,4 +85,5 @@ export const clearAllChamadas = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o histórico de chamadas do painel.");
     }
 };
+
     

@@ -84,3 +84,5 @@ export const clearAllProfissionais = async (): Promise<number> => {
         throw new Error("Não foi possível excluir todos os profissionais.");
     }
 };
+
+    

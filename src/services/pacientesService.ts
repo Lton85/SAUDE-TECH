@@ -102,3 +102,5 @@ export const clearAllPacientes = async (): Promise<number> => {
         throw new Error("Não foi possível excluir todos os pacientes.");
     }
 };
+
+    

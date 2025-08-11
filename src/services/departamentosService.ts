@@ -120,3 +120,5 @@ export const clearAllDepartamentos = async (): Promise<number> => {
         throw new Error("Não foi possível excluir todos os departamentos.");
     }
 };
+
+    
