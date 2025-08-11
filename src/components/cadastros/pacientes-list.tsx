@@ -27,6 +27,7 @@ import { FilaDeEsperaItem } from "@/types/fila";
 import { getProfissionais } from "@/services/profissionaisService";
 import { updateHistoricoItem } from "@/services/filaDeEsperaService";
 import { NotificationDialog, NotificationType } from "../ui/notification-dialog";
+import { getEmpresa } from "@/services/empresaService";
 
 
 export function PacientesList() {
@@ -35,6 +36,7 @@ export function PacientesList() {
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [profissionais, setProfissionais] = useState<{id: string, nome: string}[]>([]);
+  const [activeClassificacoes, setActiveClassificacoes] = useState<string[]>([]);
   
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
@@ -53,14 +55,21 @@ export function PacientesList() {
 
    const fetchData = async () => {
     try {
-      const [departamentosData, profissionaisData] = await Promise.all([
+      const [departamentosData, profissionaisData, empresaData] = await Promise.all([
         getDepartamentos(),
         getProfissionais(),
+        getEmpresa(),
       ]);
       setDepartamentos(departamentosData.filter(d => d.situacao === 'Ativo'));
       
       const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
       setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
+      
+      if (empresaData?.classificacoesAtendimento?.length) {
+          setActiveClassificacoes(empresaData.classificacoesAtendimento);
+      } else {
+          setActiveClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
+      }
 
     } catch (error) {
       setNotification({
@@ -362,6 +371,7 @@ export function PacientesList() {
                 onOpenChange={() => setSelectedPatientForQueue(null)}
                 paciente={selectedPatientForQueue}
                 departamentos={departamentos}
+                classificacoes={activeClassificacoes}
                 onNotification={setNotification}
             />
         )}
@@ -397,3 +407,5 @@ export function PacientesList() {
     </>
   );
 }
+
+    

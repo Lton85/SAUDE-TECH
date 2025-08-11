@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
+import { getEmpresa } from "@/services/empresaService";
 
 interface Profissional {
   id: string;
@@ -42,6 +43,7 @@ export default function AtendimentosPage() {
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+    const [activeClassificacoes, setActiveClassificacoes] = useState<string[]>([]);
     
     // UI states
     const [isLoading, setIsLoading] = useState(true);
@@ -64,14 +66,20 @@ export default function AtendimentosPage() {
     useEffect(() => {
         const fetchSupportData = async () => {
              try {
-                const [deptoData, profissionaisData] = await Promise.all([
+                const [deptoData, profissionaisData, empresaData] = await Promise.all([
                     getDepartamentos(),
                     getProfissionais(),
+                    getEmpresa(),
                 ]);
 
                 setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
                 const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
+                if (empresaData?.classificacoesAtendimento?.length) {
+                    setActiveClassificacoes(empresaData.classificacoesAtendimento);
+                } else {
+                    setActiveClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
+                }
 
              } catch (error) {
                  setNotification({ type: "error", title: "Erro ao carregar dados de apoio", message: "Não foi possível carregar departamentos ou profissionais." });
@@ -290,6 +298,7 @@ export default function AtendimentosPage() {
                 onOpenChange={setIsAddToQueueDialogOpen}
                 pacientes={pacientes}
                 departamentos={departamentos}
+                classificacoes={activeClassificacoes}
                 onAddNewPatient={handleOpenNewPatientDialog}
                 patientToAdd={patientToAdd}
                 atendimentoParaCompletar={atendimentoParaCompletar}
@@ -401,5 +410,7 @@ export default function AtendimentosPage() {
         </div>
     );
 }
+
+    
 
     

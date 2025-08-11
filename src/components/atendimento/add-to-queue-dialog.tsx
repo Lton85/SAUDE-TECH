@@ -30,6 +30,7 @@ interface AddToQueueDialogProps {
   onOpenChange: (isOpen: boolean) => void
   pacientes: Paciente[]
   departamentos: Departamento[]
+  classificacoes: string[];
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
   atendimentoParaCompletar?: FilaDeEsperaItem | null;
@@ -50,8 +51,7 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
 
 const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
 
-
-export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
+export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, classificacoes, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
@@ -69,6 +69,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
   
   const isCompleting = !!atendimentoParaCompletar;
+
+  const orderedClassificacoes = useMemo(() => {
+    return classificationOrder.filter(c => classificacoes.includes(c));
+  }, [classificacoes]);
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
 
@@ -130,6 +134,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     };
     
     if (isOpen) {
+      // Set default classification to the first available one
+      if (orderedClassificacoes.length > 0) {
+          setClassification(orderedClassificacoes[0] as FilaDeEsperaItem['classificacao']);
+      }
+
       fetchProfissionais();
       if (patientToAdd) {
         handleSelectPatient(patientToAdd);
@@ -142,7 +151,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         resetState();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, orderedClassificacoes]);
   
 
   const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
@@ -467,7 +476,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
                             <SelectContent>
-                                {classificationOrder.map(c => (
+                                {orderedClassificacoes.map(c => (
                                     <SelectItem key={c} value={c}>{c}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -503,3 +512,5 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
+
+    

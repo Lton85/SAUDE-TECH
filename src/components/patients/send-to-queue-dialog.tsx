@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -28,6 +28,7 @@ interface EnviarParaFilaDialogProps {
   onOpenChange: (isOpen: boolean) => void
   paciente: Paciente | null
   departamentos: Departamento[]
+  classificacoes: string[];
   onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
@@ -44,7 +45,7 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 
 const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
 
-export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, onNotification }: EnviarParaFilaDialogProps) {
+export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, classificacoes, onNotification }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
@@ -55,7 +56,10 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
   
-
+  const orderedClassificacoes = useMemo(() => {
+    return classificationOrder.filter(c => classificacoes.includes(c));
+  }, [classificacoes]);
+  
   useEffect(() => {
     const fetchProfissionais = async () => {
       setIsLoading(true);
@@ -75,9 +79,12 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     };
     
     if (isOpen) {
+      if (orderedClassificacoes.length > 0) {
+        setClassification(orderedClassificacoes[0] as FilaDeEsperaItem['classificacao']);
+      }
       fetchProfissionais();
     }
-  }, [isOpen, onNotification]);
+  }, [isOpen, onNotification, orderedClassificacoes]);
   
   useEffect(() => {
     const generateTicket = async () => {
@@ -247,7 +254,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                             <SelectValue placeholder="Selecione a classificação" />
                         </SelectTrigger>
                         <SelectContent>
-                            {classificationOrder.map(c => (
+                            {orderedClassificacoes.map(c => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                             ))}
                         </SelectContent>
@@ -309,3 +316,5 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     </Dialog>
   )
 }
+
+    
