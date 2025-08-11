@@ -231,3 +231,5 @@ const SituacaoCheckbox = ({ isEditMode }: { isEditMode: boolean }) => {
 }
 
 ProfissionalForm.SituacaoCheckbox = SituacaoCheckbox;
+
+    
