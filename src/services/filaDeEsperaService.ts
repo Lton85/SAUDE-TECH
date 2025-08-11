@@ -395,12 +395,6 @@ export const deleteFilaItem = async (id: string): Promise<void> => {
     await deleteDoc(filaDocRef);
 };
 
-/**
- * Consulta que requer um índice composto no Firestore.
- * Coleção: relatorios_atendimentos
- * Campos: pacienteId (Ascendente), finalizadaEm (Descendente)
- * Link para criação: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=CmFwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEAEaDgoKcGFjaWVudGVJZBABGhAKDGZpbmFsaXphZGFFbRACGgwKCF9fbmFtZV9fEAI
- */
 export const getHistoricoAtendimentos = async (pacienteId: string): Promise<FilaDeEsperaItem[]> => {
     if (!pacienteId) {
         return [];
@@ -408,18 +402,25 @@ export const getHistoricoAtendimentos = async (pacienteId: string): Promise<Fila
     try {
         const q = query(
             collection(db, "relatorios_atendimentos"),
-            where("pacienteId", "==", pacienteId),
-            orderBy("finalizadaEm", "desc")
+            where("pacienteId", "==", pacienteId)
+            // A ordenação será feita no lado do cliente para evitar erros de índice complexos
         );
 
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
         
+        // Ordenar por data de finalização ou cancelamento, a mais recente primeiro
+        data.sort((a, b) => {
+            const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
+            const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
+            return timeB - timeA;
+        });
+
         return data;
 
     } catch (error) {
         console.error("Erro ao buscar histórico de atendimentos:", error);
-        throw new Error("Não foi possível carregar o histórico do paciente. Verifique se o índice do Firestore foi criado. O link para criação está nos comentários do código.");
+        throw new Error("Não foi possível carregar o histórico do paciente.");
     }
 };
 
