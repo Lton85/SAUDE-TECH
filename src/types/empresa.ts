@@ -13,4 +13,5 @@ export interface Empresa {
     uf: string;
     telefone: string;
     email: string;
+    nomeImpressora?: string;
 }
