@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building, Printer, Save, Loader2, Pencil, X } from "lucide-react";
+import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllRelatorios } from "@/services/filaDeEsperaService";
@@ -292,8 +292,8 @@ export default function ConfiguracoesPage() {
     );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6 lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
@@ -347,7 +347,7 @@ export default function ConfiguracoesPage() {
             </Card>
         </div>
 
-        <Card className="lg:col-span-2">
+        <Card>
             <CardHeader>
                 <div className="flex items-center gap-3">
                     <Printer className="h-6 w-6" />
@@ -358,7 +358,7 @@ export default function ConfiguracoesPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2 max-w-lg">
                     <div className="flex-1 space-y-1.5">
                         <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
                         <Input 
@@ -410,5 +410,3 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
-
-    
