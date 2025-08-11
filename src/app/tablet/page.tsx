@@ -81,13 +81,13 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
                 <motion.div custom={0} initial="hidden" animate="visible" variants={cardVariants}>
                     <Card 
                         className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-green-500/10 border-green-500/30"
                         onClick={() => handleSelection('Normal')}
                     >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-video">
+                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
                             {isLoading === 'Normal' ? <Loader2 className="h-10 w-10 animate-spin text-green-400" /> : <h2 className="text-xl md:text-3xl font-bold text-green-400">NORMAL</h2>}
                         </CardContent>
                     </Card>
@@ -98,7 +98,7 @@ export default function TabletPage() {
                         className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-blue-500/10 border-blue-500/30"
                         onClick={() => handleSelection('Preferencial')}
                     >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-video">
+                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
                            {isLoading === 'Preferencial' ? <Loader2 className="h-10 w-10 animate-spin text-blue-400" /> : (
                                 <h2 className="text-xl md:text-3xl font-bold text-blue-400">PREFERENCIAL</h2>
                            )}
@@ -111,7 +111,7 @@ export default function TabletPage() {
                         className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-red-500/10 border-red-500/30"
                         onClick={() => handleSelection('Urgência')}
                     >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-video">
+                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
                             {isLoading === 'Urgência' ? <Loader2 className="h-10 w-10 animate-spin text-red-400" /> : <h2 className="text-xl md:text-3xl font-bold text-red-400">URGÊNCIA</h2>}
                         </CardContent>
                     </Card>
