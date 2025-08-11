@@ -6,13 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X, Printer } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { saveOrUpdateEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
-import { Separator } from "@/components/ui/separator";
 
 const ufs = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -298,25 +297,6 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
                             <Label htmlFor="email">E-mail</Label>
                             <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
                         </div>
-                    </div>
-
-                    <Separator />
-                    
-                    <div>
-                        <Label htmlFor="nomeImpressora" className="flex items-center gap-2 mb-2">
-                            <Printer className="h-4 w-4" />
-                            Configurações de Impressão
-                        </Label>
-                        <Input 
-                            id="nomeImpressora" 
-                            value={formData.nomeImpressora || ''} 
-                            onChange={handleInputChange} 
-                            placeholder="Ex: EPSON L3250 Series" 
-                            disabled={!isEditing}
-                        />
-                         <p className="text-xs text-muted-foreground mt-1">
-                            Insira o nome exato da impressora de comprovantes instalada no computador.
-                        </p>
                     </div>
                     
                     <div className="flex justify-end pt-4 gap-2">

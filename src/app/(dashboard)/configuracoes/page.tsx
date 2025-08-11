@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building } from "lucide-react";
+import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building, Printer, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllRelatorios } from "@/services/filaDeEsperaService";
@@ -17,6 +17,10 @@ import { getDepartamentos, clearAllDepartamentos } from "@/services/departamento
 import { ResetProfissionalDialog } from "@/components/configuracoes/reset-profissional-dialog";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { Separator } from "@/components/ui/separator";
+import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import type { Empresa } from "@/types/empresa";
 
 const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: () => void, itemType: string }) => (
     <LimpezaHistoricoDialog
@@ -24,7 +28,7 @@ const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen
         onOpenChange={onOpenChange}
         onConfirm={() => {}} // This is handled by the parent now
         title={`Excluir Todos os ${itemType}`}
-        description={`Esta ação excluirá PERMANENTEMENTE todos os cadastros de ${itemType} do sistema. Esta ação não pode ser desfeita. Deseja continuar?`}
+        description={`Esta ação excluirá PERMANENTEMENTE todos os cadastros de ${itemType} do sistema. Esta ação não pode ser desfeita.`}
         confirmText={`Sim, excluir todos`}
         requiresPassword={false}
         onConfirmWithPassword={onConfirm}
@@ -58,15 +62,22 @@ export default function ConfiguracoesPage() {
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
+    const [nomeImpressora, setNomeImpressora] = useState("");
+    const [isSavingPrinter, setIsSavingPrinter] = useState(false);
+
     useEffect(() => {
         const fetchCounts = async () => {
             try {
-                const [pacientes, profissionais] = await Promise.all([
+                const [pacientes, profissionais, empresaData] = await Promise.all([
                     getPacientes(),
                     getProfissionais(),
+                    getEmpresa(),
                 ]);
                 setPacientesCount(pacientes.length);
                 setProfissionaisCount(profissionais.length);
+                if (empresaData?.nomeImpressora) {
+                    setNomeImpressora(empresaData.nomeImpressora);
+                }
             } catch (error) {
                 setNotification({
                     type: "error",
@@ -239,6 +250,26 @@ export default function ConfiguracoesPage() {
 
     }
 
+    const handleSavePrinter = async () => {
+        setIsSavingPrinter(true);
+        try {
+            await saveOrUpdateEmpresa({ nomeImpressora } as Empresa);
+            setNotification({
+                type: 'success',
+                title: 'Impressora Salva!',
+                message: 'O nome da impressora foi salvo com sucesso.',
+            });
+        } catch (error) {
+             setNotification({
+                type: 'error',
+                title: `Erro ao salvar impressora`,
+                message: (error as Error).message,
+            });
+        } finally {
+            setIsSavingPrinter(false);
+        }
+    };
+
 
     const ActionRow = ({ label, buttonText, onClick, isResetting, disabled, icon: Icon, title, variant = "destructive" }: { label: string; buttonText: string; onClick: () => void; isResetting: boolean; disabled?: boolean; icon: React.ElementType; title?: string; variant?: "destructive" | "outline" | "default" | "secondary" | "ghost" | "link" | null | undefined }) => (
         <div className="flex items-center justify-between border-t p-3 last:border-b-0 -mx-3 -mb-3 first:-mt-3">
@@ -251,56 +282,87 @@ export default function ConfiguracoesPage() {
     );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card>
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <Settings className="h-6 w-6" />
-                    <CardTitle>Contadores de Senha</CardTitle>
-                </div>
-                <CardDescription>
-                    Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-                <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-001)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
-                <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-001)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
-                <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-001)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
-            </CardContent>
-        </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6 lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Settings className="h-6 w-6" />
+                        <CardTitle>Contadores de Senha</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-001)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
+                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-001)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
+                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-001)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
+                </CardContent>
+            </Card>
 
-        <Card>
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <ShieldAlert className="h-6 w-6 text-destructive" />
+                        <CardTitle>Gerenciamento de Cadastros</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Ações perigosas que afetam os códigos e registros. Use com extrema cautela.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (001)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                    <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (001)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                    <Separator className="my-1" />
+                    <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
+                    <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
+                    <ActionRow label="Excluir Todos os Departamentos" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Departamentos")} isResetting={isDeletingAllDepartamentos} icon={Building} />
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Trash2 className="h-6 w-6 text-destructive" />
+                        <CardTitle>Limpeza Definitiva de Dados</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Exclui permanentemente todos os registros de chamadas e relatórios.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <ActionRow label="Zerar Histórico de Dados" buttonText="Limpeza Completa" onClick={handleLimpezaRequest} isResetting={isLimpezaResetting} icon={Trash2} />
+                </CardContent>
+            </Card>
+        </div>
+
+        <Card className="lg:col-span-2">
             <CardHeader>
                 <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-6 w-6 text-destructive" />
-                    <CardTitle>Gerenciamento de Cadastros</CardTitle>
+                    <Printer className="h-6 w-6" />
+                    <CardTitle>Configurações de Impressão</CardTitle>
                 </div>
                 <CardDescription>
-                    Ações perigosas que afetam os códigos e registros. Use com extrema cautela.
+                    Insira o nome exato da impressora de comprovantes instalada no computador.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-                 <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (001)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
-                 <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (001)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
-                <Separator className="my-1" />
-                 <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
-                 <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
-                 <ActionRow label="Excluir Todos os Departamentos" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Departamentos")} isResetting={isDeletingAllDepartamentos} icon={Building} />
-            </CardContent>
-        </Card>
-        
-        <Card>
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <Trash2 className="h-6 w-6 text-destructive" />
-                    <CardTitle>Limpeza Definitiva de Dados</CardTitle>
+            <CardContent>
+                <div className="flex items-end gap-2">
+                    <div className="flex-1 space-y-1.5">
+                        <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
+                        <Input 
+                            id="nomeImpressora" 
+                            value={nomeImpressora} 
+                            onChange={(e) => setNomeImpressora(e.target.value)} 
+                            placeholder="Ex: EPSON L3250 Series" 
+                        />
+                    </div>
+                    <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
+                        {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Salvar
+                    </Button>
                 </div>
-                <CardDescription>
-                    Exclui permanentemente todos os registros de chamadas e relatórios.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-                 <ActionRow label="Zerar Histórico de Dados" buttonText="Limpeza Completa" onClick={handleLimpezaRequest} isResetting={isLimpezaResetting} icon={Trash2} />
             </CardContent>
         </Card>
         
@@ -312,10 +374,7 @@ export default function ConfiguracoesPage() {
             onConfirmWithPassword={handleConfirmLimpeza}
             isSubmitting={isLimpezaResetting}
             title="Limpeza Definitiva de Dados"
-            description={`
-                <p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos.<br/>- Relatórios de Atendimento.</p>
-                <p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>
-            `}
+            description="<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos.<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>"
             confirmText="Sim, zerar dados"
             onConfirm={() => {}}
         />
