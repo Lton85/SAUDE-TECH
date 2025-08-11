@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentosPorPeriodoComFiltros, getAtendimentoById } from "@/services/filaDeEsperaService";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +26,7 @@ import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsperaItem, onPrintItem: (itemId: string) => void }) => {
     const isCanceled = atendimento.status === 'cancelado';
@@ -67,7 +67,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                             'text-xs font-semibold',
                             atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
                             atendimento.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
-                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-600'
+                            atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700'
                         )}
                     >
                         {atendimento.classificacao}
@@ -93,10 +93,10 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
 }
 
 export default function RelatoriosPage() {
-    const { toast } = useToast();
     const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
     const [profissionais, setProfissionais] = React.useState<Profissional[]>([]);
     const [departamentos, setDepartamentos] = React.useState<Departamento[]>([]);
+    const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     
     const [selectedPacienteId, setSelectedPacienteId] = React.useState<string>("todos");
     const [selectedProfissionalId, setSelectedProfissionalId] = React.useState<string>("todos");
@@ -160,10 +160,10 @@ export default function RelatoriosPage() {
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange?.from || !dateRange?.to) {
-            toast({
+            setNotification({
+                type: "warning",
                 title: "Período inválido",
-                description: "Por favor, selecione uma data de início e fim para a busca.",
-                variant: "destructive"
+                message: "Por favor, selecione uma data de início e fim para a busca.",
             });
             return;
         }
@@ -184,17 +184,17 @@ export default function RelatoriosPage() {
             setFilteredReportData(data); // No need for client-side filtering anymore
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao buscar relatório",
-                description: (error as Error).message,
-                variant: "destructive"
+                message: (error as Error).message,
             });
             setAllReportData([]);
             setFilteredReportData([]);
         } finally {
             setIsLoading(false);
         }
-    }, [dateRange, toast, selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, selectedStatus]);
+    }, [dateRange, selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, selectedStatus]);
 
      React.useEffect(() => {
         if (!isMounted) return;
@@ -223,15 +223,15 @@ export default function RelatoriosPage() {
                 setPacientes(pacientesData);
                 setDepartamentos(departamentosData);
             } catch (error) {
-                toast({
+                setNotification({
+                    type: "error",
                     title: "Erro ao carregar dados dos filtros",
-                    description: "Não foi possível carregar as listas de pacientes e profissionais.",
-                    variant: "destructive"
+                    message: "Não foi possível carregar as listas de pacientes e profissionais.",
                 });
             }
         };
         fetchFiltersData();
-    }, [toast]);
+    }, []);
     
 
     // Handle quick date selection (Diário, Semanal, Mensal)
@@ -349,18 +349,18 @@ export default function RelatoriosPage() {
 
     const handlePrint = () => {
          if (!dateRange?.from || !dateRange.to) {
-            toast({
+            setNotification({
+                type: "warning",
                 title: "Período não selecionado",
-                description: "Por favor, selecione um período antes de imprimir.",
-                variant: "destructive"
+                message: "Por favor, selecione um período antes de imprimir.",
             });
             return;
         }
         if (filteredReportData.length === 0) {
-            toast({
+            setNotification({
+                type: "warning",
                 title: "Nenhum dado para imprimir",
-                description: "Não há atendimentos na lista para gerar um relatório.",
-                variant: "destructive"
+                message: "Não há atendimentos na lista para gerar um relatório.",
             });
             return;
         }
@@ -385,10 +385,10 @@ export default function RelatoriosPage() {
             window.open(`/print?id=${itemId}`, '_blank');
         } catch (error) {
             console.error("Erro ao preparar impressão:", error);
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao imprimir",
-                description: "Não foi possível gerar o relatório. Tente novamente.",
-                variant: "destructive"
+                message: "Não foi possível gerar o relatório. Tente novamente.",
             });
         }
     };
@@ -573,6 +573,14 @@ export default function RelatoriosPage() {
                     )}
                 </Card>
             </main>
+            {notification && (
+                <NotificationDialog
+                    type={notification.type}
+                    title={notification.title}
+                    message={notification.message}
+                    onOpenChange={() => setNotification(null)}
+                />
+            )}
         </div>
     );
 }

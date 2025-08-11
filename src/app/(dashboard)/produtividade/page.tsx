@@ -12,12 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { getHistoricoAtendimentosPorPeriodoComFiltros } from "@/services/filaDeEsperaService";
 import { AtendimentosChart } from "../relatorios/atendimentos-chart";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 const KpiCard = ({ title, value, icon: Icon, isLoading }: { title: string, value: string, icon: React.ElementType, isLoading: boolean }) => (
     <Card>
@@ -37,11 +37,11 @@ const KpiCard = ({ title, value, icon: Icon, isLoading }: { title: string, value
 
 
 export default function ProdutividadePage() {
-    const { toast } = useToast();
     const [reportData, setReportData] = React.useState<FilaDeEsperaItem[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [hasSearched, setHasSearched] = React.useState(false);
     const [isMounted, setIsMounted] = React.useState(false);
+    const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     const today = startOfDay(new Date());
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({ from: today, to: today });
@@ -69,10 +69,10 @@ export default function ProdutividadePage() {
 
     const handleSearch = React.useCallback(async () => {
         if (!dateRange?.from || !dateRange?.to) {
-            toast({
+            setNotification({
+                type: "warning",
                 title: "Período inválido",
-                description: "Por favor, selecione uma data de início e fim para a busca.",
-                variant: "destructive"
+                message: "Por favor, selecione uma data de início e fim para a busca.",
             });
             return;
         }
@@ -87,16 +87,16 @@ export default function ProdutividadePage() {
             setReportData(data);
         } catch (error) {
             console.error("Erro ao buscar dados: ", error);
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao buscar dados",
-                description: (error as Error).message,
-                variant: "destructive"
+                message: (error as Error).message,
             });
             setReportData([]);
         } finally {
             setIsLoading(false);
         }
-    }, [dateRange, toast]);
+    }, [dateRange]);
 
      React.useEffect(() => {
         if (!isMounted) return;
@@ -333,6 +333,14 @@ export default function ProdutividadePage() {
                      )}
                 </div>
             </div>
+            {notification && (
+                <NotificationDialog
+                    type={notification.type}
+                    title={notification.title}
+                    message={notification.message}
+                    onOpenChange={() => setNotification(null)}
+                />
+            )}
         </div>
     );
 }

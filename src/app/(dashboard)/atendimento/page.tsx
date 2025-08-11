@@ -25,6 +25,7 @@ import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle
 import { Badge } from "@/components/ui/badge";
 import { clearPainel } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
+import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
 
 interface Profissional {
   id: string;
@@ -48,6 +49,7 @@ export default function AtendimentosPage() {
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
+    const [cancellationConfirmation, setCancellationConfirmation] = useState<{ isOpen: boolean; itemName: string; }>({ isOpen: false, itemName: "" });
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
@@ -345,7 +347,8 @@ export default function AtendimentosPage() {
                         if (itemToCancel) {
                             try {
                                 await cancelarAtendimento(itemToCancel, motivo);
-                                setNotification({ type: "warning", title: "Atendimento Cancelado!", message: `O atendimento de ${itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`} foi cancelado.` });
+                                const itemName = itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`;
+                                setCancellationConfirmation({ isOpen: true, itemName: itemName });
                             } catch (error) {
                                 const err = error as Error;
                                 setNotification({ type: 'error', title: "Erro ao cancelar", message: err.message });
@@ -357,6 +360,12 @@ export default function AtendimentosPage() {
                     item={itemToCancel}
                 />
             )}
+            
+             <CancellationConfirmationDialog
+                isOpen={cancellationConfirmation.isOpen}
+                onOpenChange={(isOpen) => setCancellationConfirmation({ isOpen, itemName: "" })}
+                itemName={cancellationConfirmation.itemName}
+            />
 
             {itemToReturn && (
                 <ReturnToQueueDialog
@@ -377,6 +386,7 @@ export default function AtendimentosPage() {
                             setItemToReturn(null);
                         }
                     }}
+                    onNotification={setNotification}
                 />
             )}
 

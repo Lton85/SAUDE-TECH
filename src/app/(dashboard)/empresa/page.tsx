@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { saveOrUpdateEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
-import { useToast } from "@/hooks/use-toast";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 const ufs = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -51,7 +51,7 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const { toast } = useToast();
+    const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     useEffect(() => {
         setIsLoading(true);
@@ -81,10 +81,10 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         } catch (error) {
             console.error("Erro ao buscar cidades:", error);
             setCities([]);
-             toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao buscar cidades",
-                description: "Não foi possível carregar a lista de cidades para o estado selecionado.",
-                variant: "destructive",
+                message: "Não foi possível carregar a lista de cidades para o estado selecionado.",
             });
         } finally {
             setIsCitiesLoading(false);
@@ -122,10 +122,10 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             if (data.erro) {
-                toast({
+                setNotification({
+                    type: "warning",
                     title: "CEP não encontrado",
-                    description: "Por favor, verifique o CEP digitado.",
-                    variant: "destructive",
+                    message: "Por favor, verifique o CEP digitado.",
                 });
             } else {
                 const newFormData = {
@@ -147,10 +147,10 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
             }
         } catch (error) {
             console.error("Erro ao buscar CEP:", error);
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao buscar CEP",
-                description: "Ocorreu um problema ao tentar buscar o endereço pelo CEP.",
-                variant: "destructive",
+                message: "Ocorreu um problema ao tentar buscar o endereço pelo CEP.",
             });
         }
     };
@@ -176,16 +176,16 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         try {
             await saveOrUpdateEmpresa(formData);
             setIsEditing(false);
-            toast({
+            setNotification({
+                type: "success",
                 title: "Dados Salvos!",
-                description: "As informações da empresa foram atualizadas com sucesso.",
-                className: "bg-green-500 text-white"
+                message: "As informações da empresa foram atualizadas com sucesso.",
             })
         } catch (error) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao salvar",
-                description: (error as Error).message || "Não foi possível salvar os dados da empresa.",
-                variant: "destructive"
+                message: (error as Error).message || "Não foi possível salvar os dados da empresa.",
             });
         } finally {
             setIsSaving(false);
@@ -197,6 +197,7 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
     }
 
     return (
+        <>
         <Card className="w-full">
             <CardHeader>
                 <div className="flex items-center gap-3">
@@ -319,5 +320,14 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
                 </form>
             </CardContent>
         </Card>
+        {notification && (
+            <NotificationDialog
+                type={notification.type}
+                title={notification.title}
+                message={notification.message}
+                onOpenChange={() => setNotification(null)}
+            />
+        )}
+        </>
     );
 }

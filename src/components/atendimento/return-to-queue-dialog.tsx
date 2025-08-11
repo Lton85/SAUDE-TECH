@@ -16,8 +16,8 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Departamento } from "@/types/departamento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "../ui/card";
+import { NotificationType } from "../ui/notification-dialog";
 
 interface Profissional {
   id: string;
@@ -31,14 +31,14 @@ interface ReturnToQueueDialogProps {
   departamentos: Departamento[];
   profissionais: Profissional[];
   onConfirm: (item: FilaDeEsperaItem, updates: Partial<FilaDeEsperaItem>) => Promise<void>;
+  onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm }: ReturnToQueueDialogProps) {
+export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm, onNotification }: ReturnToQueueDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
     const [selectedProfissionalId, setSelectedProfissionalId] = useState("");
     const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
 
     useEffect(() => {
         if (item) {
@@ -50,10 +50,10 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
 
     const handleConfirm = async () => {
         if (!item || !selectedDepartamentoId || !selectedProfissionalId) {
-            toast({
+            onNotification({
+                type: "error",
                 title: "Campos inválidos",
-                description: "Selecione um departamento e um profissional.",
-                variant: "destructive"
+                message: "Selecione um departamento e um profissional.",
             });
             return;
         }
@@ -84,10 +84,10 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
             await onConfirm(item, updates);
 
         } catch (error) {
-            toast({
+            onNotification({
+                type: "error",
                 title: "Erro ao retornar",
-                description: (error as Error).message,
-                variant: "destructive"
+                message: (error as Error).message,
             });
         } finally {
             setIsSubmitting(false);

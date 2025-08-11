@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Settings, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllHistoricoAtendimentos } from "@/services/filaDeEsperaService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
@@ -15,10 +14,10 @@ import { getPacientes } from "@/services/pacientesService";
 import { getProfissionais } from "@/services/profissionaisService";
 import { ResetProfissionalDialog } from "@/components/configuracoes/reset-profissional-dialog";
 import { Separator } from "@/components/ui/separator";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 
 export default function ConfiguracoesPage() {
-    const { toast } = useToast();
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isPreferencialResetting, setIsPreferencialResetting] = useState(false);
     const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
@@ -35,6 +34,7 @@ export default function ConfiguracoesPage() {
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
+    const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -46,15 +46,15 @@ export default function ConfiguracoesPage() {
                 setPacientesCount(pacientes.length);
                 setProfissionaisCount(profissionais.length);
             } catch (error) {
-                toast({
+                setNotification({
+                    type: "error",
                     title: "Erro ao verificar cadastros",
-                    description: "Não foi possível verificar a quantidade de registros.",
-                    variant: "destructive"
+                    message: "Não foi possível verificar a quantidade de registros.",
                 });
             }
         };
         fetchCounts();
-    }, [toast]);
+    }, []);
 
     const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgência') => {
         setResetType(type);
@@ -67,10 +67,10 @@ export default function ConfiguracoesPage() {
 
     const handlePacienteResetRequest = () => {
         if (pacientesCount !== null && pacientesCount > 0) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Ação Bloqueada",
-                description: `Existem ${pacientesCount} paciente(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
-                variant: "destructive",
+                message: `Existem ${pacientesCount} paciente(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
             });
             return;
         }
@@ -79,10 +79,10 @@ export default function ConfiguracoesPage() {
 
     const handleProfissionalResetRequest = () => {
         if (profissionaisCount !== null && profissionaisCount > 0) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Ação Bloqueada",
-                description: `Existem ${profissionaisCount} profissional(is) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
-                variant: "destructive",
+                message: `Existem ${profissionaisCount} profissional(is) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
             });
             return;
         }
@@ -122,16 +122,16 @@ export default function ConfiguracoesPage() {
 
         try {
             await resetCounterByName(counterName);
-            toast({
+            setNotification({
+                type: "success",
                 title: `Senhas de Classificação ${resetType} Reiniciadas!`,
-                description: `A contagem de senhas foi redefinida para ${ticketExample}.`,
-                className: "bg-green-500 text-white",
+                message: `A contagem de senhas foi redefinida para ${ticketExample}.`,
             });
         } catch (error) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao reiniciar senhas",
-                description: (error as Error).message,
-                variant: "destructive",
+                message: (error as Error).message,
             });
         } finally {
             setLoading(false);
@@ -145,16 +145,16 @@ export default function ConfiguracoesPage() {
 
         try {
             const count = await clearAllHistoricoAtendimentos();
-            toast({
+            setNotification({
+                type: "success",
                 title: "Prontuários Zerados!",
-                description: `${count} registros de atendimentos finalizados foram excluídos.`,
-                className: "bg-green-500 text-white",
+                message: `${count} registros de atendimentos finalizados foram excluídos.`,
             });
         } catch (error) {
-             toast({
+             setNotification({
+                type: "error",
                 title: "Erro ao zerar prontuários",
-                description: (error as Error).message,
-                variant: "destructive",
+                message: (error as Error).message,
             });
         } finally {
             setIsProntuarioResetting(false);
@@ -167,16 +167,16 @@ export default function ConfiguracoesPage() {
 
         try {
             await resetCounterByName('pacientes_v2');
-            toast({
+            setNotification({
+                type: "success",
                 title: "Códigos de Paciente Zerados!",
-                description: "A contagem de códigos de cadastro de paciente foi reiniciada para 001.",
-                className: "bg-green-500 text-white",
+                message: "A contagem de códigos de cadastro de paciente foi reiniciada para 001.",
             });
         } catch (error) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao zerar códigos de paciente",
-                description: (error as Error).message,
-                variant: "destructive",
+                message: (error as Error).message,
             });
         } finally {
             setIsPacienteResetting(false);
@@ -188,16 +188,16 @@ export default function ConfiguracoesPage() {
         setProfissionalDialogOpen(false);
         try {
             await resetCounterByName('profissionais_v2');
-            toast({
+            setNotification({
+                type: "success",
                 title: "Códigos de Profissional Zerados!",
-                description: "A contagem de códigos de cadastro de profissional foi reiniciada para 001.",
-                className: "bg-green-500 text-white",
+                message: "A contagem de códigos de cadastro de profissional foi reiniciada para 001.",
             });
         } catch (error) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao zerar códigos de profissional",
-                description: (error as Error).message,
-                variant: "destructive",
+                message: (error as Error).message,
             });
         } finally {
             setIsProfissionalResetting(false);
@@ -316,6 +316,14 @@ export default function ConfiguracoesPage() {
               onOpenChange={setProfissionalDialogOpen}
               onConfirm={handleConfirmProfissionalReset}
           />
+           {notification && (
+            <NotificationDialog
+                type={notification.type}
+                title={notification.title}
+                message={notification.message}
+                onOpenChange={() => setNotification(null)}
+            />
+        )}
     </div>
   );
 }

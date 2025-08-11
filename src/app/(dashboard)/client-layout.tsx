@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { clearPainel } from "@/services/chamadasService";
-import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getEmpresa } from "@/services/empresaService";
@@ -51,6 +50,7 @@ import { ExitConfirmationDialog } from "@/components/ui/exit-dialog";
 import { logout, getCurrentUser } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { getAtendimentosPendentes } from "@/services/filaDeEsperaService";
+import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
 
 // Import page components dynamically
@@ -82,10 +82,9 @@ export const allMenuItems = [
 
 export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number };
 
-const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[] }) => {
+const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
-    const { toast } = useToast();
     const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
     const router = useRouter();
     const [userName, setUserName] = React.useState<string | null>(null);
@@ -103,10 +102,10 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems }: { onMenuIte
                 await clearPainel();
                 window.open(url, "_blank");
             } catch (error) {
-                toast({
+                onNotification({
+                    type: "error",
                     title: "Erro ao abrir o painel",
-                    description: "Não foi possível limpar o painel antes de abrir.",
-                    variant: "destructive",
+                    message: "Não foi possível limpar o painel antes de abrir.",
                 });
             }
         } else {
@@ -368,7 +367,7 @@ export default function DashboardClientLayout({
   const [activeTab, setActiveTab] = React.useState<string>("/");
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
   const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
-  const { toast } = useToast();
+  const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   
   React.useEffect(() => {
     const currentUser = getCurrentUser();
@@ -411,10 +410,10 @@ export default function DashboardClientLayout({
             await clearPainel();
             window.open(url, "_blank");
         } catch (error) {
-            toast({
+            setNotification({
+                type: "error",
                 title: "Erro ao abrir o painel",
-                description: "Não foi possível limpar o painel antes de abrir.",
-                variant: "destructive",
+                message: "Não foi possível limpar o painel antes de abrir.",
             });
         }
     } else {
@@ -478,7 +477,7 @@ export default function DashboardClientLayout({
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} />
+        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} onNotification={setNotification} />
         <MainContent 
             openTabs={openTabs.filter(tab => tab.id !== '/')} 
             activeTab={activeTab}
@@ -487,6 +486,14 @@ export default function DashboardClientLayout({
             onTabClose={handleTabClose}
             onMenuItemClick={handleMenuItemClick}
         />
+        {notification && (
+          <NotificationDialog
+            type={notification.type}
+            title={notification.title}
+            message={notification.message}
+            onOpenChange={() => setNotification(null)}
+          />
+        )}
       </div>
     </SidebarProvider>
   );
