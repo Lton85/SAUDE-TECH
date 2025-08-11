@@ -24,7 +24,6 @@ export default function PainelPage() {
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -60,7 +59,7 @@ export default function PainelPage() {
       if (!querySnapshot.empty) {
         const newCall = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Call;
         
-        if (hasInteracted && currentCall.id !== newCall.id && newCall.id) {
+        if (currentCall.id !== newCall.id && newCall.id) {
             try {
                 const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
                 audio.play();
@@ -78,13 +77,7 @@ export default function PainelPage() {
     });
 
     return () => unsubscribe();
-  }, [isClient, hasInteracted, currentCall.id]);
-  
-  const handleInteraction = () => {
-    if (!hasInteracted) {
-      setHasInteracted(true);
-    }
-  };
+  }, [isClient, currentCall.id]);
   
   if (!isClient) {
     return (
@@ -103,15 +96,8 @@ export default function PainelPage() {
     : "";
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none" onClick={handleInteraction}>
+    <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none">
         
-        {!hasInteracted && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm cursor-pointer">
-                <PlayCircle className="h-24 w-24 text-white/70 mb-4" />
-                <h1 className="text-4xl font-bold">Clique ou toque para ativar o som</h1>
-            </div>
-        )}
-
         <main className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12">
             <AnimatePresence mode="wait">
                 <motion.div
