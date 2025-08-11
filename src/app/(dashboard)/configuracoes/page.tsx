@@ -6,7 +6,8 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/com
 import { Settings, RefreshCw, Trash2, ShieldAlert, MonitorUp, BarChartHorizontal, UserX, Stethoscope, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
-import { clearAllRelatorios, clearAllChamadas } from "@/services/filaDeEsperaService";
+import { clearAllRelatorios } from "@/services/filaDeEsperaService";
+import { clearAllChamadas } from "@/services/chamadasService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
 import { LimpezaHistoricoDialog } from "@/components/configuracoes/limpeza-historico-dialog";
 import { ResetPacienteDialog } from "@/components/configuracoes/reset-paciente-dialog";
@@ -349,5 +350,3 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
-
-    
