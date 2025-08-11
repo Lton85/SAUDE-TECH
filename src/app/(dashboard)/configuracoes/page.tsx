@@ -26,12 +26,11 @@ const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen
     <LimpezaHistoricoDialog
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        onConfirm={() => {}} // This is handled by the parent now
         title={`Excluir Todos os ${itemType}`}
         description={`Esta ação excluirá PERMANENTEMENTE todos os cadastros de ${itemType} do sistema. Esta ação não pode ser desfeita.`}
         confirmText={`Sim, excluir todos`}
         requiresPassword={false}
-        onConfirmWithPassword={onConfirm}
+        onConfirm={onConfirm}
     />
 );
 
@@ -345,62 +344,58 @@ export default function ConfiguracoesPage() {
                     <ActionRow label="Zerar Histórico de Dados" buttonText="Limpeza Completa" onClick={handleLimpezaRequest} isResetting={isLimpezaResetting} icon={Trash2} />
                 </CardContent>
             </Card>
-        </div>
 
-        <Card>
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <Printer className="h-6 w-6" />
-                    <CardTitle>Configurações de Impressão</CardTitle>
-                </div>
-                <CardDescription>
-                    Insira o nome exato da impressora de comprovantes instalada no computador.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-end gap-2 max-w-lg">
-                    <div className="flex-1 space-y-1.5">
-                        <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
-                        <Input 
-                            id="nomeImpressora" 
-                            value={nomeImpressora} 
-                            onChange={(e) => setNomeImpressora(e.target.value)} 
-                            placeholder="Ex: EPSON L3250 Series"
-                            disabled={!isEditingPrinter}
-                        />
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Printer className="h-6 w-6" />
+                        <CardTitle>Configurações de Impressão</CardTitle>
                     </div>
-                     {!isEditingPrinter ? (
-                        <Button onClick={() => setIsEditingPrinter(true)} disabled={isSavingPrinter}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                        </Button>
-                    ) : (
-                        <>
-                            <Button variant="outline" onClick={handleCancelPrinterEdit} disabled={isSavingPrinter}>
-                                <X className="mr-2 h-4 w-4" />
-                                Cancelar
+                    <CardDescription>
+                        Insira o nome exato da impressora de comprovantes instalada no computador.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-end gap-2 max-w-lg">
+                        <div className="flex-1 space-y-1.5">
+                            <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
+                            <Input 
+                                id="nomeImpressora" 
+                                value={nomeImpressora} 
+                                onChange={(e) => setNomeImpressora(e.target.value)} 
+                                placeholder="Ex: EPSON L3250 Series"
+                                disabled={!isEditingPrinter}
+                            />
+                        </div>
+                         {!isEditingPrinter ? (
+                            <Button onClick={() => setIsEditingPrinter(true)} disabled={isSavingPrinter}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Editar
                             </Button>
-                            <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
-                                {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Salvar
-                            </Button>
-                        </>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                        ) : (
+                            <>
+                                <Button variant="outline" onClick={handleCancelPrinterEdit} disabled={isSavingPrinter}>
+                                    <X className="mr-2 h-4 w-4" />
+                                    Cancelar
+                                </Button>
+                                <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
+                                    {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    Salvar
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
         
         {resetType && (<ResetSenhaDialog isOpen={senhaDialogOpen} onOpenChange={setSenhaDialogOpen} onConfirm={handleConfirmSenhaReset} tipoSenha={resetType}/>)}
         
         <LimpezaHistoricoDialog
             isOpen={limpezaDialogOpen}
             onOpenChange={setLimpezaDialogOpen}
-            onConfirmWithPassword={handleConfirmLimpeza}
+            onConfirm={handleConfirmLimpeza}
             isSubmitting={isLimpezaResetting}
-            title="Limpeza Definitiva de Dados"
-            description="<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos.<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>"
-            confirmText="Sim, zerar dados"
-            onConfirm={() => {}}
         />
 
         <ResetPacienteDialog isOpen={pacienteDialogOpen} onOpenChange={setPacienteDialogOpen} onConfirm={handleConfirmPacienteReset} />

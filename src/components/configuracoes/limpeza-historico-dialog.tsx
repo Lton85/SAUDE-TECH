@@ -20,7 +20,6 @@ interface LimpezaHistoricoDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: (password: string) => void
-  onConfirmWithPassword?: (password: string) => void;
   title?: string
   description?: string
   confirmText?: string
@@ -32,9 +31,8 @@ export function LimpezaHistoricoDialog({
   isOpen, 
   onOpenChange, 
   onConfirm, 
-  onConfirmWithPassword,
   title = "Ação Irreversível!", 
-  description = "Esta ação é <b class='text-destructive'>IRREVERSÍVEL</b> e irá apagar todos os dados.", 
+  description = "<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha, atendimentos e finalizados<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>", 
   confirmText = "Sim, confirmar",
   requiresPassword = true,
   isSubmitting = false,
@@ -42,11 +40,7 @@ export function LimpezaHistoricoDialog({
   const [password, setPassword] = useState("");
 
   const handleConfirm = () => {
-    if (onConfirmWithPassword) {
-      onConfirmWithPassword(password);
-    } else {
-      onConfirm(password);
-    }
+    onConfirm(password);
   };
   
   const finalDescription = requiresPassword 
