@@ -377,10 +377,10 @@ export default function ConfiguracoesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 pt-2">
-                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="outline" />
-                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="outline" />
-                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="outline" />
-                    <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} variant="outline" />
+                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="destructive" />
+                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="destructive" />
+                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
+                    <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} variant="destructive" />
                 </CardContent>
             </Card>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -510,6 +510,7 @@ export default function ConfiguracoesPage() {
                         onClick={handleLimpezaRequest}
                         isResetting={isLimpezaResetting}
                         icon={Trash2}
+                        variant="destructive"
                     />
                 </CardContent>
             </Card>
@@ -521,7 +522,7 @@ export default function ConfiguracoesPage() {
             isOpen={limpezaDialogOpen}
             onOpenChange={setLimpezaDialogOpen}
             title="Ação Irreversível de Limpeza"
-            description="<p><b>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos finalizados<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações.<br/> - Todos os cadastros (pacientes, profissionais e departamentos).</p>"
+            description="&lt;p&gt;&lt;b&gt;O QUE SERÁ APAGADO:&lt;/b&gt;&lt;br/&gt; - Todas as chamadas de senha e atendimentos finalizados&lt;br/&gt;- Relatórios de Atendimento.&lt;/p&gt;&lt;p&gt;&lt;b class='text-green-600'&gt;O QUE SERÁ MANTIDO:&lt;/b&gt;&lt;br/&gt; - Todas as configurações.&lt;br/&gt; - Todos os cadastros (pacientes, profissionais e departamentos).&lt;/p&gt;"
             onConfirm={handleConfirmLimpeza}
             isSubmitting={isLimpezaResetting}
         />
@@ -536,3 +537,4 @@ export default function ConfiguracoesPage() {
   );
 }
 
+    
