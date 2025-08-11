@@ -149,7 +149,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             setSenha("Gerando...");
             const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
             const ticketPrefix = currentClassification === 'Urgência' ? 'U' : (currentClassification === 'Preferencial' ? 'P' : 'N');
-            const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+            const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
             setSenha(ticket);
         } catch (error) {
             console.error("Erro ao gerar senha:", error);

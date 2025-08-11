@@ -41,7 +41,7 @@ export const addPreCadastroToFila = async (classificacao: FilaDeEsperaItem['clas
         const counterName = classificacao === 'Urgência' ? 'senha_emergencia' : (classificacao === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
         const ticketNumber = await getNextCounter(counterName, true);
         const ticketPrefix = classificacao === 'Urgência' ? 'U' : (classificacao === 'Preferencial' ? 'P' : 'N');
-        const senha = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+        const senha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
         await addDoc(filaDeEsperaCollection, {
             senha,
@@ -572,5 +572,3 @@ export const clearAllRelatorios = async (): Promise<number> => {
         throw new Error("Não foi possível limpar os relatórios de atendimento.");
     }
 };
-
-    

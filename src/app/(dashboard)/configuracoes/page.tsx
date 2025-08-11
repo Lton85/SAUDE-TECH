@@ -140,9 +140,9 @@ export default function ConfiguracoesPage() {
         let counterName: string;
         let ticketExample: string;
         switch (resetType) {
-            case 'Normal': setLoading = setIsNormalResetting; counterName = 'senha_normal'; ticketExample = 'N-001'; break;
-            case 'Preferencial': setLoading = setIsPreferencialResetting; counterName = 'senha_preferencial'; ticketExample = 'P-001'; break;
-            case 'Urgência': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-001'; break;
+            case 'Normal': setLoading = setIsNormalResetting; counterName = 'senha_normal'; ticketExample = 'N-01'; break;
+            case 'Preferencial': setLoading = setIsPreferencialResetting; counterName = 'senha_preferencial'; ticketExample = 'P-01'; break;
+            case 'Urgência': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-01'; break;
             default: return;
         }
         setLoading(true);
@@ -313,9 +313,9 @@ export default function ConfiguracoesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-001)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
-                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-001)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
-                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-001)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
+                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
+                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
+                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
                 </CardContent>
             </Card>
 

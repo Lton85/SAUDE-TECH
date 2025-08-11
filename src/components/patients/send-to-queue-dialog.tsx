@@ -86,7 +86,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                 const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
                 const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
                 const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
-                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
                 setSenha(ticket);
             } catch (error) {
                 console.error("Erro ao gerar senha:", error);
@@ -115,7 +115,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
       const ticketNumber = await getNextCounter(counterName, true); // true = increment
       const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
-      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(3, '0')}`;
+      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
       const departamento = departamentos.find(d => d.id === selectedDepartamentoId)
       if (!departamento) throw new Error("Departamento não encontrado")
@@ -274,5 +274,3 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     </Dialog>
   )
 }
-
-    
