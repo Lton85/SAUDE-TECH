@@ -62,8 +62,10 @@ export function LimpezaHistoricoDialog({
             <AlertTriangle className="h-5 w-5 text-destructive" />
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-foreground">
-            <div dangerouslySetInnerHTML={{ __html: finalDescription }} />
+          <AlertDialogDescription asChild>
+            <div className="text-sm text-foreground space-y-3">
+              <div dangerouslySetInnerHTML={{ __html: finalDescription }} />
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         
@@ -91,5 +93,3 @@ export function LimpezaHistoricoDialog({
     </AlertDialog>
   )
 }
-
-    
