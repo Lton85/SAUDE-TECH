@@ -76,7 +76,7 @@ export default function TabletPage() {
                 <h1 className="font-display text-6xl md:text-8xl font-extrabold text-amber-400 tracking-tighter uppercase">
                     RETIRE SUA SENHA
                 </h1>
-                <p className="mt-2 text-2xl md:text-3xl text-slate-200">
+                <p className="mt-2 text-3xl md:text-4xl text-slate-200">
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
