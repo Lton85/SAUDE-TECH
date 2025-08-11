@@ -22,17 +22,21 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { Empresa } from "@/types/empresa";
 
-const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: () => void, itemType: string }) => (
-    <LimpezaHistoricoDialog
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        title={`Excluir Todos os ${itemType}`}
-        description={`Esta ação excluirá PERMANENTEMENTE todos os cadastros de ${itemType} do sistema. Esta ação não pode ser desfeita.`}
-        confirmText={`Sim, excluir todos`}
-        requiresPassword={false}
-        onConfirm={onConfirm}
-    />
-);
+const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: (password: string) => void, itemType: string }) => {
+    const description = `<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todos os cadastros de ${itemType}.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todos os outros dados, como históricos e relatórios.</p>`;
+    
+    return (
+        <LimpezaHistoricoDialog
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            title={`Excluir Todos os ${itemType}`}
+            description={description}
+            confirmText={`Sim, excluir todos`}
+            requiresPassword={true}
+            onConfirm={onConfirm}
+        />
+    )
+};
 
 
 export default function ConfiguracoesPage() {
@@ -201,7 +205,12 @@ export default function ConfiguracoesPage() {
         }
     };
 
-    const handleConfirmDeleteAll = async () => {
+    const handleConfirmDeleteAll = async (password: string) => {
+        if (password !== '9512') {
+            setNotification({ type: "error", title: "Senha Incorreta", message: "A senha de segurança fornecida está incorreta." });
+            return;
+        }
+
         if (!deleteType) return;
 
         let deleteFn: () => Promise<number>;
@@ -341,7 +350,13 @@ export default function ConfiguracoesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <ActionRow label="Zerar Histórico de Dados" buttonText="Limpeza Completa" onClick={handleLimpezaRequest} isResetting={isLimpezaResetting} icon={Trash2} />
+                     <ActionRow
+                        label="Zerar Histórico de Dados"
+                        buttonText="Limpeza Completa"
+                        onClick={handleLimpezaRequest}
+                        isResetting={isLimpezaResetting}
+                        icon={Trash2}
+                    />
                 </CardContent>
             </Card>
 
@@ -394,6 +409,8 @@ export default function ConfiguracoesPage() {
         <LimpezaHistoricoDialog
             isOpen={limpezaDialogOpen}
             onOpenChange={setLimpezaDialogOpen}
+            title="Ação Irreversível de Limpeza"
+            description="<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha e atendimentos finalizados<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações.<br/> - Todos os cadastros (pacientes, profissionais e departamentos).</p>"
             onConfirm={handleConfirmLimpeza}
             isSubmitting={isLimpezaResetting}
         />
