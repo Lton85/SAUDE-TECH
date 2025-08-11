@@ -57,7 +57,6 @@ import { NotificationDialog, NotificationType } from "@/components/ui/notificati
 const DashboardPage = React.lazy(() => import('./page'));
 const AtendimentosPage = React.lazy(() => import('./atendimento/page'));
 const CadastrosPage = React.lazy(() => import('./cadastros/page'));
-const DepartamentosPage = React.lazy(() => import('./departamentos/page'));
 const ProdutividadePage = React.lazy(() => import('./produtividade/page'));
 const RelatoriosPage = React.lazy(() => import('./relatorios/page'));
 const EmpresaPage = React.lazy(() => import('./empresa/page'));
@@ -71,7 +70,6 @@ export const allMenuItems = [
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
   { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
   { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
-  { id: "/departamentos", href: "/departamentos", label: "Departamentos", icon: Building, component: DepartamentosPage, permissionRequired: true },
   { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },

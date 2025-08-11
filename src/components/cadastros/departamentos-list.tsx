@@ -17,7 +17,7 @@ import { ViewDepartamentoDialog } from "@/components/departamentos/view-dialog";
 import { HistoryDepartamentoDialog } from "@/components/departamentos/history-dialog";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 
-export default function DepartamentosPage() {
+export function DepartamentosList() {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

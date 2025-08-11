@@ -148,8 +148,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const navFeatures = useMemo(() => {
         const featureDescriptions: { [key: string]: string } = {
             "/atendimento": "Monitore o tempo de cada consulta.",
-            "/cadastros": "Gerencie pacientes, médicos e enfermeiros.",
-            "/departamentos": "Gerencie os locais de atendimento.",
+            "/cadastros": "Gerencie pacientes, profissionais e departamentos.",
             "/produtividade": "Veja gráficos de desempenho.",
             "/relatorios": "Consulte o histórico de atendimentos.",
             "painel": "Exiba as senhas de atendimento na TV.",
@@ -161,7 +160,6 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
           "painel", 
           "tablet",
           "/cadastros", 
-          "/departamentos", 
           "/produtividade", 
           "/relatorios", 
         ];
