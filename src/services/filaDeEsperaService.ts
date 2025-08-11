@@ -552,12 +552,9 @@ export const retornarPacienteParaFila = async (id: string): Promise<void> => {
     });
 };
 
-export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
+export const clearAllRelatorios = async (): Promise<number> => {
     try {
-        const q = query(
-            collection(db, "relatorios_atendimentos")
-        );
-
+        const q = query(collection(db, "relatorios_atendimentos"));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
             return 0;
@@ -572,6 +569,6 @@ export const clearAllHistoricoAtendimentos = async (): Promise<number> => {
         return querySnapshot.size;
     } catch (error) {
         console.error("Erro ao limpar o histórico de atendimentos:", error);
-        throw new Error("Não foi possível limpar o prontuário dos pacientes.");
+        throw new Error("Não foi possível limpar os relatórios de atendimento.");
     }
 };
