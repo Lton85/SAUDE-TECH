@@ -71,7 +71,7 @@ export default function TabletPage() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="mb-8"
+                className="mb-8 w-full"
             >
                 <h1 className="font-display text-6xl md:text-8xl font-black text-amber-400 tracking-tighter uppercase">
                     RETIRE SUA SENHA AQUI
@@ -81,7 +81,7 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-8">
                 <motion.div custom={0} initial="hidden" animate="visible" variants={cardVariants}>
                     <Card 
                         className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-green-500/10 border-green-500/30"
@@ -154,3 +154,5 @@ export default function TabletPage() {
         </div>
     );
 }
+
+    
