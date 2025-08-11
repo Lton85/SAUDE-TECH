@@ -112,9 +112,7 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         const { id, value } = e.target;
         const newFormData = {...formData, [id]: value };
         setFormData(newFormData);
-        if (id === 'razaoSocial') {
-            onEmpresaDataChange({ razaoSocial: value });
-        }
+        onEmpresaDataChange({ [id]: value });
     }
 
     const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento'>, value: string) => {
@@ -129,6 +127,8 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
             const newClassifications = checked
                 ? [...currentClassifications, classification]
                 : currentClassifications.filter(c => c !== classification);
+
+            onEmpresaDataChange({ classificacoesAtendimento: newClassifications });
             return { ...prev, classificacoesAtendimento: newClassifications };
         });
     };
