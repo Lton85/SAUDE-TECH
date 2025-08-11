@@ -168,7 +168,7 @@ export default function TabletPage() {
                 <h1 className={cn("font-display font-black text-amber-400 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
                     RETIRE SUA SENHA
                 </h1>
-                <p className={cn("mt-4 text-slate-200", cardSizeClasses[config.cardSize])}>
+                <p className={cn("mt-4 text-slate-200 font-semibold", infoSizeClasses[config.infoSize])}>
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
