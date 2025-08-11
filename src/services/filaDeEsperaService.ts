@@ -29,6 +29,7 @@ const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDe
         case 'Preferencial': return 1;
         case 'Urgência': return 2;
         case 'Normal': return 3;
+        case 'Outros': return 4;
         default: return 3;
     }
 }
@@ -38,9 +39,27 @@ export const addPreCadastroToFila = async (classificacao: FilaDeEsperaItem['clas
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         const prioridade = getPrioridade(classificacao);
 
-        const counterName = classificacao === 'Urgência' ? 'senha_emergencia' : (classificacao === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
+        let counterName: string;
+        let ticketPrefix: string;
+        switch(classificacao) {
+            case 'Urgência':
+                counterName = 'senha_emergencia';
+                ticketPrefix = 'U';
+                break;
+            case 'Preferencial':
+                counterName = 'senha_preferencial';
+                ticketPrefix = 'P';
+                break;
+            case 'Outros':
+                counterName = 'senha_outros';
+                ticketPrefix = 'O';
+                break;
+            default:
+                counterName = 'senha_normal';
+                ticketPrefix = 'N';
+        }
+
         const ticketNumber = await getNextCounter(counterName, true);
-        const ticketPrefix = classificacao === 'Urgência' ? 'U' : (classificacao === 'Preferencial' ? 'P' : 'N');
         const senha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
         await addDoc(filaDeEsperaCollection, {

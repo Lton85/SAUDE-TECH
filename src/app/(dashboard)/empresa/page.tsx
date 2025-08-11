@@ -6,12 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X, ShieldQuestion } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { saveOrUpdateEmpresa } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 
 const ufs = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -22,6 +24,8 @@ interface IbgeCityResponse {
     id: number;
     nome: string;
 }
+
+const allClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"];
 
 const initialEmpresaState: Empresa = {
     id: "config",
@@ -38,6 +42,7 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
+    classificacoesAtendimento: ["Normal", "Preferencial", "Urgência"],
 };
 
 interface EmpresaPageProps {
@@ -57,7 +62,11 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
     useEffect(() => {
         setIsLoading(true);
         if (empresaData) {
-            setFormData(empresaData);
+             const classificacoes = empresaData.classificacoesAtendimento?.length 
+                ? empresaData.classificacoesAtendimento 
+                : initialEmpresaState.classificacoesAtendimento;
+
+            setFormData({...empresaData, classificacoesAtendimento: classificacoes});
             if (empresaData.uf) {
                 fetchCitiesForUf(empresaData.uf);
             }
@@ -108,11 +117,21 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
         }
     }
 
-    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf'>, value: string) => {
+    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento'>, value: string) => {
         const newFormData = { ...formData, [id]: value };
         setFormData(newFormData);
         onEmpresaDataChange({ [id]: value });
     }
+    
+     const handleClassificationChange = (classification: string, checked: boolean) => {
+        setFormData(prev => {
+            const currentClassifications = prev.classificacoesAtendimento || [];
+            const newClassifications = checked
+                ? [...currentClassifications, classification]
+                : currentClassifications.filter(c => c !== classification);
+            return { ...prev, classificacoesAtendimento: newClassifications };
+        });
+    };
     
     const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
         const cep = e.target.value.replace(/\D/g, '');
@@ -199,128 +218,157 @@ export default function EmpresaPage({ empresaData, onEmpresaDataChange }: Empres
 
     return (
         <>
-        <Card className="w-full">
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <Building className="h-6 w-6" />
-                    <CardTitle>Dados da Empresa</CardTitle>
-                </div>
-                <CardDescription>
-                    Gerencie as informações da sua unidade de saúde. Estes dados serão utilizados nos relatórios e impressões.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="codigoCliente">Código do Cliente</Label>
-                            <Input id="codigoCliente" value={formData.codigoCliente || ''} onChange={handleInputChange} placeholder="Ex: 001" disabled={!isEditing}/>
-                        </div>
-                        <div className="space-y-2 col-span-12 md:col-span-5">
-                            <Label htmlFor="razaoSocial">Razão Social</Label>
-                            <Input id="razaoSocial" value={formData.razaoSocial} onChange={handleInputChange} placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
-                        </div>
-                        <div className="space-y-2 col-span-12 md:col-span-3">
-                            <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-                            <Input id="nomeFantasia" value={formData.nomeFantasia} onChange={handleInputChange} placeholder="Ex: UBS Central" disabled={!isEditing}/>
-                        </div>
-                        <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="cnpj">CNPJ</Label>
-                            <Input id="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" disabled={!isEditing}/>
-                        </div>
+        <div className="space-y-6">
+            <Card className="w-full">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Building className="h-6 w-6" />
+                        <CardTitle>Dados da Empresa</CardTitle>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                         <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="cep">CEP</Label>
-                            <Input id="cep" value={formData.cep} onChange={handleInputChange} onBlur={handleCepBlur} placeholder="00000-000" disabled={!isEditing}/>
+                    <CardDescription>
+                        Gerencie as informações da sua unidade de saúde. Estes dados serão utilizados nos relatórios e impressões.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="codigoCliente">Código do Cliente</Label>
+                                <Input id="codigoCliente" value={formData.codigoCliente || ''} onChange={handleInputChange} placeholder="Ex: 001" disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-5">
+                                <Label htmlFor="razaoSocial">Razão Social</Label>
+                                <Input id="razaoSocial" value={formData.razaoSocial} onChange={handleInputChange} placeholder="Ex: Saúde Fácil Ltda." disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-3">
+                                <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                                <Input id="nomeFantasia" value={formData.nomeFantasia} onChange={handleInputChange} placeholder="Ex: UBS Central" disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="cnpj">CNPJ</Label>
+                                <Input id="cnpj" value={formData.cnpj} onChange={handleInputChange} placeholder="00.000.000/0001-00" disabled={!isEditing}/>
+                            </div>
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-8">
-                            <Label htmlFor="endereco">Endereço (Rua)</Label>
-                            <Input id="endereco" value={formData.endereco} onChange={handleInputChange} placeholder="Ex: Av. Principal" disabled={!isEditing}/>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                             <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="cep">CEP</Label>
+                                <Input id="cep" value={formData.cep} onChange={handleInputChange} onBlur={handleCepBlur} placeholder="00000-000" disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-8">
+                                <Label htmlFor="endereco">Endereço (Rua)</Label>
+                                <Input id="endereco" value={formData.endereco} onChange={handleInputChange} placeholder="Ex: Av. Principal" disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="numero">Número</Label>
+                                <Input id="numero" value={formData.numero} onChange={handleInputChange} placeholder="Ex: 123" disabled={!isEditing}/>
+                            </div>
                         </div>
-                        <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="numero">Número</Label>
-                            <Input id="numero" value={formData.numero} onChange={handleInputChange} placeholder="Ex: 123" disabled={!isEditing}/>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        <div className="space-y-2 col-span-12 md:col-span-8">
-                            <Label htmlFor="bairro">Bairro</Label>
-                            <Input id="bairro" value={formData.bairro} onChange={handleInputChange} placeholder="Ex: Centro" disabled={!isEditing}/>
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div className="space-y-2 col-span-12 md:col-span-8">
+                                <Label htmlFor="bairro">Bairro</Label>
+                                <Input id="bairro" value={formData.bairro} onChange={handleInputChange} placeholder="Ex: Centro" disabled={!isEditing}/>
+                            </div>
+                             <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="uf">Estado (UF)</Label>
+                                <Select value={formData.uf} onValueChange={handleUfChange} disabled={!isEditing}>
+                                    <SelectTrigger id="uf">
+                                        <SelectValue placeholder="UF" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <ScrollArea className="h-72">
+                                            {ufs.map(uf => (
+                                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                                            ))}
+                                        </ScrollArea>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2 col-span-12 md:col-span-2">
+                                <Label htmlFor="cidade">Cidade</Label>
+                                 <Select value={formData.cidade} onValueChange={(v) => handleSelectChange('cidade', v)} disabled={!isEditing || isCitiesLoading || cities.length === 0}>
+                                    <SelectTrigger id="cidade">
+                                        <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (formData.uf ? "Selecione..." : "Escolha um UF")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                         {isCitiesLoading ? (
+                                            <div className="flex items-center justify-center p-2">
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            </div>
+                                        ) : (
+                                        <ScrollArea className="h-72">
+                                            {cities.map(city => (
+                                                <SelectItem key={city} value={city}>{city}</SelectItem>
+                                            ))}
+                                        </ScrollArea>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                         <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="uf">Estado (UF)</Label>
-                            <Select value={formData.uf} onValueChange={handleUfChange} disabled={!isEditing}>
-                                <SelectTrigger id="uf">
-                                    <SelectValue placeholder="UF" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <ScrollArea className="h-72">
-                                        {ufs.map(uf => (
-                                            <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                                        ))}
-                                    </ScrollArea>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2 col-span-12 md:col-span-2">
-                            <Label htmlFor="cidade">Cidade</Label>
-                             <Select value={formData.cidade} onValueChange={(v) => handleSelectChange('cidade', v)} disabled={!isEditing || isCitiesLoading || cities.length === 0}>
-                                <SelectTrigger id="cidade">
-                                    <SelectValue placeholder={isCitiesLoading ? "Carregando..." : (formData.uf ? "Selecione..." : "Escolha um UF")} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                     {isCitiesLoading ? (
-                                        <div className="flex items-center justify-center p-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        </div>
-                                    ) : (
-                                    <ScrollArea className="h-72">
-                                        {cities.map(city => (
-                                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                                        ))}
-                                    </ScrollArea>
-                                    )}
-                                </SelectContent>
-                            </Select>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="telefone">Telefone</Label>
+                                <Input id="telefone" value={formData.telefone} onChange={handleInputChange} type="tel" placeholder="(00) 0000-0000" disabled={!isEditing}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">E-mail</Label>
+                                <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="telefone">Telefone</Label>
-                            <Input id="telefone" value={formData.telefone} onChange={handleInputChange} type="tel" placeholder="(00) 0000-0000" disabled={!isEditing}/>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">E-mail</Label>
-                            <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
-                        </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <ShieldQuestion className="h-6 w-6" />
+                        <CardTitle>Classificação de Atendimento</CardTitle>
                     </div>
-                    
-                    <div className="flex justify-end pt-4 gap-2">
-                        {!isEditing ? (
-                            <Button onClick={handleEditToggle} disabled={isSaving}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Editar Cadastro
-                            </Button>
-                        ) : (
-                            <>
-                                <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-                                    <X className="mr-2 h-4 w-4" />
-                                    Cancelar
-                                </Button>
-                                <Button onClick={handleSave} disabled={isSaving}>
-                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Salvar Alterações
-                                </Button>
-                            </>
-                        )}
+                    <CardDescription>
+                        Selecione os tipos de atendimento que serão utilizados no tablet de senhas.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3">
+                       {allClassificacoes.map(name => (
+                           <div key={name} className="flex items-center space-x-2">
+                               <Checkbox 
+                                id={`class-${name}`} 
+                                checked={formData.classificacoesAtendimento?.includes(name)}
+                                onCheckedChange={(checked) => handleClassificationChange(name, !!checked)}
+                                disabled={!isEditing}
+                               />
+                               <Label htmlFor={`class-${name}`} className="font-normal">{name}</Label>
+                           </div>
+                       ))}
                     </div>
-                </form>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        
+            <div className="flex justify-end pt-4 gap-2">
+                {!isEditing ? (
+                    <Button onClick={handleEditToggle} disabled={isSaving}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar Cadastro
+                    </Button>
+                ) : (
+                    <>
+                        <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                            <X className="mr-2 h-4 w-4" />
+                            Cancelar
+                        </Button>
+                        <Button onClick={handleSave} disabled={isSaving}>
+                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Salvar Alterações
+                        </Button>
+                    </>
+                )}
+            </div>
+        </div>
         {notification && (
             <NotificationDialog
                 type={notification.type}

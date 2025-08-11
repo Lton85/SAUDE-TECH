@@ -9,22 +9,67 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
 import { cn } from "@/lib/utils";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
+import { getEmpresa } from "@/services/empresaService";
+import type { Empresa } from "@/types/empresa";
 
 interface GeneratedTicket {
     senha: string;
     tipo: FilaDeEsperaItem['classificacao'];
 }
 
-const notificationColors: { [key in FilaDeEsperaItem['classificacao']]: string } = {
+const notificationColors: { [key: string]: string } = {
     Normal: 'bg-green-600',
     Preferencial: 'bg-blue-600',
     Urgência: 'bg-red-600',
+    Outros: 'bg-amber-500',
 };
+
+const borderColors: { [key: string]: string } = {
+    Normal: "group-hover:border-green-400 bg-green-500/10 border-green-500/30",
+    Preferencial: "group-hover:border-blue-400 bg-blue-500/10 border-blue-500/30",
+    Urgência: "group-hover:border-red-400 bg-red-500/10 border-red-500/30",
+    Outros: "group-hover:border-amber-400 bg-amber-500/10 border-amber-500/30",
+};
+
+const textColors: { [key: string]: string } = {
+    Normal: "text-green-400",
+    Preferencial: "text-blue-400",
+    Urgência: "text-red-400",
+    Outros: "text-amber-400",
+};
+
 
 export default function TabletPage() {
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
+    const [classificacoes, setClassificacoes] = useState<string[]>([]);
+    const [isFetchingConfig, setIsFetchingConfig] = useState(true);
     const [generatedTicket, setGeneratedTicket] = useState<GeneratedTicket | null>(null);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            setIsFetchingConfig(true);
+            try {
+                const empresaData = await getEmpresa();
+                if (empresaData?.classificacoesAtendimento?.length) {
+                    setClassificacoes(empresaData.classificacoesAtendimento);
+                } else {
+                    // Fallback para as classificações padrão se não estiver configurado
+                    setClassificacoes(["Normal", "Preferencial", "Urgência"]);
+                }
+            } catch (error) {
+                setNotification({
+                    type: 'error',
+                    title: `Erro ao carregar configurações`,
+                    message: (error as Error).message,
+                });
+                 setClassificacoes(["Normal", "Preferencial", "Urgência"]);
+            } finally {
+                setIsFetchingConfig(false);
+            }
+        };
+        fetchConfig();
+    }, []);
 
     useEffect(() => {
         if (generatedTicket) {
@@ -64,6 +109,17 @@ export default function TabletPage() {
             }
         })
     };
+    
+    if (isFetchingConfig) {
+        return (
+             <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 p-8 text-center overflow-hidden">
+                <Loader2 className="h-16 w-16 animate-spin text-amber-400" />
+                <p className="mt-4 text-4xl md:text-5xl text-slate-200">
+                    Carregando configurações...
+                </p>
+            </div>
+        )
+    }
 
     return (
         <div className="relative flex flex-col items-center justify-center min-h-screen bg-slate-900 p-8 text-center overflow-hidden">
@@ -81,41 +137,27 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl">
-                <motion.div custom={0} initial="hidden" animate="visible" variants={cardVariants}>
-                    <Card 
-                        className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-green-500/10 border-green-500/30"
-                        onClick={() => handleSelection('Normal')}
-                    >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                            {isLoading === 'Normal' ? <Loader2 className="h-12 w-12 animate-spin text-green-400" /> : <h2 className="text-4xl md:text-7xl font-bold text-green-400">NORMAL</h2>}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                <motion.div custom={1} initial="hidden" animate="visible" variants={cardVariants}>
-                     <Card 
-                        className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-blue-500/10 border-blue-500/30"
-                        onClick={() => handleSelection('Preferencial')}
-                    >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                           {isLoading === 'Preferencial' ? <Loader2 className="h-12 w-12 animate-spin text-blue-400" /> : (
-                                <h2 className="text-4xl md:text-7xl font-bold text-blue-400">PREFERENCIAL</h2>
-                           )}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                <motion.div custom={2} initial="hidden" animate="visible" variants={cardVariants}>
-                     <Card 
-                        className="group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer bg-red-500/10 border-red-500/30"
-                        onClick={() => handleSelection('Urgência')}
-                    >
-                        <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                            {isLoading === 'Urgência' ? <Loader2 className="h-12 w-12 animate-spin text-red-400" /> : <h2 className="text-4xl md:text-7xl font-bold text-red-400">URGÊNCIA</h2>}
-                        </CardContent>
-                    </Card>
-                </motion.div>
+            <div className={cn(
+                "grid grid-cols-1 gap-8 w-full max-w-7xl",
+                classificacoes.length === 2 && "md:grid-cols-2",
+                classificacoes.length === 3 && "md:grid-cols-3",
+                classificacoes.length === 4 && "md:grid-cols-4",
+            )}>
+                {classificacoes.map((tipo, index) => (
+                     <motion.div key={tipo} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
+                        <Card 
+                            className={cn(
+                                "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer",
+                                borderColors[tipo]
+                            )}
+                            onClick={() => handleSelection(tipo as FilaDeEsperaItem['classificacao'])}
+                        >
+                            <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
+                                {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("text-4xl md:text-7xl font-bold", textColors[tipo])}>{tipo.toUpperCase()}</h2>}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                ))}
             </div>
             
             <AnimatePresence>

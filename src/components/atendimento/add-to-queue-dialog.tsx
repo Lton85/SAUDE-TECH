@@ -145,10 +145,27 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
     if (selectedPaciente && !isCompleting) {
         try {
-            const counterName = currentClassification === 'Urgência' ? 'senha_emergencia' : (currentClassification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
+            let counterName;
+            let ticketPrefix;
+            switch(currentClassification) {
+                case 'Urgência':
+                    counterName = 'senha_emergencia';
+                    ticketPrefix = 'U';
+                    break;
+                case 'Preferencial':
+                    counterName = 'senha_preferencial';
+                    ticketPrefix = 'P';
+                    break;
+                case 'Outros':
+                    counterName = 'senha_outros';
+                    ticketPrefix = 'O';
+                    break;
+                default:
+                    counterName = 'senha_normal';
+                    ticketPrefix = 'N';
+            }
             setSenha("Gerando...");
             const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-            const ticketPrefix = currentClassification === 'Urgência' ? 'U' : (currentClassification === 'Preferencial' ? 'P' : 'N');
             const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
             setSenha(ticket);
         } catch (error) {
@@ -450,6 +467,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                                 <SelectItem value="Normal">Normal</SelectItem>
                                 <SelectItem value="Preferencial">Preferencial</SelectItem>
                                 <SelectItem value="Urgência">Urgência</SelectItem>
+                                <SelectItem value="Outros">Outros</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

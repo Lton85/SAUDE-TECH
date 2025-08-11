@@ -67,9 +67,14 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                 throw new Error("Departamento ou profissional não encontrado.");
             }
             
-            let prioridade: FilaDeEsperaItem['prioridade'] = 3;
-            if (classification === 'Preferencial') prioridade = 1;
-            if (classification === 'Urgência') prioridade = 2;
+            let prioridade: FilaDeEsperaItem['prioridade'];
+            switch(classification) {
+                case 'Preferencial': prioridade = 1; break;
+                case 'Urgência': prioridade = 2; break;
+                case 'Normal': prioridade = 3; break;
+                case 'Outros': prioridade = 4; break;
+                default: prioridade = 3;
+            }
 
             const updates: Partial<FilaDeEsperaItem> = {
                 departamentoId: selectedDepto.id,
@@ -153,6 +158,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
                                 <SelectItem value="Normal">Normal</SelectItem>
                                 <SelectItem value="Preferencial">Preferencial</SelectItem>
                                 <SelectItem value="Urgência">Urgência</SelectItem>
+                                <SelectItem value="Outros">Outros</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

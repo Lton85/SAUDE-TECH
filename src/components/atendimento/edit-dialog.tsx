@@ -163,6 +163,7 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
                                 <SelectItem value="Normal">Normal</SelectItem>
                                 <SelectItem value="Preferencial">Preferencial</SelectItem>
                                 <SelectItem value="Urgência">Urgência</SelectItem>
+                                <SelectItem value="Outros">Outros</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

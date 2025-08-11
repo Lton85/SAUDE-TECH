@@ -14,4 +14,5 @@ export interface Empresa {
     telefone: string;
     email: string;
     nomeImpressora?: string;
+    classificacoesAtendimento?: string[];
 }

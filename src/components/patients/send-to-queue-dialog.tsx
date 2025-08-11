@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
@@ -83,9 +82,26 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         if (paciente && isOpen) {
             setSenha("Gerando senha...");
             try {
-                const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
+                let counterName;
+                let ticketPrefix;
+                switch(classification) {
+                    case 'Urgência':
+                        counterName = 'senha_emergencia';
+                        ticketPrefix = 'U';
+                        break;
+                    case 'Preferencial':
+                        counterName = 'senha_preferencial';
+                        ticketPrefix = 'P';
+                        break;
+                    case 'Outros':
+                        counterName = 'senha_outros';
+                        ticketPrefix = 'O';
+                        break;
+                    default:
+                        counterName = 'senha_normal';
+                        ticketPrefix = 'N';
+                }
                 const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
                 const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
                 setSenha(ticket);
             } catch (error) {
@@ -112,9 +128,26 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
 
     setIsSubmitting(true)
     try {
-      const counterName = classification === 'Urgência' ? 'senha_emergencia' : (classification === 'Preferencial' ? 'senha_preferencial' : 'senha_normal');
+        let counterName;
+        let ticketPrefix;
+        switch(classification) {
+            case 'Urgência':
+                counterName = 'senha_emergencia';
+                ticketPrefix = 'U';
+                break;
+            case 'Preferencial':
+                counterName = 'senha_preferencial';
+                ticketPrefix = 'P';
+                break;
+            case 'Outros':
+                counterName = 'senha_outros';
+                ticketPrefix = 'O';
+                break;
+            default:
+                counterName = 'senha_normal';
+                ticketPrefix = 'N';
+        }
       const ticketNumber = await getNextCounter(counterName, true); // true = increment
-      const ticketPrefix = classification === 'Urgência' ? 'U' : (classification === 'Preferencial' ? 'P' : 'N');
       const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
       const departamento = departamentos.find(d => d.id === selectedDepartamentoId)
@@ -215,6 +248,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                             <SelectItem value="Normal">Normal</SelectItem>
                             <SelectItem value="Preferencial">Preferencial</SelectItem>
                             <SelectItem value="Urgência">Urgência</SelectItem>
+                            <SelectItem value="Outros">Outros</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

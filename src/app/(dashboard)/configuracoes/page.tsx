@@ -43,6 +43,7 @@ export default function ConfiguracoesPage() {
     const [isNormalResetting, setIsNormalResetting] = useState(false);
     const [isPreferencialResetting, setIsPreferencialResetting] = useState(false);
     const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
+    const [isOutrosResetting, setIsOutrosResetting] = useState(false);
     const [isLimpezaResetting, setIsLimpezaResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isProfissionalResetting, setIsProfissionalResetting] = useState(false);
@@ -59,7 +60,7 @@ export default function ConfiguracoesPage() {
     const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
     
-    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | null>(null);
+    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | 'Outros' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
@@ -95,7 +96,7 @@ export default function ConfiguracoesPage() {
         fetchCounts();
     }, []);
 
-    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgência') => {
+    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgência' | 'Outros') => {
         setResetType(type);
         setSenhaDialogOpen(true);
     };
@@ -143,6 +144,7 @@ export default function ConfiguracoesPage() {
             case 'Normal': setLoading = setIsNormalResetting; counterName = 'senha_normal'; ticketExample = 'N-01'; break;
             case 'Preferencial': setLoading = setIsPreferencialResetting; counterName = 'senha_preferencial'; ticketExample = 'P-01'; break;
             case 'Urgência': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-01'; break;
+            case 'Outros': setLoading = setIsOutrosResetting; counterName = 'senha_outros'; ticketExample = 'O-01'; break;
             default: return;
         }
         setLoading(true);
@@ -301,107 +303,111 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Settings className="h-6 w-6" />
-                        <CardTitle>Contadores de Senha</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
-                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
-                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <ShieldAlert className="h-6 w-6 text-destructive" />
-                        <CardTitle>Gerenciamento de Cadastros</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Ações perigosas que afetam os códigos e registros. Use com extrema cautela.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (01)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
-                    <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (01)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
-                    <Separator className="my-1" />
-                    <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
-                    <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
-                    <ActionRow label="Excluir Todos os Departamentos" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Departamentos")} isResetting={isDeletingAllDepartamentos} icon={Building} />
-                </CardContent>
-            </Card>
-            
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Trash2 className="h-6 w-6 text-destructive" />
-                        <CardTitle>Limpeza Definitiva de Dados</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Exclui permanentemente todos os registros de chamadas e relatórios.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                     <ActionRow
-                        label="Zerar Histórico de Dados"
-                        buttonText="Limpeza Completa"
-                        onClick={handleLimpezaRequest}
-                        isResetting={isLimpezaResetting}
-                        icon={Trash2}
-                    />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Printer className="h-6 w-6" />
-                        <CardTitle>Configurações de Impressão</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Insira o nome exato da impressora de comprovantes instalada no computador.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-end gap-2 max-w-lg">
-                        <div className="flex-1 space-y-1.5">
-                            <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
-                            <Input 
-                                id="nomeImpressora" 
-                                value={nomeImpressora} 
-                                onChange={(e) => setNomeImpressora(e.target.value)} 
-                                placeholder="Ex: EPSON L3250 Series"
-                                disabled={!isEditingPrinter}
-                            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6 lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <Settings className="h-6 w-6" />
+                            <CardTitle>Contadores de Senha</CardTitle>
                         </div>
-                         {!isEditingPrinter ? (
-                            <Button onClick={() => setIsEditingPrinter(true)} disabled={isSavingPrinter}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Editar
-                            </Button>
-                        ) : (
-                            <>
-                                <Button variant="outline" onClick={handleCancelPrinterEdit} disabled={isSavingPrinter}>
-                                    <X className="mr-2 h-4 w-4" />
-                                    Cancelar
+                        <CardDescription>
+                            Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} />
+                        <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} />
+                        <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} />
+                        <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <ShieldAlert className="h-6 w-6 text-destructive" />
+                            <CardTitle>Gerenciamento de Cadastros</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Ações perigosas que afetam os códigos e registros. Use com extrema cautela.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (01)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                        <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (01)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                        <Separator className="my-1" />
+                        <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
+                        <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
+                        <ActionRow label="Excluir Todos os Departamentos" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Departamentos")} isResetting={isDeletingAllDepartamentos} icon={Building} />
+                    </CardContent>
+                </Card>
+                
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <Trash2 className="h-6 w-6 text-destructive" />
+                            <CardTitle>Limpeza Definitiva de Dados</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Exclui permanentemente todos os registros de chamadas e relatórios.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                         <ActionRow
+                            label="Zerar Histórico de Dados"
+                            buttonText="Limpeza Completa"
+                            onClick={handleLimpezaRequest}
+                            isResetting={isLimpezaResetting}
+                            icon={Trash2}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="lg:col-span-2">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <Printer className="h-6 w-6" />
+                            <CardTitle>Configurações de Impressão</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Insira o nome exato da impressora de comprovantes instalada no computador.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-end gap-2 max-w-lg">
+                            <div className="flex-1 space-y-1.5">
+                                <Label htmlFor="nomeImpressora">Nome da Impressora</Label>
+                                <Input 
+                                    id="nomeImpressora" 
+                                    value={nomeImpressora} 
+                                    onChange={(e) => setNomeImpressora(e.target.value)} 
+                                    placeholder="Ex: EPSON L3250 Series"
+                                    disabled={!isEditingPrinter}
+                                />
+                            </div>
+                             {!isEditingPrinter ? (
+                                <Button onClick={() => setIsEditingPrinter(true)} disabled={isSavingPrinter}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Editar
                                 </Button>
-                                <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
-                                    {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Salvar
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                            ) : (
+                                <>
+                                    <Button variant="outline" onClick={handleCancelPrinterEdit} disabled={isSavingPrinter}>
+                                        <X className="mr-2 h-4 w-4" />
+                                        Cancelar
+                                    </Button>
+                                    <Button onClick={handleSavePrinter} disabled={isSavingPrinter}>
+                                        {isSavingPrinter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        Salvar
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
         
         {resetType && (<ResetSenhaDialog isOpen={senhaDialogOpen} onOpenChange={setSenhaDialogOpen} onConfirm={handleConfirmSenhaReset} tipoSenha={resetType}/>)}

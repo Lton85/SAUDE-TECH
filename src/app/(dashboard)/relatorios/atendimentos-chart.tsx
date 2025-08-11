@@ -28,6 +28,10 @@ const chartConfig = {
     label: "Urgência",
     color: "hsl(var(--chart-1))",
   },
+   outros: {
+    label: "Outros",
+    color: "hsl(47.9, 95.8%, 53.1%)",
+  },
   cancelado: {
     label: "Cancelado",
     color: "hsl(38.8, 80.2%, 48.2%)",
@@ -36,12 +40,12 @@ const chartConfig = {
 
 export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
   const chartData = React.useMemo(() => {
-    const hourlyCounts: { [key: string]: { normal: number; preferencial: number; urgencia: number; cancelado: number; } } = {};
+    const hourlyCounts: { [key: string]: { normal: number; preferencial: number; urgencia: number; outros: number; cancelado: number; } } = {};
 
     // Initialize hours from 7 AM to 10 PM
     for (let i = 7; i <= 22; i++) {
         const hour = i.toString().padStart(2, '0') + ":00";
-        hourlyCounts[hour] = { normal: 0, preferencial: 0, urgencia: 0, cancelado: 0 };
+        hourlyCounts[hour] = { normal: 0, preferencial: 0, urgencia: 0, outros: 0, cancelado: 0 };
     }
 
     data.forEach(item => {
@@ -61,6 +65,9 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
                         break;
                     case 'Urgência':
                         hourlyCounts[hour].urgencia++;
+                        break;
+                    case 'Outros':
+                        hourlyCounts[hour].outros++;
                         break;
                 }
             }
@@ -100,6 +107,7 @@ export function AtendimentosChart({ data }: { data: FilaDeEsperaItem[] }) {
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="urgencia" fill="var(--color-urgencia)" radius={0} stackId="a" />
                 <Bar dataKey="preferencial" fill="var(--color-preferencial)" radius={0} stackId="a" />
+                <Bar dataKey="outros" fill="var(--color-outros)" radius={0} stackId="a" />
                 <Bar dataKey="cancelado" fill="var(--color-cancelado)" radius={0} stackId="a" />
                 <Bar dataKey="normal" fill="var(--color-normal)" radius={4} stackId="a" />
             </BarChart>
