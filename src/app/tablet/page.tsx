@@ -129,10 +129,10 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-12 w-full"
             >
-                <h1 className="font-display text-8xl md:text-9xl lg:text-[11rem] font-black text-amber-400 tracking-tighter uppercase">
+                <h1 className="font-display text-6xl md:text-8xl font-black text-amber-400 tracking-tighter uppercase">
                     RETIRE SUA SENHA
                 </h1>
-                <p className="mt-4 text-4xl md:text-5xl text-slate-200">
+                <p className="mt-4 text-2xl md:text-3xl text-slate-200">
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
@@ -153,7 +153,7 @@ export default function TabletPage() {
                             onClick={() => handleSelection(tipo as FilaDeEsperaItem['classificacao'])}
                         >
                             <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 aspect-square">
-                                {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("text-4xl md:text-7xl font-bold", textColors[tipo])}>{tipo.toUpperCase()}</h2>}
+                                {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("text-3xl md:text-4xl font-bold", textColors[tipo])}>{tipo.toUpperCase()}</h2>}
                             </CardContent>
                         </Card>
                     </motion.div>
