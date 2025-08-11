@@ -38,7 +38,7 @@ export const addDepartamento = async (departamento: Omit<Departamento, 'id' | 'c
         throw new Error("O número da sala já está em uso por outro departamento.");
     }
     const nextId = await getNextCounter('departamentos_v2');
-    const codigo = String(nextId).padStart(3, '0');
+    const codigo = String(nextId).padStart(2, '0');
     const loggedUser = getCurrentUser();
      const newDepartamento: Omit<Departamento, 'id'> = {
         ...departamento,

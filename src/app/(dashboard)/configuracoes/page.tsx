@@ -21,6 +21,7 @@ import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { Empresa } from "@/types/empresa";
+import { ResetDepartamentoDialog } from "@/components/configuracoes/reset-departamento-dialog";
 
 const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: (password: string) => void, itemType: string }) => {
     const description = `<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todos os cadastros de ${itemType}.</p>`;
@@ -47,6 +48,7 @@ export default function ConfiguracoesPage() {
     const [isLimpezaResetting, setIsLimpezaResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isProfissionalResetting, setIsProfissionalResetting] = useState(false);
+    const [isDepartamentoResetting, setIsDepartamentoResetting] = useState(false);
     
     const [isDeletingAllPacientes, setIsDeletingAllPacientes] = useState(false);
     const [isDeletingAllProfissionais, setIsDeletingAllProfissionais] = useState(false);
@@ -56,6 +58,7 @@ export default function ConfiguracoesPage() {
     const [limpezaDialogOpen, setLimpezaDialogOpen] = useState(false);
     const [pacienteDialogOpen, setPacienteDialogOpen] = useState(false);
     const [profissionalDialogOpen, setProfissionalDialogOpen] = useState(false);
+    const [departamentoDialogOpen, setDepartamentoDialogOpen] = useState(false);
     
     const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
@@ -64,6 +67,7 @@ export default function ConfiguracoesPage() {
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
+    const [departamentosCount, setDepartamentosCount] = useState<number | null>(null);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
 
     const [nomeImpressora, setNomeImpressora] = useState("");
@@ -74,13 +78,15 @@ export default function ConfiguracoesPage() {
     useEffect(() => {
         const fetchCounts = async () => {
             try {
-                const [pacientes, profissionais, empresaData] = await Promise.all([
+                const [pacientes, profissionais, departamentos, empresaData] = await Promise.all([
                     getPacientes(),
                     getProfissionais(),
+                    getDepartamentos(),
                     getEmpresa(),
                 ]);
                 setPacientesCount(pacientes.length);
                 setProfissionaisCount(profissionais.length);
+                setDepartamentosCount(departamentos.length);
                 if (empresaData?.nomeImpressora) {
                     setNomeImpressora(empresaData.nomeImpressora);
                     setOriginalNomeImpressora(empresaData.nomeImpressora);
@@ -127,6 +133,18 @@ export default function ConfiguracoesPage() {
             return;
         }
         setProfissionalDialogOpen(true);
+    };
+    
+    const handleDepartamentoResetRequest = () => {
+        if (departamentosCount !== null && departamentosCount > 0) {
+            setNotification({
+                type: "error",
+                title: "Ação Bloqueada",
+                message: `Existem ${departamentosCount} departamento(s) cadastrado(s). É necessário excluir todos antes de zerar os códigos.`,
+            });
+            return;
+        }
+        setDepartamentoDialogOpen(true);
     };
 
     const handleDeleteAllRequest = (type: "Pacientes" | "Profissionais" | "Departamentos") => {
@@ -206,6 +224,19 @@ export default function ConfiguracoesPage() {
             setIsProfissionalResetting(false);
         }
     };
+    
+    const handleConfirmDepartamentoReset = async () => {
+        setIsDepartamentoResetting(true);
+        setDepartamentoDialogOpen(false);
+        try {
+            await resetCounterByName('departamentos_v2');
+            setNotification({ type: "success", title: "Códigos de Departamento Zerados!", message: "A contagem de códigos de cadastro de departamento foi reiniciada para 01." });
+        } catch (error) {
+            setNotification({ type: "error", title: "Erro ao zerar códigos de departamento", message: (error as Error).message });
+        } finally {
+            setIsDepartamentoResetting(false);
+        }
+    };
 
     const handleConfirmDeleteAll = async (password: string) => {
         if (password !== '9512') {
@@ -250,6 +281,7 @@ export default function ConfiguracoesPage() {
             // Refresh counts
             if (itemType === 'Pacientes') setPacientesCount(0);
             if (itemType === 'Profissionais') setProfissionaisCount(0);
+            if (itemType === 'Departamentos') setDepartamentosCount(0);
         } catch (error) {
             setNotification({
                 type: 'error',
@@ -336,6 +368,7 @@ export default function ConfiguracoesPage() {
                     <CardContent className="space-y-3">
                         <ActionRow label="Zerar Códigos de Pacientes" buttonText="Zerar (01)" onClick={handlePacienteResetRequest} isResetting={isPacienteResetting} disabled={pacientesCount === null || pacientesCount > 0} title={pacientesCount !== null && pacientesCount > 0 ? `Existem ${pacientesCount} pacientes cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
                         <ActionRow label="Zerar Códigos de Profissionais" buttonText="Zerar (01)" onClick={handleProfissionalResetRequest} isResetting={isProfissionalResetting} disabled={profissionaisCount === null || profissionaisCount > 0} title={profissionaisCount !== null && profissionaisCount > 0 ? `Existem ${profissionaisCount} profissionais cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
+                        <ActionRow label="Zerar Códigos de Departamentos" buttonText="Zerar (01)" onClick={handleDepartamentoResetRequest} isResetting={isDepartamentoResetting} disabled={departamentosCount === null || departamentosCount > 0} title={departamentosCount !== null && departamentosCount > 0 ? `Existem ${departamentosCount} departamentos cadastrados. Exclua-os primeiro.` : ""} icon={RefreshCw} />
                         <Separator className="my-1" />
                         <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
                         <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
@@ -423,6 +456,8 @@ export default function ConfiguracoesPage() {
 
         <ResetPacienteDialog isOpen={pacienteDialogOpen} onOpenChange={setPacienteDialogOpen} onConfirm={handleConfirmPacienteReset} />
         <ResetProfissionalDialog isOpen={profissionalDialogOpen} onOpenChange={setProfissionalDialogOpen} onConfirm={handleConfirmProfissionalReset} />
+        <ResetDepartamentoDialog isOpen={departamentoDialogOpen} onOpenChange={setDepartamentoDialogOpen} onConfirm={handleConfirmDepartamentoReset} />
+
         {deleteType && (<DeleteAllDialog isOpen={deleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} onConfirm={handleConfirmDeleteAll} itemType={deleteType} />)}
         {notification && (<NotificationDialog type={notification.type} title={notification.title} message={notification.message} onOpenChange={() => setNotification(null)} />)}
     </div>
