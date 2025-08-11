@@ -353,7 +353,7 @@ export default function ConfiguracoesPage() {
 
 
     const ActionRow = ({ label, buttonText, onClick, isResetting, disabled, icon: Icon, title, variant = "destructive" }: { label: string; buttonText: string; onClick: () => void; isResetting: boolean; disabled?: boolean; icon: React.ElementType; title?: string; variant?: "destructive" | "outline" | "default" | "secondary" | "ghost" | "link" | null | undefined }) => (
-        <div className="flex items-center justify-between p-3 first:pt-0 last:pb-0">
+        <div className="flex items-center justify-between px-3 py-2 first:pt-0 last:pb-0">
             <p className="font-medium text-sm text-gray-700">{label}</p>
             <Button onClick={onClick} variant={variant} size="sm" className="h-8 text-xs" disabled={isResetting || disabled} title={title}>
                 {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icon className="mr-2 h-3 w-3" />}
@@ -376,7 +376,7 @@ export default function ConfiguracoesPage() {
                         Reinicia a numeração das senhas para um novo turno ou dia de atendimento.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2 pt-2">
+                <CardContent className="pt-2">
                     <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
@@ -536,5 +536,3 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
-
-    
