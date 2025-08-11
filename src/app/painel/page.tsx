@@ -24,7 +24,7 @@ export default function PainelPage() {
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -80,6 +80,12 @@ export default function PainelPage() {
     return () => unsubscribe();
   }, [isClient, hasInteracted, currentCall.id]);
   
+  const handleInteraction = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+  };
+  
   if (!isClient) {
     return (
        <div className="flex h-screen w-full items-center justify-center bg-slate-900 font-headline text-white overflow-hidden">
@@ -97,8 +103,14 @@ export default function PainelPage() {
     : "";
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none">
+    <div className="flex flex-col h-screen bg-slate-900 text-white font-headline select-none" onClick={handleInteraction}>
         
+        {!hasInteracted ? (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm cursor-pointer">
+                <PlayCircle className="h-24 w-24 text-white/70 mb-4" />
+                <h1 className="text-4xl font-bold">Clique ou toque para ativar o som</h1>
+            </div>
+        ) : (
         <main className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12">
             <AnimatePresence mode="wait">
                 <motion.div
@@ -134,6 +146,7 @@ export default function PainelPage() {
                 </motion.div>
             </AnimatePresence>
         </main>
+        )}
         
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
