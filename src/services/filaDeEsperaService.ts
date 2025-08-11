@@ -572,3 +572,5 @@ export const clearAllRelatorios = async (): Promise<number> => {
         throw new Error("Não foi possível limpar os relatórios de atendimento.");
     }
 };
+
+    
