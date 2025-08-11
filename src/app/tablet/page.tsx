@@ -45,6 +45,11 @@ const infoSizeClasses = {
   medio: "text-6xl md:text-8xl",
   grande: "text-7xl md:text-9xl",
 };
+const subtitleSizeClasses = {
+  pequeno: "text-3xl md:text-4xl",
+  medio: "text-4xl md:text-5xl",
+  grande: "text-5xl md:text-6xl",
+};
 const cardSizeClasses = {
   pequeno: "text-2xl md:text-3xl",
   medio: "text-3xl md:text-4xl",
@@ -168,7 +173,7 @@ export default function TabletPage() {
                 <h1 className={cn("font-display font-black text-amber-400 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
                     RETIRE SUA SENHA
                 </h1>
-                <p className={cn("mt-4 text-slate-200 font-semibold", infoSizeClasses[config.infoSize])}>
+                <p className={cn("mt-4 text-slate-200 font-normal", subtitleSizeClasses[config.infoSize])}>
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
