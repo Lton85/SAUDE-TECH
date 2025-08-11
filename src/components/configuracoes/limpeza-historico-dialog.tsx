@@ -48,6 +48,11 @@ export function LimpezaHistoricoDialog({
       onConfirm(password);
     }
   };
+  
+  const finalDescription = requiresPassword 
+    ? description + " Para continuar, você precisará fornecer a senha de segurança."
+    : description;
+
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
@@ -58,10 +63,7 @@ export function LimpezaHistoricoDialog({
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <span dangerouslySetInnerHTML={{ __html: description }} />
-            {requiresPassword && (
-                <span className="mt-2 block">Para continuar, você precisará fornecer a senha de segurança.</span>
-            )}
+            <span dangerouslySetInnerHTML={{ __html: finalDescription }} />
           </AlertDialogDescription>
         </AlertDialogHeader>
         
