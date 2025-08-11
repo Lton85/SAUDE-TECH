@@ -64,11 +64,22 @@ export const getUltimaChamada = async (): Promise<Chamada | null> => {
 
 export const clearAllChamadas = async (): Promise<number> => {
     try {
-        // Apenas reseta o painel para o estado inicial, não apaga o histórico.
-        await clearPainel(); 
-        // Retorna 1 para indicar que uma ação (a de limpeza) foi realizada.
-        // O número retornado não representa mais o total de itens excluídos.
-        return 1;
+        const snapshot = await getDocs(chamadasCollection);
+        if (snapshot.empty) {
+            return 0;
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        // Após limpar, reseta o painel para o estado inicial
+        await clearPainel();
+
+        // Retorna o número de documentos excluídos
+        return snapshot.size;
     } catch (error) {
         console.error("Erro ao limpar o histórico de chamadas:", error);
         throw new Error("Não foi possível limpar o histórico de chamadas do painel.");
