@@ -188,7 +188,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
           <h2 className="text-xl font-bold tracking-tight">Acessos Rápidos</h2>
           <p className="text-muted-foreground">Navegue pelas principais funcionalidades do sistema.</p>
         </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {navFeatures.map((feature) => (
               <Card 
                   key={feature.id} 
