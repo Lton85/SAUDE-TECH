@@ -1,12 +1,32 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot, getDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, writeBatch, updateDoc, onSnapshot, getDoc, query, orderBy, where } from 'firebase/firestore';
 import type { Paciente } from '@/types/paciente';
 import { getNextCounter } from './countersService';
 import { getCurrentUser } from './authService';
 
 const pacientesCollection = collection(db, 'pacientes');
+
+const checkDuplicate = async (field: 'cpf' | 'cns', value: string, currentId?: string): Promise<void> => {
+    if (!value) return; // Do not check for empty values
+    
+    const q = query(pacientesCollection, where(field, "==", value));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+        if (currentId) {
+            // In update mode, check if the found document is different from the current one
+            const isDuplicate = snapshot.docs.some(doc => doc.id !== currentId);
+            if (isDuplicate) {
+                throw new Error(`O ${field.toUpperCase()} informado já está cadastrado para outro paciente.`);
+            }
+        } else {
+            // In add mode, any result is a duplicate
+            throw new Error(`O ${field.toUpperCase()} informado já está cadastrado.`);
+        }
+    }
+}
 
 export const getPacientes = async (): Promise<Paciente[]> => {
     const q = query(pacientesCollection, orderBy("codigo", "asc"));
@@ -37,6 +57,10 @@ export const getPacientesRealtime = (
 };
 
 export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'historico'>): Promise<string> => {
+    // Check for duplicates before adding
+    await checkDuplicate('cpf', paciente.cpf || '');
+    await checkDuplicate('cns', paciente.cns);
+    
     const nextId = await getNextCounter('pacientes_v2');
     const codigo = String(nextId).padStart(3, '0');
     const loggedUser = getCurrentUser();
@@ -56,6 +80,10 @@ export const addPaciente = async (paciente: Omit<Paciente, 'id' | 'codigo' | 'hi
 };
 
 export const updatePaciente = async (id: string, paciente: Partial<Omit<Paciente, 'id' | 'codigo' | 'historico'>>): Promise<void> => {
+    // Check for duplicates before updating
+    if (paciente.cpf) await checkDuplicate('cpf', paciente.cpf, id);
+    if (paciente.cns) await checkDuplicate('cns', paciente.cns, id);
+
     const pacienteDoc = doc(db, 'pacientes', id);
     const docSnap = await getDoc(pacienteDoc);
 
