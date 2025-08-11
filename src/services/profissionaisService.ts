@@ -64,3 +64,23 @@ export const deleteProfissional = async (id: string): Promise<void> => {
 
     await deleteDoc(profissionalDoc);
 };
+
+export const clearAllProfissionais = async (): Promise<number> => {
+    try {
+        const snapshot = await getDocs(profissionaisCollection);
+        if (snapshot.empty) {
+            return 0;
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        return snapshot.size;
+    } catch (error) {
+        console.error("Erro ao limpar a coleção de profissionais:", error);
+        throw new Error("Não foi possível excluir todos os profissionais.");
+    }
+};

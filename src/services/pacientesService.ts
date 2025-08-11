@@ -82,3 +82,23 @@ export const deletePaciente = async (id: string): Promise<void> => {
     const pacienteDoc = doc(db, 'pacientes', id);
     await deleteDoc(pacienteDoc);
 };
+
+export const clearAllPacientes = async (): Promise<number> => {
+    try {
+        const snapshot = await getDocs(pacientesCollection);
+        if (snapshot.empty) {
+            return 0;
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        return snapshot.size;
+    } catch (error) {
+        console.error("Erro ao limpar a coleção de pacientes:", error);
+        throw new Error("Não foi possível excluir todos os pacientes.");
+    }
+};

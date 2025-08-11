@@ -92,4 +92,31 @@ export const deleteDepartamento = async (id: string): Promise<void> => {
     await deleteDoc(departamentoDoc);
 };
 
-    
+export const clearAllDepartamentos = async (): Promise<number> => {
+    try {
+        const q = query(collection(db, "filaDeEspera"));
+        const activePatientsSnapshot = await getDocs(q);
+        if (!activePatientsSnapshot.empty) {
+            throw new Error(`Não é possível excluir. Existem ${activePatientsSnapshot.size} pacientes na fila ou em atendimento.`);
+        }
+
+        const snapshot = await getDocs(departamentosCollection);
+        if (snapshot.empty) {
+            return 0;
+        }
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        return snapshot.size;
+    } catch (error) {
+        console.error("Erro ao limpar a coleção de departamentos:", error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Não foi possível excluir todos os departamentos.");
+    }
+};
