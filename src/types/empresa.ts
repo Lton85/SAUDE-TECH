@@ -15,4 +15,6 @@ export interface Empresa {
     email: string;
     nomeImpressora?: string;
     classificacoesAtendimento?: string[];
+    tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
+    tabletCardSize?: 'pequeno' | 'medio' | 'grande';
 }

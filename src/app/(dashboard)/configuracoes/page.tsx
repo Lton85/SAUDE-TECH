@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building } from "lucide-react";
+import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building, Tablet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllRelatorios } from "@/services/filaDeEsperaService";
@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { Empresa } from "@/types/empresa";
 import { ResetDepartamentoDialog } from "@/components/configuracoes/reset-departamento-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen: boolean, onOpenChange: (open: boolean) => void, onConfirm: (password: string) => void, itemType: string }) => {
     const description = `<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todos os cadastros de ${itemType}.</p>`;
@@ -74,6 +75,11 @@ export default function ConfiguracoesPage() {
     const [originalNomeImpressora, setOriginalNomeImpressora] = useState("");
     const [isSavingPrinter, setIsSavingPrinter] = useState(false);
     const [isEditingPrinter, setIsEditingPrinter] = useState(false);
+    
+    const [tabletInfoSize, setTabletInfoSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
+    const [tabletCardSize, setTabletCardSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
+    const [isSavingResolution, setIsSavingResolution] = useState(false);
+    
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -91,6 +97,9 @@ export default function ConfiguracoesPage() {
                     setNomeImpressora(empresaData.nomeImpressora);
                     setOriginalNomeImpressora(empresaData.nomeImpressora);
                 }
+                if (empresaData?.tabletInfoSize) setTabletInfoSize(empresaData.tabletInfoSize);
+                if (empresaData?.tabletCardSize) setTabletCardSize(empresaData.tabletCardSize);
+
             } catch (error) {
                 setNotification({
                     type: "error",
@@ -316,6 +325,26 @@ export default function ConfiguracoesPage() {
             setIsSavingPrinter(false);
         }
     };
+
+    const handleSaveResolution = async () => {
+        setIsSavingResolution(true);
+        try {
+            await saveOrUpdateEmpresa({ tabletInfoSize, tabletCardSize } as Empresa);
+            setNotification({
+                type: 'success',
+                title: 'Resolução Salva!',
+                message: 'As configurações de resolução do tablet foram salvas.',
+            });
+        } catch (error) {
+             setNotification({
+                type: 'error',
+                title: `Erro ao salvar resolução`,
+                message: (error as Error).message,
+            });
+        } finally {
+            setIsSavingResolution(false);
+        }
+    };
     
     const handleCancelPrinterEdit = () => {
         setNomeImpressora(originalNomeImpressora);
@@ -397,7 +426,7 @@ export default function ConfiguracoesPage() {
                     </CardContent>
                 </Card>
             </div>
-            <div className="lg:col-span-2">
+             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
                         <div className="flex items-center gap-3">
@@ -438,6 +467,46 @@ export default function ConfiguracoesPage() {
                                 </>
                             )}
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                     <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <Tablet className="h-6 w-6" />
+                            <CardTitle>Resolução Tablet</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Ajuste o tamanho dos textos na tela de retirada de senhas.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label className="font-semibold">Informações</Label>
+                            <RadioGroup value={tabletInfoSize} onValueChange={(v) => setTabletInfoSize(v as any)} className="flex items-center gap-2">
+                                <RadioGroupItem value="pequeno" id="info-p"/>
+                                <Label htmlFor="info-p" className="cursor-pointer text-xs">P</Label>
+                                <RadioGroupItem value="medio" id="info-m"/>
+                                <Label htmlFor="info-m" className="cursor-pointer text-xs">M</Label>
+                                <RadioGroupItem value="grande" id="info-g"/>
+                                <Label htmlFor="info-g" className="cursor-pointer text-xs">G</Label>
+                            </RadioGroup>
+                        </div>
+                         <div className="flex items-center justify-between">
+                            <Label className="font-semibold">Card</Label>
+                             <RadioGroup value={tabletCardSize} onValueChange={(v) => setTabletCardSize(v as any)} className="flex items-center gap-2">
+                                <RadioGroupItem value="pequeno" id="card-p"/>
+                                <Label htmlFor="card-p" className="cursor-pointer text-xs">P</Label>
+                                <RadioGroupItem value="medio" id="card-m"/>
+                                <Label htmlFor="card-m" className="cursor-pointer text-xs">M</Label>
+                                <RadioGroupItem value="grande" id="card-g"/>
+                                <Label htmlFor="card-g" className="cursor-pointer text-xs">G</Label>
+                            </RadioGroup>
+                        </div>
+                        <Button className="w-full mt-2" onClick={handleSaveResolution} disabled={isSavingResolution}>
+                            {isSavingResolution ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Salvar Resolução
+                        </Button>
                     </CardContent>
                 </Card>
             </div>

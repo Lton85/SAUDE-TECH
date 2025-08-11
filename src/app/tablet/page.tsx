@@ -40,9 +40,30 @@ const textColors: { [key: string]: string } = {
 
 const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
 
+const infoSizeClasses = {
+  pequeno: "text-5xl md:text-7xl",
+  medio: "text-6xl md:text-8xl",
+  grande: "text-7xl md:text-9xl",
+};
+const cardSizeClasses = {
+  pequeno: "text-2xl md:text-3xl",
+  medio: "text-3xl md:text-4xl",
+  grande: "text-4xl md:text-5xl",
+};
+
+
 export default function TabletPage() {
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
-    const [classificacoes, setClassificacoes] = useState<string[]>([]);
+    const [config, setConfig] = useState<{
+        classificacoes: string[];
+        infoSize: 'pequeno' | 'medio' | 'grande';
+        cardSize: 'pequeno' | 'medio' | 'grande';
+    }>({
+        classificacoes: [],
+        infoSize: 'medio',
+        cardSize: 'medio',
+    });
+
     const [isFetchingConfig, setIsFetchingConfig] = useState(true);
     const [generatedTicket, setGeneratedTicket] = useState<GeneratedTicket | null>(null);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
@@ -57,13 +78,16 @@ export default function TabletPage() {
                 if (empresaData?.classificacoesAtendimento?.length) {
                     activeClassificacoes = empresaData.classificacoesAtendimento;
                 } else {
-                    // Fallback para as classificações padrão se não estiver configurado
                     activeClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"];
                 }
 
-                // Sort the active classifications based on the predefined order
                 const sortedClassificacoes = classificationOrder.filter(c => activeClassificacoes.includes(c));
-                setClassificacoes(sortedClassificacoes);
+                
+                setConfig({
+                    classificacoes: sortedClassificacoes,
+                    infoSize: empresaData?.tabletInfoSize || 'medio',
+                    cardSize: empresaData?.tabletCardSize || 'medio'
+                });
 
             } catch (error) {
                 setNotification({
@@ -71,8 +95,11 @@ export default function TabletPage() {
                     title: `Erro ao carregar configurações`,
                     message: (error as Error).message,
                 });
-                 // Fallback on error
-                 setClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
+                 setConfig({
+                     classificacoes: ["Normal", "Preferencial", "Urgência", "Outros"],
+                     infoSize: 'medio',
+                     cardSize: 'medio'
+                 });
             } finally {
                 setIsFetchingConfig(false);
             }
@@ -84,7 +111,7 @@ export default function TabletPage() {
         if (generatedTicket) {
             const timer = setTimeout(() => {
                 setGeneratedTicket(null);
-            }, 5000); // Fica na tela por 5 segundos
+            }, 5000); 
             return () => clearTimeout(timer);
         }
     }, [generatedTicket]);
@@ -138,23 +165,23 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-12 w-full"
             >
-                <h1 className="font-display text-6xl md:text-8xl font-black text-amber-400 tracking-tighter uppercase">
+                <h1 className={cn("font-display font-black text-amber-400 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
                     RETIRE SUA SENHA
                 </h1>
-                <p className="mt-4 text-2xl md:text-3xl text-slate-200">
+                <p className={cn("mt-4 text-slate-200", cardSizeClasses[config.cardSize])}>
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
 
             <div className="flex flex-wrap justify-center items-center gap-8 w-full max-w-7xl">
-                {classificacoes.map((tipo, index) => (
+                {config.classificacoes.map((tipo, index) => (
                      <motion.div 
                         key={tipo} 
                         custom={index} 
                         initial="hidden" 
                         animate="visible" 
                         variants={cardVariants}
-                        className="w-full sm:w-64 md:w-72" // Define a fixed width for the cards
+                        className="w-full sm:w-64 md:w-72"
                      >
                         <Card 
                             className={cn(
@@ -164,7 +191,7 @@ export default function TabletPage() {
                             onClick={() => handleSelection(tipo as FilaDeEsperaItem['classificacao'])}
                         >
                             <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 h-full">
-                                {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("text-3xl md:text-4xl font-bold", textColors[tipo])}>{tipo.toUpperCase()}</h2>}
+                                {isLoading === tipo ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[tipo])} /> : <h2 className={cn("font-bold", textColors[tipo], cardSizeClasses[config.cardSize])}>{tipo.toUpperCase()}</h2>}
                             </CardContent>
                         </Card>
                     </motion.div>
