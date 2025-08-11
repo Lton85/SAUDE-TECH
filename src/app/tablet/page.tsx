@@ -77,7 +77,7 @@ export default function TabletPage() {
                     RETIRE SUA SENHA
                 </h1>
                 <p className="mt-2 text-xl md:text-2xl text-slate-200">
-                    Escolha o serviço desejado:
+                    Escolha o tipo de atendimento:
                 </p>
             </motion.div>
 
