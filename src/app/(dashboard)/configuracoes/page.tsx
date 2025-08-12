@@ -73,9 +73,6 @@ export default function ConfiguracoesPage() {
     const [isSavingPrinter, setIsSavingPrinter] = useState(false);
     const [isEditingPrinter, setIsEditingPrinter] = useState(false);
     
-    const [tabletInfoSize, setTabletInfoSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
-    const [tabletCardSize, setTabletCardSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
-    const [isSavingResolution, setIsSavingResolution] = useState(false);
     const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
     
 
@@ -98,9 +95,6 @@ export default function ConfiguracoesPage() {
                     setNomeImpressora(empresaData.nomeImpressora);
                     setOriginalNomeImpressora(empresaData.nomeImpressora);
                 }
-                if (empresaData?.tabletInfoSize) setTabletInfoSize(empresaData.tabletInfoSize);
-                if (empresaData?.tabletCardSize) setTabletCardSize(empresaData.tabletCardSize);
-
             } catch (error) {
                 setNotification({
                     type: "error",
@@ -327,26 +321,6 @@ export default function ConfiguracoesPage() {
             setIsSavingPrinter(false);
         }
     };
-
-    const handleSaveResolution = async () => {
-        setIsSavingResolution(true);
-        try {
-            await saveOrUpdateEmpresa({ tabletInfoSize, tabletCardSize } as Empresa);
-            setNotification({
-                type: 'success',
-                title: 'Resolução Salva!',
-                message: 'As configurações de resolução do tablet foram salvas.',
-            });
-        } catch (error) {
-             setNotification({
-                type: 'error',
-                title: `Erro ao salvar resolução`,
-                message: (error as Error).message,
-            });
-        } finally {
-            setIsSavingResolution(false);
-        }
-    };
     
     const handleCancelPrinterEdit = () => {
         setNomeImpressora(originalNomeImpressora);
@@ -437,43 +411,25 @@ export default function ConfiguracoesPage() {
                     </CardContent>
                 </Card>
 
-                 <Card>
-                     <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <Tablet className="h-5 w-5" />
-                            <CardTitle className="text-lg">Resolução Tablet</CardTitle>
+                 <Card className="border-destructive/50">
+                    <CardHeader>
+                        <div className="flex items-center gap-3 text-destructive">
+                            <Trash2 className="h-5 w-5" />
+                            <CardTitle className="text-lg">Limpeza Definitiva</CardTitle>
                         </div>
-                        <CardDescription className="text-sm">
-                           Ajuste os tamanhos para a tela de senhas.
+                        <CardDescription>
+                            Exclui permanentemente todos os registros de chamadas e relatórios.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <Label className="font-semibold text-sm">Informações</Label>
-                            <RadioGroup value={tabletInfoSize} onValueChange={(v) => setTabletInfoSize(v as any)} className="flex items-center gap-2">
-                                <RadioGroupItem value="pequeno" id="info-p"/>
-                                <Label htmlFor="info-p" className="cursor-pointer text-xs px-1">P</Label>
-                                <RadioGroupItem value="medio" id="info-m"/>
-                                <Label htmlFor="info-m" className="cursor-pointer text-xs px-1">M</Label>
-                                <RadioGroupItem value="grande" id="info-g"/>
-                                <Label htmlFor="info-g" className="cursor-pointer text-xs px-1">G</Label>
-                            </RadioGroup>
-                        </div>
-                         <div className="flex items-center justify-between">
-                            <Label className="font-semibold text-sm">Card</Label>
-                             <RadioGroup value={tabletCardSize} onValueChange={(v) => setTabletCardSize(v as any)} className="flex items-center gap-2">
-                                <RadioGroupItem value="pequeno" id="card-p"/>
-                                <Label htmlFor="card-p" className="cursor-pointer text-xs px-1">P</Label>
-                                <RadioGroupItem value="medio" id="card-m"/>
-                                <Label htmlFor="card-m" className="cursor-pointer text-xs px-1">M</Label>
-                                <RadioGroupItem value="grande" id="card-g"/>
-                                <Label htmlFor="card-g" className="cursor-pointer text-xs px-1">G</Label>
-                            </RadioGroup>
-                        </div>
-                        <Button className="w-full mt-2 h-9" size="sm" onClick={handleSaveResolution} disabled={isSavingResolution}>
-                            {isSavingResolution ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-3 w-3" />}
-                            Salvar Resolução
-                        </Button>
+                    <CardContent className="pt-2">
+                        <ActionRow
+                            label="Zerar Histórico de Dados"
+                            buttonText="Limpeza Completa"
+                            onClick={handleLimpezaRequest}
+                            isResetting={isLimpezaResetting}
+                            icon={Trash2}
+                            variant="destructive"
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -499,28 +455,6 @@ export default function ConfiguracoesPage() {
                     <ActionRow label="Excluir Todos os Pacientes" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Pacientes")} isResetting={isDeletingAllPacientes} icon={UserX} />
                     <ActionRow label="Excluir Todos os Profissionais" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Profissionais")} isResetting={isDeletingAllProfissionais} icon={Stethoscope} />
                     <ActionRow label="Excluir Todos os Departamentos" buttonText="Excluir" onClick={() => handleDeleteAllRequest("Departamentos")} isResetting={isDeletingAllDepartamentos} icon={Building} />
-                </CardContent>
-            </Card>
-            
-            <Card className="border-destructive/50">
-                <CardHeader>
-                    <div className="flex items-center gap-3 text-destructive">
-                        <Trash2 className="h-5 w-5" />
-                        <CardTitle className="text-lg">Limpeza Definitiva</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Exclui permanentemente todos os registros de chamadas e relatórios.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-2">
-                     <ActionRow
-                        label="Zerar Histórico de Dados"
-                        buttonText="Limpeza Completa"
-                        onClick={handleLimpezaRequest}
-                        isResetting={isLimpezaResetting}
-                        icon={Trash2}
-                        variant="destructive"
-                    />
                 </CardContent>
             </Card>
         </div>

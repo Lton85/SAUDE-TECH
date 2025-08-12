@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv, PlusCircle, Trash2 } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv, PlusCircle, Trash2, Tablet } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
@@ -14,6 +14,8 @@ import type { Empresa, Classificacao } from "@/types/empresa";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 
 const ufs = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -51,6 +53,8 @@ const initialEmpresaState: Empresa = {
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
     exibirLocalChamadaTriagem: true,
+    tabletInfoSize: 'medio',
+    tabletCardSize: 'medio',
 };
 
 export default function EmpresaPage() {
@@ -130,8 +134,12 @@ export default function EmpresaPage() {
         setFormData(prev => ({...prev, [id]: value }));
     }
 
-    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento' | 'nomesClassificacoes'>, value: string) => {
+    const handleSelectChange = (id: keyof Empresa, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
+    }
+
+    const handleRadioChange = (id: keyof Empresa, value: string) => {
+        setFormData(prev => ({...prev, [id]: value}));
     }
     
     const handleClassificationChange = (index: number, field: keyof Omit<Classificacao, 'id' | 'editavel'>, value: string | boolean) => {
@@ -410,48 +418,85 @@ export default function EmpresaPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <Tv className="h-6 w-6" />
-                            <CardTitle>Configurações do Painel</CardTitle>
-                        </div>
-                        <CardDescription>
-                            Ajuste as informações exibidas no painel de senhas.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                           <Checkbox 
-                            id="exibirUltimasSenhas" 
-                            checked={!!formData.exibirUltimasSenhas}
-                            onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
-                            disabled={!isEditing}
-                           />
-                           <Label htmlFor="exibirUltimasSenhas" className="font-normal">Exibir últimas senhas chamadas</Label>
-                       </div>
-                       <Separator />
-                       <div className="space-y-2">
-                           <Label htmlFor="localChamadaTriagem">Local da Primeira Chamada</Label>
-                           <Input 
-                                id="localChamadaTriagem" 
-                                value={formData.localChamadaTriagem || ''} 
-                                onChange={handleInputChange} 
-                                placeholder="Ex: Recepção, Triagem, Guichê 1"
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <Tv className="h-6 w-6" />
+                                <CardTitle>Configurações do Painel</CardTitle>
+                            </div>
+                            <CardDescription>
+                                Ajuste as informações exibidas no painel de senhas.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                            <Checkbox 
+                                id="exibirUltimasSenhas" 
+                                checked={!!formData.exibirUltimasSenhas}
+                                onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
                                 disabled={!isEditing}
                             />
-                       </div>
-                       <div className="flex items-center space-x-2">
-                           <Checkbox 
-                            id="exibirLocalChamadaTriagem" 
-                            checked={!!formData.exibirLocalChamadaTriagem}
-                            onCheckedChange={(checked) => handleCheckboxChange('exibirLocalChamadaTriagem', !!checked)}
-                            disabled={!isEditing}
-                           />
-                           <Label htmlFor="exibirLocalChamadaTriagem" className="font-normal">Exibir local da primeira chamada no painel</Label>
-                       </div>
-                    </CardContent>
-                </Card>
+                            <Label htmlFor="exibirUltimasSenhas" className="font-normal">Exibir últimas senhas chamadas</Label>
+                        </div>
+                        <Separator />
+                        <div className="space-y-2">
+                            <Label htmlFor="localChamadaTriagem">Local da Primeira Chamada</Label>
+                            <Input 
+                                    id="localChamadaTriagem" 
+                                    value={formData.localChamadaTriagem || ''} 
+                                    onChange={handleInputChange} 
+                                    placeholder="Ex: Recepção, Triagem, Guichê 1"
+                                    disabled={!isEditing}
+                                />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox 
+                                id="exibirLocalChamadaTriagem" 
+                                checked={!!formData.exibirLocalChamadaTriagem}
+                                onCheckedChange={(checked) => handleCheckboxChange('exibirLocalChamadaTriagem', !!checked)}
+                                disabled={!isEditing}
+                            />
+                            <Label htmlFor="exibirLocalChamadaTriagem" className="font-normal">Exibir local da primeira chamada no painel</Label>
+                        </div>
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <Tablet className="h-6 w-6" />
+                                <CardTitle>Resolução Tablet</CardTitle>
+                            </div>
+                            <CardDescription className="text-sm">
+                                Ajuste os tamanhos para a tela de senhas.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-semibold text-sm">Informações</Label>
+                                <RadioGroup value={formData.tabletInfoSize || 'medio'} onValueChange={(v) => handleRadioChange('tabletInfoSize', v as any)} className="flex items-center gap-2">
+                                    <RadioGroupItem value="pequeno" id="info-p" disabled={!isEditing}/>
+                                    <Label htmlFor="info-p" className="cursor-pointer text-xs px-1">P</Label>
+                                    <RadioGroupItem value="medio" id="info-m" disabled={!isEditing}/>
+                                    <Label htmlFor="info-m" className="cursor-pointer text-xs px-1">M</Label>
+                                    <RadioGroupItem value="grande" id="info-g" disabled={!isEditing}/>
+                                    <Label htmlFor="info-g" className="cursor-pointer text-xs px-1">G</Label>
+                                </RadioGroup>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <Label className="font-semibold text-sm">Card</Label>
+                                <RadioGroup value={formData.tabletCardSize || 'medio'} onValueChange={(v) => handleRadioChange('tabletCardSize', v as any)} className="flex items-center gap-2">
+                                    <RadioGroupItem value="pequeno" id="card-p" disabled={!isEditing}/>
+                                    <Label htmlFor="card-p" className="cursor-pointer text-xs px-1">P</Label>
+                                    <RadioGroupItem value="medio" id="card-m" disabled={!isEditing}/>
+                                    <Label htmlFor="card-m" className="cursor-pointer text-xs px-1">M</Label>
+                                    <RadioGroupItem value="grande" id="card-g" disabled={!isEditing}/>
+                                    <Label htmlFor="card-g" className="cursor-pointer text-xs px-1">G</Label>
+                                </RadioGroup>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         
             <div className="flex justify-end pt-4 gap-2">
@@ -485,7 +530,3 @@ export default function EmpresaPage() {
         </>
     );
 }
-
-    
-
-    
