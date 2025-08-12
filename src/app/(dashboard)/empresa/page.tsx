@@ -365,8 +365,8 @@ export default function EmpresaPage() {
                     <CardContent>
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
-                               <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-start gap-x-4">
-                                   <div className="flex items-center h-full pt-2">
+                               <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4">
+                                   <div className="flex items-center h-full">
                                      <Checkbox 
                                         id={`class-active-${classificacao.id}`}
                                         checked={classificacao.ativa}
@@ -393,7 +393,7 @@ export default function EmpresaPage() {
                                         />
                                    </div>
                                     {isEditing && classificacao.editavel && (
-                                        <div className="flex items-center h-full pt-2">
+                                        <div className="flex items-center h-full">
                                             <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
