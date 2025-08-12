@@ -29,9 +29,9 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', descricao: 'Atendimento geral para todos os públicos', ativa: true, editavel: false },
-    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, idosos, pessoas com deficiência.', ativa: true, editavel: false },
-    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de urgência e emergência.', ativa: true, editavel: false },
+    { id: 'Normal', nome: 'Normal', descricao: 'Atendimento geral para todos os públicos', ativa: true },
+    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, idosos, pessoas com deficiência.', ativa: true },
+    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de urgência e emergência.', ativa: true },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -156,7 +156,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: '', descricao: '', ativa: true, editavel: true }
+                { id: newId, nome: '', descricao: '', ativa: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -366,16 +366,14 @@ export default function EmpresaPage() {
                     <CardContent>
                         <div className="space-y-4">
                             {(formData.classificacoes || []).map((classificacao, index) => (
-                                <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4">
-                                    <div className="flex items-center h-full">
+                                <div key={classificacao.id} className="space-y-2">
+                                    <div className="flex items-center gap-x-4">
                                         <Checkbox
                                             id={`class-active-${classificacao.id}`}
                                             checked={classificacao.ativa}
                                             onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
                                             disabled={!isEditing}
                                         />
-                                    </div>
-                                    <div className="space-y-2">
                                         <Input
                                             id={`className-${classificacao.id}`}
                                             value={classificacao.nome}
@@ -384,6 +382,13 @@ export default function EmpresaPage() {
                                             className="font-semibold h-9"
                                             placeholder="Nome da Classificação"
                                         />
+                                         {isEditing && !initialClassificacoes.some(c => c.id === classificacao.id) && (
+                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-x-4 ml-8">
                                         <Input
                                             id={`classDesc-${classificacao.id}`}
                                             value={classificacao.descricao || ''}
@@ -393,13 +398,7 @@ export default function EmpresaPage() {
                                             className="text-sm h-9"
                                         />
                                     </div>
-                                    {isEditing && classificacao.editavel && (
-                                        <div className="flex items-center h-full">
-                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
+                                     {index < (formData.classificacoes || []).length -1 && <Separator className="mt-4!"/>}
                                 </div>
                             ))}
                             {isEditing && (
