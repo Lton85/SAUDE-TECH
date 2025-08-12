@@ -193,20 +193,16 @@ export default function TabletPage() {
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
-                                    <>
-                                        <div className="flex-grow flex items-center justify-center">
-                                            <h2 className={cn("font-bold text-center", colors.text, cardSizeClasses[config.cardSize])}>
-                                                {classificacao.nome.toUpperCase()}
-                                            </h2>
-                                        </div>
-                                        <div className="h-10 flex-shrink-0 flex items-center">
-                                            {classificacao.exibirDescricao && classificacao.descricao && (
-                                                <p className={cn("text-xs md:text-sm font-normal text-center", colors.text, "opacity-70")}>
-                                                    {classificacao.descricao}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </>
+                                    <div className="text-center">
+                                        <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                            {classificacao.nome.toUpperCase()}
+                                        </h2>
+                                        {classificacao.exibirDescricao && classificacao.descricao && (
+                                            <p className={cn("mt-2 text-xs md:text-sm font-normal", colors.text, "opacity-70")}>
+                                                {classificacao.descricao}
+                                            </p>
+                                        )}
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
