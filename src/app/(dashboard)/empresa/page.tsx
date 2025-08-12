@@ -28,10 +28,9 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false, exibirDescricao: true },
-    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false, exibirDescricao: true },
-    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false, exibirDescricao: true },
-    { id: 'Outros', nome: 'Outros', descricao: '', ativa: true, editavel: false, exibirDescricao: true },
+    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false },
+    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false },
+    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -156,7 +155,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true, exibirDescricao: true }
+                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -392,7 +391,7 @@ export default function EmpresaPage() {
                                </div>
                            ))}
                            {isEditing && (
-                            <Button variant="outline" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
+                            <Button size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
                                 <PlusCircle className="mr-2 h-4 w-4"/>
                                 Adicionar Nova Classificação
                             </Button>
@@ -513,5 +512,3 @@ export default function EmpresaPage() {
         </>
     );
 }
-
-    
