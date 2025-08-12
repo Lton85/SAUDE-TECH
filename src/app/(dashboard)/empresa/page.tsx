@@ -367,15 +367,6 @@ export default function EmpresaPage() {
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
                                <div key={classificacao.id} className="flex items-start space-x-4">
-                                   <div className="flex flex-col items-center gap-2 pt-1">
-                                    <Checkbox 
-                                        id={`class-active-${classificacao.id}`}
-                                        checked={classificacao.ativa}
-                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
-                                        disabled={!isEditing}
-                                    />
-                                    <Label htmlFor={`class-active-${classificacao.id}`} className="text-xs text-muted-foreground">Ativa</Label>
-                                   </div>
                                    <div className="flex-1 space-y-2">
                                         <Input
                                           id={`className-${classificacao.id}`}
@@ -384,22 +375,14 @@ export default function EmpresaPage() {
                                           disabled={!isEditing}
                                           className="font-semibold"
                                         />
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox
-                                                id={`class-show-desc-${classificacao.id}`}
-                                                checked={classificacao.exibirDescricao}
-                                                onCheckedChange={(checked) => handleClassificationChange(index, 'exibirDescricao', !!checked)}
-                                                disabled={!isEditing}
-                                            />
-                                            <Input
-                                            id={`classDesc-${classificacao.id}`}
-                                            value={classificacao.descricao || ''}
-                                            onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
-                                            disabled={!isEditing}
-                                            placeholder="Descrição (Ex: Gestantes, Idosos...)"
-                                            className="text-xs h-8"
-                                            />
-                                        </div>
+                                        <Input
+                                        id={`classDesc-${classificacao.id}`}
+                                        value={classificacao.descricao || ''}
+                                        onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
+                                        disabled={!isEditing}
+                                        placeholder="Descrição (Ex: Gestantes, Idosos...)"
+                                        className="text-xs h-8"
+                                        />
                                    </div>
                                     {isEditing && classificacao.editavel && (
                                         <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8 mt-0.5">
@@ -530,3 +513,5 @@ export default function EmpresaPage() {
         </>
     );
 }
+
+    
