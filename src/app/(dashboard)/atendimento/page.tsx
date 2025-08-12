@@ -90,13 +90,7 @@ export default function AtendimentosPage() {
         const unsubPacientes = getPacientesRealtime(setPacientes, (error) => setNotification({ type: 'error', title: "Erro ao carregar pacientes", message: error }));
         
         const unsubPendentes = getAtendimentosPendentes((data) => {
-            const sortedData = data.sort((a, b) => {
-                if (a.prioridade !== b.prioridade) {
-                    return a.prioridade - b.prioridade;
-                }
-                return (a.chegadaEm?.toDate().getTime() ?? 0) - (b.chegadaEm?.toDate().getTime() ?? 0);
-            });
-            setPendentes(sortedData);
+            setPendentes(data);
             setIsLoading(false);
         }, (error) => {
              setNotification({ type: 'error', title: "Erro ao carregar senhas pendentes", message: error });
