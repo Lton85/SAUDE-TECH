@@ -359,7 +359,7 @@ export default function EmpresaPage() {
                             <CardTitle>Classificação de Atendimento</CardTitle>
                         </div>
                         <CardDescription>
-                            Ative, personalize e adicione novos tipos de atendimento para o tablet de senhas.
+                            Personalize e adicione novos tipos de atendimento para o tablet de senhas.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
