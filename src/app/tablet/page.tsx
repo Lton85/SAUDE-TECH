@@ -189,24 +189,24 @@ export default function TabletPage() {
                             )}
                             onClick={() => handleSelection(classificacao)}
                         >
-                             <CardContent className="flex flex-col items-center justify-center p-4 h-full">
+                            <CardContent className="flex flex-col items-center justify-center p-4 h-full">
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
-                                    <div className="text-center">
-                                        <div className="mb-auto flex-grow flex items-center justify-center">
-                                            <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                    <>
+                                        <div className="flex-grow flex items-center justify-center">
+                                            <h2 className={cn("font-bold text-center", colors.text, cardSizeClasses[config.cardSize])}>
                                                 {classificacao.nome.toUpperCase()}
                                             </h2>
                                         </div>
-                                        <div className="mt-auto">
+                                        <div className="h-10 flex-shrink-0 flex items-center">
                                             {classificacao.exibirDescricao && classificacao.descricao && (
-                                                <p className={cn("text-xs md:text-sm mt-1 font-normal", colors.text, "opacity-70")}>
+                                                <p className={cn("text-xs md:text-sm font-normal text-center", colors.text, "opacity-70")}>
                                                     {classificacao.descricao}
                                                 </p>
                                             )}
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                             </CardContent>
                         </Card>
