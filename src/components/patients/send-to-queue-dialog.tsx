@@ -43,7 +43,7 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
     );
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, classificacoes, onNotification }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -94,7 +94,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
                 let counterName;
                 let ticketPrefix;
                 switch(classification) {
-                    case 'Urgência':
+                    case 'Urgencia':
                         counterName = 'senha_emergencia';
                         ticketPrefix = 'U';
                         break;
@@ -140,7 +140,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
         let counterName;
         let ticketPrefix;
         switch(classification) {
-            case 'Urgência':
+            case 'Urgencia':
                 counterName = 'senha_emergencia';
                 ticketPrefix = 'U';
                 break;
@@ -165,7 +165,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
+      const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
         departamentoId: departamento.id,
@@ -316,5 +316,3 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     </Dialog>
   )
 }
-
-    

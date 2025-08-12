@@ -18,7 +18,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
     return (
         <Card key={item.id} className={cn(
             "w-full",
-            item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
+            item.classificacao === "Urgencia" && "border-red-500/50 bg-red-500/5",
             item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
             item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
             item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
@@ -27,13 +27,13 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
                  <div className="flex items-center gap-2">
                     <span className={cn(
                         "font-bold text-base tracking-tight",
-                         item.classificacao === "Urgência" && "text-red-600",
+                         item.classificacao === "Urgencia" && "text-red-600",
                         item.classificacao === "Preferencial" && "text-blue-600",
                         item.classificacao === "Normal" && "text-green-600",
                         item.classificacao === "Outros" && "text-slate-600",
                     )}>{item.senha}</span>
                      <Badge variant={
-                        item.classificacao === 'Urgência' ? 'destructive' :
+                        item.classificacao === 'Urgencia' ? 'destructive' :
                         item.classificacao === 'Preferencial' ? 'default' : 
                         item.classificacao === 'Outros' ? 'default' : 'secondary'
                     } className={cn("text-xs",
@@ -105,7 +105,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
         )
     }
 
-    const urgenciaItems = emTriagem.filter(item => item.classificacao === 'Urgência');
+    const urgenciaItems = emTriagem.filter(item => item.classificacao === 'Urgencia');
     const preferencialItems = emTriagem.filter(item => item.classificacao === 'Preferencial');
     const normalItems = emTriagem.filter(item => item.classificacao === 'Normal');
     const outrosItems = emTriagem.filter(item => item.classificacao === 'Outros');

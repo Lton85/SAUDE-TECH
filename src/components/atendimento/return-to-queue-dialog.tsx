@@ -34,7 +34,7 @@ interface ReturnToQueueDialogProps {
   onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onConfirm, onNotification }: ReturnToQueueDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");
@@ -87,7 +87,7 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
             let prioridade: FilaDeEsperaItem['prioridade'];
             switch(classification) {
                 case 'Preferencial': prioridade = 1; break;
-                case 'Urgência': prioridade = 2; break;
+                case 'Urgencia': prioridade = 2; break;
                 case 'Normal': prioridade = 3; break;
                 case 'Outros': prioridade = 4; break;
                 default: prioridade = 3;

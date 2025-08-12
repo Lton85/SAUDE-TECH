@@ -52,14 +52,14 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
             {emAtendimento.map((item) => (
                 <div key={item.id} className={cn(
                     "flex items-center justify-between p-2 border rounded-lg hover:bg-muted/50 transition-colors",
-                    item.classificacao === "Urgência" && "border-red-500/30 bg-red-500/5",
+                    item.classificacao === "Urgencia" && "border-red-500/30 bg-red-500/5",
                     item.classificacao === "Preferencial" && "border-blue-500/30 bg-blue-500/5",
                     item.classificacao === "Normal" && "border-green-500/30 bg-green-500/5",
                     item.classificacao === "Outros" && "border-slate-500/30 bg-slate-500/5"
                 )}>
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                          <Badge variant={
-                                item.classificacao === 'Urgência' ? 'destructive' : 
+                                item.classificacao === 'Urgencia' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 
                                 item.classificacao === 'Outros' ? 'default' : 'secondary'
                             } className={cn("text-base",

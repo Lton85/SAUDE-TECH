@@ -153,7 +153,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                     <Badge
                                         className={cn(
                                             'text-xs font-semibold',
-                                            item.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                                            item.classificacao === 'Urgencia' && 'bg-red-500 text-white hover:bg-red-600',
                                             item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
                                             item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700'
                                         )}

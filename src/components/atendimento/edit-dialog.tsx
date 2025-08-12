@@ -36,7 +36,7 @@ interface EditQueueItemDialogProps {
   onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos, profissionais, onSave, isHistory = false, onNotification }: EditQueueItemDialogProps) {
     const [selectedDepartamentoId, setSelectedDepartamentoId] = useState("");

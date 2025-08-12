@@ -15,6 +15,12 @@ export interface Empresa {
     email: string;
     nomeImpressora?: string;
     classificacoesAtendimento?: string[];
+    nomesClassificacoes?: {
+        Normal: string;
+        Preferencial: string;
+        Urgencia: string;
+        Outros: string;
+    };
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';
     exibirUltimasSenhas?: boolean;

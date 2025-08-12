@@ -10,6 +10,7 @@ import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
 import { getNextCounter } from './countersService';
 import { getEmpresa } from './empresaService';
+import { Empresa } from '@/types/empresa';
 
 
 interface SearchFilters {
@@ -28,36 +29,41 @@ interface FullSearchFilters extends SearchFilters {
 const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
     switch (classificacao) {
         case 'Preferencial': return 1;
-        case 'Urgência': return 2;
+        case 'Urgencia': return 2;
         case 'Normal': return 3;
         case 'Outros': return 4;
         default: return 3;
     }
 }
 
-export const addPreCadastroToFila = async (classificacao: FilaDeEsperaItem['classificacao']): Promise<string> => {
+export const addPreCadastroToFila = async (
+    classificacao: FilaDeEsperaItem['classificacao'],
+    nomesClassificacoes?: Empresa['nomesClassificacoes']
+): Promise<string> => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         const prioridade = getPrioridade(classificacao);
 
         let counterName: string;
         let ticketPrefix: string;
+        const nomePersonalizado = nomesClassificacoes?.[classificacao] || classificacao;
+        
         switch(classificacao) {
-            case 'Urgência':
+            case 'Urgencia':
                 counterName = 'senha_emergencia';
-                ticketPrefix = 'U';
+                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
             case 'Preferencial':
                 counterName = 'senha_preferencial';
-                ticketPrefix = 'P';
+                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
             case 'Outros':
                 counterName = 'senha_outros';
-                ticketPrefix = 'O';
+                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
-            default:
+            default: // Normal
                 counterName = 'senha_normal';
-                ticketPrefix = 'N';
+                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
         }
 
         const ticketNumber = await getNextCounter(counterName, true);

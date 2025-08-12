@@ -49,7 +49,7 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
     );
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
+const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, classificacoes, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -160,7 +160,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             let counterName;
             let ticketPrefix;
             switch(currentClassification) {
-                case 'Urgência':
+                case 'Urgencia':
                     counterName = 'senha_emergencia';
                     ticketPrefix = 'U';
                     break;
@@ -236,7 +236,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'prioridade'> = {
+      const item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'> = {
         pacienteId: selectedPaciente.id,
         pacienteNome: selectedPaciente.nome,
         departamentoId: selectedDepartamento.id,

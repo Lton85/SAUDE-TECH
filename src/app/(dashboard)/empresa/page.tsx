@@ -25,10 +25,7 @@ interface IbgeCityResponse {
     nome: string;
 }
 
-const allClassificacoes = ["Normal", "Preferencial", "Urgência", "Outros"].sort((a, b) => {
-    const order = { "Normal": 1, "Preferencial": 2, "Urgência": 3, "Outros": 4 };
-    return order[a as keyof typeof order] - order[b as keyof typeof order];
-});
+const allClassificacoes = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 
 const initialEmpresaState: Empresa = {
@@ -46,7 +43,13 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
-    classificacoesAtendimento: ["Normal", "Preferencial", "Urgência", "Outros"],
+    classificacoesAtendimento: ["Normal", "Preferencial", "Urgencia", "Outros"],
+    nomesClassificacoes: {
+        Normal: "Normal",
+        Preferencial: "Preferencial",
+        Urgencia: "Urgência",
+        Outros: "Outros",
+    },
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
     exibirLocalChamadaTriagem: true,
@@ -66,16 +69,13 @@ export default function EmpresaPage() {
         try {
             const empresaData = await getEmpresa();
             if (empresaData) {
-                const classificacoes = empresaData.classificacoesAtendimento?.length 
-                    ? empresaData.classificacoesAtendimento 
-                    : initialEmpresaState.classificacoesAtendimento;
-
                 setFormData({
-                    ...initialEmpresaState, // Garante que todos os campos, inclusive os novos, existam
+                    ...initialEmpresaState,
                     ...empresaData, 
-                    classificacoesAtendimento: classificacoes,
-                    localChamadaTriagem: empresaData.localChamadaTriagem ?? initialEmpresaState.localChamadaTriagem,
-                    exibirLocalChamadaTriagem: empresaData.exibirLocalChamadaTriagem ?? initialEmpresaState.exibirLocalChamadaTriagem,
+                    nomesClassificacoes: {
+                        ...initialEmpresaState.nomesClassificacoes,
+                        ...empresaData.nomesClassificacoes,
+                    },
                 });
 
                 if (empresaData.uf) {
@@ -134,7 +134,7 @@ export default function EmpresaPage() {
         setFormData(prev => ({...prev, [id]: value }));
     }
 
-    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento'>, value: string) => {
+    const handleSelectChange = (id: keyof Omit<Empresa, 'id' | 'uf' | 'classificacoesAtendimento' | 'nomesClassificacoes'>, value: string) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
     
@@ -147,6 +147,16 @@ export default function EmpresaPage() {
 
             return { ...prev, classificacoesAtendimento: newClassifications };
         });
+    };
+    
+    const handleClassificationNameChange = (classificationKey: keyof Empresa['nomesClassificacoes'], newName: string) => {
+        setFormData(prev => ({
+            ...prev,
+            nomesClassificacoes: {
+                ...prev.nomesClassificacoes,
+                [classificationKey]: newName,
+            }
+        }));
     };
 
     const handleCheckboxChange = (id: keyof Empresa, checked: boolean) => {
@@ -340,20 +350,27 @@ export default function EmpresaPage() {
                             <CardTitle>Classificação de Atendimento</CardTitle>
                         </div>
                         <CardDescription>
-                            Selecione os tipos de atendimento que serão utilizados no tablet de senhas.
+                            Ative e personalize os nomes dos tipos de atendimento para o tablet de senhas.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-3">
-                           {allClassificacoes.map(name => (
-                               <div key={name} className="flex items-center space-x-2">
+                         <div className="space-y-4">
+                           {(Object.keys(formData.nomesClassificacoes || {}) as Array<keyof typeof formData.nomesClassificacoes>).map(key => (
+                               <div key={key} className="flex items-center space-x-4">
                                    <Checkbox 
-                                    id={`class-${name}`} 
-                                    checked={formData.classificacoesAtendimento?.includes(name)}
-                                    onCheckedChange={(checked) => handleClassificationChange(name, !!checked)}
+                                    id={`class-${key}`} 
+                                    checked={formData.classificacoesAtendimento?.includes(key)}
+                                    onCheckedChange={(checked) => handleClassificationChange(key, !!checked)}
                                     disabled={!isEditing}
                                    />
-                                   <Label htmlFor={`class-${name}`} className="font-normal">{name}</Label>
+                                   <div className="flex-1">
+                                        <Input
+                                          id={`className-${key}`}
+                                          value={formData.nomesClassificacoes?.[key] || ''}
+                                          onChange={(e) => handleClassificationNameChange(key, e.target.value)}
+                                          disabled={!isEditing}
+                                        />
+                                   </div>
                                </div>
                            ))}
                         </div>

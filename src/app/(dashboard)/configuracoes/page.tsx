@@ -64,7 +64,7 @@ export default function ConfiguracoesPage() {
     const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
     
-    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgência' | 'Outros' | null>(null);
+    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgencia' | 'Outros' | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
@@ -111,7 +111,7 @@ export default function ConfiguracoesPage() {
         fetchCounts();
     }, []);
 
-    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgência' | 'Outros') => {
+    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgencia' | 'Outros') => {
         setResetType(type);
         setSenhaDialogOpen(true);
     };
@@ -170,7 +170,7 @@ export default function ConfiguracoesPage() {
         switch (resetType) {
             case 'Normal': setLoading = setIsNormalResetting; counterName = 'senha_normal'; ticketExample = 'N-01'; break;
             case 'Preferencial': setLoading = setIsPreferencialResetting; counterName = 'senha_preferencial'; ticketExample = 'P-01'; break;
-            case 'Urgência': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-01'; break;
+            case 'Urgencia': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-01'; break;
             case 'Outros': setLoading = setIsOutrosResetting; counterName = 'senha_outros'; ticketExample = 'O-01'; break;
             default: return;
         }
@@ -379,7 +379,7 @@ export default function ConfiguracoesPage() {
                 <CardContent>
                     <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="destructive" />
-                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgência')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
+                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgencia')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
                     <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} variant="destructive" />
                 </CardContent>
             </Card>

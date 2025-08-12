@@ -75,14 +75,14 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                         ) : fila.length > 0 ? (
                             fila.map((item) => (
                                 <TableRow key={item.id} className={cn(
-                                    item.classificacao === 'Urgência' && "bg-red-500/10 hover:bg-red-500/20",
+                                    item.classificacao === 'Urgencia' && "bg-red-500/10 hover:bg-red-500/20",
                                     item.classificacao === 'Preferencial' && "bg-blue-500/10 hover:bg-blue-500/20",
                                     item.classificacao === 'Normal' && "bg-green-500/10 hover:bg-green-500/20",
                                     item.classificacao === 'Outros' && "bg-slate-500/10 hover:bg-slate-500/20"
                                 )}>
                                     <TableCell className="font-mono px-3 py-2 text-sm font-bold">
                                         <Badge variant={
-                                            item.classificacao === 'Urgência' ? 'destructive' : 
+                                            item.classificacao === 'Urgencia' ? 'destructive' : 
                                             item.classificacao === 'Preferencial' ? 'default' : 
                                             item.classificacao === 'Outros' ? 'default' : 'secondary'
                                         } className={cn(
