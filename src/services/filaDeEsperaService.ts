@@ -1,9 +1,4 @@
 
-
-
-
-
-
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -520,8 +515,10 @@ export const getHistoricoAtendimentosPorPeriodo = async (
 export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
     filters: FullSearchFilters
 ): Promise<FilaDeEsperaItem[]> => {
+    // 1. Fetch all data for the date range without Firestore filters for status, etc.
     let data = await getHistoricoAtendimentosPorPeriodo(filters);
 
+    // 2. Apply other filters in the client-side code
     if (filters.pacienteId && filters.pacienteId !== 'todos') {
         data = data.filter(item => item.pacienteId === filters.pacienteId);
     }
@@ -531,6 +528,7 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
         const docSnap = await getDoc(docRef);
         if(docSnap.exists()){
             const profissional = docSnap.data();
+            // Assuming profissionalNome is stored as "Dr(a). Nome Sobrenome"
             data = data.filter(item => item.profissionalNome === `Dr(a). ${profissional.nome}`);
         }
     }
@@ -646,5 +644,5 @@ export const clearAllAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar a fila de atendimentos.");
     }
 };
-
+    
     
