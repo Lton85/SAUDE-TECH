@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { HeartPulse, User, Stethoscope } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
@@ -37,6 +37,7 @@ const HistoryItem = ({ call }: { call: Call }) => (
 
 export default function PainelPage() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
+  const lastCallIdRef = useRef<string | null>(null);
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -73,15 +74,17 @@ export default function PainelPage() {
   }, [isClient]);
 
   useEffect(() => {
-    if(!isClient) return;
+    if (!isClient) return;
 
     const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
         
-        // Play sound if the latest call is new
-        if (callHistory.length > 0 && newCalls.length > 0 && callHistory[0].id !== newCalls[0].id) {
-            try {
+        const latestCallId = newCalls.length > 0 ? newCalls[0].id : null;
+        
+        // Play sound if the latest call is new and different from the last known call
+        if (latestCallId && lastCallIdRef.current !== latestCallId) {
+             try {
                 const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
                 audio.play().catch(error => {
                     // Autoplay was prevented. This is expected before user interaction.
@@ -93,6 +96,7 @@ export default function PainelPage() {
             }
         }
         
+        lastCallIdRef.current = latestCallId;
         setCallHistory(newCalls.length > 0 ? newCalls : [emptyCall]);
 
     }, (error) => {
@@ -101,7 +105,7 @@ export default function PainelPage() {
     });
 
     return () => unsubscribe();
-  }, [isClient, callHistory]);
+  }, [isClient]);
   
   if (!isClient) {
     return (

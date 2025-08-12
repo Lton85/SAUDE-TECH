@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch, setDoc, doc } from 'firebase/firestore';
 
 interface Chamada {
     id?: string; // Adicionado para rastrear a chamada
@@ -29,7 +29,11 @@ export const createChamada = async (chamadaData: Chamada) => {
 
 export const clearPainel = async () => {
     try {
-        await addDoc(chamadasCollection, {
+        // Usar setDoc com um ID específico para a ação de limpar, garantindo que seja um evento único.
+        // Isso facilita a detecção de "nova chamada" no lado do cliente para o som.
+        const clearCallRef = doc(chamadasCollection); // Cria uma referência com novo ID
+        await setDoc(clearCallRef, {
+            id: 'clear-call', // ID especial para identificar a limpeza
             senha: '----',
             departamentoNome: 'Aguardando...',
             pacienteNome: 'Aguardando paciente...',
