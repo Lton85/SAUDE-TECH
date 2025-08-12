@@ -17,8 +17,11 @@ const chamadasCollection = collection(db, 'chamadas');
 
 export const createChamada = async (chamadaData: Chamada) => {
     try {
-        await addDoc(chamadasCollection, {
+        // Usar um ID de documento explícito para a nova chamada para garantir que seja único
+        const chamadaRef = doc(chamadasCollection);
+        await setDoc(chamadaRef, {
             ...chamadaData,
+            id: chamadaRef.id, // Armazena o próprio ID no documento
             timestamp: serverTimestamp() 
         });
     } catch (error) {
@@ -31,7 +34,7 @@ export const clearPainel = async () => {
     try {
         // Usar setDoc com um ID específico para a ação de limpar, garantindo que seja um evento único.
         // Isso facilita a detecção de "nova chamada" no lado do cliente para o som.
-        const clearCallRef = doc(chamadasCollection); // Cria uma referência com novo ID
+        const clearCallRef = doc(chamadasCollection, 'clear-call');
         await setDoc(clearCallRef, {
             id: 'clear-call', // ID especial para identificar a limpeza
             senha: '----',
