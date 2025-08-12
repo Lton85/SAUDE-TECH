@@ -57,17 +57,26 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                         item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
-                             <Badge variant={
-                                item.classificacao === 'Urgência' ? 'destructive' : 
-                                item.classificacao === 'Preferencial' ? 'default' : 
-                                item.classificacao === 'Outros' ? 'default' : 'secondary'
-                            } className={cn("text-base",
-                                item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
-                                item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                                item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600'
-                            )}>
-                                {item.senha}
-                            </Badge>
+                             <div className="flex items-center gap-3">
+                                <Badge variant={
+                                    item.classificacao === 'Urgência' ? 'destructive' : 
+                                    item.classificacao === 'Preferencial' ? 'default' : 
+                                    item.classificacao === 'Outros' ? 'default' : 'secondary'
+                                } className={cn("text-base",
+                                    item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
+                                    item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
+                                    item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600'
+                                )}>
+                                    {item.senha}
+                                </Badge>
+                                <span className={cn(
+                                    "text-xs font-semibold uppercase tracking-wider",
+                                    item.classificacao === 'Urgência' && 'text-red-600',
+                                    item.classificacao === 'Preferencial' && 'text-blue-600',
+                                    item.classificacao === 'Normal' && 'text-green-600',
+                                    item.classificacao === 'Outros' && 'text-slate-500',
+                                )}>{item.classificacao}</span>
+                            </div>
                             
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
                                 <Clock className="h-3 w-3" />
