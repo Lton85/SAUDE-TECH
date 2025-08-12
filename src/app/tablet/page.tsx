@@ -10,7 +10,7 @@ import { addPreCadastroToFila } from "@/services/filaDeEsperaService";
 import { cn } from "@/lib/utils";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { getEmpresa } from "@/services/empresaService";
-import type { Empresa } from "@/types/empresa";
+import type { Empresa, Classificacao } from "@/types/empresa";
 
 interface GeneratedTicket {
     senha: string;
@@ -18,28 +18,30 @@ interface GeneratedTicket {
     tipoNome: string;
 }
 
-const notificationColors: { [key: string]: string } = {
-    Normal: 'bg-green-600',
-    Preferencial: 'bg-blue-600',
-    Urgencia: 'bg-red-600',
-    Outros: 'bg-slate-600',
+const getColors = (classId: string) => {
+    switch (classId) {
+        case 'Normal': return {
+            notification: 'bg-green-600',
+            border: "group-hover:border-green-400 bg-green-500/10 border-green-500/30",
+            text: "text-green-400"
+        };
+        case 'Preferencial': return {
+            notification: 'bg-blue-600',
+            border: "group-hover:border-blue-400 bg-blue-500/10 border-blue-500/30",
+            text: "text-blue-400"
+        };
+        case 'Urgencia': return {
+            notification: 'bg-red-600',
+            border: "group-hover:border-red-400 bg-red-500/10 border-red-500/30",
+            text: "text-red-400"
+        };
+        default: return { // Para "Outros" e qualquer classificação customizada
+            notification: 'bg-slate-600',
+            border: "group-hover:border-slate-400 bg-slate-500/10 border-slate-500/30",
+            text: "text-slate-400"
+        };
+    }
 };
-
-const borderColors: { [key: string]: string } = {
-    Normal: "group-hover:border-green-400 bg-green-500/10 border-green-500/30",
-    Preferencial: "group-hover:border-blue-400 bg-blue-500/10 border-blue-500/30",
-    Urgencia: "group-hover:border-red-400 bg-red-500/10 border-red-500/30",
-    Outros: "group-hover:border-slate-400 bg-slate-500/10 border-slate-500/30",
-};
-
-const textColors: { [key: string]: string } = {
-    Normal: "text-green-400",
-    Preferencial: "text-blue-400",
-    Urgencia: "text-red-400",
-    Outros: "text-slate-400",
-};
-
-const classificationOrder: Array<keyof Empresa['nomesClassificacoes']> = ["Normal", "Preferencial", "Urgencia", "Outros"];
 
 const infoSizeClasses = {
   pequeno: "text-5xl md:text-7xl",
@@ -61,13 +63,11 @@ const cardSizeClasses = {
 export default function TabletPage() {
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
     const [config, setConfig] = useState<{
-        activeClassifications: string[];
-        classificationNames: Empresa['nomesClassificacoes'];
+        activeClassifications: Classificacao[];
         infoSize: 'pequeno' | 'medio' | 'grande';
         cardSize: 'pequeno' | 'medio' | 'grande';
     }>({
         activeClassifications: [],
-        classificationNames: { Normal: 'Normal', Preferencial: 'Preferencial', Urgencia: 'Urgência', Outros: 'Outros' },
         infoSize: 'medio',
         cardSize: 'medio',
     });
@@ -81,15 +81,12 @@ export default function TabletPage() {
             setIsFetchingConfig(true);
             try {
                 const empresaData = await getEmpresa();
-                const active = empresaData?.classificacoesAtendimento?.length 
-                    ? empresaData.classificacoesAtendimento 
-                    : ["Normal", "Preferencial", "Urgencia", "Outros"];
-
-                const names = empresaData?.nomesClassificacoes || { Normal: 'Normal', Preferencial: 'Preferencial', Urgencia: 'Urgência', Outros: 'Outros' };
+                const active = empresaData?.classificacoes?.length 
+                    ? empresaData.classificacoes.filter(c => c.ativa) 
+                    : [];
                 
                 setConfig({
                     activeClassifications: active,
-                    classificationNames: names,
                     infoSize: empresaData?.tabletInfoSize || 'medio',
                     cardSize: empresaData?.tabletCardSize || 'medio'
                 });
@@ -100,12 +97,6 @@ export default function TabletPage() {
                     title: `Erro ao carregar configurações`,
                     message: (error as Error).message,
                 });
-                 setConfig({
-                     activeClassifications: ["Normal", "Preferencial", "Urgencia", "Outros"],
-                     classificationNames: { Normal: 'Normal', Preferencial: 'Preferencial', Urgencia: 'Urgência', Outros: 'Outros' },
-                     infoSize: 'medio',
-                     cardSize: 'medio'
-                 });
             } finally {
                 setIsFetchingConfig(false);
             }
@@ -122,12 +113,12 @@ export default function TabletPage() {
         }
     }, [generatedTicket]);
 
-    const handleSelection = async (type: FilaDeEsperaItem['classificacao']) => {
-        setIsLoading(type);
+    const handleSelection = async (classificacao: Classificacao) => {
+        setIsLoading(classificacao.id);
         setGeneratedTicket(null);
         try {
-            const senha = await addPreCadastroToFila(type, config.classificationNames);
-            setGeneratedTicket({ senha, tipo: type, tipoNome: config.classificationNames?.[type] || type });
+            const senha = await addPreCadastroToFila(classificacao, config.activeClassifications);
+            setGeneratedTicket({ senha, tipo: classificacao.id, tipoNome: classificacao.nome });
         } catch (error) {
              setNotification({
                 type: 'error',
@@ -151,8 +142,6 @@ export default function TabletPage() {
             }
         })
     };
-
-    const sortedAndFilteredClassifications = classificationOrder.filter(c => config.activeClassifications.includes(c));
     
     if (isFetchingConfig) {
         return (
@@ -182,9 +171,11 @@ export default function TabletPage() {
             </motion.div>
 
             <div className="flex flex-wrap justify-center items-center gap-8 w-full max-w-7xl">
-                {sortedAndFilteredClassifications.map((key, index) => (
+                {config.activeClassifications.map((classificacao, index) => {
+                     const colors = getColors(classificacao.id);
+                     return (
                      <motion.div 
-                        key={key} 
+                        key={classificacao.id} 
                         custom={index} 
                         initial="hidden" 
                         animate="visible" 
@@ -194,16 +185,16 @@ export default function TabletPage() {
                         <Card 
                             className={cn(
                                 "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer aspect-square",
-                                borderColors[key]
+                                colors.border
                             )}
-                            onClick={() => handleSelection(key as FilaDeEsperaItem['classificacao'])}
+                            onClick={() => handleSelection(classificacao)}
                         >
                             <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 h-full">
-                                {isLoading === key ? <Loader2 className={cn("h-12 w-12 animate-spin", textColors[key])} /> : <h2 className={cn("font-bold", textColors[key], cardSizeClasses[config.cardSize])}>{config.classificationNames?.[key]?.toUpperCase() || key.toUpperCase()}</h2>}
+                                {isLoading === classificacao.id ? <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} /> : <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>{classificacao.nome.toUpperCase()}</h2>}
                             </CardContent>
                         </Card>
                     </motion.div>
-                ))}
+                )})}
             </div>
             
             <AnimatePresence>
@@ -215,7 +206,7 @@ export default function TabletPage() {
                         transition={{ duration: 0.3 }}
                         className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm"
                     >
-                        <div className={cn("text-white p-12 rounded-lg shadow-2xl max-w-2xl text-center border-4 border-white/50", notificationColors[generatedTicket.tipo])}>
+                        <div className={cn("text-white p-12 rounded-lg shadow-2xl max-w-2xl text-center border-4 border-white/50", getColors(generatedTicket.tipo).notification)}>
                             <h3 className="text-4xl font-bold">SENHA GERADA</h3>
                              <p className="mt-4 text-9xl font-display font-extrabold tracking-tighter">
                                 {generatedTicket.senha}

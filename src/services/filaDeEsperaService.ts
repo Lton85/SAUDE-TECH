@@ -1,6 +1,7 @@
 
 
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -42,27 +43,22 @@ const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao'], classif
 }
 
 export const addPreCadastroToFila = async (
-    classificacaoId: string,
+    classificacao: Classificacao,
     classificacoes: Classificacao[]
 ): Promise<string> => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
-        const classificacaoSelecionada = classificacoes.find(c => c.id === classificacaoId);
-        if (!classificacaoSelecionada) {
-            throw new Error("Tipo de classificação inválido.");
-        }
-
-        const prioridade = getPrioridade(classificacaoId, classificacoes);
-        const counterName = `senha_${classificacaoId.toLowerCase()}`;
-        const ticketPrefix = classificacaoSelecionada.nome.charAt(0).toUpperCase();
+        const prioridade = getPrioridade(classificacao.id, classificacoes);
+        const counterName = `senha_${classificacao.id.toLowerCase()}`;
+        const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
 
         const ticketNumber = await getNextCounter(counterName, true);
         const senha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
         await addDoc(filaDeEsperaCollection, {
             senha,
-            classificacao: classificacaoId, // Salva o ID da classificação
+            classificacao: classificacao.id, // Salva o ID da classificação
             prioridade,
             chegadaEm: serverTimestamp(),
             status: 'pendente'

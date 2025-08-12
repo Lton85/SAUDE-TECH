@@ -10,28 +10,18 @@ import { UserPlus, Clock, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { Classificacao } from "@/types/empresa";
 
-
-const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void }) => {
+const TriagemCard = ({ item, onIdentify, onCancel, colorClass }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, colorClass: string }) => {
     const horaChegada = item.chegadaEm ? format(item.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
+    const badgeBgColor = colorClass.replace('text', 'bg').replace('-600', '-600 hover:bg-red-700'); // Adaptação simples
+
     return (
-        <Card key={item.id} className={cn(
-            "w-full",
-            item.classificacao === "Urgencia" && "border-red-500/50 bg-red-500/5",
-            item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
-            item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
-            item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
-        )}>
+        <Card key={item.id} className={cn("w-full", colorClass.replace('text', 'border').replace('-600', '-500/50'), colorClass.replace('text', 'bg').replace('-600', '-500/5'))}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
                  <div className="flex items-center gap-2">
-                    <span className={cn(
-                        "font-bold text-base tracking-tight",
-                         item.classificacao === "Urgencia" && "text-red-600",
-                        item.classificacao === "Preferencial" && "text-blue-600",
-                        item.classificacao === "Normal" && "text-green-600",
-                        item.classificacao === "Outros" && "text-slate-600",
-                    )}>{item.senha}</span>
+                    <span className={cn("font-bold text-base tracking-tight", colorClass)}>{item.senha}</span>
                      <Badge variant={
                         item.classificacao === 'Urgencia' ? 'destructive' :
                         item.classificacao === 'Preferencial' ? 'default' : 
@@ -39,7 +29,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
                     } className={cn("text-xs",
                         item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                         item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                        item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
+                        item.classificacao === 'Outros' && 'bg-slate-600 hover:bg-slate-700 text-white'
                     )}>
                         {item.classificacao}
                     </Badge>
@@ -80,7 +70,7 @@ const TriagemColumn = ({ title, items, onIdentify, onCancel, isLoading, colorCla
                          <Card key={i}><CardContent className="p-2"><Skeleton className="h-8 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
-                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} />)
+                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} colorClass={colorClass} />)
                 ) : (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                         Nenhuma senha.
@@ -91,24 +81,35 @@ const TriagemColumn = ({ title, items, onIdentify, onCancel, isLoading, colorCla
     )
 }
 
+const getColorClassForClassification = (id: string): string => {
+    switch (id) {
+        case "Urgencia": return "text-red-600";
+        case "Preferencial": return "text-blue-600";
+        case "Normal": return "text-green-600";
+        default: return "text-slate-600"; // Cor padrão para 'Outros' e customizadas
+    }
+}
 
-export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { emTriagem: FilaDeEsperaItem[], isLoading: boolean, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void }) {
+interface EmTriagemListProps {
+    emTriagem: FilaDeEsperaItem[];
+    isLoading: boolean;
+    onIdentify: (item: FilaDeEsperaItem) => void;
+    onCancel: (item: FilaDeEsperaItem) => void;
+    classificacoes: Classificacao[];
+}
+
+
+export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, classificacoes }: EmTriagemListProps) {
     
     if (isLoading && emTriagem.length === 0) {
         return (
             <div className="flex gap-4 h-full">
-                 <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-red-600"/>
-                 <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-blue-600"/>
-                 <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-green-600"/>
-                 <TriagemColumn title="Outros Atendimentos" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-slate-600"/>
+                 {[...Array(4)].map((_, i) => (
+                      <TriagemColumn key={i} title="" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass=""/>
+                 ))}
             </div>
         )
     }
-
-    const urgenciaItems = emTriagem.filter(item => item.classificacao === 'Urgencia');
-    const preferencialItems = emTriagem.filter(item => item.classificacao === 'Preferencial');
-    const normalItems = emTriagem.filter(item => item.classificacao === 'Normal');
-    const outrosItems = emTriagem.filter(item => item.classificacao === 'Outros');
 
     if (emTriagem.length === 0 && !isLoading) {
         return (
@@ -119,11 +120,22 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
     }
     
     return (
-         <div className="flex gap-4 h-full">
-            <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-red-600"/>
-            <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-blue-600"/>
-            <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-green-600"/>
-            <TriagemColumn title="Outros Atendimentos" items={outrosItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-slate-600"/>
+         <div className={cn("flex gap-4 h-full", `grid-cols-${classificacoes.length}`)}>
+            {classificacoes.map(classificacao => {
+                const items = emTriagem.filter(item => item.classificacao === classificacao.id);
+                const colorClass = getColorClassForClassification(classificacao.id);
+                return (
+                     <TriagemColumn 
+                        key={classificacao.id}
+                        title={classificacao.nome} 
+                        items={items} 
+                        onIdentify={onIdentify} 
+                        onCancel={onCancel} 
+                        isLoading={isLoading} 
+                        colorClass={colorClass}
+                    />
+                )
+            })}
         </div>
     );
 }
