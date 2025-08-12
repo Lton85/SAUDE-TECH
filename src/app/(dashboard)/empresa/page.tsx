@@ -366,6 +366,14 @@ export default function EmpresaPage() {
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
                                <div key={classificacao.id} className="flex items-start space-x-4">
+                                   <div className="flex items-center pt-2">
+                                     <Checkbox 
+                                        id={`class-active-${classificacao.id}`}
+                                        checked={classificacao.ativa}
+                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                                        disabled={!isEditing}
+                                     />
+                                   </div>
                                    <div className="flex-1 space-y-2">
                                         <Input
                                           id={`className-${classificacao.id}`}
