@@ -45,25 +45,21 @@ export const addPreCadastroToFila = async (
         const prioridade = getPrioridade(classificacao);
 
         let counterName: string;
-        let ticketPrefix: string;
         const nomePersonalizado = nomesClassificacoes?.[classificacao] || classificacao;
+        const ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
         
         switch(classificacao) {
             case 'Urgencia':
                 counterName = 'senha_emergencia';
-                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
             case 'Preferencial':
                 counterName = 'senha_preferencial';
-                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
             case 'Outros':
                 counterName = 'senha_outros';
-                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
                 break;
             default: // Normal
                 counterName = 'senha_normal';
-                ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
         }
 
         const ticketNumber = await getNextCounter(counterName, true);
