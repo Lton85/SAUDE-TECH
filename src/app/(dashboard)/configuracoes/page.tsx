@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import type { Empresa } from "@/types/empresa";
+import type { Empresa, Classificacao } from "@/types/empresa";
 import { ResetDepartamentoDialog } from "@/components/configuracoes/reset-departamento-dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -42,10 +42,7 @@ const DeleteAllDialog = ({ isOpen, onOpenChange, onConfirm, itemType }: { isOpen
 
 
 export default function ConfiguracoesPage() {
-    const [isNormalResetting, setIsNormalResetting] = useState(false);
-    const [isPreferencialResetting, setIsPreferencialResetting] = useState(false);
-    const [isUrgenciaResetting, setIsUrgenciaResetting] = useState(false);
-    const [isOutrosResetting, setIsOutrosResetting] = useState(false);
+    const [resettingStates, setResettingStates] = useState<{ [key: string]: boolean }>({});
     const [isLimpezaResetting, setIsLimpezaResetting] = useState(false);
     const [isPacienteResetting, setIsPacienteResetting] = useState(false);
     const [isProfissionalResetting, setIsProfissionalResetting] = useState(false);
@@ -64,7 +61,7 @@ export default function ConfiguracoesPage() {
     const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
     const [deleteType, setDeleteType] = useState<"Pacientes" | "Profissionais" | "Departamentos" | null>(null);
     
-    const [resetType, setResetType] = useState<'Normal' | 'Preferencial' | 'Urgencia' | 'Outros' | null>(null);
+    const [resetType, setResetType] = useState<Classificacao | null>(null);
     
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
@@ -79,6 +76,7 @@ export default function ConfiguracoesPage() {
     const [tabletInfoSize, setTabletInfoSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
     const [tabletCardSize, setTabletCardSize] = useState<'pequeno' | 'medio' | 'grande'>('medio');
     const [isSavingResolution, setIsSavingResolution] = useState(false);
+    const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
     
 
     useEffect(() => {
@@ -93,6 +91,9 @@ export default function ConfiguracoesPage() {
                 setPacientesCount(pacientes.length);
                 setProfissionaisCount(profissionais.length);
                 setDepartamentosCount(departamentos.length);
+                if (empresaData?.classificacoes?.length) {
+                    setClassificacoes(empresaData.classificacoes);
+                }
                 if (empresaData?.nomeImpressora) {
                     setNomeImpressora(empresaData.nomeImpressora);
                     setOriginalNomeImpressora(empresaData.nomeImpressora);
@@ -111,8 +112,8 @@ export default function ConfiguracoesPage() {
         fetchCounts();
     }, []);
 
-    const handleResetRequest = (type: 'Normal' | 'Preferencial' | 'Urgencia' | 'Outros') => {
-        setResetType(type);
+    const handleResetRequest = (classificacao: Classificacao) => {
+        setResetType(classificacao);
         setSenhaDialogOpen(true);
     };
     
@@ -164,25 +165,24 @@ export default function ConfiguracoesPage() {
 
     const handleConfirmSenhaReset = async () => {
         if (!resetType) return;
-        let setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-        let counterName: string;
-        let ticketExample: string;
-        switch (resetType) {
-            case 'Normal': setLoading = setIsNormalResetting; counterName = 'senha_normal'; ticketExample = 'N-01'; break;
-            case 'Preferencial': setLoading = setIsPreferencialResetting; counterName = 'senha_preferencial'; ticketExample = 'P-01'; break;
-            case 'Urgencia': setLoading = setIsUrgenciaResetting; counterName = 'senha_emergencia'; ticketExample = 'U-01'; break;
-            case 'Outros': setLoading = setIsOutrosResetting; counterName = 'senha_outros'; ticketExample = 'O-01'; break;
-            default: return;
-        }
-        setLoading(true);
+        
+        setResettingStates(prev => ({ ...prev, [resetType.id]: true }));
         setSenhaDialogOpen(false);
+
         try {
+            const counterName = `senha_${resetType.id.toLowerCase()}`;
             await resetCounterByName(counterName);
-            setNotification({ type: "success", title: `Senhas de Classificação ${resetType} Reiniciadas!`, message: `A contagem de senhas foi redefinida para ${ticketExample}.` });
+            const ticketPrefix = resetType.nome.charAt(0).toUpperCase();
+
+            setNotification({ 
+                type: "success", 
+                title: `Senhas de ${resetType.nome} Reiniciadas!`, 
+                message: `A contagem de senhas foi redefinida para ${ticketPrefix}-01.` 
+            });
         } catch (error) {
             setNotification({ type: "error", title: "Erro ao reiniciar senhas", message: (error as Error).message });
         } finally {
-            setLoading(false);
+            setResettingStates(prev => ({ ...prev, [resetType.id]: false }));
             setResetType(null);
         }
     };
@@ -377,10 +377,17 @@ export default function ConfiguracoesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ActionRow label="Zerar Senha Normal" buttonText="Zerar (N-01)" onClick={() => handleResetRequest('Normal')} isResetting={isNormalResetting} icon={RefreshCw} variant="destructive" />
-                    <ActionRow label="Zerar Senha Preferencial" buttonText="Zerar (P-01)" onClick={() => handleResetRequest('Preferencial')} isResetting={isPreferencialResetting} icon={RefreshCw} variant="destructive" />
-                    <ActionRow label="Zerar Senha Urgência" buttonText="Zerar (U-01)" onClick={() => handleResetRequest('Urgencia')} isResetting={isUrgenciaResetting} icon={RefreshCw} variant="destructive" />
-                    <ActionRow label="Zerar Senha Outros" buttonText="Zerar (O-01)" onClick={() => handleResetRequest('Outros')} isResetting={isOutrosResetting} icon={RefreshCw} variant="destructive" />
+                    {classificacoes.map((classificacao) => (
+                        <ActionRow
+                            key={classificacao.id}
+                            label={`Zerar Senha ${classificacao.nome}`}
+                            buttonText={`Zerar (${classificacao.nome.charAt(0)}-01)`}
+                            onClick={() => handleResetRequest(classificacao)}
+                            isResetting={resettingStates[classificacao.id]}
+                            icon={RefreshCw}
+                            variant="destructive"
+                        />
+                    ))}
                 </CardContent>
             </Card>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -536,3 +543,5 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
+
+    

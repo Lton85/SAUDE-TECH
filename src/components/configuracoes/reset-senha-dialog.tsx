@@ -1,4 +1,6 @@
 
+"use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,12 +12,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { AlertTriangle } from "lucide-react"
+import type { Classificacao } from "@/types/empresa"
 
 interface ResetSenhaDialogProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onConfirm: () => void
-  tipoSenha: 'Normal' | 'Preferencial' | 'Urgencia' | 'Outros'
+  tipoSenha: Classificacao
 }
 
 export function ResetSenhaDialog({ isOpen, onOpenChange, onConfirm, tipoSenha }: ResetSenhaDialogProps) {
@@ -28,7 +31,7 @@ export function ResetSenhaDialog({ isOpen, onOpenChange, onConfirm, tipoSenha }:
             Confirmar Ação
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Você tem certeza que deseja zerar a contagem de senhas de classificação <span className="font-bold text-destructive">{tipoSenha}</span>? Esta ação não pode ser desfeita.
+            Você tem certeza que deseja zerar a contagem de senhas de classificação <span className="font-bold text-destructive">{tipoSenha.nome}</span>? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -41,3 +44,5 @@ export function ResetSenhaDialog({ isOpen, onOpenChange, onConfirm, tipoSenha }:
     </AlertDialog>
   )
 }
+
+    
