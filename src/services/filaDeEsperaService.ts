@@ -3,6 +3,7 @@
 
 
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -289,8 +290,16 @@ export const getAtendimentosFinalizadosHoje = (
         } as FilaDeEsperaItem));
         combineAndUpdate(finalizadosData, canceladosData);
     }, (error) => {
+        const firestoreError = error as any;
+        let errorMessage = "Não foi possível buscar os atendimentos finalizados de hoje.";
+        if (firestoreError.code === 'failed-precondition' && firestoreError.message.includes('index')) {
+            const urlMatch = firestoreError.message.match(/https:\/\/[^ ]+/);
+            if (urlMatch) {
+                errorMessage += ` É necessário criar um índice no Firestore. Acesse: ${urlMatch[0]}`;
+            }
+        }
         console.error("Error fetching today's finalized appointments: ", error);
-        onError("Não foi possível buscar os atendimentos finalizados de hoje. Verifique os índices do Firestore.");
+        onError(errorMessage);
     });
 
     const unsubCancelados = onSnapshot(qCanceled, (snapshot) => {
@@ -300,8 +309,16 @@ export const getAtendimentosFinalizadosHoje = (
         } as FilaDeEsperaItem));
         combineAndUpdate(finalizadosData, canceladosData);
     }, (error) => {
+        const firestoreError = error as any;
+        let errorMessage = "Não foi possível buscar os atendimentos cancelados de hoje.";
+        if (firestoreError.code === 'failed-precondition' && firestoreError.message.includes('index')) {
+            const urlMatch = firestoreError.message.match(/https:\/\/[^ ]+/);
+            if (urlMatch) {
+                errorMessage += ` É necessário criar um índice no Firestore. Acesse: ${urlMatch[0]}`;
+            }
+        }
         console.error("Error fetching today's canceled appointments: ", error);
-        onError("Não foi possível buscar os atendimentos cancelados de hoje. Verifique os índices do Firestore.");
+        onError(errorMessage);
     });
 
 
@@ -487,8 +504,16 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         return allData;
 
     } catch (error) {
+        const firestoreError = error as any;
+        let errorMessage = "Não foi possível carregar o relatório de atendimentos.";
+        if (firestoreError.code === 'failed-precondition' && firestoreError.message.includes('index')) {
+            const urlMatch = firestoreError.message.match(/https:\/\/[^ ]+/);
+            if (urlMatch) {
+                errorMessage += ` É necessário criar um índice no Firestore. Acesse: ${urlMatch[0]}`;
+            }
+        }
         console.error("Erro ao buscar histórico de atendimentos por período:", error);
-        throw new Error("Não foi possível carregar o relatório de atendimentos. Pode ser necessário criar um índice no Firestore. Verifique o console para um link de criação.");
+        throw new Error(errorMessage);
     }
 };
 
@@ -621,3 +646,5 @@ export const clearAllAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar a fila de atendimentos.");
     }
 };
+
+    

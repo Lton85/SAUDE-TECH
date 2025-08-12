@@ -203,7 +203,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 collection(db, "relatorios_atendimentos"),
                 where("status", "==", "finalizado"),
                 where("finalizadaEm", ">=", Timestamp.fromDate(startOfToday)),
-                where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday))
+                where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday)),
             );
             
             const unsubscribeDaily = onSnapshot(qDia, (snapshot) => {
@@ -224,6 +224,9 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 
                 setDailyCounts(counts.filter(c => c.count > 0)); // Only show classifications with counts
                 setIsDailyCountLoading(false);
+            }, (error) => {
+                 console.error("Failed to get daily counts:", error);
+                 setIsDailyCountLoading(false);
             });
             return unsubscribeDaily;
         }
@@ -305,7 +308,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
           ))}
       </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             <SummaryCard 
                 title="Pacientes Cadastrados"
                 value={pacientesCount}
@@ -314,8 +317,15 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 inactiveCount={pacientesInativosCount}
                 isLoading={pacientesCount === null}
             />
+             <SummaryCard 
+                title="Atendimentos no Mês"
+                value={atendimentosMesCount}
+                icon={Activity}
+                color="bg-purple-500"
+                isLoading={atendimentosMesCount === null}
+            />
             <SummaryCard 
-                title="Departamentos Cadastrados"
+                title="Departamentos"
                 value={departamentosCount}
                 icon={Building}
                 color="bg-yellow-500"
@@ -330,21 +340,15 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 inactiveCount={profissionaisInativosCount}
                 isLoading={profissionaisCount === null}
             />
-             <SummaryCard 
-                title="Atendimentos no Mês"
-                value={atendimentosMesCount}
-                icon={Activity}
-                color="bg-purple-500"
-                isLoading={atendimentosMesCount === null}
-            />
+            {(isDailyCountLoading || dailyCounts.length > 0) && (
+                <DailySummaryCard
+                    dailyCounts={dailyCounts}
+                    isLoading={isDailyCountLoading}
+                />
+            )}
         </div>
-
-        {(isDailyCountLoading || dailyCounts.length > 0) && (
-            <DailySummaryCard
-                dailyCounts={dailyCounts}
-                isLoading={isDailyCountLoading}
-            />
-        )}
     </div>
   );
 }
+
+    
