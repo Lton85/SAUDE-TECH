@@ -315,6 +315,7 @@ export default function AtendimentosPage() {
                             isLoading={isLoading}
                             filter={finalizadosFilter}
                             onFilterChange={setFinalizadosFilter}
+                            classificationNames={classificationNames}
                         />
                     </TabsContent>
                 </div>
@@ -438,7 +439,3 @@ export default function AtendimentosPage() {
         </div>
     );
 }
-
-    
-
-    

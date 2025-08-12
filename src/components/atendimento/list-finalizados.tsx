@@ -20,6 +20,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog"
 import { Button } from "../ui/button";
+import type { Empresa } from "@/types/empresa";
 
 
 interface FinalizadosListProps {
@@ -27,9 +28,10 @@ interface FinalizadosListProps {
     isLoading: boolean;
     filter: 'todos' | 'finalizado' | 'cancelado';
     onFilterChange: (value: 'todos' | 'finalizado' | 'cancelado') => void;
+    classificationNames?: Empresa['nomesClassificacoes'];
 }
 
-export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange }: FinalizadosListProps) {
+export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange, classificationNames }: FinalizadosListProps) {
     
     const [motivoVisivel, setMotivoVisivel] = React.useState<string | null>(null);
 
@@ -99,6 +101,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                 {filteredList.map((item) => {
                     const isCanceled = item.status === 'cancelado';
                     const eventTime = isCanceled ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
+                    const classificationName = classificationNames?.[item.classificacao] || item.classificacao;
                     
                     return (
                         <div key={item.id} className={cn(
@@ -155,10 +158,11 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                             'text-xs font-semibold',
                                             item.classificacao === 'Urgencia' && 'bg-red-500 text-white hover:bg-red-600',
                                             item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
-                                            item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700'
+                                            item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700',
+                                            item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
                                         )}
                                     >
-                                        {item.classificacao}
+                                        {classificationName}
                                     </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
