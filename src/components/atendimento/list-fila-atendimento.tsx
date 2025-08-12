@@ -9,7 +9,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser } from "lucide-react";
+import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser, ListX } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FilaDeAtendimentoListProps {
@@ -21,9 +21,10 @@ interface FilaDeAtendimentoListProps {
     onCancel: (item: FilaDeEsperaItem) => void;
     onAddToQueue: () => void;
     onClearPanel: () => void;
+    onClearHistory: () => void;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -37,9 +38,13 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                           <PlusCircle className="mr-2 h-4 w-4" />
                             Adicionar na Fila
                         </Button>
-                        <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9">
+                        <Button variant="outline" size="icon" onClick={onClearHistory} className="h-9 w-9" title="Limpar Histórico do Painel">
+                            <ListX className="h-4 w-4" />
+                            <span className="sr-only">Limpar Histórico do Painel</span>
+                        </Button>
+                        <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9" title="Limpar Painel Principal">
                             <Eraser className="h-4 w-4" />
-                            <span className="sr-only">Limpar Painel</span>
+                            <span className="sr-only">Limpar Painel Principal</span>
                         </Button>
                     </div>
                 </div>

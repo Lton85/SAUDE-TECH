@@ -23,7 +23,7 @@ import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
 import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { clearPainel } from "@/services/chamadasService";
+import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
 import { getEmpresa } from "@/services/empresaService";
@@ -90,7 +90,13 @@ export default function AtendimentosPage() {
         const unsubPacientes = getPacientesRealtime(setPacientes, (error) => setNotification({ type: 'error', title: "Erro ao carregar pacientes", message: error }));
         
         const unsubPendentes = getAtendimentosPendentes((data) => {
-            setPendentes(data);
+             const sortedData = [...data].sort((a, b) => {
+                if (a.prioridade !== b.prioridade) {
+                    return a.prioridade - b.prioridade;
+                }
+                return (a.chegadaEm?.toMillis() ?? 0) - (b.chegadaEm?.toMillis() ?? 0);
+            });
+            setPendentes(sortedData);
             setIsLoading(false);
         }, (error) => {
              setNotification({ type: 'error', title: "Erro ao carregar senhas pendentes", message: error });
@@ -201,6 +207,16 @@ export default function AtendimentosPage() {
             setNotification({ type: 'error', title: "Erro ao limpar painel", message: err.message });
         }
     };
+
+    const handleClearHistory = async () => {
+        try {
+            await clearHistoryChamadas();
+            setNotification({ type: 'success', title: "Histórico Limpo!", message: "O histórico de últimas senhas do painel foi limpo." });
+        } catch (error) {
+            const err = error as Error;
+            setNotification({ type: 'error', title: "Erro ao limpar histórico", message: err.message });
+        }
+    };
     
     return (
         <div className="flex flex-col h-full">
@@ -262,6 +278,7 @@ export default function AtendimentosPage() {
                             onCancel={setItemToCancel}
                             onAddToQueue={handleAddToQueue}
                             onClearPanel={handleClearPanel}
+                            onClearHistory={handleClearHistory}
                         />
                     </TabsContent>
 

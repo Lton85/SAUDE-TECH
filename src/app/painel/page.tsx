@@ -37,7 +37,7 @@ const HistoryItem = ({ call }: { call: Call }) => (
 );
 
 export default function PainelPage() {
-  const [callHistory, setCallHistory] = useState<Call[]>([emptyCall]);
+  const [callHistory, setCallHistory] = useState<Call[]>([]);
   const lastCallIdRef = useRef<string | null>(null);
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
@@ -76,7 +76,7 @@ export default function PainelPage() {
   useEffect(() => {
     if (!isClient) return;
 
-    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
+    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(6));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
@@ -86,7 +86,6 @@ export default function PainelPage() {
             try {
                 const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
                 audio.play().catch(error => {
-                    // This error is expected if the user hasn't interacted with the page yet.
                     console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
                 });
             } catch (error) {

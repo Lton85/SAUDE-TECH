@@ -1,7 +1,7 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch, setDoc, doc, deleteDoc } from 'firebase/firestore';
 
 interface Chamada {
     id?: string; // Adicionado para rastrear a chamada
@@ -17,11 +17,10 @@ const chamadasCollection = collection(db, 'chamadas');
 
 export const createChamada = async (chamadaData: Chamada) => {
     try {
-        // Usar um ID de documento explícito para a nova chamada para garantir que seja único
         const chamadaRef = doc(chamadasCollection);
         await setDoc(chamadaRef, {
             ...chamadaData,
-            id: chamadaRef.id, // Armazena o próprio ID no documento
+            id: chamadaRef.id, 
             timestamp: serverTimestamp() 
         });
     } catch (error) {
@@ -32,16 +31,14 @@ export const createChamada = async (chamadaData: Chamada) => {
 
 export const clearPainel = async () => {
     try {
-        // Usar setDoc com um ID específico para a ação de limpar, garantindo que seja um evento único.
-        // Isso facilita a detecção de "nova chamada" no lado do cliente para o som.
         const clearCallRef = doc(chamadasCollection, 'clear-call');
         await setDoc(clearCallRef, {
-            id: 'clear-call', // ID especial para identificar a limpeza
+            id: 'clear-call',
             senha: '----',
             departamentoNome: 'Aguardando...',
             pacienteNome: 'Aguardando paciente...',
             profissionalNome: 'Aguardando profissional...',
-            atendimentoId: null, // Limpa o ID do atendimento
+            atendimentoId: null,
             timestamp: serverTimestamp() 
         });
     } catch (error) {
@@ -49,6 +46,36 @@ export const clearPainel = async () => {
         throw new Error("Não foi possível limpar o painel no Firestore.");
     }
 };
+
+
+export const clearHistoryChamadas = async (): Promise<void> => {
+    try {
+        const q = query(chamadasCollection, orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.docs.length <= 1) {
+            return; // Keep the latest call
+        }
+
+        const batch = writeBatch(db);
+        // Get all documents except the most recent one
+        const docsToDelete = snapshot.docs.slice(1);
+        
+        docsToDelete.forEach(doc => {
+            // Do not delete the special 'clear-call' document
+            if (doc.id !== 'clear-call') {
+                batch.delete(doc.ref);
+            }
+        });
+
+        await batch.commit();
+
+    } catch (error) {
+        console.error("Erro ao limpar o histórico de chamadas:", error);
+        throw new Error("Não foi possível limpar o histórico de chamadas do painel.");
+    }
+};
+
 
 /**
  * Retorna a última chamada feita no painel.
@@ -82,10 +109,8 @@ export const clearAllChamadas = async (): Promise<number> => {
         });
         await batch.commit();
 
-        // Após limpar, reseta o painel para o estado inicial
         await clearPainel();
 
-        // Retorna o número de documentos excluídos
         return snapshot.size;
     } catch (error) {
         console.error("Erro ao limpar o histórico de chamadas:", error);
