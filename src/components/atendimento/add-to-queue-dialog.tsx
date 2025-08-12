@@ -72,10 +72,12 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
 
   const filteredPacientes = useMemo(() => {
-    if (!searchQuery) return pacientes;
-    
     const lowercasedQuery = searchQuery.toLowerCase().trim();
-    if (!lowercasedQuery) return pacientes;
+    
+    // If search query is just a space or empty, show all patients.
+    if (!lowercasedQuery) {
+        return pacientes;
+    }
 
     // Check for specific filters like "rua " or "numero "
     if (lowercasedQuery.startsWith("rua ")) {
@@ -272,6 +274,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === ' ' && searchQuery === '') {
+        e.preventDefault();
         setShowPatientList(true);
     }
     if (showPatientList && filteredPacientes.length > 0) {
