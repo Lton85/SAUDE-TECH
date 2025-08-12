@@ -28,9 +28,9 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false },
-    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false },
-    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false },
+    { id: 'Normal', nome: 'Normal', descricao: 'Atendimento geral para todos os públicos', ativa: true, editavel: false },
+    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, idosos, pessoas com deficiência.', ativa: true, editavel: false },
+    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de urgência e emergência.', ativa: true, editavel: false },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -155,7 +155,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true }
+                { id: newId, nome: '', descricao: '', ativa: true, editavel: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -365,41 +365,44 @@ export default function EmpresaPage() {
                     <CardContent>
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
-                               <div key={classificacao.id} className="flex items-start space-x-4">
-                                   <div className="flex items-center pt-2">
-                                     <Checkbox 
-                                        id={`class-active-${classificacao.id}`}
-                                        checked={classificacao.ativa}
-                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
-                                        disabled={!isEditing}
-                                     />
+                               <div key={classificacao.id} className="space-y-2">
+                                   <div className="flex items-center space-x-4">
+                                       <div className="flex items-center">
+                                         <Checkbox 
+                                            id={`class-active-${classificacao.id}`}
+                                            checked={classificacao.ativa}
+                                            onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                                            disabled={!isEditing}
+                                         />
+                                       </div>
+                                       <div className="flex-1">
+                                            <Input
+                                              id={`className-${classificacao.id}`}
+                                              value={classificacao.nome}
+                                              onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
+                                              disabled={!isEditing || !classificacao.editavel}
+                                              className="font-semibold"
+                                              placeholder="Nome da Classificação"
+                                            />
+                                       </div>
+                                        {isEditing && classificacao.editavel && (
+                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                    </div>
-                                   <div className="flex-1 space-y-2">
-                                        <Input
-                                          id={`className-${classificacao.id}`}
-                                          value={classificacao.nome}
-                                          onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
-                                          disabled={!isEditing}
-                                          className="font-semibold"
-                                        />
-                                        <Input
+                                    <Input
                                         id={`classDesc-${classificacao.id}`}
                                         value={classificacao.descricao || ''}
                                         onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
                                         disabled={!isEditing}
                                         placeholder="Descrição (Ex: Gestantes, Idosos...)"
-                                        className="text-xs h-8"
-                                        />
-                                   </div>
-                                    {isEditing && classificacao.editavel && (
-                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8 mt-0.5">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    )}
+                                        className="text-sm h-9 ml-8"
+                                    />
                                </div>
                            ))}
                            {isEditing && (
-                            <Button size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
+                            <Button variant="default" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
                                 <PlusCircle className="mr-2 h-4 w-4"/>
                                 Adicionar Nova Classificação
                             </Button>
