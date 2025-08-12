@@ -189,7 +189,7 @@ export default function TabletPage() {
                             )}
                             onClick={() => handleSelection(classificacao)}
                         >
-                            <CardContent className="flex flex-col items-center justify-center p-4 h-full">
+                            <CardContent className="flex items-center justify-center p-4 h-full">
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
