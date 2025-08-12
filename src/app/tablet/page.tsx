@@ -193,12 +193,10 @@ export default function TabletPage() {
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
-                                    <div className="text-center flex flex-col justify-center flex-grow">
-                                        <div className="flex-grow flex items-center justify-center">
-                                            <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
-                                                {classificacao.nome.toUpperCase()}
-                                            </h2>
-                                        </div>
+                                    <div className="text-center">
+                                        <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                            {classificacao.nome.toUpperCase()}
+                                        </h2>
                                         {classificacao.exibirDescricao && classificacao.descricao && (
                                             <p className={cn("text-xs md:text-sm mt-2 font-normal", colors.text, "opacity-70")}>
                                                 {classificacao.descricao}
