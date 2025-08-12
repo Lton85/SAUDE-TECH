@@ -6,7 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/com
 import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building, Tablet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
-import { clearAllRelatorios } from "@/services/filaDeEsperaService";
+import { clearAllRelatorios, clearAllAtendimentos } from "@/services/filaDeEsperaService";
 import { clearAllChamadas } from "@/services/chamadasService";
 import { ResetSenhaDialog } from "@/components/configuracoes/reset-senha-dialog";
 import { LimpezaHistoricoDialog } from "@/components/configuracoes/limpeza-historico-dialog";
@@ -196,11 +196,13 @@ export default function ConfiguracoesPage() {
         setIsLimpezaResetting(true);
         setLimpezaDialogOpen(false);
         try {
-            const [chamadasCount, relatoriosCount] = await Promise.all([
+            const [chamadasCount, relatoriosCount, atendimentosCount] = await Promise.all([
                 clearAllChamadas(),
-                clearAllRelatorios()
+                clearAllRelatorios(),
+                clearAllAtendimentos()
             ]);
-            setNotification({ type: "success", title: "Dados Zerados!", message: `${chamadasCount} chamadas e ${relatoriosCount} relatórios foram excluídos.` });
+            const total = chamadasCount + relatoriosCount + atendimentosCount;
+            setNotification({ type: "success", title: "Limpeza Completa!", message: `${total} registros de atendimento foram excluídos.` });
         } catch (error) {
              setNotification({ type: "error", title: "Erro ao zerar dados", message: (error as Error).message });
         } finally {
@@ -529,7 +531,7 @@ export default function ConfiguracoesPage() {
             isOpen={limpezaDialogOpen}
             onOpenChange={setLimpezaDialogOpen}
             title="Ação Irreversível de Limpeza"
-            description="&lt;p&gt;&lt;b&gt;O QUE SERÁ APAGADO:&lt;/b&gt;&lt;br/&gt; - Todas as chamadas de senha e atendimentos finalizados&lt;br/&gt;- Relatórios de Atendimento.&lt;/p&gt;&lt;p&gt;&lt;b class='text-green-600'&gt;O QUE SERÁ MANTIDO:&lt;/b&gt;&lt;br/&gt; - Todas as configurações.&lt;br/&gt; - Todos os cadastros (pacientes, profissionais e departamentos).&lt;/p&gt;"
+            description="&lt;p&gt;&lt;b&gt;O QUE SERÁ APAGADO:&lt;/b&gt;&lt;br/&gt; - &lt;b&gt;TODOS&lt;/b&gt; os atendimentos (pendentes, em triagem, em andamento, finalizados e cancelados).&lt;br/&gt;- Todas as chamadas de senha do painel.&lt;/p&gt;&lt;p&gt;&lt;b class='text-green-600'&gt;O QUE SERÁ MANTIDO:&lt;/b&gt;&lt;br/&gt; - Todas as configurações.&lt;br/&gt; - Todos os cadastros (pacientes, profissionais e departamentos).&lt;/p&gt;"
             onConfirm={handleConfirmLimpeza}
             isSubmitting={isLimpezaResetting}
         />
@@ -543,5 +545,3 @@ export default function ConfiguracoesPage() {
     </div>
   );
 }
-
-    

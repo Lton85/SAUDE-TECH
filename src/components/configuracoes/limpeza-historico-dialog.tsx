@@ -32,7 +32,7 @@ export function LimpezaHistoricoDialog({
   onOpenChange, 
   onConfirm, 
   title = "Ação Irreversível!", 
-  description = "<p><b class='text-destructive'>O QUE SERÁ APAGADO:</b><br/> - Todas as chamadas de senha, atendimentos e finalizados<br/>- Relatórios de Atendimento.</p><p><b class='text-green-600'>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações (gerais e banco de dados).<br/> - Todos os cadastros (clientes, profissionais e departamentos).</p>", 
+  description = "<p><b>O QUE SERÁ APAGADO:</b><br/> - <b>TODOS</b> os atendimentos (pendentes, em triagem, em andamento, finalizados e cancelados).<br/>- Todas as chamadas de senha do painel.</p><p><b>O QUE SERÁ MANTIDO:</b><br/> - Todas as configurações.<br/> - Todos os cadastros (pacientes, profissionais e departamentos).</p>", 
   confirmText = "Sim, confirmar",
   requiresPassword = true,
   isSubmitting = false,

@@ -2,6 +2,7 @@
 
 
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -597,5 +598,26 @@ export const clearAllRelatorios = async (): Promise<number> => {
     } catch (error) {
         console.error("Erro ao limpar o histórico de atendimentos:", error);
         throw new Error("Não foi possível limpar os relatórios de atendimento.");
+    }
+};
+
+export const clearAllAtendimentos = async (): Promise<number> => {
+    try {
+        const q = query(collection(db, "filaDeEspera"));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return 0;
+        }
+
+        const batch = writeBatch(db);
+        querySnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        return querySnapshot.size;
+    } catch (error) {
+        console.error("Erro ao limpar a fila de atendimentos:", error);
+        throw new Error("Não foi possível limpar a fila de atendimentos.");
     }
 };
