@@ -197,7 +197,7 @@ export default function TabletPage() {
                                         <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
                                             {classificacao.nome.toUpperCase()}
                                         </h2>
-                                        {classificacao.descricao && (
+                                        {classificacao.exibirDescricao && classificacao.descricao && (
                                             <p className={cn("text-xs md:text-sm mt-2 font-normal", colors.text, "opacity-70")}>
                                                 {classificacao.descricao}
                                             </p>
@@ -246,5 +246,7 @@ export default function TabletPage() {
         </div>
     );
 }
+
+    
 
     

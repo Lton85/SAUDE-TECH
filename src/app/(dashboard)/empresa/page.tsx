@@ -26,10 +26,10 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false },
-    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false },
-    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false },
-    { id: 'Outros', nome: 'Outros', descricao: '', ativa: true, editavel: false },
+    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false, exibirDescricao: true },
+    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false, exibirDescricao: true },
+    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false, exibirDescricao: true },
+    { id: 'Outros', nome: 'Outros', descricao: '', ativa: true, editavel: false, exibirDescricao: true },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -148,7 +148,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true }
+                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true, exibirDescricao: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -358,13 +358,16 @@ export default function EmpresaPage() {
                     <CardContent>
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
-                               <div key={classificacao.id} className="flex items-center space-x-4">
-                                   <Checkbox 
-                                    id={`class-${classificacao.id}`}
-                                    checked={classificacao.ativa}
-                                    onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
-                                    disabled={!isEditing}
-                                   />
+                               <div key={classificacao.id} className="flex items-start space-x-4">
+                                   <div className="flex flex-col items-center gap-2 pt-1">
+                                    <Checkbox 
+                                        id={`class-active-${classificacao.id}`}
+                                        checked={classificacao.ativa}
+                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                                        disabled={!isEditing}
+                                    />
+                                    <Label htmlFor={`class-active-${classificacao.id}`} className="text-xs text-muted-foreground">Ativa</Label>
+                                   </div>
                                    <div className="flex-1 space-y-2">
                                         <Input
                                           id={`className-${classificacao.id}`}
@@ -373,17 +376,25 @@ export default function EmpresaPage() {
                                           disabled={!isEditing}
                                           className="font-semibold"
                                         />
-                                        <Input
-                                          id={`classDesc-${classificacao.id}`}
-                                          value={classificacao.descricao || ''}
-                                          onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
-                                          disabled={!isEditing}
-                                          placeholder="Descrição (Ex: Gestantes, Idosos...)"
-                                          className="text-xs"
-                                        />
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                id={`class-show-desc-${classificacao.id}`}
+                                                checked={classificacao.exibirDescricao}
+                                                onCheckedChange={(checked) => handleClassificationChange(index, 'exibirDescricao', !!checked)}
+                                                disabled={!isEditing}
+                                            />
+                                            <Input
+                                            id={`classDesc-${classificacao.id}`}
+                                            value={classificacao.descricao || ''}
+                                            onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
+                                            disabled={!isEditing}
+                                            placeholder="Descrição (Ex: Gestantes, Idosos...)"
+                                            className="text-xs h-8"
+                                            />
+                                        </div>
                                    </div>
                                     {isEditing && classificacao.editavel && (
-                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive">
+                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8 mt-0.5">
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     )}
@@ -474,5 +485,7 @@ export default function EmpresaPage() {
         </>
     );
 }
+
+    
 
     

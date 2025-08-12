@@ -1,10 +1,12 @@
 
+
 export interface Classificacao {
     id: string; // Ex: "Normal", "Preferencial", "custom_123"
     nome: string; // Ex: "Atendimento Normal", "Preferencial", "Guichê 1"
     descricao?: string; // Ex: "Para consultas de rotina", "Gestantes, Idosos, Cadeirantes"
     ativa: boolean;
     editavel: boolean; // Para impedir a exclusão dos 4 padrões
+    exibirDescricao?: boolean;
 }
 
 export interface Empresa {
@@ -39,5 +41,7 @@ export interface Empresa {
     localChamadaTriagem?: string;
     exibirLocalChamadaTriagem?: boolean;
 }
+
+    
 
     
