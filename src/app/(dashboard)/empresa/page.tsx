@@ -365,40 +365,40 @@ export default function EmpresaPage() {
                     <CardContent>
                          <div className="space-y-4">
                            {(formData.classificacoes || []).map((classificacao, index) => (
-                               <div key={classificacao.id} className="space-y-2">
-                                   <div className="flex items-center space-x-4">
-                                       <div className="flex items-center">
-                                         <Checkbox 
-                                            id={`class-active-${classificacao.id}`}
-                                            checked={classificacao.ativa}
-                                            onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                               <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-start gap-x-4 gap-y-2">
+                                   <div className="flex items-center h-9">
+                                     <Checkbox 
+                                        id={`class-active-${classificacao.id}`}
+                                        checked={classificacao.ativa}
+                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                                        disabled={!isEditing}
+                                     />
+                                   </div>
+                                   <div className="space-y-2">
+                                        <Input
+                                          id={`className-${classificacao.id}`}
+                                          value={classificacao.nome}
+                                          onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
+                                          disabled={!isEditing || !classificacao.editavel}
+                                          className="font-semibold h-9"
+                                          placeholder="Nome da Classificação"
+                                        />
+                                        <Input
+                                            id={`classDesc-${classificacao.id}`}
+                                            value={classificacao.descricao || ''}
+                                            onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
                                             disabled={!isEditing}
-                                         />
-                                       </div>
-                                       <div className="flex-1">
-                                            <Input
-                                              id={`className-${classificacao.id}`}
-                                              value={classificacao.nome}
-                                              onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
-                                              disabled={!isEditing || !classificacao.editavel}
-                                              className="font-semibold"
-                                              placeholder="Nome da Classificação"
-                                            />
-                                       </div>
-                                        {isEditing && classificacao.editavel && (
+                                            placeholder="Descrição (Ex: Gestantes, Idosos...)"
+                                            className="text-sm h-9"
+                                        />
+                                   </div>
+                                    {isEditing && classificacao.editavel && (
+                                        <div className="flex items-center h-9">
                                             <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
-                                        )}
-                                   </div>
-                                    <Input
-                                        id={`classDesc-${classificacao.id}`}
-                                        value={classificacao.descricao || ''}
-                                        onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
-                                        disabled={!isEditing}
-                                        placeholder="Descrição (Ex: Gestantes, Idosos...)"
-                                        className="text-sm h-9 ml-8"
-                                    />
+                                        </div>
+                                    )}
                                </div>
                            ))}
                            {isEditing && (
