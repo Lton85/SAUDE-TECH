@@ -37,15 +37,15 @@ const HistoryItem = ({ call }: { call: Call }) => (
 );
 
 export default function PainelPage() {
-  const [callHistory, setCallHistory] = useState<Call[]>([]);
-  const lastPlayedSoundTimestamp = useRef<number | null>(null);
+  const [callHistory, setCallHistory] = useState<Call[]>([emptyCall]);
+  const lastCallIdRef = useRef<string | null>(null);
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [empresaConfig, setEmpresaConfig] = useState<Empresa | null>(null);
 
   const currentCall = callHistory[0] || emptyCall;
-  const lastCalls = callHistory.slice(1); // Last 4 calls for the history panel
+  const lastCalls = callHistory.slice(1);
 
   useEffect(() => {
     setIsClient(true);
@@ -63,7 +63,6 @@ export default function PainelPage() {
             }
         } catch (error) {
             console.error("Erro ao buscar dados da empresa:", error);
-            // Mantém os valores padrão em caso de erro
         }
     };
 
@@ -78,25 +77,22 @@ export default function PainelPage() {
     if (!isClient) return;
 
     const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(5));
+    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
-        
         const latestCall = newCalls.length > 0 ? newCalls[0] : null;
-        
-        // Play sound if the latest call is new and its timestamp hasn't been played
-        if (latestCall && latestCall.timestamp) {
-            const callTimestamp = latestCall.timestamp.toMillis();
-            if (lastPlayedSoundTimestamp.current !== callTimestamp) {
-                try {
-                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                    audio.play().catch(error => {
-                        console.warn("Audio play prevented: ", error);
-                    });
-                    lastPlayedSoundTimestamp.current = callTimestamp;
-                } catch (error) {
-                    console.error("Error creating or playing audio:", error);
-                }
+
+        if (latestCall && latestCall.id !== lastCallIdRef.current) {
+            try {
+                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                audio.play().catch(error => {
+                    // This error is expected if the user hasn't interacted with the page yet.
+                    console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
+                });
+            } catch (error) {
+                console.error("Error creating or playing audio:", error);
             }
+            lastCallIdRef.current = latestCall.id || null;
         }
         
         setCallHistory(newCalls.length > 0 ? newCalls : [emptyCall]);
