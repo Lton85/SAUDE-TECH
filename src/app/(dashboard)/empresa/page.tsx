@@ -367,28 +367,37 @@ export default function EmpresaPage() {
                         <div className="space-y-4">
                             {(formData.classificacoes || []).map((classificacao, index) => (
                                 <div key={classificacao.id} className="space-y-2">
-                                    <div className="flex items-center gap-x-4">
+                                    <div className="flex items-center space-x-4">
                                         <Checkbox
                                             id={`class-active-${classificacao.id}`}
                                             checked={classificacao.ativa}
                                             onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
                                             disabled={!isEditing}
                                         />
-                                        <Input
-                                            id={`className-${classificacao.id}`}
-                                            value={classificacao.nome}
-                                            onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="font-semibold h-9"
-                                            placeholder="Nome da Classificação"
-                                        />
-                                         {isEditing && !initialClassificacoes.some(c => c.id === classificacao.id) && (
-                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
+                                        <div className="flex-1 flex items-center gap-x-4">
+                                            <Input
+                                                id={`className-${classificacao.id}`}
+                                                value={classificacao.nome}
+                                                onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="font-semibold h-9"
+                                                placeholder="Nome da Classificação"
+                                            />
+                                            {isEditing && !initialClassificacoes.some(c => c.id === classificacao.id) && (
+                                                <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-x-4 ml-8">
+                                    <div className="flex items-center space-x-4">
+                                        <Checkbox
+                                             // This checkbox can be used for a different logic in the future, e.g., show/hide description
+                                            id={`class-desc-active-${classificacao.id}`}
+                                            // Let's assume for now it's always "on" if the main one is on. Or create new state property.
+                                            checked={classificacao.ativa} 
+                                            disabled={!isEditing}
+                                        />
                                         <Input
                                             id={`classDesc-${classificacao.id}`}
                                             value={classificacao.descricao || ''}
@@ -398,7 +407,7 @@ export default function EmpresaPage() {
                                             className="text-sm h-9"
                                         />
                                     </div>
-                                     {index < (formData.classificacoes || []).length -1 && <Separator className="mt-4!"/>}
+                                     {index < (formData.classificacoes || []).length -1 && <Separator className="mt-4"/>}
                                 </div>
                             ))}
                             {isEditing && (
