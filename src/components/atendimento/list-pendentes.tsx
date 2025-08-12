@@ -10,15 +10,17 @@ import { Megaphone, XCircle, Clock } from "lucide-react";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "../ui/badge";
+import { Empresa } from "@/types/empresa";
 
 interface SenhasPendentesListProps {
     pendentes: FilaDeEsperaItem[];
     isLoading: boolean;
     onCall: (item: FilaDeEsperaItem) => void;
     onCancel: (item: FilaDeEsperaItem) => void;
+    classificationNames?: Empresa['nomesClassificacoes'];
 }
 
-export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: SenhasPendentesListProps) {
+export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificationNames }: SenhasPendentesListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -47,11 +49,12 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                 const chegada = item.chegadaEm ? item.chegadaEm.toDate() : null;
                 const formattedTime = chegada ? format(chegada, "HH:mm:ss", { locale: ptBR }) : '-';
                 const formattedDate = chegada ? format(chegada, "dd/MM/yy", { locale: ptBR }) : '-';
+                const classificationName = classificationNames?.[item.classificacao] || item.classificacao;
 
                 return (
                      <Card key={item.id} className={cn(
                         "hover:bg-muted/50 transition-colors",
-                        item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
+                        item.classificacao === "Urgencia" && "border-red-500/50 bg-red-500/5",
                         item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
                         item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
                         item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
@@ -59,23 +62,23 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                         <CardContent className="p-2 flex items-center justify-between">
                              <div className="flex items-center gap-3">
                                 <Badge variant={
-                                    item.classificacao === 'Urgência' ? 'destructive' : 
+                                    item.classificacao === 'Urgencia' ? 'destructive' : 
                                     item.classificacao === 'Preferencial' ? 'default' : 
                                     item.classificacao === 'Outros' ? 'default' : 'secondary'
                                 } className={cn("text-base",
                                     item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                                     item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                                    item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600'
+                                    item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
                                 )}>
                                     {item.senha}
                                 </Badge>
                                 <span className={cn(
                                     "text-xs font-semibold uppercase tracking-wider",
-                                    item.classificacao === 'Urgência' && 'text-red-600',
+                                    item.classificacao === 'Urgencia' && 'text-red-600',
                                     item.classificacao === 'Preferencial' && 'text-blue-600',
                                     item.classificacao === 'Normal' && 'text-green-600',
                                     item.classificacao === 'Outros' && 'text-slate-500',
-                                )}>{item.classificacao}</span>
+                                )}>{classificationName}</span>
                             </div>
                             
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">

@@ -26,12 +26,19 @@ import { Badge } from "@/components/ui/badge";
 import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
-import { getEmpresa } from "@/services/empresaService";
+import { getEmpresa, Empresa } from "@/services/empresaService";
 
 interface Profissional {
   id: string;
   nome: string;
 }
+
+const initialClassificationNames: Empresa['nomesClassificacoes'] = {
+    Normal: "Normal",
+    Preferencial: "Preferencial",
+    Urgencia: "Urgência",
+    Outros: "Outros",
+};
 
 export default function AtendimentosPage() {
     // Data states
@@ -44,6 +51,7 @@ export default function AtendimentosPage() {
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
     const [activeClassificacoes, setActiveClassificacoes] = useState<string[]>([]);
+    const [classificationNames, setClassificationNames] = useState<Empresa['nomesClassificacoes']>(initialClassificationNames);
     
     // UI states
     const [isLoading, setIsLoading] = useState(true);
@@ -75,11 +83,19 @@ export default function AtendimentosPage() {
                 setDepartamentos(deptoData.filter(d => d.situacao === 'Ativo'));
                 const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
+                
                 if (empresaData?.classificacoesAtendimento?.length) {
                     setActiveClassificacoes(empresaData.classificacoesAtendimento);
                 } else {
                     setActiveClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
                 }
+
+                if (empresaData?.nomesClassificacoes) {
+                    setClassificationNames(empresaData.nomesClassificacoes);
+                } else {
+                    setClassificationNames(initialClassificationNames);
+                }
+
 
              } catch (error) {
                  setNotification({ type: "error", title: "Erro ao carregar dados de apoio", message: "Não foi possível carregar departamentos ou profissionais." });
@@ -256,6 +272,7 @@ export default function AtendimentosPage() {
                             isLoading={isLoading} 
                             onCall={handleChamarParaTriagem}
                             onCancel={setItemToCancel}
+                            classificationNames={classificationNames}
                         />
                     </TabsContent>
                     
