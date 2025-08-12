@@ -38,13 +38,15 @@ const HistoryItem = ({ call }: { call: Call }) => (
 
 export default function PainelPage() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
-  const lastCallIdRef = useRef<string | null>(null);
+  const [latestCall, setLatestCall] = useState<Call | null>(null);
+  const lastPlayedCallId = useRef<string | null>(null);
+
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [empresaConfig, setEmpresaConfig] = useState<Empresa | null>(null);
 
-  const currentCall = callHistory[0] || emptyCall;
+  const currentCall = latestCall || emptyCall;
   const lastCalls = callHistory.slice(1);
 
   useEffect(() => {
@@ -80,29 +82,30 @@ export default function PainelPage() {
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
-        const latestCall = newCalls.length > 0 ? newCalls[0] : null;
-
-        if (latestCall && latestCall.id !== lastCallIdRef.current) {
-            try {
-                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                audio.play().catch(error => {
-                    console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
-                });
-            } catch (error) {
-                console.error("Error creating or playing audio:", error);
-            }
-            lastCallIdRef.current = latestCall.id || null;
-        }
-        
         setCallHistory(newCalls.length > 0 ? newCalls : [emptyCall]);
-
+        setLatestCall(newCalls.length > 0 ? newCalls[0] : null);
     }, (error) => {
         console.error("Firebase snapshot error:", error);
         setCallHistory([emptyCall]);
+        setLatestCall(null);
     });
 
     return () => unsubscribe();
   }, [isClient]);
+
+  useEffect(() => {
+    if (latestCall && latestCall.id !== lastPlayedCallId.current) {
+        try {
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play().catch(error => {
+                console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
+            });
+        } catch (error) {
+            console.error("Error creating or playing audio:", error);
+        }
+        lastPlayedCallId.current = latestCall.id || null;
+    }
+  }, [latestCall]);
   
   if (!isClient) {
     return (
