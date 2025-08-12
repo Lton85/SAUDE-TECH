@@ -54,6 +54,21 @@ export function EditQueueItemDialog({ isOpen, onOpenChange, item, departamentos,
         }
     }, [item]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === ' ') {
+                event.preventDefault(); 
+                onOpenChange(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onOpenChange]);
+
     const handleSave = async () => {
         if (!item || !selectedDepartamentoId || !selectedProfissionalId || !senha) {
             onNotification({

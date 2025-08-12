@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,6 +19,22 @@ interface CancellationConfirmationDialogProps {
 }
 
 export function CancellationConfirmationDialog({ isOpen, onOpenChange, itemName }: CancellationConfirmationDialogProps) {
+  
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ') {
+        event.preventDefault(); 
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onOpenChange]);
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -39,5 +56,3 @@ export function CancellationConfirmationDialog({ isOpen, onOpenChange, itemName 
     </AlertDialog>
   );
 }
-
-    

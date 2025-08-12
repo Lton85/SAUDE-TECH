@@ -41,6 +41,21 @@ export function CancelAtendimentoDialog({ isOpen, onOpenChange, onConfirm, item 
     }
   }, [isOpen]);
   
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ') {
+        event.preventDefault(); 
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onOpenChange]);
+
   if (!item) return null;
 
   return (
@@ -82,5 +97,3 @@ export function CancelAtendimentoDialog({ isOpen, onOpenChange, onConfirm, item 
     </Dialog>
   )
 }
-
-    

@@ -117,6 +117,21 @@ export function ProntuarioDialog({ isOpen, onOpenChange, item, onEdit }: Prontua
     fetchHistorico();
   }, [item, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ') {
+        event.preventDefault(); 
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onOpenChange]);
+
   if (!item) return null;
 
   return (

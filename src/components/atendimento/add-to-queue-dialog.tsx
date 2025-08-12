@@ -307,6 +307,21 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ') {
+        event.preventDefault(); 
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onOpenChange]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -512,5 +527,3 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     </Dialog>
   )
 }
-
-    

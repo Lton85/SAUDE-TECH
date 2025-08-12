@@ -50,6 +50,21 @@ export function ReturnToQueueDialog({ isOpen, onOpenChange, item, departamentos,
         }
     }, [item]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === ' ') {
+                event.preventDefault(); 
+                onOpenChange(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onOpenChange]);
+
     const handleConfirm = async () => {
         if (!item || !selectedDepartamentoId || !selectedProfissionalId) {
             onNotification({
