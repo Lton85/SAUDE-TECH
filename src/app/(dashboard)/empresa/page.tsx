@@ -15,6 +15,7 @@ import { NotificationDialog, NotificationType } from "@/components/ui/notificati
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 
 
 const ufs = [
@@ -141,7 +142,7 @@ export default function EmpresaPage() {
         setFormData(prev => ({...prev, [id]: value}));
     }
     
-    const handleClassificationChange = (index: number, field: keyof Omit<Classificacao, 'id' | 'editavel'>, value: string | boolean) => {
+    const handleClassificationChange = (index: number, field: keyof Omit<Classificacao, 'id'>, value: string | boolean) => {
         setFormData(prev => {
             const newClassificacoes = [...(prev.classificacoes || [])];
             const classificacaoToUpdate = { ...newClassificacoes[index], [field]: value };
@@ -363,25 +364,25 @@ export default function EmpresaPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <div className="space-y-4">
-                           {(formData.classificacoes || []).map((classificacao, index) => (
-                               <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-start gap-x-4">
-                                   <div className="flex items-center h-full pt-1.5">
-                                     <Checkbox 
-                                        id={`class-active-${classificacao.id}`}
-                                        checked={classificacao.ativa}
-                                        onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
-                                        disabled={!isEditing}
-                                     />
-                                   </div>
-                                   <div className="space-y-2">
+                        <div className="space-y-4">
+                            {(formData.classificacoes || []).map((classificacao, index) => (
+                                <div key={classificacao.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4">
+                                    <div className="flex items-center h-full">
+                                        <Checkbox
+                                            id={`class-active-${classificacao.id}`}
+                                            checked={classificacao.ativa}
+                                            onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
+                                            disabled={!isEditing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
                                         <Input
-                                          id={`className-${classificacao.id}`}
-                                          value={classificacao.nome}
-                                          onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
-                                          disabled={!isEditing}
-                                          className="font-semibold h-9"
-                                          placeholder="Nome da Classificação"
+                                            id={`className-${classificacao.id}`}
+                                            value={classificacao.nome}
+                                            onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="font-semibold h-9"
+                                            placeholder="Nome da Classificação"
                                         />
                                         <Input
                                             id={`classDesc-${classificacao.id}`}
@@ -391,22 +392,22 @@ export default function EmpresaPage() {
                                             placeholder="Descrição (Ex: Gestantes, Idosos...)"
                                             className="text-sm h-9"
                                         />
-                                   </div>
+                                    </div>
                                     {isEditing && classificacao.editavel && (
-                                        <div className="flex items-center h-full pt-1.5">
+                                        <div className="flex items-center h-full">
                                             <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     )}
-                               </div>
-                           ))}
-                           {isEditing && (
-                            <Button variant="default" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
-                                <PlusCircle className="mr-2 h-4 w-4"/>
-                                Adicionar Nova Classificação
-                            </Button>
-                           )}
+                                </div>
+                            ))}
+                            {isEditing && (
+                                <Button variant="default" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Adicionar Nova Classificação
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

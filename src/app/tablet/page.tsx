@@ -35,7 +35,7 @@ const getColors = (classId: string) => {
             border: "group-hover:border-red-400 bg-red-900/40 border-red-500/30",
             text: "text-red-400"
         };
-        default: return { // Para "Outros" e qualquer classificação customizada
+        default: return { 
             notification: 'bg-slate-600',
             border: "group-hover:border-slate-400 bg-slate-900/40 border-slate-500/30",
             text: "text-slate-400"
@@ -185,7 +185,8 @@ export default function TabletPage() {
                         <Card 
                             className={cn(
                                 "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer aspect-square",
-                                colors.border
+                                colors.border,
+                                "bg-cover bg-center"
                             )}
                             onClick={() => handleSelection(classificacao)}
                         >
@@ -193,18 +194,22 @@ export default function TabletPage() {
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center text-center">
-                                        <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
-                                            {classificacao.nome.toUpperCase()}
-                                        </h2>
+                                    <div className="flex flex-col items-center justify-center text-center h-full">
+                                        <div className="flex-grow flex items-center justify-center">
+                                            <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                                {classificacao.nome.toUpperCase()}
+                                            </h2>
+                                        </div>
                                         {classificacao.descricao && (
-                                            <p className={cn(
-                                                "text-xs md:text-sm font-normal mt-2", 
-                                                colors.text, 
-                                                "opacity-70"
-                                            )}>
-                                                {classificacao.descricao}
-                                            </p>
+                                            <div className="self-end pb-2">
+                                                <p className={cn(
+                                                    "text-xs md:text-sm font-normal", 
+                                                    colors.text, 
+                                                    "opacity-70"
+                                                )}>
+                                                    {classificacao.descricao}
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
                                 )}
