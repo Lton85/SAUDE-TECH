@@ -17,4 +17,7 @@ export interface Empresa {
     classificacoesAtendimento?: string[];
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';
+    exibirUltimasSenhas?: boolean;
 }
+
+    

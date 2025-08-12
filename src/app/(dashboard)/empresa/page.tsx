@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X, ShieldQuestion } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
@@ -47,6 +47,7 @@ const initialEmpresaState: Empresa = {
     email: "",
     nomeImpressora: "",
     classificacoesAtendimento: ["Normal", "Preferencial", "Urgência", "Outros"],
+    exibirUltimasSenhas: true,
 };
 
 export default function EmpresaPage() {
@@ -67,7 +68,12 @@ export default function EmpresaPage() {
                     ? empresaData.classificacoesAtendimento 
                     : initialEmpresaState.classificacoesAtendimento;
 
-                setFormData({...empresaData, classificacoesAtendimento: classificacoes});
+                setFormData({
+                    ...initialEmpresaState, // Garante que todos os campos, inclusive o novo, existam
+                    ...empresaData, 
+                    classificacoesAtendimento: classificacoes
+                });
+
                 if (empresaData.uf) {
                     fetchCitiesForUf(empresaData.uf);
                 }
@@ -137,6 +143,10 @@ export default function EmpresaPage() {
 
             return { ...prev, classificacoesAtendimento: newClassifications };
         });
+    };
+
+    const handleCheckboxChange = (id: keyof Empresa, checked: boolean) => {
+        setFormData(prev => ({...prev, [id]: checked}));
     };
     
     const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
@@ -318,32 +328,59 @@ export default function EmpresaPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <ShieldQuestion className="h-6 w-6" />
-                        <CardTitle>Classificação de Atendimento</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Selecione os tipos de atendimento que serão utilizados no tablet de senhas.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                       {allClassificacoes.map(name => (
-                           <div key={name} className="flex items-center space-x-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <ShieldQuestion className="h-6 w-6" />
+                            <CardTitle>Classificação de Atendimento</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Selecione os tipos de atendimento que serão utilizados no tablet de senhas.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                           {allClassificacoes.map(name => (
+                               <div key={name} className="flex items-center space-x-2">
+                                   <Checkbox 
+                                    id={`class-${name}`} 
+                                    checked={formData.classificacoesAtendimento?.includes(name)}
+                                    onCheckedChange={(checked) => handleClassificationChange(name, !!checked)}
+                                    disabled={!isEditing}
+                                   />
+                                   <Label htmlFor={`class-${name}`} className="font-normal">{name}</Label>
+                               </div>
+                           ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <Tv className="h-6 w-6" />
+                            <CardTitle>Configurações do Painel</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Ajuste as informações exibidas no painel de senhas.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-2">
                                <Checkbox 
-                                id={`class-${name}`} 
-                                checked={formData.classificacoesAtendimento?.includes(name)}
-                                onCheckedChange={(checked) => handleClassificationChange(name, !!checked)}
+                                id="exibirUltimasSenhas" 
+                                checked={formData.exibirUltimasSenhas}
+                                onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
                                 disabled={!isEditing}
                                />
-                               <Label htmlFor={`class-${name}`} className="font-normal">{name}</Label>
+                               <Label htmlFor="exibirUltimasSenhas" className="font-normal">Exibir últimas senhas chamadas</Label>
                            </div>
-                       ))}
-                    </div>
-                </CardContent>
-            </Card>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         
             <div className="flex justify-end pt-4 gap-2">
                 {!isEditing ? (
@@ -376,3 +413,5 @@ export default function EmpresaPage() {
         </>
     );
 }
+
+    
