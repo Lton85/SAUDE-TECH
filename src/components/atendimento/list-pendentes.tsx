@@ -53,15 +53,18 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel }: 
                         "hover:bg-muted/50 transition-colors",
                         item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
                         item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
-                        item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5"
+                        item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
+                        item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
                              <Badge variant={
                                 item.classificacao === 'Urgência' ? 'destructive' : 
-                                item.classificacao === 'Preferencial' ? 'default' : 'secondary'
+                                item.classificacao === 'Preferencial' ? 'default' : 
+                                item.classificacao === 'Outros' ? 'default' : 'secondary'
                             } className={cn("text-base",
                                 item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
-                                item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white'
+                                item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
+                                item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600'
                             )}>
                                 {item.senha}
                             </Badge>
