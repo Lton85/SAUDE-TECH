@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -37,6 +38,21 @@ export function NotificationDialog({ type, title, message, onOpenChange }: Notif
   const Icon = icons[type];
   const colorClass = colors[type];
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ') {
+        event.preventDefault(); // Impede que o espaço acione o clique do botão focado
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onOpenChange]);
+
   return (
     <AlertDialog open={true} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -58,5 +74,3 @@ export function NotificationDialog({ type, title, message, onOpenChange }: Notif
     </AlertDialog>
   );
 }
-
-    
