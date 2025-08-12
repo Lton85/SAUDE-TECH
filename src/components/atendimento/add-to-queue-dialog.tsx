@@ -75,7 +75,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     const lowercasedQuery = searchQuery.toLowerCase().trim();
     
     // If search query is just a space or empty, show all patients.
-    if (!lowercasedQuery) {
+    if (!lowercasedQuery || lowercasedQuery === '') {
         return pacientes;
     }
 
@@ -344,7 +344,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         setSelectedPaciente(null)
                     }
                 }}
-                onFocus={() => { if(searchQuery) setShowPatientList(true) }}
+                onFocus={() => { if(searchQuery || filteredPacientes.length > 0) setShowPatientList(true) }}
                 onKeyDown={handleKeyDown}
                 className="pl-10"
                 />
@@ -372,14 +372,14 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         variant="ghost"
                         className={cn(
                             "w-full justify-start h-auto py-2 px-2 text-left",
-                            highlightedIndex === index && "bg-accent"
+                            highlightedIndex === index && "bg-accent text-accent-foreground"
                         )}
                         onClick={() => handleSelectPatient(paciente)}
                         onMouseEnter={() => setHighlightedIndex(index)}
                         >
                             <div>
                             <p className="font-semibold">{paciente.nome}</p>
-                            <p className="text-xs text-muted-foreground">CNS: {paciente.cns}</p>
+                            <p className={cn("text-xs", highlightedIndex !== index && "text-muted-foreground")}>CNS: {paciente.cns}</p>
                         </div>
                         </Button>
                     ))}
