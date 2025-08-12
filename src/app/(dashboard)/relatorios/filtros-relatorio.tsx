@@ -10,11 +10,13 @@ import { Filter, Loader2, User, Stethoscope, X, Search, ShieldQuestion, Building
 import type { Profissional } from "@/types/profissional";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
+import type { Classificacao } from "@/types/empresa";
 
 interface FiltrosRelatorioProps {
     pacientes: Paciente[];
     profissionais: Profissional[];
     departamentos: Departamento[];
+    classificacoes: Classificacao[];
     selectedPacienteId: string;
     onPacienteChange: (id: string) => void;
     selectedProfissionalId: string;
@@ -35,6 +37,7 @@ export function FiltrosRelatorio({
     pacientes,
     profissionais,
     departamentos,
+    classificacoes,
     selectedPacienteId,
     onPacienteChange,
     selectedProfissionalId,
@@ -137,10 +140,9 @@ export function FiltrosRelatorio({
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="todos">Todos os Tipos</SelectItem>
-                            <SelectItem value="Normal">Atendimento Normal</SelectItem>
-                            <SelectItem value="Preferencial">Atendimento Preferencial</SelectItem>
-                            <SelectItem value="Urgência">Atendimento de Urgência</SelectItem>
-                            <SelectItem value="Outros">Outros</SelectItem>
+                            {classificacoes.map(c => (
+                                <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>

@@ -19,9 +19,11 @@ import { Separator } from "@/components/ui/separator";
 import { getProfissionais } from "@/services/profissionaisService";
 import { getPacientes } from "@/services/pacientesService";
 import { getDepartamentos } from "@/services/departamentosService";
+import { getEmpresa } from "@/services/empresaService";
 import type { Profissional } from "@/types/profissional";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
+import type { Classificacao } from "@/types/empresa";
 import { FiltrosRelatorio } from "./filtros-relatorio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
@@ -44,7 +46,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Building className="h-3 w-3" />
-                        <span className="truncate">{atendimento.departamentoNome}</span>
+                        <span className="truncate">{atendimento.departamentoNome}{atendimento.departamentoNumero ? ` - Sala ${atendimento.departamentoNumero}` : ''}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <User className="h-3 w-3" />
@@ -96,6 +98,7 @@ export default function RelatoriosPage() {
     const [pacientes, setPacientes] = React.useState<Paciente[]>([]);
     const [profissionais, setProfissionais] = React.useState<Profissional[]>([]);
     const [departamentos, setDepartamentos] = React.useState<Departamento[]>([]);
+    const [classificacoes, setClassificacoes] = React.useState<Classificacao[]>([]);
     const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     
     const [selectedPacienteId, setSelectedPacienteId] = React.useState<string>("todos");
@@ -214,14 +217,18 @@ export default function RelatoriosPage() {
     React.useEffect(() => {
         const fetchFiltersData = async () => {
             try {
-                const [profissionaisData, pacientesData, departamentosData] = await Promise.all([
+                const [profissionaisData, pacientesData, departamentosData, empresaData] = await Promise.all([
                     getProfissionais(), 
                     getPacientes(),
                     getDepartamentos(),
+                    getEmpresa(),
                 ]);
                 setProfissionais(profissionaisData);
                 setPacientes(pacientesData);
                 setDepartamentos(departamentosData);
+                if (empresaData?.classificacoes?.length) {
+                    setClassificacoes(empresaData.classificacoes.filter(c => c.ativa));
+                }
             } catch (error) {
                 setNotification({
                     type: "error",
@@ -408,6 +415,7 @@ export default function RelatoriosPage() {
                     pacientes={pacientes}
                     profissionais={profissionais}
                     departamentos={departamentos}
+                    classificacoes={classificacoes}
                     selectedPacienteId={selectedPacienteId}
                     onPacienteChange={setSelectedPacienteId}
                     selectedProfissionalId={selectedProfissionalId}
