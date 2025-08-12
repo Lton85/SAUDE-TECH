@@ -1,4 +1,12 @@
 
+
+export interface Classificacao {
+    id: string; // Ex: "Normal", "Preferencial", "custom_123"
+    nome: string; // Ex: "Atendimento Normal", "Preferencial", "Guichê 1"
+    ativa: boolean;
+    editavel: boolean; // Para impedir a exclusão dos 4 padrões
+}
+
 export interface Empresa {
     id: string;
     codigoCliente: string;
@@ -14,18 +22,10 @@ export interface Empresa {
     telefone: string;
     email: string;
     nomeImpressora?: string;
-    classificacoesAtendimento?: string[];
-    nomesClassificacoes?: {
-        Normal: string;
-        Preferencial: string;
-        Urgencia: string;
-        Outros: string;
-    };
+    classificacoes?: Classificacao[];
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';
     exibirUltimasSenhas?: boolean;
     localChamadaTriagem?: string;
     exibirLocalChamadaTriagem?: boolean;
 }
-
-    

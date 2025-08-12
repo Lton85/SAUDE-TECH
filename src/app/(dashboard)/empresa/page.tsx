@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv, PlusCircle, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
-import type { Empresa } from "@/types/empresa";
+import type { Empresa, Classificacao } from "@/types/empresa";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -25,8 +25,12 @@ interface IbgeCityResponse {
     nome: string;
 }
 
-const allClassificacoes = ["Normal", "Preferencial", "Urgencia", "Outros"];
-
+const initialClassificacoes: Classificacao[] = [
+    { id: 'Normal', nome: 'Normal', ativa: true, editavel: false },
+    { id: 'Preferencial', nome: 'Preferencial', ativa: true, editavel: false },
+    { id: 'Urgencia', nome: 'Urgência', ativa: true, editavel: false },
+    { id: 'Outros', nome: 'Outros', ativa: true, editavel: false },
+];
 
 const initialEmpresaState: Empresa = {
     id: "config",
@@ -43,13 +47,7 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
-    classificacoesAtendimento: ["Normal", "Preferencial", "Urgencia", "Outros"],
-    nomesClassificacoes: {
-        Normal: "Normal",
-        Preferencial: "Preferencial",
-        Urgencia: "Urgência",
-        Outros: "Outros",
-    },
+    classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
     exibirLocalChamadaTriagem: true,
@@ -69,13 +67,11 @@ export default function EmpresaPage() {
         try {
             const empresaData = await getEmpresa();
             if (empresaData) {
+                 const classificacoesExistentes = empresaData.classificacoes?.length ? empresaData.classificacoes : initialClassificacoes;
                 setFormData({
                     ...initialEmpresaState,
-                    ...empresaData, 
-                    nomesClassificacoes: {
-                        ...initialEmpresaState.nomesClassificacoes,
-                        ...empresaData.nomesClassificacoes,
-                    },
+                    ...empresaData,
+                    classificacoes: classificacoesExistentes,
                 });
 
                 if (empresaData.uf) {
@@ -138,25 +134,32 @@ export default function EmpresaPage() {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
     
-     const handleClassificationChange = (classification: string, checked: boolean) => {
+    const handleClassificationChange = (index: number, field: keyof Classificacao, value: string | boolean) => {
         setFormData(prev => {
-            const currentClassifications = prev.classificacoesAtendimento || [];
-            const newClassifications = checked
-                ? [...currentClassifications, classification]
-                : currentClassifications.filter(c => c !== classification);
-
-            return { ...prev, classificacoesAtendimento: newClassifications };
+            const newClassificacoes = [...(prev.classificacoes || [])];
+            const classificacaoToUpdate = { ...newClassificacoes[index], [field]: value };
+            newClassificacoes[index] = classificacaoToUpdate;
+            return { ...prev, classificacoes: newClassificacoes };
         });
     };
     
-    const handleClassificationNameChange = (classificationKey: keyof Empresa['nomesClassificacoes'], newName: string) => {
-        setFormData(prev => ({
-            ...prev,
-            nomesClassificacoes: {
-                ...prev.nomesClassificacoes,
-                [classificationKey]: newName,
-            }
-        }));
+    const handleAddClassification = () => {
+        setFormData(prev => {
+            const newId = `custom_${Date.now()}`;
+            const newClassificacoes = [
+                ...(prev.classificacoes || []),
+                { id: newId, nome: 'Nova Classificação', ativa: true, editavel: true }
+            ];
+            return { ...prev, classificacoes: newClassificacoes };
+        });
+    };
+
+    const handleRemoveClassification = (index: number) => {
+        setFormData(prev => {
+            const newClassificacoes = [...(prev.classificacoes || [])];
+            newClassificacoes.splice(index, 1);
+            return { ...prev, classificacoes: newClassificacoes };
+        });
     };
 
     const handleCheckboxChange = (id: keyof Empresa, checked: boolean) => {
@@ -197,7 +200,6 @@ export default function EmpresaPage() {
             });
         }
     };
-
 
     const handleEditToggle = () => {
         setIsEditing(true);
@@ -350,29 +352,40 @@ export default function EmpresaPage() {
                             <CardTitle>Classificação de Atendimento</CardTitle>
                         </div>
                         <CardDescription>
-                            Ative e personalize os nomes dos tipos de atendimento para o tablet de senhas.
+                            Ative, personalize e adicione novos tipos de atendimento para o tablet de senhas.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                          <div className="space-y-4">
-                           {(Object.keys(formData.nomesClassificacoes || {}) as Array<keyof typeof formData.nomesClassificacoes>).map(key => (
-                               <div key={key} className="flex items-center space-x-4">
+                           {(formData.classificacoes || []).map((classificacao, index) => (
+                               <div key={classificacao.id} className="flex items-center space-x-4">
                                    <Checkbox 
-                                    id={`class-${key}`} 
-                                    checked={formData.classificacoesAtendimento?.includes(key)}
-                                    onCheckedChange={(checked) => handleClassificationChange(key, !!checked)}
+                                    id={`class-${classificacao.id}`}
+                                    checked={classificacao.ativa}
+                                    onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
                                     disabled={!isEditing}
                                    />
                                    <div className="flex-1">
                                         <Input
-                                          id={`className-${key}`}
-                                          value={formData.nomesClassificacoes?.[key] || ''}
-                                          onChange={(e) => handleClassificationNameChange(key, e.target.value)}
+                                          id={`className-${classificacao.id}`}
+                                          value={classificacao.nome}
+                                          onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
                                           disabled={!isEditing}
                                         />
                                    </div>
+                                    {isEditing && classificacao.editavel && (
+                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                </div>
                            ))}
+                           {isEditing && (
+                            <Button variant="outline" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>
+                                <PlusCircle className="mr-2 h-4 w-4"/>
+                                Adicionar Nova Classificação
+                            </Button>
+                           )}
                         </div>
                     </CardContent>
                 </Card>
@@ -391,7 +404,7 @@ export default function EmpresaPage() {
                         <div className="flex items-center space-x-2">
                            <Checkbox 
                             id="exibirUltimasSenhas" 
-                            checked={formData.exibirUltimasSenhas}
+                            checked={!!formData.exibirUltimasSenhas}
                             onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
                             disabled={!isEditing}
                            />
@@ -411,7 +424,7 @@ export default function EmpresaPage() {
                        <div className="flex items-center space-x-2">
                            <Checkbox 
                             id="exibirLocalChamadaTriagem" 
-                            checked={formData.exibirLocalChamadaTriagem}
+                            checked={!!formData.exibirLocalChamadaTriagem}
                             onCheckedChange={(checked) => handleCheckboxChange('exibirLocalChamadaTriagem', !!checked)}
                             disabled={!isEditing}
                            />

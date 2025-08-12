@@ -1,5 +1,6 @@
 
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -10,7 +11,7 @@ import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
 import { getNextCounter } from './countersService';
 import { getEmpresa } from './empresaService';
-import { Empresa } from '@/types/empresa';
+import { Empresa, Classificacao } from '@/types/empresa';
 
 
 interface SearchFilters {
@@ -26,48 +27,42 @@ interface FullSearchFilters extends SearchFilters {
     status?: string;
 }
 
-const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao']): FilaDeEsperaItem['prioridade'] => {
-    switch (classificacao) {
-        case 'Preferencial': return 1;
-        case 'Urgencia': return 2;
-        case 'Normal': return 3;
-        case 'Outros': return 4;
-        default: return 3;
-    }
+const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao'], classificacoesConfig: Classificacao[]): FilaDeEsperaItem['prioridade'] => {
+    const config = classificacoesConfig.find(c => c.id === classificacao);
+    const index = config ? classificacoesConfig.indexOf(config) : -1;
+
+    // Prioridades padrão para os 4 tipos base
+    if (classificacao === 'Preferencial') return 1;
+    if (classificacao === 'Urgencia') return 2;
+    if (classificacao === 'Normal') return 3;
+    if (classificacao === 'Outros') return 4;
+    
+    // Para novos tipos, a prioridade é baseada na ordem em que aparecem, após os padrões
+    return index !== -1 ? index + 5 : 99;
 }
 
 export const addPreCadastroToFila = async (
-    classificacao: FilaDeEsperaItem['classificacao'],
-    nomesClassificacoes?: Empresa['nomesClassificacoes']
+    classificacaoId: string,
+    classificacoes: Classificacao[]
 ): Promise<string> => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
-        const prioridade = getPrioridade(classificacao);
-
-        let counterName: string;
-        const nomePersonalizado = nomesClassificacoes?.[classificacao] || classificacao;
-        const ticketPrefix = nomePersonalizado.charAt(0).toUpperCase();
         
-        switch(classificacao) {
-            case 'Urgencia':
-                counterName = 'senha_emergencia';
-                break;
-            case 'Preferencial':
-                counterName = 'senha_preferencial';
-                break;
-            case 'Outros':
-                counterName = 'senha_outros';
-                break;
-            default: // Normal
-                counterName = 'senha_normal';
+        const classificacaoSelecionada = classificacoes.find(c => c.id === classificacaoId);
+        if (!classificacaoSelecionada) {
+            throw new Error("Tipo de classificação inválido.");
         }
+
+        const prioridade = getPrioridade(classificacaoId, classificacoes);
+        const counterName = `senha_${classificacaoId.toLowerCase()}`;
+        const ticketPrefix = classificacaoSelecionada.nome.charAt(0).toUpperCase();
 
         const ticketNumber = await getNextCounter(counterName, true);
         const senha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
 
         await addDoc(filaDeEsperaCollection, {
             senha,
-            classificacao,
+            classificacao: classificacaoId, // Salva o ID da classificação
             prioridade,
             chegadaEm: serverTimestamp(),
             status: 'pendente'
@@ -101,7 +96,10 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
             }
         }
         
-        const prioridade = getPrioridade(item.classificacao);
+        const empresaConfig = await getEmpresa();
+        const classificacoes = empresaConfig?.classificacoes || [];
+        const prioridade = getPrioridade(item.classificacao, classificacoes);
+
 
         // If it's completing a pending registration, update it
         if (atendimentoPendenteId) {
@@ -552,7 +550,9 @@ export const updateFilaItem = async (id: string, data: Partial<FilaDeEsperaItem>
     const filaDocRef = doc(db, "filaDeEspera", id);
     const updates = {...data};
     if (data.classificacao) {
-        updates.prioridade = getPrioridade(data.classificacao);
+        const empresaConfig = await getEmpresa();
+        const classificacoes = empresaConfig?.classificacoes || [];
+        updates.prioridade = getPrioridade(data.classificacao, classificacoes);
     }
     await updateDoc(filaDocRef, updates);
 };
@@ -564,7 +564,9 @@ export const updateHistoricoItem = async (id: string, data: Partial<FilaDeEspera
     const historicoDocRef = doc(db, "relatorios_atendimentos", id);
     const updates = {...data};
     if (data.classificacao) {
-        updates.prioridade = getPrioridade(data.classificacao);
+        const empresaConfig = await getEmpresa();
+        const classificacoes = empresaConfig?.classificacoes || [];
+        updates.prioridade = getPrioridade(data.classificacao, classificacoes);
     }
     await updateDoc(historicoDocRef, updates);
 };

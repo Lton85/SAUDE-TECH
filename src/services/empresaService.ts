@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { db } from '@/lib/firebase';
@@ -29,9 +30,9 @@ export const getEmpresa = async (): Promise<Empresa | null> => {
 
 /**
  * Salva ou atualiza os dados da empresa no Firestore.
- * @param {Empresa} data - Os dados da empresa para salvar.
+ * @param {Partial<Empresa>} data - Os dados da empresa para salvar (pode ser parcial).
  */
-export const saveOrUpdateEmpresa = async (data: Empresa): Promise<void> => {
+export const saveOrUpdateEmpresa = async (data: Partial<Empresa>): Promise<void> => {
     try {
         // Usa setDoc com merge: true para criar ou atualizar o documento
         await setDoc(empresaDocRef, data, { merge: true });
@@ -40,5 +41,3 @@ export const saveOrUpdateEmpresa = async (data: Empresa): Promise<void> => {
         throw new Error("Não foi possível salvar as informações da empresa.");
     }
 };
-
-    
