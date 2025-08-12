@@ -39,3 +39,5 @@ export interface Empresa {
     localChamadaTriagem?: string;
     exibirLocalChamadaTriagem?: boolean;
 }
+
+    

@@ -26,10 +26,10 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', ativa: true, editavel: false },
-    { id: 'Preferencial', nome: 'Preferencial', ativa: true, editavel: false },
-    { id: 'Urgencia', nome: 'Urgência', ativa: true, editavel: false },
-    { id: 'Outros', nome: 'Outros', ativa: true, editavel: false },
+    { id: 'Normal', nome: 'Normal', descricao: 'Para consultas de rotina', ativa: true, editavel: false },
+    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, Idosos, Cadeirantes', ativa: true, editavel: false },
+    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de emergência', ativa: true, editavel: false },
+    { id: 'Outros', nome: 'Outros', descricao: '', ativa: true, editavel: false },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -134,7 +134,7 @@ export default function EmpresaPage() {
         setFormData(prev => ({ ...prev, [id]: value }));
     }
     
-    const handleClassificationChange = (index: number, field: keyof Classificacao, value: string | boolean) => {
+    const handleClassificationChange = (index: number, field: keyof Omit<Classificacao, 'id' | 'editavel'>, value: string | boolean) => {
         setFormData(prev => {
             const newClassificacoes = [...(prev.classificacoes || [])];
             const classificacaoToUpdate = { ...newClassificacoes[index], [field]: value };
@@ -148,7 +148,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: 'Nova Classificação', ativa: true, editavel: true }
+                { id: newId, nome: 'Nova Classificação', descricao: '', ativa: true, editavel: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -365,12 +365,21 @@ export default function EmpresaPage() {
                                     onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
                                     disabled={!isEditing}
                                    />
-                                   <div className="flex-1">
+                                   <div className="flex-1 space-y-2">
                                         <Input
                                           id={`className-${classificacao.id}`}
                                           value={classificacao.nome}
                                           onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
                                           disabled={!isEditing}
+                                          className="font-semibold"
+                                        />
+                                        <Input
+                                          id={`classDesc-${classificacao.id}`}
+                                          value={classificacao.descricao || ''}
+                                          onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
+                                          disabled={!isEditing}
+                                          placeholder="Descrição (Ex: Gestantes, Idosos...)"
+                                          className="text-xs"
                                         />
                                    </div>
                                     {isEditing && classificacao.editavel && (
@@ -465,3 +474,5 @@ export default function EmpresaPage() {
         </>
     );
 }
+
+    
