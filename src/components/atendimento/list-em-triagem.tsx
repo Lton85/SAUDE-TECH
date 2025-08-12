@@ -21,7 +21,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
             item.classificacao === "Urgência" && "border-red-500/50 bg-red-500/5",
             item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
             item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
-            item.classificacao === "Outros" && "border-amber-500/50 bg-amber-500/5"
+            item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
         )}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
                  <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
                          item.classificacao === "Urgência" && "text-red-600",
                         item.classificacao === "Preferencial" && "text-blue-600",
                         item.classificacao === "Normal" && "text-green-600",
-                        item.classificacao === "Outros" && "text-amber-600",
+                        item.classificacao === "Outros" && "text-slate-600",
                     )}>{item.senha}</span>
                      <Badge variant={
                         item.classificacao === 'Urgência' ? 'destructive' :
@@ -39,7 +39,7 @@ const TriagemCard = ({ item, onIdentify, onCancel }: { item: FilaDeEsperaItem, o
                     } className={cn("text-xs",
                         item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                         item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                        item.classificacao === 'Outros' && 'bg-amber-500 hover:bg-amber-600 text-white'
+                        item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
                     )}>
                         {item.classificacao}
                     </Badge>
@@ -100,7 +100,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
                  <TriagemColumn title="Atendimento de Urgência" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-red-600"/>
                  <TriagemColumn title="Atendimento Preferencial" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-blue-600"/>
                  <TriagemColumn title="Atendimento Normal" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-green-600"/>
-                 <TriagemColumn title="Outros Atendimentos" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-amber-600"/>
+                 <TriagemColumn title="Outros Atendimentos" items={[]} onIdentify={onIdentify} onCancel={onCancel} isLoading={true} colorClass="text-slate-600"/>
             </div>
         )
     }
@@ -123,7 +123,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel }: { 
             <TriagemColumn title="Atendimento de Urgência" items={urgenciaItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-red-600"/>
             <TriagemColumn title="Atendimento Preferencial" items={preferencialItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-blue-600"/>
             <TriagemColumn title="Atendimento Normal" items={normalItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-green-600"/>
-            <TriagemColumn title="Outros Atendimentos" items={outrosItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-amber-600"/>
+            <TriagemColumn title="Outros Atendimentos" items={outrosItems} onIdentify={onIdentify} onCancel={onCancel} isLoading={isLoading} colorClass="text-slate-600"/>
         </div>
     );
 }

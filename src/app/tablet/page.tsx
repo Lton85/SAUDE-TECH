@@ -21,21 +21,21 @@ const notificationColors: { [key: string]: string } = {
     Normal: 'bg-green-600',
     Preferencial: 'bg-blue-600',
     Urgência: 'bg-red-600',
-    Outros: 'bg-amber-500',
+    Outros: 'bg-slate-600',
 };
 
 const borderColors: { [key: string]: string } = {
     Normal: "group-hover:border-green-400 bg-green-500/10 border-green-500/30",
     Preferencial: "group-hover:border-blue-400 bg-blue-500/10 border-blue-500/30",
     Urgência: "group-hover:border-red-400 bg-red-500/10 border-red-500/30",
-    Outros: "group-hover:border-amber-400 bg-amber-500/10 border-amber-500/30",
+    Outros: "group-hover:border-slate-400 bg-slate-500/10 border-slate-500/30",
 };
 
 const textColors: { [key: string]: string } = {
     Normal: "text-green-400",
     Preferencial: "text-blue-400",
     Urgência: "text-red-400",
-    Outros: "text-amber-400",
+    Outros: "text-slate-400",
 };
 
 const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgência", "Outros"];
