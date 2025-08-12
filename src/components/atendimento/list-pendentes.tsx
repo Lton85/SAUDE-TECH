@@ -10,17 +10,17 @@ import { Megaphone, XCircle, Clock } from "lucide-react";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "../ui/badge";
-import { Empresa } from "@/types/empresa";
+import type { Classificacao } from "@/types/empresa";
 
 interface SenhasPendentesListProps {
     pendentes: FilaDeEsperaItem[];
     isLoading: boolean;
     onCall: (item: FilaDeEsperaItem) => void;
     onCancel: (item: FilaDeEsperaItem) => void;
-    classificationNames?: Empresa['nomesClassificacoes'];
+    classificacoes: Classificacao[];
 }
 
-export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificationNames }: SenhasPendentesListProps) {
+export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificacoes }: SenhasPendentesListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -49,36 +49,46 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, cl
                 const chegada = item.chegadaEm ? item.chegadaEm.toDate() : null;
                 const formattedTime = chegada ? format(chegada, "HH:mm:ss", { locale: ptBR }) : '-';
                 const formattedDate = chegada ? format(chegada, "dd/MM/yy", { locale: ptBR }) : '-';
-                const classificationName = classificationNames?.[item.classificacao] || item.classificacao;
+                const classificacaoInfo = classificacoes.find(c => c.id === item.classificacao);
+                const classificationName = classificacaoInfo ? classificacaoInfo.nome : item.classificacao;
+                
+                const getColorClass = (id: string) => {
+                    if (id === "Urgencia") return "text-red-600";
+                    if (id === "Preferencial") return "text-blue-600";
+                    if (id === "Normal") return "text-green-600";
+                    return "text-slate-600";
+                }
+                
+                const getBadgeClass = (id: string) => {
+                    if (id === "Urgencia") return "destructive";
+                    if (id === "Preferencial") return "default";
+                    if (id === "Normal") return "secondary";
+                    return "default"; // slate
+                }
+                
+                const getCustomBadgeStyle = (id: string) => {
+                    if (id === "Preferencial") return 'bg-blue-600 hover:bg-blue-700';
+                    if (id === "Normal") return 'bg-green-600 hover:bg-green-700 text-white';
+                    if (!['Urgencia'].includes(id)) return 'bg-slate-500 hover:bg-slate-600';
+                    return '';
+                }
 
                 return (
                      <Card key={item.id} className={cn(
                         "hover:bg-muted/50 transition-colors",
-                        item.classificacao === "Urgencia" && "border-red-500/50 bg-red-500/5",
-                        item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
-                        item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
-                        item.classificacao === "Outros" && "border-slate-500/50 bg-slate-500/5"
+                         item.classificacao === "Urgencia" && "border-red-500/50 bg-red-500/5",
+                         item.classificacao === "Preferencial" && "border-blue-500/50 bg-blue-500/5",
+                         item.classificacao === "Normal" && "border-green-500/50 bg-green-500/5",
+                         !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) && "border-slate-500/50 bg-slate-500/5"
                     )}>
                         <CardContent className="p-2 flex items-center justify-between">
                              <div className="flex items-center gap-3">
-                                <Badge variant={
-                                    item.classificacao === 'Urgencia' ? 'destructive' : 
-                                    item.classificacao === 'Preferencial' ? 'default' : 
-                                    item.classificacao === 'Outros' ? 'default' : 'secondary'
-                                } className={cn("text-base",
-                                    item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
-                                    item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                                    item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
-                                )}>
+                                <Badge variant={getBadgeClass(item.classificacao)} className={cn("text-base", getCustomBadgeStyle(item.classificacao))}>
                                     {item.senha}
                                 </Badge>
-                                <span className={cn(
-                                    "text-xs font-semibold uppercase tracking-wider",
-                                    item.classificacao === 'Urgencia' && 'text-red-600',
-                                    item.classificacao === 'Preferencial' && 'text-blue-600',
-                                    item.classificacao === 'Normal' && 'text-green-600',
-                                    item.classificacao === 'Outros' && 'text-slate-500',
-                                )}>{classificationName}</span>
+                                <span className={cn("text-xs font-semibold uppercase tracking-wider", getColorClass(item.classificacao))}>
+                                    {classificationName}
+                                </span>
                             </div>
                             
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">

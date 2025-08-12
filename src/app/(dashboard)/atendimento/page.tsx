@@ -268,7 +268,7 @@ export default function AtendimentosPage() {
                             isLoading={isLoading} 
                             onCall={handleChamarParaTriagem}
                             onCancel={setItemToCancel}
-                            classificationNames={classificationNames}
+                            classificacoes={activeClassificacoes}
                         />
                     </TabsContent>
                     
@@ -324,7 +324,7 @@ export default function AtendimentosPage() {
                 onOpenChange={setIsAddToQueueDialogOpen}
                 pacientes={pacientes}
                 departamentos={departamentos}
-                classificacoes={activeClassificacoes.map(c => c.id)}
+                classificacoes={activeClassificacoes}
                 onAddNewPatient={handleOpenNewPatientDialog}
                 patientToAdd={patientToAdd}
                 atendimentoParaCompletar={atendimentoParaCompletar}

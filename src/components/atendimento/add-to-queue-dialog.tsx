@@ -20,6 +20,7 @@ import { Separator } from "../ui/separator"
 import { Badge } from "../ui/badge"
 import { FilaDeEsperaItem } from "@/types/fila"
 import { NotificationType } from "../ui/notification-dialog"
+import { Classificacao } from "@/types/empresa"
 
 interface Profissional {
   id: string;
@@ -30,7 +31,7 @@ interface AddToQueueDialogProps {
   onOpenChange: (isOpen: boolean) => void
   pacientes: Paciente[]
   departamentos: Departamento[]
-  classificacoes: string[];
+  classificacoes: Classificacao[];
   onAddNewPatient: () => void;
   patientToAdd?: Paciente | null;
   atendimentoParaCompletar?: FilaDeEsperaItem | null;
@@ -49,15 +50,13 @@ const InfoRow = ({ icon: Icon, label, value, children, className }: { icon: Reac
     );
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
-
 export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamentos, classificacoes, onAddNewPatient, patientToAdd, atendimentoParaCompletar, onSuccess }: AddToQueueDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoadingProfissionais, setIsLoadingProfissionais] = useState(true);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null)
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
-  const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
+  const [classificationId, setClassificationId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [senha, setSenha] = useState("");
   const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
@@ -69,10 +68,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
   
   const isCompleting = !!atendimentoParaCompletar;
-
-  const orderedClassificacoes = useMemo(() => {
-    return classificationOrder.filter(c => classificacoes.includes(c));
-  }, [classificacoes]);
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
 
@@ -107,13 +102,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSelectedPaciente(null);
     setSelectedDepartamentoId("");
     setSelectedProfissionalId("");
-    setClassification('Normal');
+    setClassificationId(classificacoes.length > 0 ? classificacoes[0].id : "");
     setIsSubmitting(false);
     setSearchQuery("");
     setShowPatientList(false);
     setHighlightedIndex(-1);
     setSenha("");
-  }, []);
+  }, [classificacoes]);
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -126,7 +121,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
          setNotification({
           type: "error",
           title: "Erro ao carregar profissionais",
-          message: "Não foi possível carregar a lista de profissionais.",
+          message: "Não foi possível carregar la lista de profissionais.",
         });
       } finally {
         setIsLoadingProfissionais(false);
@@ -134,48 +129,35 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     };
     
     if (isOpen) {
-      // Set default classification to the first available one
-      if (orderedClassificacoes.length > 0) {
-          setClassification(orderedClassificacoes[0] as FilaDeEsperaItem['classificacao']);
+      if (classificacoes.length > 0) {
+        setClassificationId(classificacoes[0].id);
       }
-
       fetchProfissionais();
       if (patientToAdd) {
         handleSelectPatient(patientToAdd);
       }
       if (atendimentoParaCompletar) {
         setSenha(atendimentoParaCompletar.senha);
-        setClassification(atendimentoParaCompletar.classificacao);
+        setClassificationId(atendimentoParaCompletar.classificacao);
       }
     } else {
         resetState();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, orderedClassificacoes]);
+  }, [isOpen]);
   
 
-  const generateTicketPreview = useCallback(async (currentClassification: FilaDeEsperaItem['classificacao']) => {
+  const generateTicketPreview = useCallback(async (currentClassificationId: string) => {
     if (selectedPaciente && !isCompleting) {
         try {
-            let counterName;
-            let ticketPrefix;
-            switch(currentClassification) {
-                case 'Urgencia':
-                    counterName = 'senha_emergencia';
-                    ticketPrefix = 'U';
-                    break;
-                case 'Preferencial':
-                    counterName = 'senha_preferencial';
-                    ticketPrefix = 'P';
-                    break;
-                case 'Outros':
-                    counterName = 'senha_outros';
-                    ticketPrefix = 'O';
-                    break;
-                default:
-                    counterName = 'senha_normal';
-                    ticketPrefix = 'N';
+            const classificacao = classificacoes.find(c => c.id === currentClassificationId);
+            if (!classificacao) {
+                setSenha("Erro");
+                throw new Error("Classificação não encontrada.");
             }
+            const counterName = `senha_${classificacao.id.toLowerCase()}`;
+            const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
+
             setSenha("Gerando...");
             const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
             const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
@@ -186,16 +168,16 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
             setNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
         }
     }
-  }, [selectedPaciente, isCompleting]);
+  }, [selectedPaciente, isCompleting, classificacoes]);
 
 
   useEffect(() => {
     if (selectedPaciente && !isCompleting) {
-        generateTicketPreview(classification);
+        generateTicketPreview(classificationId);
     } else if (!isCompleting) {
         setSenha("");
     }
-  }, [selectedPaciente, generateTicketPreview, classification, isCompleting]);
+  }, [selectedPaciente, generateTicketPreview, classificationId, isCompleting]);
 
 
   useEffect(() => {
@@ -246,7 +228,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         profissionalNome: profissional.nome,
         senha: senha,
         status: "aguardando",
-        classificacao: classification,
+        classificacao: classificationId,
       }
 
       await addPacienteToFila(item, atendimentoParaCompletar?.id);
@@ -486,13 +468,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <div className="space-y-2">
                         <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                        <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])} disabled={!selectedPaciente || isCompleting}>
+                        <Select value={classificationId} onValueChange={setClassificationId} disabled={!selectedPaciente || isCompleting}>
                             <SelectTrigger id="classification">
                                 <SelectValue placeholder="Selecione a classificação" />
                             </SelectTrigger>
                             <SelectContent>
-                                {orderedClassificacoes.map(c => (
-                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                {classificacoes.map(c => (
+                                    <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
