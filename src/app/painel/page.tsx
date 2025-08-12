@@ -83,9 +83,13 @@ export default function PainelPage() {
         if (callHistory.length > 0 && newCalls.length > 0 && callHistory[0].id !== newCalls[0].id) {
             try {
                 const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                audio.play();
+                audio.play().catch(error => {
+                    // Autoplay was prevented. This is expected before user interaction.
+                    // We can console.log for debugging but it's not a critical error.
+                    console.warn("Audio play prevented: ", error);
+                });
             } catch (error) {
-                console.error("Error playing sound:", error);
+                console.error("Error creating or playing audio:", error);
             }
         }
         
@@ -190,5 +194,3 @@ export default function PainelPage() {
     </div>
   );
 }
-
-    
