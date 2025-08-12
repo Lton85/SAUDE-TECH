@@ -194,7 +194,7 @@ export default function TabletPage() {
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
                                     <div className="text-center">
-                                        <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                        <h2 className={cn("font-bold min-h-[4rem] flex items-center justify-center", colors.text, cardSizeClasses[config.cardSize])}>
                                             {classificacao.nome.toUpperCase()}
                                         </h2>
                                         {classificacao.descricao && (
@@ -249,4 +249,5 @@ export default function TabletPage() {
             )}
         </div>
     );
-}
+
+    
