@@ -170,7 +170,7 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className="flex flex-wrap justify-center items-center gap-8 w-full max-w-7xl">
+            <div className="flex flex-wrap justify-center items-stretch gap-8 w-full max-w-7xl">
                 {config.activeClassifications.map((classificacao, index) => {
                      const colors = getColors(classificacao.id);
                      return (
@@ -189,19 +189,23 @@ export default function TabletPage() {
                             )}
                             onClick={() => handleSelection(classificacao)}
                         >
-                            <CardContent className="flex flex-col items-center justify-center p-8 md:p-10 h-full">
+                             <CardContent className="flex flex-col items-center justify-center p-4 h-full">
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
                                     <div className="text-center">
-                                        <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
-                                            {classificacao.nome.toUpperCase()}
-                                        </h2>
-                                        {classificacao.exibirDescricao && classificacao.descricao && (
-                                            <p className={cn("text-xs md:text-sm mt-2 font-normal", colors.text, "opacity-70")}>
-                                                {classificacao.descricao}
-                                            </p>
-                                        )}
+                                        <div className="flex items-center justify-center h-24">
+                                            <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
+                                                {classificacao.nome.toUpperCase()}
+                                            </h2>
+                                        </div>
+                                        <div className="h-12">
+                                            {classificacao.exibirDescricao && classificacao.descricao && (
+                                                <p className={cn("text-xs md:text-sm mt-1 font-normal", colors.text, "opacity-70")}>
+                                                    {classificacao.descricao}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </CardContent>
