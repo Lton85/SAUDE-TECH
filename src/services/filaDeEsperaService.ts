@@ -9,6 +9,7 @@ import { createChamada } from './chamadasService';
 import { getDoc } from 'firebase/firestore';
 import { startOfDay, endOfDay } from 'date-fns';
 import { getNextCounter } from './countersService';
+import { getEmpresa } from './empresaService';
 
 
 interface SearchFilters {
@@ -319,9 +320,9 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
         throw new Error("ID do item da fila não encontrado.");
     }
     
-    let sala: string;
-    let profissional: string;
-    let paciente: string;
+    let sala: string = "";
+    let profissional: string = "";
+    let paciente: string = "";
     let novoStatus: FilaDeEsperaItem['status'];
 
     if (tipoChamada === 'atendimento') {
@@ -344,7 +345,14 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
         paciente = item.pacienteNome || "Paciente";
         novoStatus = "em-atendimento";
     } else {
-        sala = "Recepção";
+        const empresaConfig = await getEmpresa();
+        
+        if (empresaConfig?.exibirLocalChamadaTriagem) {
+            sala = empresaConfig.localChamadaTriagem || "Recepção";
+        } else {
+            sala = ""; // Se não for para exibir, o texto fica vazio
+        }
+
         novoStatus = "chamado-triagem";
         paciente = ""; // Ocultar nome do paciente na triagem
         profissional = ""; // Ocultar nome do profissional na triagem

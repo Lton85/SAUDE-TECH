@@ -18,6 +18,8 @@ export interface Empresa {
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';
     exibirUltimasSenhas?: boolean;
+    localChamadaTriagem?: string;
+    exibirLocalChamadaTriagem?: boolean;
 }
 
     

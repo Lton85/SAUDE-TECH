@@ -48,6 +48,8 @@ const initialEmpresaState: Empresa = {
     nomeImpressora: "",
     classificacoesAtendimento: ["Normal", "Preferencial", "Urgência", "Outros"],
     exibirUltimasSenhas: true,
+    localChamadaTriagem: "Recepção",
+    exibirLocalChamadaTriagem: true,
 };
 
 export default function EmpresaPage() {
@@ -69,9 +71,11 @@ export default function EmpresaPage() {
                     : initialEmpresaState.classificacoesAtendimento;
 
                 setFormData({
-                    ...initialEmpresaState, // Garante que todos os campos, inclusive o novo, existam
+                    ...initialEmpresaState, // Garante que todos os campos, inclusive os novos, existam
                     ...empresaData, 
-                    classificacoesAtendimento: classificacoes
+                    classificacoesAtendimento: classificacoes,
+                    localChamadaTriagem: empresaData.localChamadaTriagem ?? initialEmpresaState.localChamadaTriagem,
+                    exibirLocalChamadaTriagem: empresaData.exibirLocalChamadaTriagem ?? initialEmpresaState.exibirLocalChamadaTriagem,
                 });
 
                 if (empresaData.uf) {
@@ -366,18 +370,36 @@ export default function EmpresaPage() {
                             Ajuste as informações exibidas no painel de senhas.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-2">
-                               <Checkbox 
-                                id="exibirUltimasSenhas" 
-                                checked={formData.exibirUltimasSenhas}
-                                onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                            id="exibirUltimasSenhas" 
+                            checked={formData.exibirUltimasSenhas}
+                            onCheckedChange={(checked) => handleCheckboxChange('exibirUltimasSenhas', !!checked)}
+                            disabled={!isEditing}
+                           />
+                           <Label htmlFor="exibirUltimasSenhas" className="font-normal">Exibir últimas senhas chamadas</Label>
+                       </div>
+                       <Separator />
+                       <div className="space-y-2">
+                           <Label htmlFor="localChamadaTriagem">Local da Primeira Chamada</Label>
+                           <Input 
+                                id="localChamadaTriagem" 
+                                value={formData.localChamadaTriagem || ''} 
+                                onChange={handleInputChange} 
+                                placeholder="Ex: Recepção, Triagem, Guichê 1"
                                 disabled={!isEditing}
-                               />
-                               <Label htmlFor="exibirUltimasSenhas" className="font-normal">Exibir últimas senhas chamadas</Label>
-                           </div>
-                        </div>
+                            />
+                       </div>
+                       <div className="flex items-center space-x-2">
+                           <Checkbox 
+                            id="exibirLocalChamadaTriagem" 
+                            checked={formData.exibirLocalChamadaTriagem}
+                            onCheckedChange={(checked) => handleCheckboxChange('exibirLocalChamadaTriagem', !!checked)}
+                            disabled={!isEditing}
+                           />
+                           <Label htmlFor="exibirLocalChamadaTriagem" className="font-normal">Exibir local da primeira chamada no painel</Label>
+                       </div>
                     </CardContent>
                 </Card>
             </div>
@@ -413,5 +435,3 @@ export default function EmpresaPage() {
         </>
     );
 }
-
-    

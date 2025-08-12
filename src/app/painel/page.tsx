@@ -39,7 +39,7 @@ const HistoryItem = ({ call }: { call: Call }) => (
 export default function PainelPage() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [latestCall, setLatestCall] = useState<Call | null>(null);
-  const lastPlayedCallId = useRef<string | null>(null);
+  const lastCallIdRef = useRef<string | null>(null);
 
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
@@ -78,12 +78,30 @@ export default function PainelPage() {
   useEffect(() => {
     if (!isClient) return;
 
-    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(6));
+    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(7)); // Increased to 7 to show 6 in history
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
-        setCallHistory(newCalls.length > 0 ? newCalls : [emptyCall]);
-        setLatestCall(newCalls.length > 0 ? newCalls[0] : null);
+        
+        if (newCalls.length > 0) {
+            const mostRecentCall = newCalls[0];
+            if (mostRecentCall.id !== lastCallIdRef.current) {
+                try {
+                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                    audio.play().catch(error => {
+                        console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
+                    });
+                } catch (error) {
+                    console.error("Error creating or playing audio:", error);
+                }
+                lastCallIdRef.current = mostRecentCall.id || null;
+            }
+            setLatestCall(mostRecentCall);
+            setCallHistory(newCalls);
+        } else {
+            setLatestCall(emptyCall);
+            setCallHistory([emptyCall]);
+        }
     }, (error) => {
         console.error("Firebase snapshot error:", error);
         setCallHistory([emptyCall]);
@@ -92,20 +110,6 @@ export default function PainelPage() {
 
     return () => unsubscribe();
   }, [isClient]);
-
-  useEffect(() => {
-    if (latestCall && latestCall.id !== lastPlayedCallId.current) {
-        try {
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(error => {
-                console.warn("Audio play was prevented by the browser. This is normal until the first user interaction.", error);
-            });
-        } catch (error) {
-            console.error("Error creating or playing audio:", error);
-        }
-        lastPlayedCallId.current = latestCall.id || null;
-    }
-  }, [latestCall]);
   
   if (!isClient) {
     return (
@@ -141,7 +145,9 @@ export default function PainelPage() {
                         <div className="text-center flex-1 flex flex-col justify-center">
                             <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-amber-400 uppercase tracking-widest">Senha</h2>
                             <p className="font-display font-extrabold text-white tracking-tighter my-2 md:my-4 text-8xl md:text-[12rem] lg:text-[18rem] xl:text-[22rem] 2xl:text-[26rem] leading-none drop-shadow-[0_5px_15px_rgba(0,255,255,0.2)] text-cyan-400">{currentCall.senha}</p>
-                            <p className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
+                            {currentCall.departamentoNome && (
+                                <p className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white/90">{currentCall.departamentoNome}</p>
+                            )}
                         </div>
 
                         {(currentCall.pacienteNome || currentCall.profissionalNome) && (currentCall.pacienteNome !== '' || currentCall.profissionalNome !== '') && (
