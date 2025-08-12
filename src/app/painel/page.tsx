@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { HeartPulse, User, Stethoscope } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getEmpresa } from '@/services/empresaService';
 import type { Empresa } from '@/types/empresa';
@@ -17,6 +17,7 @@ interface Call {
   pacienteNome: string;
   profissionalNome: string;
   atendimentoId?: string;
+  timestamp?: Timestamp;
 }
 
 const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', pacienteNome: 'Aguardando paciente...', profissionalNome: 'Aguardando profissional...' };
@@ -37,7 +38,7 @@ const HistoryItem = ({ call }: { call: Call }) => (
 
 export default function PainelPage() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
-  const lastCallIdRef = useRef<string | null>(null);
+  const lastPlayedSoundTimestamp = useRef<number | null>(null);
   const [razaoSocial, setRazaoSocial] = useState<string>('UNIDADE BÁSICA DE SAÚDE');
   const [time, setTime] = useState<Date | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -80,23 +81,24 @@ export default function PainelPage() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Call));
         
-        const latestCallId = newCalls.length > 0 ? newCalls[0].id : null;
+        const latestCall = newCalls.length > 0 ? newCalls[0] : null;
         
-        // Play sound if the latest call is new and different from the last known call
-        if (latestCallId && lastCallIdRef.current !== latestCallId) {
-             try {
-                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                audio.play().catch(error => {
-                    // Autoplay was prevented. This is expected before user interaction.
-                    // We can console.log for debugging but it's not a critical error.
-                    console.warn("Audio play prevented: ", error);
-                });
-            } catch (error) {
-                console.error("Error creating or playing audio:", error);
+        // Play sound if the latest call is new and its timestamp hasn't been played
+        if (latestCall && latestCall.timestamp) {
+            const callTimestamp = latestCall.timestamp.toMillis();
+            if (lastPlayedSoundTimestamp.current !== callTimestamp) {
+                try {
+                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                    audio.play().catch(error => {
+                        console.warn("Audio play prevented: ", error);
+                    });
+                    lastPlayedSoundTimestamp.current = callTimestamp;
+                } catch (error) {
+                    console.error("Error creating or playing audio:", error);
+                }
             }
         }
         
-        lastCallIdRef.current = latestCallId;
         setCallHistory(newCalls.length > 0 ? newCalls : [emptyCall]);
 
     }, (error) => {
