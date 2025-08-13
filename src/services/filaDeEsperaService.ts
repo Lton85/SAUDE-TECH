@@ -375,6 +375,9 @@ export const retornarParaPendente = async (id: string): Promise<void> => {
     await updateDoc(filaDocRef, {
         status: "pendente",
         chamadaEm: null,
+        // Limpa os dados de identificação para que possa ser re-identificado
+        pacienteId: null,
+        pacienteNome: null,
     });
 };
 
@@ -384,8 +387,8 @@ export const retornarPacienteParaTriagem = async (id: string): Promise<void> => 
     }
     const filaDocRef = doc(db, "filaDeEspera", id);
     await updateDoc(filaDocRef, {
-        status: "pendente",
-        chamadaEm: null,
+        status: "chamado-triagem",
+        chamadaEm: serverTimestamp(),
         departamentoId: null,
         departamentoNome: null,
         departamentoNumero: null,
@@ -652,5 +655,6 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     }
 };
 
+    
 
     
