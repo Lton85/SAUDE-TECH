@@ -296,25 +296,9 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === ' ') {
-        event.preventDefault(); 
-        onOpenChange(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onOpenChange]);
-
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-5xl">
+      <DialogContent className="sm:max-w-5xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Send />
@@ -336,7 +320,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value)
-                    setShowPatientList(!!e.target.value)
+                    setShowPatientList(true)
                     setHighlightedIndex(-1);
                     if (!e.target.value) {
                       setSelectedPaciente(null)

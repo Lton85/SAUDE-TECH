@@ -84,22 +84,6 @@ export function PatientDialog({ isOpen, onOpenChange, onSuccess, paciente, onNot
         }
     }, [paciente, form, isOpen]);
 
-    React.useEffect(() => {
-        if (!isOpen) return;
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === ' ') {
-                event.preventDefault(); 
-                onOpenChange(false);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [isOpen, onOpenChange]);
-
-
     const handleSubmit = async (values: PatientFormValues) => {
         setIsSubmitting(true);
         try {

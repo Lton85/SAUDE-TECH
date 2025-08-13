@@ -40,27 +40,12 @@ export function CancelAtendimentoDialog({ isOpen, onOpenChange, onConfirm, item 
       setIsSubmitting(false);
     }
   }, [isOpen]);
-  
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === ' ') {
-        event.preventDefault(); 
-        onOpenChange(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onOpenChange]);
 
   if (!item) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <XCircle className="h-5 w-5 text-destructive" />
