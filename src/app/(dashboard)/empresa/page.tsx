@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv, PlusCircle, Trash2, Tablet } from "lucide-react";
+import { Building, Save, Loader2, Pencil, X, ShieldQuestion, Tv, PlusCircle, Trash2, Tablet, Image as ImageIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmpresa, saveOrUpdateEmpresa } from "@/services/empresaService";
@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 
 const ufs = [
@@ -50,6 +51,7 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
+    logoSvg: "",
     classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
@@ -136,7 +138,7 @@ export default function EmpresaPage() {
         fetchCitiesForUf(uf);
     }
     
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
         setFormData(prev => ({...prev, [id]: value }));
     }
@@ -364,6 +366,31 @@ export default function EmpresaPage() {
                                 <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
                             </div>
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+             <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <ImageIcon className="h-6 w-6" />
+                        <CardTitle>Logotipo do Sistema (SVG)</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Cole o código do seu logotipo em formato SVG para personalizar a identidade visual do sistema.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-2">
+                        <Label htmlFor="logoSvg">Código SVG</Label>
+                        <Textarea 
+                            id="logoSvg" 
+                            value={formData.logoSvg || ''} 
+                            onChange={handleInputChange}
+                            placeholder='<svg xmlns="http://www.w3.org/2000/svg" ...>' 
+                            disabled={!isEditing}
+                            className="h-32 font-mono text-xs"
+                        />
                     </div>
                 </CardContent>
             </Card>

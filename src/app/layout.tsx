@@ -4,7 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Saúde Fácil - Gestão de Atendimento',
+  title: 'Saúde Tech - Gestão de Atendimento',
   description: 'Sistema completo para gestão de atendimento em postos de saúde.',
 };
 

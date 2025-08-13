@@ -3,7 +3,7 @@
 "use client";
 
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import type { Empresa } from '@/types/empresa';
 
 const empresaCollectionName = 'empresa';
@@ -26,6 +26,33 @@ export const getEmpresa = async (): Promise<Empresa | null> => {
         console.error("Erro ao buscar dados da empresa: ", error);
         throw new Error("Não foi possível buscar as informações da empresa.");
     }
+};
+
+/**
+ * Cria um listener em tempo real para os dados da empresa.
+ * @param onUpdate - Função de callback para ser chamada com os novos dados.
+ * @param onError - Função de callback para ser chamada em caso de erro.
+ * @returns {() => void} Uma função para cancelar a inscrição do listener.
+ */
+export const onEmpresaSnapshot = (
+    onUpdate: (data: Empresa | null) => void,
+    onError: (error: Error) => void
+): (() => void) => {
+    const unsubscribe = onSnapshot(
+        empresaDocRef,
+        (docSnap) => {
+            if (docSnap.exists()) {
+                onUpdate({ id: docSnap.id, ...docSnap.data() } as Empresa);
+            } else {
+                onUpdate(null);
+            }
+        },
+        (error) => {
+            console.error("Erro no snapshot da empresa: ", error);
+            onError(new Error("Não foi possível carregar os dados da empresa em tempo real."));
+        }
+    );
+    return unsubscribe;
 };
 
 /**

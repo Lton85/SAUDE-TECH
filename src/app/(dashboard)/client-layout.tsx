@@ -41,7 +41,7 @@ import { Input } from "@/components/ui/input";
 import { clearPainel } from "@/services/chamadasService";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { getEmpresa } from "@/services/empresaService";
+import { getEmpresa, onEmpresaSnapshot } from "@/services/empresaService";
 import type { Empresa } from "@/types/empresa";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -105,7 +105,7 @@ export type Tab = (typeof allMenuItems)[number] & {
     subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
 };
 
-const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
+const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification, logoSvg }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; logoSvg?: string; }) => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
     const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
@@ -169,9 +169,9 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                  <CustomLogo className="h-8 w-8 text-primary" />
+                  <CustomLogo className="h-8 w-8 text-primary" logoSvg={logoSvg} />
                   <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
-                      <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
+                      <h1 className="text-xl font-bold font-headline">Saúde Tech</h1>
                   </div>
                 </Link>
                  <SidebarTrigger className="hidden md:flex h-7 w-7">
@@ -268,32 +268,17 @@ const DateTimeDisplay = () => {
 };
 
 
-const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, onMenuItemClick }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, onMenuItemClick, empresa, isLoadingEmpresa }: { 
     openTabs: Tab[];
     activeTab: string;
     activeContentId: string;
     onTabClick: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
     onMenuItemClick: (item: Tab) => void;
+    empresa: Empresa | null;
+    isLoadingEmpresa: boolean;
 }) => {
-  const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
-  const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
   const router = useRouter();
-
-  React.useEffect(() => {
-    const fetchEmpresaData = async () => {
-        setIsLoadingEmpresa(true);
-        try {
-            const data = await getEmpresa();
-            setEmpresa(data);
-        } catch (error) {
-            console.error("Failed to fetch empresa data", error);
-        } finally {
-            setIsLoadingEmpresa(false);
-        }
-    };
-    fetchEmpresaData();
-  }, [activeContentId]); // Refetch when content changes, e.g., after saving on EmpresaPage
 
   const activeComponentInfo = allMenuItems.find(item => item.id === activeContentId);
 
@@ -318,7 +303,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
               {isLoadingEmpresa ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                  <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Fácil"}</h1>
+                  <h1 className="text-lg font-semibold text-primary truncate">{empresa?.razaoSocial || "Saúde Tech"}</h1>
               )}
             </div>
              <DateTimeDisplay />
@@ -383,7 +368,24 @@ export default function DashboardClientLayout({
   const [activeContentId, setActiveContentId] = React.useState<string>("/");
   const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
   const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
+  const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
+  const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
   
+  React.useEffect(() => {
+    setIsLoadingEmpresa(true);
+    const unsubscribe = onEmpresaSnapshot(
+      (data) => {
+        setEmpresa(data);
+        setIsLoadingEmpresa(false);
+      },
+      (error) => {
+        console.error("Failed to fetch empresa data", error);
+        setIsLoadingEmpresa(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
   React.useEffect(() => {
     const currentUser = getCurrentUser();
     if (currentUser) {
@@ -508,7 +510,7 @@ export default function DashboardClientLayout({
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} onNotification={setNotification} />
+        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} onNotification={setNotification} logoSvg={empresa?.logoSvg} />
         <MainContent 
             openTabs={openTabs.filter(tab => tab.id !== '/')} 
             activeTab={activeTab}
@@ -516,6 +518,8 @@ export default function DashboardClientLayout({
             onTabClick={handleTabClick}
             onTabClose={handleTabClose}
             onMenuItemClick={handleMenuItemClick}
+            empresa={empresa}
+            isLoadingEmpresa={isLoadingEmpresa}
         />
         {notification && (
           <NotificationDialog

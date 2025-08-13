@@ -172,7 +172,7 @@ function PrintPageContent() {
             </main>
              <footer className="mt-auto pt-6 text-center">
                 <p className="text-xs text-gray-500">
-                    Saúde Fácil - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
+                    Saúde Tech - Gestão de Atendimento | Emitido em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm:ss")}
                 </p>
             </footer>
         </div>
