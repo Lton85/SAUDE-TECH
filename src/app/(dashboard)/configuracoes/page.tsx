@@ -303,8 +303,7 @@ export default function ConfiguracoesPage() {
             setLoading(false);
             setDeleteType(null);
         }
-
-    }
+    };
 
     const handleSavePrinter = async () => {
         setIsSavingPrinter(true);
@@ -509,9 +508,7 @@ export default function ConfiguracoesPage() {
         <ResetDepartamentoDialog isOpen={departamentoDialogOpen} onOpenChange={setDepartamentoDialogOpen} onConfirm={handleConfirmDepartamentoReset} />
 
         {deleteType && (<DeleteAllDialog isOpen={deleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} onConfirm={handleConfirmDeleteAll} itemType={deleteType} />)}
-        {notification && (<NotificationDialog type={notification.type} title={notification.title} message={notification.message} onOpenChange={() => setNotification(null)} />}
+        {notification && (<NotificationDialog type={notification.type} title={notification.title} message={notification.message} onOpenChange={() => setNotification(null)} />)}
     </div>
   );
 }
-
-    
