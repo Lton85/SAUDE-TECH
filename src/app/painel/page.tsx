@@ -20,7 +20,7 @@ interface Call {
   timestamp?: Timestamp;
 }
 
-const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', pacienteNome: 'Aguardando paciente...', profissionalNome: 'Aguardando profissional...' };
+const emptyCall: Call = { senha: '----', departamentoNome: 'Aguardando...', pacienteNome: '', profissionalNome: '' };
 
 const HistoryItem = ({ call }: { call: Call }) => (
     <motion.div
@@ -150,15 +150,15 @@ export default function PainelPage() {
                             )}
                         </div>
 
-                        {(currentCall.pacienteNome || currentCall.profissionalNome) && (currentCall.pacienteNome !== '' || currentCall.profissionalNome !== '') && (
+                        {(currentCall.pacienteNome || currentCall.profissionalNome) && (
                             <div className="flex justify-between items-center border-t-2 border-slate-700/50 pt-4 md:pt-6 mt-4 md:mt-6">
-                                {currentCall.pacienteNome && currentCall.pacienteNome !== '' && (
+                                {currentCall.pacienteNome && (
                                     <div className="text-left">
                                         <h3 className="flex items-center gap-2 text-xl md:text-2xl lg:text-3xl font-bold text-amber-400 uppercase"><User className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7"/>Paciente</h3>
                                         <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-white truncate">{currentCall.pacienteNome}</p>
                                     </div>
                                 )}
-                                {currentCall.profissionalNome && currentCall.profissionalNome !== '' && (
+                                {currentCall.profissionalNome && (
                                     <div className="text-right">
                                         <h3 className="flex items-center justify-end gap-2 text-xl md:text-2xl lg:text-3xl font-bold text-amber-400 uppercase"><Stethoscope className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7"/>Profissional</h3>
                                         <p className="text-2xl md:text-3xl lg:text-4xl font-medium text-white truncate">{currentCall.profissionalNome}</p>
