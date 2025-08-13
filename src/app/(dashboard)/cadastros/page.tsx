@@ -55,16 +55,17 @@ export default function CadastrosPage() {
     }
 
     return (
-        <Tabs defaultValue={activeTab} className="w-full">
-             <TooltipProvider>
-                <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
-                    {allTabs.map(tab => {
-                        const Icon = tab.icon;
-                        const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
-                        return (
-                            <Tooltip key={tab.id} delayDuration={0}>
+        <Tabs defaultValue={activeTab} className="w-full flex flex-col flex-1">
+             <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
+                {allTabs.map(tab => {
+                    const Icon = tab.icon;
+                    const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                    return (
+                        <TooltipProvider key={tab.id}>
+                            <Tooltip delayDuration={0}>
                                 <TooltipTrigger asChild>
                                     <TabsTrigger value={tab.id} disabled={!hasPermission}>
+                                        {!hasPermission && <Lock className="mr-2 h-3 w-3" />}
                                         <Icon className="mr-2 h-4 w-4" />
                                         {tab.label}
                                     </TabsTrigger>
@@ -73,28 +74,30 @@ export default function CadastrosPage() {
                                     <p>{tab.label}</p>
                                 </TooltipContent>
                             </Tooltip>
-                        );
-                    })}
-                </TabsList>
-            </TooltipProvider>
-            {allTabs.map(tab => {
-                const Component = tab.component;
-                const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
-                return (
-                    <TabsContent key={tab.id} value={tab.id} className="mt-4">
-                        {hasPermission ? (
-                            <Component />
-                        ) : (
-                             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
-                                <Lock className="h-10 w-10 text-muted-foreground/50" />
-                                <p className="mt-4 text-center text-muted-foreground">
-                                    Você não tem permissão para acessar esta aba.
-                                </p>
-                            </div>
-                        )}
-                    </TabsContent>
-                );
-            })}
+                        </TooltipProvider>
+                    );
+                })}
+            </TabsList>
+            <div className="flex-1 overflow-y-auto mt-4">
+                {allTabs.map(tab => {
+                    const Component = tab.component;
+                    const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                    return (
+                        <TabsContent key={tab.id} value={tab.id} className="mt-0">
+                            {hasPermission ? (
+                                <Component />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
+                                    <Lock className="h-10 w-10 text-muted-foreground/50" />
+                                    <p className="mt-4 text-center text-muted-foreground">
+                                        Você não tem permissão para acessar esta aba.
+                                    </p>
+                                </div>
+                            )}
+                        </TabsContent>
+                    );
+                })}
+            </div>
         </Tabs>
     );
 }
