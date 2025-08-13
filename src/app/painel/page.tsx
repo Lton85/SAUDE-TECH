@@ -2,13 +2,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { HeartPulse, User, Stethoscope } from 'lucide-react';
+import { User, Stethoscope } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getEmpresa } from '@/services/empresaService';
 import type { Empresa } from '@/types/empresa';
 import { cn } from '@/lib/utils';
+import { CustomLogo } from '@/components/ui/custom-logo';
 
 interface Call {
   id?: string;
@@ -190,7 +191,7 @@ export default function PainelPage() {
         
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
-                <HeartPulse className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" />
+                <CustomLogo className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" />
                 <span className="font-bold">SAÚDE FÁCIL | {razaoSocial}</span>
             </div>
             {time ? (

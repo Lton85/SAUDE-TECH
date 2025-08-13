@@ -9,7 +9,6 @@ import {
   ClipboardList,
   Clock,
   Tv2,
-  HeartPulse,
   Settings,
   BarChart3,
   PanelLeftClose,
@@ -52,6 +51,7 @@ import { logout, getCurrentUser } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { getAtendimentosPendentes } from "@/services/filaDeEsperaService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
+import { CustomLogo } from "@/components/ui/custom-logo";
 
 
 // Import page components dynamically
@@ -169,7 +169,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                  <HeartPulse className="h-8 w-8 text-primary" />
+                  <CustomLogo className="h-8 w-8 text-primary" />
                   <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
                       <h1 className="text-xl font-bold font-headline">Saúde Fácil</h1>
                   </div>

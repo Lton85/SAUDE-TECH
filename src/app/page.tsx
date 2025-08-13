@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { login, checkAuth } from '@/services/authService';
-import { Loader2, HeartPulse, LogIn } from 'lucide-react';
+import { Loader2, LogIn } from 'lucide-react';
 import { NotificationDialog, NotificationType } from '@/components/ui/notification-dialog';
+import { CustomLogo } from '@/components/ui/custom-logo';
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -58,7 +59,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <HeartPulse className="h-12 w-12 text-primary" />
+                <CustomLogo className="h-12 w-12 text-primary" />
             </div>
           <CardTitle className="text-2xl">Saúde Fácil</CardTitle>
           <CardDescription>Acesse sua conta para continuar</CardDescription>
