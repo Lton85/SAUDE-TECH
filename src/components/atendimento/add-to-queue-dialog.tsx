@@ -58,7 +58,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
   const [classificationId, setClassificationId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [senha, setSenha] = useState("");
   const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -109,7 +108,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery("");
     setShowPatientList(false);
     setHighlightedIndex(-1);
-    setSenha("");
   }, [classificacoes]);
 
   useEffect(() => {
@@ -139,7 +137,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         handleSelectPatient(patientToAdd);
       }
       if (atendimentoParaCompletar) {
-        setSenha(atendimentoParaCompletar.senha);
         setClassificationId(atendimentoParaCompletar.classificacao);
       }
     } else {
@@ -186,7 +183,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
       const profissional = profissionais.find(p => p.id === selectedProfissionalId);
       if (!profissional) throw new Error("Profissional não encontrado");
 
-      const item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'> = {
+      const item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade' | 'senha'> = {
         pacienteId: selectedPaciente.id,
         pacienteNome: selectedPaciente.nome,
         departamentoId: selectedDepartamento.id,
@@ -194,12 +191,11 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         departamentoNumero: selectedDepartamento.numero,
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
-        senha: senha, // A senha será gerada/confirmada no backend
         status: "aguardando",
         classificacao: classificationId,
       }
 
-      await addPacienteToFila(item, atendimentoParaCompletar?.id);
+      await addPacienteToFila(item, atendimentoParaCompletar);
       
       onSuccess(isCompleting ? "Cadastro Completado!" : "Paciente Enviado!", `${selectedPaciente.nome} foi enviado para a fila de ${selectedDepartamento.nome}.`)
       onOpenChange(false);
@@ -438,7 +434,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
                         <Input 
                         id="senha" 
-                        value={isCompleting ? senha : "Será gerada ao confirmar"}
+                        value={isCompleting ? atendimentoParaCompletar.senha : "Será gerada ao confirmar"}
                         readOnly
                         className="font-bold text-lg bg-background text-center tracking-wider"
                         disabled

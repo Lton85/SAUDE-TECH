@@ -69,7 +69,10 @@ export const addPreCadastroToFila = async (
     }
 }
 
-export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'>, atendimentoPendenteId?: string ) => {
+export const addPacienteToFila = async (
+    item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade' | 'senha'>,
+    atendimentoPendente?: FilaDeEsperaItem | null
+) => {
     try {
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
@@ -98,13 +101,14 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
             throw new Error("Classificação de atendimento inválida.");
         }
 
-        let finalSenha = item.senha;
-        
-        // Gera uma nova senha apenas se não for um pre-cadastro (que já tem senha)
-        if (!atendimentoPendenteId) {
+        let finalSenha: string;
+
+        if (atendimentoPendente) {
+            finalSenha = atendimentoPendente.senha;
+        } else {
             const counterName = `senha_${classificacaoConfig.id.toLowerCase()}`;
             const ticketPrefix = classificacaoConfig.nome.charAt(0).toUpperCase();
-            const ticketNumber = await getNextCounter(counterName, true); // INCREMENTA o contador
+            const ticketNumber = await getNextCounter(counterName, true);
             finalSenha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
         }
         
@@ -115,8 +119,8 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
         };
 
         // If it's completing a pending registration, update it
-        if (atendimentoPendenteId) {
-            const docRef = doc(db, "filaDeEspera", atendimentoPendenteId);
+        if (atendimentoPendente) {
+            const docRef = doc(db, "filaDeEspera", atendimentoPendente.id);
              await updateDoc(docRef, {
                 ...finalItem,
                 status: 'aguardando'
@@ -404,14 +408,21 @@ export const retornarPacienteParaTriagem = async (id: string): Promise<void> => 
         throw new Error("ID do item da fila não encontrado.");
     }
     const filaDocRef = doc(db, "filaDeEspera", id);
+    
+    const filaDocSnap = await getDoc(filaDocRef);
+    if (!filaDocSnap.exists()) {
+        throw new Error("Atendimento não encontrado na fila.");
+    }
+
+    // Apenas muda o status, mantendo os dados do paciente.
+    // O profissional/depto pode ser redefinido na tela de fila de atendimento antes de chamar.
     await updateDoc(filaDocRef, {
-        status: "pendente", // Volta para pendente para uma nova triagem
-        chamadaEm: null,
-        departamentoId: null,
-        departamentoNome: null,
-        departamentoNumero: null,
+        status: "chamado-triagem", 
         profissionalId: null,
         profissionalNome: null,
+        departamentoId: null,
+        departamentoNome: null,
+        departamentoNumero: null
     });
 };
 
