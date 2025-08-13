@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento, retornarParaPendente } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
@@ -191,6 +191,16 @@ export default function AtendimentosPage() {
             setNotification({ type: 'error', title: "Erro ao chamar senha", message: err.message });
         }
     };
+    
+    const handleReturnToPending = async (item: FilaDeEsperaItem) => {
+        try {
+            await retornarParaPendente(item.id);
+            setNotification({ type: 'success', title: "Retorno Confirmado!", message: `A senha ${item.senha} voltou para a fila de senhas pendentes.` });
+        } catch (error) {
+            const err = error as Error;
+            setNotification({ type: 'error', title: "Erro ao retornar senha", message: err.message });
+        }
+    };
 
     const handleChamarParaAtendimento = async (item: FilaDeEsperaItem) => {
         try {
@@ -285,6 +295,7 @@ export default function AtendimentosPage() {
                             isLoading={isLoading}
                             onIdentify={handleCompletarCadastro}
                             onCancel={setItemToCancel}
+                            onReturnToPending={handleReturnToPending}
                             classificacoes={activeClassificacoes}
                         />
                     </TabsContent>

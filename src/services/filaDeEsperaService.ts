@@ -367,6 +367,18 @@ export const chamarPaciente = async (item: FilaDeEsperaItem, tipoChamada: 'atend
     });
 };
 
+export const retornarParaPendente = async (id: string): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await updateDoc(filaDocRef, {
+        status: "pendente",
+        chamadaEm: null,
+    });
+};
+
+
 export const finalizarAtendimento = async (id: string) => {
     if (!id) throw new Error("ID do item da fila não encontrado.");
 
