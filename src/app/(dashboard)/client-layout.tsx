@@ -108,7 +108,6 @@ export const allMenuItems = [
 export type Tab = (typeof allMenuItems)[number] & { 
     notificationCount?: number; 
     subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
-    disabled?: boolean;
 };
 
 const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
@@ -161,8 +160,6 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
     }, [searchTerm, menuItems]);
     
     const handleButtonClick = (item: Tab) => {
-        if(item.disabled) return;
-
         if (item.target === '_blank' && item.href) {
             handleOpenInNewTab(item.href);
         } else if (item.id === 'sair') {
@@ -207,10 +204,9 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                         <SidebarMenuButton
                             onClick={() => handleButtonClick(item)}
                             isActive={activeContentId === item.id}
-                            disabled={item.disabled}
-                            tooltip={{children: item.disabled ? `${item.label} (Bloqueado)` : item.label, side: "right"}}
+                            tooltip={{children: item.label, side: "right"}}
                         >
-                            {item.disabled ? <Lock /> : <item.icon />}
+                            <item.icon />
                             <span>{item.label}</span>
                              {item.notificationCount && item.notificationCount > 0 && (
                                 <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -397,14 +393,14 @@ export default function DashboardClientLayout({
     const currentUser = getCurrentUser();
     if (currentUser) {
         if (currentUser.usuario === 'master') {
-            setUserMenuItems(allMenuItems.map(item => ({...item, disabled: false})));
+            setUserMenuItems(allMenuItems);
             return;
         }
 
         const userPermissions = currentUser.permissoes || [];
-        const allowedMenuItems = allMenuItems.map(item => {
+        const allowedMenuItems = allMenuItems.filter(item => {
             if (!item.permissionRequired) {
-                return {...item, disabled: false};
+                return true;
             }
 
             let hasAccess = userPermissions.includes(item.id);
@@ -413,7 +409,7 @@ export default function DashboardClientLayout({
                 hasAccess = hasAccess || hasSubItemAccess;
             }
 
-            return {...item, disabled: !hasAccess};
+            return hasAccess;
         });
         setUserMenuItems(allowedMenuItems);
     }
@@ -460,8 +456,6 @@ export default function DashboardClientLayout({
   };
 
   const handleMenuItemClick = (item: Tab) => {
-    if (item.disabled) return;
-
     if (item.target === '_blank' && item.href) {
         handleOpenInNewTab(item.href);
         return;
