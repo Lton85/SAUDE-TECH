@@ -471,7 +471,6 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         // Query for finalized appointments
         const qFinalizados = query(
             collection(db, "relatorios_atendimentos"),
-            where("status", "==", "finalizado"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
             where("finalizadaEm", "<=", Timestamp.fromDate(end))
         );
@@ -479,7 +478,6 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         // Query for canceled appointments
         const qCancelados = query(
             collection(db, "relatorios_atendimentos"),
-            where("status", "==", "cancelado"),
             where("canceladaEm", ">=", Timestamp.fromDate(start)),
             where("canceladaEm", "<=", Timestamp.fromDate(end))
         );
@@ -488,9 +486,12 @@ export const getHistoricoAtendimentosPorPeriodo = async (
             getDocs(qFinalizados),
             getDocs(qCancelados)
         ]);
-
-        const finalizadosData = finalizadosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
-        const canceladosData = canceladosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        
+        let finalizadosData = finalizadosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        finalizadosData = finalizadosData.filter(item => item.status === 'finalizado');
+        
+        let canceladosData = canceladosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        canceladosData = canceladosData.filter(item => item.status === 'cancelado');
 
         const allData = [...finalizadosData, ...canceladosData].sort((a, b) => {
             const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
