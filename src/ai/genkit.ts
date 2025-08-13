@@ -1,9 +1,9 @@
 import {configureGenkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {googleAi} from '@genkit-ai/googleai';
 import {genkit} from 'genkit';
 
 configureGenkit({
-  plugins: [googleAI()],
+  plugins: [googleAi()],
 });
 
 export {genkit as ai};
