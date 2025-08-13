@@ -203,7 +203,6 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
             const qDia = query(
                 collection(db, "relatorios_atendimentos"),
-                where("status", "==", "finalizado"),
                 where("finalizadaEm", ">=", Timestamp.fromDate(startOfToday)),
                 where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday)),
             );
@@ -218,9 +217,11 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 
                 snapshot.forEach(doc => {
                     const item = doc.data() as FilaDeEsperaItem;
-                    const classificationCount = counts.find(c => c.id === item.classificacao);
-                    if (classificationCount) {
-                        classificationCount.count++;
+                    if(item.status === 'finalizado') {
+                        const classificationCount = counts.find(c => c.id === item.classificacao);
+                        if (classificationCount) {
+                            classificationCount.count++;
+                        }
                     }
                 });
                 
