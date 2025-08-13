@@ -456,14 +456,12 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         
         const qFinalizados = query(
             collection(db, "relatorios_atendimentos"),
-            where("status", "==", "finalizado"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
             where("finalizadaEm", "<=", Timestamp.fromDate(end))
         );
 
         const qCancelados = query(
             collection(db, "relatorios_atendimentos"),
-            where("status", "==", "cancelado"),
             where("canceladaEm", ">=", Timestamp.fromDate(start)),
             where("canceladaEm", "<=", Timestamp.fromDate(end))
         );
