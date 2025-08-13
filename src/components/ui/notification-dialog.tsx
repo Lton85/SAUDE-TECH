@@ -68,7 +68,7 @@ export function NotificationDialog({ type, title, message, onOpenChange }: Notif
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter className="sm:justify-center">
-          <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+          <Button onClick={() => onOpenChange(false)} className="bg-green-600 hover:bg-green-700">Fechar</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
