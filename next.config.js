@@ -1,3 +1,4 @@
+
 const nextConfig = {
   /* config options here */
   typescript: {
@@ -11,6 +12,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
         port: '',
         pathname: '/**',
       },
