@@ -115,7 +115,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                                 <Megaphone className="mr-1 h-3 w-3" />
                                                 Chamar
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReturnToTriage(item)} disabled={isReadOnly}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReturnToTriage(item)} title="Retornar para Triagem" disabled={isReadOnly}>
                                                 <Undo2 className="h-3 w-3" />
                                                 <span className="sr-only">Retornar para Triagem</span>
                                             </Button>

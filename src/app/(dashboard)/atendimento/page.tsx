@@ -21,7 +21,7 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
-import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX, Lock, Tv2 } from "lucide-react";
+import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX, Lock, Tv2, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
@@ -82,6 +82,8 @@ export default function AtendimentosPage() {
     const [cancellationConfirmation, setCancellationConfirmation] = useState<{ isOpen: boolean; itemName: string; }>({ isOpen: false, itemName: "" });
     const [isClearPanelDialogOpen, setIsClearPanelDialogOpen] = useState(false);
     const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
+    const [isReturnToTriageDialogOpen, setIsReturnToTriageDialogOpen] = useState(false);
+
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
@@ -89,6 +91,7 @@ export default function AtendimentosPage() {
     const [itemToEditFromHistory, setItemToEditFromHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToReturnToTriage, setItemToReturnToTriage] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
@@ -236,13 +239,22 @@ export default function AtendimentosPage() {
         }
     };
 
-    const handleReturnToTriage = async (item: FilaDeEsperaItem) => {
+    const handleReturnToTriageRequest = (item: FilaDeEsperaItem) => {
+        setItemToReturnToTriage(item);
+        setIsReturnToTriageDialogOpen(true);
+    };
+
+    const handleConfirmReturnToTriage = async () => {
+        if (!itemToReturnToTriage) return;
         try {
-            await retornarPacienteParaTriagem(item.id);
-            setNotification({ type: 'success', title: "Retornado para Triagem!", message: `O paciente ${item.pacienteNome} retornou para a triagem inicial.` });
+            await retornarPacienteParaTriagem(itemToReturnToTriage.id);
+            setNotification({ type: 'success', title: "Retornado para Triagem!", message: `O paciente ${itemToReturnToTriage.pacienteNome} retornou para a triagem inicial.` });
         } catch (error) {
             const err = error as Error;
             setNotification({ type: 'error', title: "Erro ao retornar paciente", message: err.message });
+        } finally {
+            setIsReturnToTriageDialogOpen(false);
+            setItemToReturnToTriage(null);
         }
     };
 
@@ -338,7 +350,7 @@ export default function AtendimentosPage() {
                             <TabsContent key={tab.id} value={tab.id}>
                                 {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPending} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
-                                {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriage} isReadOnly={!hasPermission} />}
+                                {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
                                 {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
                             </TabsContent>
@@ -455,6 +467,18 @@ export default function AtendimentosPage() {
                 confirmText="Sim, Limpar Histórico"
                 icon={ListX}
             />
+
+            {itemToReturnToTriage && (
+                <ConfirmationDialog
+                    isOpen={isReturnToTriageDialogOpen}
+                    onOpenChange={setIsReturnToTriageDialogOpen}
+                    onConfirm={handleConfirmReturnToTriage}
+                    title="Retornar Paciente para a Triagem?"
+                    description={`Tem certeza que deseja retornar o paciente ${itemToReturnToTriage.pacienteNome} para a triagem inicial? Ele sairá da fila de atendimento.`}
+                    confirmText="Sim, Retornar"
+                    icon={Undo2}
+                />
+            )}
 
             {itemToReturn && (
                 <ReturnToQueueDialog
