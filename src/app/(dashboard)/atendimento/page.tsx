@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento, retornarParaPendente } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento, retornarParaPendente, retornarPacienteParaTriagem } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
@@ -202,6 +202,16 @@ export default function AtendimentosPage() {
         }
     };
 
+    const handleReturnToTriage = async (item: FilaDeEsperaItem) => {
+        try {
+            await retornarPacienteParaTriagem(item.id);
+            setNotification({ type: 'success', title: "Retornado para Triagem!", message: `O paciente ${item.pacienteNome} retornou para a triagem inicial.` });
+        } catch (error) {
+            const err = error as Error;
+            setNotification({ type: 'error', title: "Erro ao retornar paciente", message: err.message });
+        }
+    };
+
     const handleChamarParaAtendimento = async (item: FilaDeEsperaItem) => {
         try {
             await chamarPaciente(item, 'atendimento');
@@ -312,6 +322,7 @@ export default function AtendimentosPage() {
                             onClearPanel={handleClearPanel}
                             onClearHistory={handleClearHistory}
                             onPreviewPanel={() => setIsPanelPreviewOpen(true)}
+                            onReturnToTriage={handleReturnToTriage}
                         />
                     </TabsContent>
 
@@ -460,5 +471,7 @@ export default function AtendimentosPage() {
         </div>
     );
 }
+
+    
 
     

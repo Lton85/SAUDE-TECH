@@ -9,7 +9,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser, ListX, Tv2 } from "lucide-react";
+import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser, ListX, Tv2, Undo2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FilaDeAtendimentoListProps {
@@ -23,9 +23,10 @@ interface FilaDeAtendimentoListProps {
     onClearPanel: () => void;
     onClearHistory: () => void;
     onPreviewPanel: () => void;
+    onReturnToTriage: (item: FilaDeEsperaItem) => void;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory, onPreviewPanel }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory, onPreviewPanel, onReturnToTriage }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -63,7 +64,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                             <TableHead className="px-3 py-2 text-xs">Departamento</TableHead>
                             <TableHead className="px-3 py-2 text-xs">Profissional</TableHead>
                             <TableHead className="w-[150px] px-3 py-2 text-xs">Tempo de Espera</TableHead>
-                            <TableHead className="w-[150px] text-right px-3 py-2 text-xs">Ações</TableHead>
+                            <TableHead className="w-[200px] text-right px-3 py-2 text-xs">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -113,6 +114,10 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                                 <Megaphone className="mr-1 h-3 w-3" />
                                                 Chamar
                                             </Button>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReturnToTriage(item)}>
+                                                <Undo2 className="h-3 w-3" />
+                                                <span className="sr-only">Retornar para Triagem</span>
+                                            </Button>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEdit(item)}>
                                                 <Pencil className="h-3 w-3" />
                                                 <span className="sr-only">Editar</span>
@@ -142,5 +147,7 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
         </Card>
     );
 }
+
+    
 
     

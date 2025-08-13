@@ -378,6 +378,22 @@ export const retornarParaPendente = async (id: string): Promise<void> => {
     });
 };
 
+export const retornarPacienteParaTriagem = async (id: string): Promise<void> => {
+    if (!id) {
+        throw new Error("ID do item da fila não encontrado.");
+    }
+    const filaDocRef = doc(db, "filaDeEspera", id);
+    await updateDoc(filaDocRef, {
+        status: "pendente",
+        chamadaEm: null,
+        departamentoId: null,
+        departamentoNome: null,
+        departamentoNumero: null,
+        profissionalId: null,
+        profissionalNome: null,
+    });
+};
+
 
 export const finalizarAtendimento = async (id: string) => {
     if (!id) throw new Error("ID do item da fila não encontrado.");
@@ -635,3 +651,6 @@ export const clearAllAtendimentos = async (): Promise<number> => {
         throw new Error("Não foi possível limpar a fila de atendimentos.");
     }
 };
+
+
+    
