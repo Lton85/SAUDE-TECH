@@ -67,7 +67,7 @@ const ReportItemCard = ({ atendimento, onPrintItem }: { atendimento: FilaDeEsper
                     <Badge
                         className={cn(
                             'text-xs font-semibold',
-                            atendimento.classificacao === 'Urgência' && 'bg-red-500 text-white hover:bg-red-600',
+                            atendimento.classificacao === 'Urgencia' && 'bg-red-500 text-white hover:bg-red-600',
                             atendimento.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
                             atendimento.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700'
                         )}
@@ -157,9 +157,13 @@ export default function RelatoriosPage() {
         if (selectedClassificacao !== 'todos') {
             filteredData = filteredData.filter(item => item.classificacao === selectedClassificacao);
         }
+        
+        if (selectedStatus !== 'todos') {
+            filteredData = filteredData.filter(item => item.status === selectedStatus);
+        }
 
         setFilteredReportData(filteredData);
-    }, [selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, profissionais]);
+    }, [selectedPacienteId, selectedProfissionalId, selectedDepartamentoId, selectedClassificacao, selectedStatus, profissionais]);
     
     const handleSearch = React.useCallback(async () => {
         if (!dateRange?.from || !dateRange?.to) {
@@ -177,14 +181,14 @@ export default function RelatoriosPage() {
             const data = await getHistoricoAtendimentosPorPeriodoComFiltros({ 
                 dateFrom: dateRange.from, 
                 dateTo: dateRange.to,
-                pacienteId: selectedPacienteId === 'todos' ? undefined : selectedPacienteId,
-                profissionalId: selectedProfissionalId === 'todos' ? undefined : selectedProfissionalId,
-                departamentoId: selectedDepartamentoId === 'todos' ? undefined : selectedDepartamentoId,
-                classificacao: selectedClassificacao === 'todos' ? undefined : selectedClassificacao,
-                status: selectedStatus === 'todos' ? undefined : selectedStatus,
+                pacienteId: selectedPacienteId,
+                profissionalId: selectedProfissionalId,
+                departamentoId: selectedDepartamentoId,
+                classificacao: selectedClassificacao,
+                status: selectedStatus,
             });
             setAllReportData(data);
-            setFilteredReportData(data); // No need for client-side filtering anymore
+            setFilteredReportData(data); // Filters are now applied in the service
         } catch (error) {
             console.error("Erro ao buscar relatório: ", error);
             setNotification({
@@ -592,5 +596,3 @@ export default function RelatoriosPage() {
         </div>
     );
 }
-
-    

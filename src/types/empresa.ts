@@ -1,5 +1,4 @@
 
-
 export interface Classificacao {
     id: string; // Ex: "Normal", "Preferencial", "custom_123"
     nome: string; // Ex: "Atendimento Normal", "Preferencial", "Guichê 1"
@@ -23,23 +22,9 @@ export interface Empresa {
     email: string;
     nomeImpressora?: string;
     classificacoes?: Classificacao[];
-    // Deprecated, use `classificacoes` instead
-    classificacoesAtendimento?: string[];
-    // Deprecated, use `classificacoes` instead
-    nomesClassificacoes?: {
-        Normal: string;
-        Preferencial: string;
-        Urgencia: string;
-        Outros: string;
-        [key: string]: string; // Para classificações customizadas
-    };
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';
     exibirUltimasSenhas?: boolean;
     localChamadaTriagem?: string;
     exibirLocalChamadaTriagem?: boolean;
 }
-
-    
-
-    

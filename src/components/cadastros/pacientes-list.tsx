@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -28,6 +27,7 @@ import { getProfissionais } from "@/services/profissionaisService";
 import { updateHistoricoItem } from "@/services/filaDeEsperaService";
 import { NotificationDialog, NotificationType } from "../ui/notification-dialog";
 import { getEmpresa } from "@/services/empresaService";
+import type { Classificacao } from "@/types/empresa";
 
 
 export function PacientesList() {
@@ -36,7 +36,7 @@ export function PacientesList() {
   const [filteredPacientes, setFilteredPacientes] = useState<Paciente[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [profissionais, setProfissionais] = useState<{id: string, nome: string}[]>([]);
-  const [activeClassificacoes, setActiveClassificacoes] = useState<string[]>([]);
+  const [activeClassificacoes, setActiveClassificacoes] = useState<Classificacao[]>([]);
   
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState<Paciente | null>(null);
   const [selectedPatientForView, setSelectedPatientForView] = useState<Paciente | null>(null);
@@ -65,10 +65,8 @@ export function PacientesList() {
       const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
       setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
       
-      if (empresaData?.classificacoesAtendimento?.length) {
-          setActiveClassificacoes(empresaData.classificacoesAtendimento);
-      } else {
-          setActiveClassificacoes(["Normal", "Preferencial", "Urgência", "Outros"]);
+      if (empresaData?.classificacoes?.length) {
+          setActiveClassificacoes(empresaData.classificacoes.filter(c => c.ativa));
       }
 
     } catch (error) {
@@ -407,5 +405,3 @@ export function PacientesList() {
     </>
   );
 }
-
-    

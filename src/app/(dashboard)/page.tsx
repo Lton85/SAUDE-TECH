@@ -68,7 +68,7 @@ const DailySummaryCard = ({ dailyCounts, isLoading }: { dailyCounts: DailyCount[
     return (
         <Card>
             <CardHeader className="pb-4">
-                <CardTitle className="text-base">Atendimentos do Dia</CardTitle>
+                <CardTitle className="text-base">Atendimentos (Dia)</CardTitle>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -79,15 +79,17 @@ const DailySummaryCard = ({ dailyCounts, isLoading }: { dailyCounts: DailyCount[
                     </div>
                 ) : (
                     <div className="flex justify-around items-center gap-4">
-                        {dailyCounts.map(item => (
-                            <div key={item.id} className="flex flex-col items-center gap-1 text-center">
+                        {dailyCounts.length > 0 ? dailyCounts.map(item => (
+                            <div key={item.id} className="flex flex-col items-center gap-1 text-center" title={item.nome}>
                                 <div className={cn("flex h-8 w-8 items-center justify-center rounded-full text-white", item.color)}>
                                     <item.icon className="h-4 w-4" />
                                 </div>
                                 <p className="text-xl font-bold">{item.count}</p>
-                                <p className="text-xs font-medium text-muted-foreground">{item.nome}</p>
+                                <p className="text-xs font-medium text-muted-foreground truncate max-w-[60px]">{item.nome}</p>
                             </div>
-                        ))}
+                        )) : (
+                            <p className="text-sm text-muted-foreground text-center w-full">Nenhum atendimento finalizado hoje.</p>
+                        )}
                     </div>
                 )}
             </CardContent>
@@ -222,7 +224,7 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                     }
                 });
                 
-                setDailyCounts(counts.filter(c => c.count > 0)); // Only show classifications with counts
+                setDailyCounts(counts);
                 setIsDailyCountLoading(false);
             }, (error) => {
                  console.error("Failed to get daily counts:", error);
@@ -340,15 +342,11 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
                 inactiveCount={profissionaisInativosCount}
                 isLoading={profissionaisCount === null}
             />
-            {(isDailyCountLoading || dailyCounts.length > 0) && (
-                <DailySummaryCard
-                    dailyCounts={dailyCounts}
-                    isLoading={isDailyCountLoading}
-                />
-            )}
+            <DailySummaryCard
+                dailyCounts={dailyCounts}
+                isLoading={isDailyCountLoading}
+            />
         </div>
     </div>
   );
 }
-
-    

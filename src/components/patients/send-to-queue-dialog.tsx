@@ -18,6 +18,7 @@ import { Separator } from "../ui/separator"
 import type { FilaDeEsperaItem } from "@/types/fila"
 import { getNextCounter } from "@/services/countersService"
 import { NotificationType } from "../ui/notification-dialog"
+import type { Classificacao } from "@/types/empresa";
 
 interface Profissional {
   id: string;
@@ -28,7 +29,7 @@ interface EnviarParaFilaDialogProps {
   onOpenChange: (isOpen: boolean) => void
   paciente: Paciente | null
   departamentos: Departamento[]
-  classificacoes: string[];
+  classificacoes: Classificacao[];
   onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void;
 }
 
@@ -43,22 +44,16 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
     );
 }
 
-const classificationOrder: FilaDeEsperaItem['classificacao'][] = ["Normal", "Preferencial", "Urgencia", "Outros"];
-
 export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departamentos, classificacoes, onNotification }: EnviarParaFilaDialogProps) {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState<string>("")
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>("")
-  const [classification, setClassification] = useState<FilaDeEsperaItem['classificacao']>('Normal');
+  const [classificationId, setClassificationId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [senha, setSenha] = useState("");
 
   const selectedDepartamento = departamentos.find(d => d.id === selectedDepartamentoId);
-  
-  const orderedClassificacoes = useMemo(() => {
-    return classificationOrder.filter(c => classificacoes.includes(c));
-  }, [classificacoes]);
   
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -79,51 +74,44 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     };
     
     if (isOpen) {
-      if (orderedClassificacoes.length > 0) {
-        setClassification(orderedClassificacoes[0] as FilaDeEsperaItem['classificacao']);
+      if (classificacoes.length > 0) {
+        setClassificationId(classificacoes[0].id);
       }
       fetchProfissionais();
     }
-  }, [isOpen, onNotification, orderedClassificacoes]);
+  }, [isOpen, onNotification, classificacoes]);
   
-  useEffect(() => {
-    const generateTicket = async () => {
-        if (paciente && isOpen) {
-            setSenha("Gerando senha...");
-            try {
-                let counterName;
-                let ticketPrefix;
-                switch(classification) {
-                    case 'Urgencia':
-                        counterName = 'senha_emergencia';
-                        ticketPrefix = 'U';
-                        break;
-                    case 'Preferencial':
-                        counterName = 'senha_preferencial';
-                        ticketPrefix = 'P';
-                        break;
-                    case 'Outros':
-                        counterName = 'senha_outros';
-                        ticketPrefix = 'O';
-                        break;
-                    default:
-                        counterName = 'senha_normal';
-                        ticketPrefix = 'N';
-                }
-                const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-                const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
-                setSenha(ticket);
-            } catch (error) {
-                console.error("Erro ao gerar senha:", error);
-                setSenha("Erro ao gerar");
-                onNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
+  const generateTicketPreview = useCallback(async (currentClassificationId: string) => {
+    if (paciente && isOpen) {
+        try {
+            const classificacao = classificacoes.find(c => c.id === currentClassificationId);
+            if (!classificacao) {
+                setSenha("Erro");
+                throw new Error("Classificação não encontrada.");
             }
-        } else {
-            setSenha("");
+            const counterName = `senha_${classificacao.id.toLowerCase()}`;
+            const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
+
+            setSenha("Gerando...");
+            const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+            const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
+            setSenha(ticket);
+        } catch (error) {
+            console.error("Erro ao gerar senha:", error);
+            setSenha("Erro");
+            onNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
         }
-    };
-    generateTicket();
-  }, [paciente, isOpen, classification, onNotification]);
+    } else {
+        setSenha("");
+    }
+  }, [paciente, isOpen, classificacoes, onNotification]);
+
+
+  useEffect(() => {
+    if (paciente && isOpen) {
+        generateTicketPreview(classificationId);
+    }
+  }, [paciente, isOpen, classificationId, generateTicketPreview]);
 
   const handleSubmit = async () => {
     if (!selectedDepartamentoId || !paciente || !selectedProfissionalId) {
@@ -137,45 +125,17 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
 
     setIsSubmitting(true)
     try {
-        let counterName;
-        let ticketPrefix;
-        switch(classification) {
-            case 'Urgencia':
-                counterName = 'senha_emergencia';
-                ticketPrefix = 'U';
-                break;
-            case 'Preferencial':
-                counterName = 'senha_preferencial';
-                ticketPrefix = 'P';
-                break;
-            case 'Outros':
-                counterName = 'senha_outros';
-                ticketPrefix = 'O';
-                break;
-            default:
-                counterName = 'senha_normal';
-                ticketPrefix = 'N';
-        }
-      const ticketNumber = await getNextCounter(counterName, true); // true = increment
-      const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
-
-      const departamento = departamentos.find(d => d.id === selectedDepartamentoId)
-      if (!departamento) throw new Error("Departamento não encontrado")
-
-      const profissional = profissionais.find(p => p.id === selectedProfissionalId);
-      if (!profissional) throw new Error("Profissional não encontrado");
-
       const newItem: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'> = {
         pacienteId: paciente.id,
         pacienteNome: paciente.nome,
-        departamentoId: departamento.id,
-        departamentoNome: departamento.nome,
-        departamentoNumero: departamento.numero,
-        profissionalId: profissional.id,
-        profissionalNome: profissional.nome,
-        senha: ticket,
+        departamentoId: selectedDepartamentoId,
+        departamentoNome: selectedDepartamento?.nome || '',
+        departamentoNumero: selectedDepartamento?.numero,
+        profissionalId: selectedProfissionalId,
+        profissionalNome: profissionais.find(p => p.id === selectedProfissionalId)?.nome || '',
+        senha: senha,
         status: "aguardando",
-        classificacao: classification,
+        classificacao: classificationId,
       }
       
       await addPacienteToFila(newItem)
@@ -183,7 +143,7 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
       onNotification({
         type: "success",
         title: "Paciente Enviado!",
-        message: `${paciente.nome} foi enviado para a fila de ${departamento.nome}.`,
+        message: `${paciente.nome} foi enviado para a fila de ${selectedDepartamento?.nome}.`,
       })
       onOpenChange(false)
     } catch (error) {
@@ -204,7 +164,9 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
     if (!open) {
         setSelectedDepartamentoId("");
         setSelectedProfissionalId("");
-        setClassification('Normal');
+        if (classificacoes.length > 0) {
+            setClassificationId(classificacoes[0].id);
+        }
         setSenha("");
     }
     onOpenChange(open);
@@ -249,13 +211,13 @@ export function EnviarParaFilaDialog({ isOpen, onOpenChange, paciente, departame
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="classification" className="flex items-center gap-2"><ShieldQuestion className="h-4 w-4" />Classificação</Label>
-                    <Select value={classification} onValueChange={(value) => setClassification(value as FilaDeEsperaItem['classificacao'])}>
+                    <Select value={classificationId} onValueChange={setClassificationId}>
                         <SelectTrigger id="classification">
                             <SelectValue placeholder="Selecione a classificação" />
                         </SelectTrigger>
                         <SelectContent>
-                            {orderedClassificacoes.map(c => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                            {classificacoes.map(c => (
+                                <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
