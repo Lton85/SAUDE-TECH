@@ -45,7 +45,7 @@ const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass
                         <UserPlus className="mr-1 h-3 w-3"/>
                         Identificar
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReturnToPending(item)} disabled={isReadOnly}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReturnToPending(item)} disabled={isReadOnly} title="Retornar para pendentes">
                         <Undo2 className="h-4 w-4" />
                         <span className="sr-only">Retornar para pendentes</span>
                     </Button>

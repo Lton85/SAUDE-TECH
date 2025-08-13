@@ -83,6 +83,7 @@ export default function AtendimentosPage() {
     const [isClearPanelDialogOpen, setIsClearPanelDialogOpen] = useState(false);
     const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
     const [isReturnToTriageDialogOpen, setIsReturnToTriageDialogOpen] = useState(false);
+    const [isReturnToPendingDialogOpen, setIsReturnToPendingDialogOpen] = useState(false);
 
     
     // Dialog item states
@@ -92,6 +93,7 @@ export default function AtendimentosPage() {
     const [itemToHistory, setItemToHistory] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturnToTriage, setItemToReturnToTriage] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToReturnToPending, setItemToReturnToPending] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
@@ -229,13 +231,22 @@ export default function AtendimentosPage() {
         }
     };
     
-    const handleReturnToPending = async (item: FilaDeEsperaItem) => {
+    const handleReturnToPendingRequest = (item: FilaDeEsperaItem) => {
+        setItemToReturnToPending(item);
+        setIsReturnToPendingDialogOpen(true);
+    };
+
+    const handleConfirmReturnToPending = async () => {
+        if (!itemToReturnToPending) return;
         try {
-            await retornarParaPendente(item.id);
-            setNotification({ type: 'success', title: "Retorno Confirmado!", message: `A senha ${item.senha} voltou para a fila de senhas pendentes.` });
+            await retornarParaPendente(itemToReturnToPending.id);
+            setNotification({ type: 'success', title: "Retorno Confirmado!", message: `A senha ${itemToReturnToPending.senha} voltou para a fila de senhas pendentes.` });
         } catch (error) {
             const err = error as Error;
             setNotification({ type: 'error', title: "Erro ao retornar senha", message: err.message });
+        } finally {
+            setIsReturnToPendingDialogOpen(false);
+            setItemToReturnToPending(null);
         }
     };
 
@@ -321,6 +332,7 @@ export default function AtendimentosPage() {
             <Tabs defaultValue={activeTab} className="flex flex-col flex-1">
                  <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10 bg-card">
                     {allTabs.map(tab => {
+                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                          const Icon = tab.icon;
                          let count = 0;
                          if (tab.id === 'pendentes') count = pendentes.length;
@@ -330,7 +342,8 @@ export default function AtendimentosPage() {
                          else if (tab.id === 'finalizados') count = finalizados.length;
 
                         return (
-                            <TabsTrigger key={tab.id} value={tab.id}>
+                            <TabsTrigger key={tab.id} value={tab.id} disabled={!hasPermission}>
+                                {!hasPermission && <Lock className="mr-2 h-3 w-3" />}
                                 <Icon className="mr-2 h-4 w-4" />
                                 {tab.label}
                                 {count > 0 && (
@@ -349,7 +362,7 @@ export default function AtendimentosPage() {
                         return (
                             <TabsContent key={tab.id} value={tab.id}>
                                 {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
-                                {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPending} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
                                 {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
@@ -475,6 +488,18 @@ export default function AtendimentosPage() {
                     onConfirm={handleConfirmReturnToTriage}
                     title="Retornar Paciente para a Triagem?"
                     description={`Tem certeza que deseja retornar o paciente ${itemToReturnToTriage.pacienteNome} para a triagem inicial? Ele sairá da fila de atendimento.`}
+                    confirmText="Sim, Retornar"
+                    icon={Undo2}
+                />
+            )}
+
+            {itemToReturnToPending && (
+                <ConfirmationDialog
+                    isOpen={isReturnToPendingDialogOpen}
+                    onOpenChange={setIsReturnToPendingDialogOpen}
+                    onConfirm={handleConfirmReturnToPending}
+                    title="Retornar para Senhas Pendentes?"
+                    description={`Tem certeza que deseja retornar a senha ${itemToReturnToPending.senha} para a lista de senhas pendentes?`}
                     confirmText="Sim, Retornar"
                     icon={Undo2}
                 />
