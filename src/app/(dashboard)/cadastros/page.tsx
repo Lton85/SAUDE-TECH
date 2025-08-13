@@ -43,7 +43,7 @@ export default function CadastrosPage() {
                             key={item.id}
                             onClick={() => setActiveList(item.id as ActiveList)}
                             className={cn(
-                                "h-14 text-lg",
+                                "h-12 text-base",
                                 activeList === item.id
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-card text-card-foreground border hover:bg-muted"
