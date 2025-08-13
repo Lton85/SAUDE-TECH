@@ -147,40 +147,6 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-  
-
-  const generateTicketPreview = useCallback(async (currentClassificationId: string) => {
-    if (selectedPaciente && !isCompleting) {
-        try {
-            const classificacao = classificacoes.find(c => c.id === currentClassificationId);
-            if (!classificacao) {
-                setSenha("Erro");
-                throw new Error("Classificação não encontrada.");
-            }
-            const counterName = `senha_${classificacao.id.toLowerCase()}`;
-            const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
-
-            setSenha("Gerando...");
-            const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
-            const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
-            setSenha(ticket);
-        } catch (error) {
-            console.error("Erro ao gerar senha:", error);
-            setSenha("Erro");
-            setNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
-        }
-    }
-  }, [selectedPaciente, isCompleting, classificacoes]);
-
-
-  useEffect(() => {
-    if (selectedPaciente && !isCompleting) {
-        generateTicketPreview(classificationId);
-    } else if (!isCompleting) {
-        setSenha("");
-    }
-  }, [selectedPaciente, generateTicketPreview, classificationId, isCompleting]);
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -228,7 +194,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
         departamentoNumero: selectedDepartamento.numero,
         profissionalId: profissional.id,
         profissionalNome: profissional.nome,
-        senha: senha,
+        senha: senha, // A senha será gerada/confirmada no backend
         status: "aguardando",
         classificacao: classificationId,
       }
@@ -472,10 +438,10 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
                         <Input 
                         id="senha" 
-                        value={senha}
+                        value={isCompleting ? senha : "Será gerada ao confirmar"}
                         readOnly
                         className="font-bold text-lg bg-background text-center tracking-wider"
-                        disabled={!selectedPaciente}
+                        disabled
                         placeholder="-"
                         />
                     </div>

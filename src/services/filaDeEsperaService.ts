@@ -92,20 +92,38 @@ export const addPacienteToFila = async (item: Omit<FilaDeEsperaItem, 'id' | 'che
         const empresaConfig = await getEmpresa();
         const classificacoes = empresaConfig?.classificacoes || [];
         const prioridade = getPrioridade(item.classificacao, classificacoes);
+        
+        const classificacaoConfig = classificacoes.find(c => c.id === item.classificacao);
+        if (!classificacaoConfig) {
+            throw new Error("Classificação de atendimento inválida.");
+        }
 
+        let finalSenha = item.senha;
+        
+        // Gera uma nova senha apenas se não for um pre-cadastro (que já tem senha)
+        if (!atendimentoPendenteId) {
+            const counterName = `senha_${classificacaoConfig.id.toLowerCase()}`;
+            const ticketPrefix = classificacaoConfig.nome.charAt(0).toUpperCase();
+            const ticketNumber = await getNextCounter(counterName, true); // INCREMENTA o contador
+            finalSenha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
+        }
+        
+        const finalItem = {
+            ...item,
+            senha: finalSenha,
+            prioridade
+        };
 
         // If it's completing a pending registration, update it
         if (atendimentoPendenteId) {
             const docRef = doc(db, "filaDeEspera", atendimentoPendenteId);
              await updateDoc(docRef, {
-                ...item,
-                prioridade,
+                ...finalItem,
                 status: 'aguardando'
             });
         } else { // Otherwise, create a new one
             await addDoc(filaDeEsperaCollection, {
-                ...item,
-                prioridade,
+                ...finalItem,
                 chegadaEm: serverTimestamp(),
                 chamadaEm: null,
                 finalizadaEm: null,
@@ -387,8 +405,8 @@ export const retornarPacienteParaTriagem = async (id: string): Promise<void> => 
     }
     const filaDocRef = doc(db, "filaDeEspera", id);
     await updateDoc(filaDocRef, {
-        status: "chamado-triagem",
-        chamadaEm: serverTimestamp(),
+        status: "pendente", // Volta para pendente para uma nova triagem
+        chamadaEm: null,
         departamentoId: null,
         departamentoNome: null,
         departamentoNumero: null,
