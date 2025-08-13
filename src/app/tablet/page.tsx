@@ -22,23 +22,27 @@ const getColors = (classId: string) => {
     switch (classId) {
         case 'Normal': return {
             notification: 'bg-green-600',
-            border: "group-hover:border-green-400 bg-green-900/40 border-green-500/30",
-            text: "text-green-400"
+            border: "border-green-400/30 bg-green-900/20 hover:border-green-400/60",
+            text: "text-green-400",
+            description: "text-green-400/70"
         };
         case 'Preferencial': return {
             notification: 'bg-blue-600',
-            border: "group-hover:border-blue-400 bg-blue-900/40 border-blue-500/30",
-            text: "text-blue-400"
+            border: "border-blue-400/30 bg-blue-900/20 hover:border-blue-400/60",
+            text: "text-blue-400",
+            description: "text-blue-400/70"
         };
         case 'Urgencia': return {
             notification: 'bg-red-600',
-            border: "group-hover:border-red-400 bg-red-900/40 border-red-500/30",
-            text: "text-red-400"
+            border: "border-red-400/30 bg-red-900/20 hover:border-red-400/60",
+            text: "text-red-400",
+            description: "text-red-400/70"
         };
         default: return { 
             notification: 'bg-slate-600',
-            border: "group-hover:border-slate-400 bg-slate-900/40 border-slate-500/30",
-            text: "text-slate-400"
+            border: "border-slate-400/30 bg-slate-900/20 hover:border-slate-400/60",
+            text: "text-slate-400",
+            description: "text-slate-400/70"
         };
     }
 };
@@ -162,10 +166,10 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-12 w-full"
             >
-                <h1 className={cn("font-display font-black text-amber-400 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
+                 <h1 className={cn("font-display font-black text-slate-100 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
                     RETIRE SUA SENHA
                 </h1>
-                <p className={cn("mt-4 text-slate-200 font-normal", subtitleSizeClasses[config.infoSize])}>
+                <p className={cn("mt-4 text-slate-300 font-normal", subtitleSizeClasses[config.infoSize])}>
                     Escolha o tipo de atendimento:
                 </p>
             </motion.div>
@@ -180,13 +184,12 @@ export default function TabletPage() {
                         initial="hidden" 
                         animate="visible" 
                         variants={cardVariants}
-                        className="w-full sm:w-64 md:w-72"
+                        className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
                      >
                         <Card 
                             className={cn(
                                 "group w-full h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer aspect-square",
-                                colors.border,
-                                "bg-cover bg-center"
+                                colors.border
                             )}
                             onClick={() => handleSelection(classificacao)}
                         >
@@ -194,24 +197,19 @@ export default function TabletPage() {
                                 {isLoading === classificacao.id ? (
                                     <Loader2 className={cn("h-12 w-12 animate-spin", colors.text)} />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center text-center h-full">
-                                        <div className="flex-grow flex items-center justify-center">
-                                            <h2 className={cn("font-bold", colors.text, cardSizeClasses[config.cardSize])}>
-                                                {classificacao.nome.toUpperCase()}
-                                            </h2>
-                                        </div>
+                                    <>
+                                        <h2 className={cn("font-bold uppercase", colors.text, cardSizeClasses[config.cardSize])}>
+                                            {classificacao.nome}
+                                        </h2>
                                         {classificacao.descricao && (
-                                            <div className="self-end pb-2">
-                                                <p className={cn(
-                                                    "text-xs md:text-sm font-normal", 
-                                                    colors.text, 
-                                                    "opacity-70"
-                                                )}>
-                                                    {classificacao.descricao}
-                                                </p>
-                                            </div>
+                                            <p className={cn(
+                                                "text-xs md:text-sm font-normal mt-2", 
+                                                colors.description
+                                            )}>
+                                                {classificacao.descricao}
+                                            </p>
                                         )}
-                                    </div>
+                                    </>
                                 )}
                             </CardContent>
                         </Card>
@@ -254,4 +252,5 @@ export default function TabletPage() {
             )}
         </div>
     );
-}
+
+    
