@@ -6,30 +6,21 @@ import Image from "next/image";
 import React from "react";
 import { Stethoscope } from "lucide-react";
 
-interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {
-  logoUrl?: string | null;
-}
+interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
+export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
+    // URL do logotipo fixo para toda a aplicação.
+    const fixedLogoUrl = "https://i.ibb.co/pwnVLr0/logo-saude.png";
 
-    if (logoUrl) {
-        return (
-            <div className={cn("relative", className)} {...props}>
-                <Image
-                    src={logoUrl}
-                    alt="Logotipo do Sistema"
-                    layout="fill"
-                    objectFit="contain"
-                    unoptimized // Use this if you have issues with optimized images from external sources
-                />
-            </div>
-        );
-    }
-    
-    // Fallback Icon
     return (
-        <div className={cn("flex items-center justify-center", className)} {...props}>
-            <Stethoscope className="w-full h-full" />
+        <div className={cn("relative", className)} {...props}>
+            <Image
+                src={fixedLogoUrl}
+                alt="Logotipo do Sistema"
+                layout="fill"
+                objectFit="contain"
+                unoptimized
+            />
         </div>
     );
 };
