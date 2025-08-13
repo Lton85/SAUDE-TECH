@@ -41,15 +41,15 @@ export default function CadastrosPage() {
                     return (
                         <Button
                             key={item.id}
+                            size="sm"
                             onClick={() => setActiveList(item.id as ActiveList)}
                             className={cn(
-                                "h-12 text-base",
                                 activeList === item.id
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-card text-card-foreground border hover:bg-muted"
                             )}
                         >
-                            <Icon className="mr-2 h-5 w-5" />
+                            <Icon className="mr-2 h-4 w-4" />
                             {item.label}
                         </Button>
                     );
