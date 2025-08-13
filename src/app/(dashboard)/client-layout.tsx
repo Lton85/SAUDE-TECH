@@ -22,6 +22,7 @@ import {
   LogOut,
   UserCircle,
   Tablet,
+  Lock,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -104,7 +105,11 @@ export const allMenuItems = [
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
 ];
 
-export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number; subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[] };
+export type Tab = (typeof allMenuItems)[number] & { 
+    notificationCount?: number; 
+    subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
+    disabled?: boolean;
+};
 
 const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
     const { state } = useSidebar();
@@ -156,6 +161,8 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
     }, [searchTerm, menuItems]);
     
     const handleButtonClick = (item: Tab) => {
+        if(item.disabled) return;
+
         if (item.target === '_blank' && item.href) {
             handleOpenInNewTab(item.href);
         } else if (item.id === 'sair') {
@@ -200,9 +207,10 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                         <SidebarMenuButton
                             onClick={() => handleButtonClick(item)}
                             isActive={activeContentId === item.id}
-                            tooltip={{children: item.label, side: "right"}}
+                            disabled={item.disabled}
+                            tooltip={{children: item.disabled ? `${item.label} (Bloqueado)` : item.label, side: "right"}}
                         >
-                            <item.icon />
+                            {item.disabled ? <Lock /> : <item.icon />}
                             <span>{item.label}</span>
                              {item.notificationCount && item.notificationCount > 0 && (
                                 <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -389,24 +397,23 @@ export default function DashboardClientLayout({
     const currentUser = getCurrentUser();
     if (currentUser) {
         if (currentUser.usuario === 'master') {
-            setUserMenuItems(allMenuItems);
+            setUserMenuItems(allMenuItems.map(item => ({...item, disabled: false})));
             return;
         }
 
         const userPermissions = currentUser.permissoes || [];
-        const allowedMenuItems = allMenuItems.filter(item => {
-            // It's allowed if it doesn't require permission
-            if (!item.permissionRequired) return true;
-            
-            // Or if it's explicitly in permissions
-            if (userPermissions.includes(item.id)) return true;
-
-            // Or if any of its sub-items are in permissions
-            if(item.subItems) {
-                return item.subItems.some(sub => userPermissions.includes(sub.id));
+        const allowedMenuItems = allMenuItems.map(item => {
+            if (!item.permissionRequired) {
+                return {...item, disabled: false};
             }
-            
-            return false;
+
+            let hasAccess = userPermissions.includes(item.id);
+            if (item.subItems) {
+                const hasSubItemAccess = item.subItems.some(sub => userPermissions.includes(sub.id));
+                hasAccess = hasAccess || hasSubItemAccess;
+            }
+
+            return {...item, disabled: !hasAccess};
         });
         setUserMenuItems(allowedMenuItems);
     }
@@ -453,6 +460,8 @@ export default function DashboardClientLayout({
   };
 
   const handleMenuItemClick = (item: Tab) => {
+    if (item.disabled) return;
+
     if (item.target === '_blank' && item.href) {
         handleOpenInNewTab(item.href);
         return;

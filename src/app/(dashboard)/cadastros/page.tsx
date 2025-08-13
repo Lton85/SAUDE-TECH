@@ -23,53 +23,67 @@ const allTabs: TabInfo[] = [
 ];
 
 export default function CadastrosPage() {
-  const [allowedTabs, setAllowedTabs] = React.useState<TabInfo[]>([]);
+    const [permissions, setPermissions] = React.useState<string[]>([]);
+    const [activeTab, setActiveTab] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) return;
+    React.useEffect(() => {
+        const user = getCurrentUser();
+        if (!user) return;
 
-    if (user.usuario === 'master') {
-      setAllowedTabs(allTabs);
-    } else {
-      const userPermissions = user.permissoes || [];
-      const tabs = allTabs.filter(tab => userPermissions.includes(`/cadastros/${tab.id}`));
-      setAllowedTabs(tabs);
-    }
-  }, []);
+        const userPermissions = user.permissoes || [];
+        if (user.usuario === 'master') {
+             const allPermissions = allTabs.map(t => `/cadastros/${t.id}`);
+            setPermissions(allPermissions);
+            setActiveTab(allTabs[0]?.id);
+        } else {
+            setPermissions(userPermissions);
+            const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/cadastros/${tab.id}`));
+            setActiveTab(firstAllowedTab ? firstAllowedTab.id : null);
+        }
+    }, []);
 
-  if (allowedTabs.length === 0) {
-      return (
+    if (activeTab === null) {
+        return (
             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
                 <Lock className="h-10 w-10 text-muted-foreground/50" />
                 <p className="mt-4 text-center text-muted-foreground">
                     Você não tem permissão para acessar esta seção.
                 </p>
             </div>
-      );
-  }
+        );
+    }
 
-  return (
-    <Tabs defaultValue={allowedTabs[0]?.id} className="w-full">
-      <TabsList className={`grid w-full grid-cols-${allowedTabs.length}`}>
-        {allowedTabs.map(tab => {
-            const Icon = tab.icon;
-            return (
-                <TabsTrigger key={tab.id} value={tab.id}>
-                    <Icon className="mr-2 h-4 w-4" />
-                    {tab.label}
-                </TabsTrigger>
-            );
-        })}
-      </TabsList>
-      {allowedTabs.map(tab => {
-          const Component = tab.component;
-          return (
-            <TabsContent key={tab.id} value={tab.id} className="mt-4">
-                <Component />
-            </TabsContent>
-          );
-      })}
-    </Tabs>
-  );
+    return (
+        <Tabs defaultValue={activeTab} className="w-full">
+            <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
+                {allTabs.map(tab => {
+                    const Icon = tab.icon;
+                    return (
+                        <TabsTrigger key={tab.id} value={tab.id}>
+                            <Icon className="mr-2 h-4 w-4" />
+                            {tab.label}
+                        </TabsTrigger>
+                    );
+                })}
+            </TabsList>
+            {allTabs.map(tab => {
+                const Component = tab.component;
+                const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                return (
+                    <TabsContent key={tab.id} value={tab.id} className="mt-4">
+                        {hasPermission ? (
+                            <Component />
+                        ) : (
+                             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
+                                <Lock className="h-10 w-10 text-muted-foreground/50" />
+                                <p className="mt-4 text-center text-muted-foreground">
+                                    Você não tem permissão para acessar esta aba.
+                                </p>
+                            </div>
+                        )}
+                    </TabsContent>
+                );
+            })}
+        </Tabs>
+    );
 }

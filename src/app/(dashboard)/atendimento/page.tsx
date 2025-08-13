@@ -93,16 +93,23 @@ export default function AtendimentosPage() {
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
     // Permissions
-    const [allowedTabs, setAllowedTabs] = useState<TabInfo[]>([]);
-
+    const [permissions, setPermissions] = useState<string[]>([]);
+    const [activeTab, setActiveTab] = useState<string | null>(null);
+    
     useEffect(() => {
         const user = getCurrentUser();
-        const userPermissions = user?.permissoes || [];
-        if(user?.usuario === 'master'){
-             setAllowedTabs(allTabs);
+        if (!user) return;
+
+        const userPermissions = user.permissoes || [];
+        if (user.usuario === 'master') {
+            const allPermissions = allTabs.map(t => `/atendimento/${t.id}`);
+            setPermissions(allPermissions);
+            setActiveTab(allTabs[0]?.id);
         } else {
-            const tabs = allTabs.filter(tab => userPermissions.includes(`/atendimento/${tab.id}`));
-            setAllowedTabs(tabs);
+            setPermissions(userPermissions);
+            // Set the first allowed tab as active
+            const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/atendimento/${tab.id}`));
+            setActiveTab(firstAllowedTab ? firstAllowedTab.id : null);
         }
     }, []);
 
@@ -286,7 +293,7 @@ export default function AtendimentosPage() {
         }
     };
     
-     if (allowedTabs.length === 0 && !isLoading) {
+    if (activeTab === null) {
         return (
             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
                 <Lock className="h-10 w-10 text-muted-foreground/50" />
@@ -299,10 +306,9 @@ export default function AtendimentosPage() {
     
     return (
         <div className="flex flex-col h-full">
-            <Tabs defaultValue={allowedTabs[0]?.id} className="flex flex-col flex-1">
+            <Tabs defaultValue={activeTab} className="flex flex-col flex-1">
                  <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10 bg-card">
                     {allTabs.map(tab => {
-                         if (!allowedTabs.some(allowed => allowed.id === tab.id)) return null;
                          const Icon = tab.icon;
                          let count = 0;
                          if (tab.id === 'pendentes') count = pendentes.length;
@@ -326,62 +332,29 @@ export default function AtendimentosPage() {
                 </TabsList>
                 
                 <div className="flex-1 overflow-y-auto mt-4">
-                    <TabsContent value="pendentes">
-                        <SenhasPendentesList 
-                            pendentes={pendentes} 
-                            isLoading={isLoading} 
-                            onCall={handleChamarParaTriagem}
-                            onCancel={setItemToCancel}
-                            classificacoes={activeClassificacoes}
-                        />
-                    </TabsContent>
-                    
-                    <TabsContent value="em-triagem">
-                        <EmTriagemList 
-                            emTriagem={emTriagem}
-                            isLoading={isLoading}
-                            onIdentify={handleCompletarCadastro}
-                            onCancel={setItemToCancel}
-                            onReturnToPending={handleReturnToPending}
-                            classificacoes={activeClassificacoes}
-                        />
-                    </TabsContent>
-
-                    <TabsContent value="fila-atendimento">
-                        <FilaDeAtendimentoList
-                            fila={fila}
-                            isLoading={isLoading}
-                            onCall={handleChamarParaAtendimento}
-                            onEdit={setItemToEdit}
-                            onHistory={setItemToHistory}
-                            onCancel={setItemToCancel}
-                            onAddToQueue={handleAddToQueue}
-                            onClearPanel={() => setIsClearPanelDialogOpen(true)}
-                            onClearHistory={() => setIsClearHistoryDialogOpen(true)}
-                            onPreviewPanel={() => setIsPanelPreviewOpen(true)}
-                            onReturnToTriage={handleReturnToTriage}
-                        />
-                    </TabsContent>
-
-                     <TabsContent value="em-andamento">
-                        <EmAndamentoList
-                            emAtendimento={emAtendimento}
-                            isLoading={isLoading}
-                            onReturnToQueue={setItemToReturn}
-                            onFinalize={handleFinalizarAtendimento}
-                            onCancel={setItemToCancel}
-                        />
-                    </TabsContent>
-
-                    <TabsContent value="finalizados">
-                        <FinalizadosList
-                            finalizados={finalizados}
-                            isLoading={isLoading}
-                            filter={finalizadosFilter}
-                            onFilterChange={setFinalizadosFilter}
-                            classificationNames={classificationNames}
-                        />
-                    </TabsContent>
+                    {allTabs.map(tab => {
+                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
+                        return (
+                            <TabsContent key={tab.id} value={tab.id}>
+                                {!hasPermission ? (
+                                     <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                                        <Lock className="h-10 w-10 text-muted-foreground/50" />
+                                        <p className="mt-4 text-center text-muted-foreground">
+                                            Você não tem permissão para acessar esta aba.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <>
+                                     {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes}/>}
+                                     {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPending} classificacoes={activeClassificacoes}/>}
+                                     {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriage} />}
+                                     {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel}/>}
+                                     {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
+                                    </>
+                                )}
+                            </TabsContent>
+                        )
+                    })}
                 </div>
             </Tabs>
             
