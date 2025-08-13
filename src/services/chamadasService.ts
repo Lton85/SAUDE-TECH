@@ -36,8 +36,8 @@ export const clearPainel = async () => {
             id: 'clear-call',
             senha: '----',
             departamentoNome: 'Aguardando...',
-            pacienteNome: '', // Alterado para vazio
-            profissionalNome: '', // Alterado para vazio
+            pacienteNome: '',
+            profissionalNome: '',
             atendimentoId: null,
             timestamp: serverTimestamp() 
         });

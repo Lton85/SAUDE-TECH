@@ -233,20 +233,6 @@ export const getAtendimentosEmAndamento = (
     return unsubscribe;
 }
 
-/**
- * Esta função requer DOIS índices compostos no Firestore para ordenação.
- * As consultas básicas por data já são otimizadas.
- *
- * 1) Para Atendimentos Finalizados
- * Coleção: relatorios_atendimentos
- * Campos: finalizadaEm (Descendente)
- * Link: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg8KC2ZpbmFsaXphZGFFbRACGgwKCF9fbmFtZV9fEAI
- *
- * 2) Para Atendimentos Cancelados
- * Coleção: relatorios_atendimentos
- * Campos: canceladaEm (Descendente)
- * Link: https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Clxwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEg4KCmNhbmNlbGFkYUVtEgIaDAoKX19uYW1lX18QAQ==
- */
 export const getAtendimentosFinalizadosHoje = (
     onUpdate: (data: FilaDeEsperaItem[]) => void,
     onError: (error: string) => void
@@ -468,16 +454,16 @@ export const getHistoricoAtendimentosPorPeriodo = async (
         const start = startOfDay(dateFrom);
         const end = endOfDay(dateTo);
         
-        // Query for finalized appointments
         const qFinalizados = query(
             collection(db, "relatorios_atendimentos"),
+            where("status", "==", "finalizado"),
             where("finalizadaEm", ">=", Timestamp.fromDate(start)),
             where("finalizadaEm", "<=", Timestamp.fromDate(end))
         );
 
-        // Query for canceled appointments
         const qCancelados = query(
             collection(db, "relatorios_atendimentos"),
+            where("status", "==", "cancelado"),
             where("canceladaEm", ">=", Timestamp.fromDate(start)),
             where("canceladaEm", "<=", Timestamp.fromDate(end))
         );
@@ -487,12 +473,9 @@ export const getHistoricoAtendimentosPorPeriodo = async (
             getDocs(qCancelados)
         ]);
         
-        let finalizadosData = finalizadosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
-        finalizadosData = finalizadosData.filter(item => item.status === 'finalizado');
+        const finalizadosData = finalizadosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
+        const canceladosData = canceladosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
         
-        let canceladosData = canceladosSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FilaDeEsperaItem));
-        canceladosData = canceladosData.filter(item => item.status === 'cancelado');
-
         const allData = [...finalizadosData, ...canceladosData].sort((a, b) => {
             const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
             const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
@@ -518,10 +501,8 @@ export const getHistoricoAtendimentosPorPeriodo = async (
 export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
     filters: FullSearchFilters
 ): Promise<FilaDeEsperaItem[]> => {
-    // 1. Fetch all data for the date range without Firestore filters for status, etc.
     let data = await getHistoricoAtendimentosPorPeriodo(filters);
 
-    // 2. Apply other filters in the client-side code
     if (filters.pacienteId && filters.pacienteId !== 'todos') {
         data = data.filter(item => item.pacienteId === filters.pacienteId);
     }
@@ -531,7 +512,6 @@ export const getHistoricoAtendimentosPorPeriodoComFiltros = async (
         const docSnap = await getDoc(docRef);
         if(docSnap.exists()){
             const profissional = docSnap.data();
-            // Assuming profissionalNome is stored as "Dr(a). Nome Sobrenome"
             data = data.filter(item => item.profissionalNome === `Dr(a). ${profissional.nome}`);
         }
     }

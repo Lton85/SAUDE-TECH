@@ -203,8 +203,9 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
 
             const qDia = query(
                 collection(db, "relatorios_atendimentos"),
+                where("status", "==", "finalizado"),
                 where("finalizadaEm", ">=", Timestamp.fromDate(startOfToday)),
-                where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday)),
+                where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday))
             );
             
             const unsubscribeDaily = onSnapshot(qDia, (snapshot) => {

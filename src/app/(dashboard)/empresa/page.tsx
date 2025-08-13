@@ -29,9 +29,9 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', descricao: 'Atendimento geral para todos os públicos', ativa: true },
-    { id: 'Preferencial', nome: 'Preferencial', descricao: 'Gestantes, idosos, pessoas com deficiência.', ativa: true },
-    { id: 'Urgencia', nome: 'Urgência', descricao: 'Atendimento de urgência e emergência.', ativa: true },
+    { id: 'Normal', nome: 'Normal', nomeAtivo: true, descricao: 'Atendimento geral para todos os públicos', descricaoAtiva: true },
+    { id: 'Preferencial', nome: 'Preferencial', nomeAtivo: true, descricao: 'Gestantes, idosos, pessoas com deficiência.', descricaoAtiva: true },
+    { id: 'Urgencia', nome: 'Urgência', nomeAtivo: true, descricao: 'Atendimento de urgência e emergência.', descricaoAtiva: true },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -72,10 +72,16 @@ export default function EmpresaPage() {
             const empresaData = await getEmpresa();
             if (empresaData) {
                  const classificacoesExistentes = empresaData.classificacoes?.length ? empresaData.classificacoes : initialClassificacoes;
+                 const classificacoesCompletas = classificacoesExistentes.map(c => ({
+                    ...c,
+                    nomeAtivo: c.nomeAtivo !== undefined ? c.nomeAtivo : true,
+                    descricaoAtiva: c.descricaoAtiva !== undefined ? c.descricaoAtiva : true,
+                 }));
+
                 setFormData({
                     ...initialEmpresaState,
                     ...empresaData,
-                    classificacoes: classificacoesExistentes,
+                    classificacoes: classificacoesCompletas,
                 });
 
                 if (empresaData.uf) {
@@ -156,7 +162,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: '', descricao: '', ativa: true }
+                { id: newId, nome: '', nomeAtivo: true, descricao: '', descricaoAtiva: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
@@ -224,7 +230,16 @@ export default function EmpresaPage() {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await saveOrUpdateEmpresa(formData);
+            // Garante que a propriedade `ativa` seja derivada do estado dos checkboxes `nomeAtivo` e `descricaoAtiva`
+            const formDataToSave = {
+                ...formData,
+                classificacoes: formData.classificacoes?.map(c => ({
+                    ...c,
+                    ativa: c.nomeAtivo || c.descricaoAtiva,
+                }))
+            };
+
+            await saveOrUpdateEmpresa(formDataToSave);
             setIsEditing(false);
             setNotification({
                 type: "success",
@@ -366,40 +381,48 @@ export default function EmpresaPage() {
                     <CardContent>
                         <div className="space-y-4">
                             {(formData.classificacoes || []).map((classificacao, index) => (
-                                <div key={classificacao.id} className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`class-active-${classificacao.id}`}
-                                            checked={classificacao.ativa}
-                                            onCheckedChange={(checked) => handleClassificationChange(index, 'ativa', !!checked)}
-                                            disabled={!isEditing}
-                                        />
-                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-4">
+                                <React.Fragment key={classificacao.id}>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`class-name-active-${classificacao.id}`}
+                                                checked={classificacao.nomeAtivo}
+                                                onCheckedChange={(checked) => handleClassificationChange(index, 'nomeAtivo', !!checked)}
+                                                disabled={!isEditing}
+                                            />
                                             <Input
                                                 id={`className-${classificacao.id}`}
                                                 value={classificacao.nome}
                                                 onChange={(e) => handleClassificationChange(index, 'nome', e.target.value)}
                                                 disabled={!isEditing}
-                                                className="font-semibold h-9"
+                                                className="font-semibold h-9 flex-1"
                                                 placeholder="Nome da Classificação"
                                             />
-                                             <Input
+                                            {isEditing && !initialClassificacoes.some(c => c.id === classificacao.id) && (
+                                                <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                         <div className="flex items-center space-x-2 ml-8">
+                                             <Checkbox
+                                                id={`class-desc-active-${classificacao.id}`}
+                                                checked={classificacao.descricaoAtiva}
+                                                onCheckedChange={(checked) => handleClassificationChange(index, 'descricaoAtiva', !!checked)}
+                                                disabled={!isEditing}
+                                            />
+                                            <Input
                                                 id={`classDesc-${classificacao.id}`}
                                                 value={classificacao.descricao || ''}
                                                 onChange={(e) => handleClassificationChange(index, 'descricao', e.target.value)}
                                                 disabled={!isEditing}
                                                 placeholder="Descrição (Ex: Gestantes, Idosos...)"
-                                                className="text-sm h-9"
+                                                className="text-sm h-9 flex-1"
                                             />
                                         </div>
-                                         {isEditing && !initialClassificacoes.some(c => c.id === classificacao.id) && (
-                                            <Button variant="ghost" size="icon" onClick={() => handleRemoveClassification(index)} className="text-destructive hover:text-destructive h-8 w-8">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
                                     </div>
-                                     {index < (formData.classificacoes || []).length -1 && <Separator className="mt-4"/>}
-                                </div>
+                                    {index < (formData.classificacoes || []).length - 1 && <Separator className="mt-4" />}
+                                </React.Fragment>
                             ))}
                             {isEditing && (
                                 <Button variant="default" size="sm" className="mt-4 w-full" onClick={handleAddClassification}>

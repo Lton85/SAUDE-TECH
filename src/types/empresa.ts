@@ -2,8 +2,10 @@
 export interface Classificacao {
     id: string; // Ex: "Normal", "Preferencial", "custom_123"
     nome: string; // Ex: "Atendimento Normal", "Preferencial", "Guichê 1"
+    nomeAtivo?: boolean;
     descricao?: string; // Ex: "Para consultas de rotina", "Gestantes, Idosos, Cadeirantes"
-    ativa: boolean;
+    descricaoAtiva?: boolean;
+    ativa: boolean; // Será derivado de nomeAtivo ou descricaoAtiva
 }
 
 export interface Empresa {
