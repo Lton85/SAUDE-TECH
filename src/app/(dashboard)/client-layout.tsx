@@ -169,7 +169,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                  <CustomLogo className="h-8 w-8 text-primary" logoUrl={empresa?.logoUrl}/>
+                  <CustomLogo className="h-8 w-8 text-primary" />
                   <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
                       <h1 className="text-xl font-bold font-headline">Saúde Tech</h1>
                   </div>

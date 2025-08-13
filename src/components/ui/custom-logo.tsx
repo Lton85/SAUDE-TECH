@@ -6,11 +6,11 @@ import Image from "next/image";
 import React from "react";
 import { Stethoscope } from "lucide-react";
 
-interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {
-  logoUrl?: string | null;
-}
+interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
+export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
+    const logoUrl = 'https://i.ibb.co/pwnVLr0/logo-saude.png';
+
     if (logoUrl) {
         return (
             <div className={cn("relative", className)} {...props}>
