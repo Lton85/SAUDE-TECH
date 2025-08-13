@@ -31,6 +31,8 @@ import { getEmpresa, Empresa } from "@/services/empresaService";
 import type { Classificacao } from "@/types/empresa";
 import { CurrentPanelDialog } from "@/components/atendimento/current-panel-dialog";
 import { getCurrentUser } from "@/services/authService";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Profissional {
   id: string;
@@ -329,8 +331,8 @@ export default function AtendimentosPage() {
     
     return (
         <div className="flex flex-col h-full">
-            <Tabs defaultValue={activeTab} className="flex flex-col flex-1">
-                 <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10 bg-card">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
+                 <div className="flex gap-4">
                     {allTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                          const Icon = tab.icon;
@@ -342,31 +344,41 @@ export default function AtendimentosPage() {
                          else if (tab.id === 'finalizados') count = finalizados.length;
 
                         return (
-                            <TabsTrigger key={tab.id} value={tab.id} disabled={!hasPermission}>
+                             <Button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                disabled={!hasPermission}
+                                className={cn(
+                                    "text-sm font-medium flex-1",
+                                    activeTab === tab.id
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-card text-card-foreground border hover:bg-muted"
+                                )}
+                            >
                                 {!hasPermission && <Lock className="mr-2 h-3 w-3" />}
                                 <Icon className="mr-2 h-4 w-4" />
                                 {tab.label}
                                 {count > 0 && (
-                                    <Badge variant={tab.id === 'pendentes' ? 'destructive' : tab.id === 'finalizados' ? 'secondary' : 'default'} className="ml-2">
+                                    <Badge variant={activeTab === tab.id ? 'secondary' : (tab.id === 'pendentes' ? 'destructive' : tab.id === 'finalizados' ? 'secondary' : 'default')} className="ml-2">
                                         {count}
                                     </Badge>
                                 )}
-                            </TabsTrigger>
+                            </Button>
                         );
                     })}
-                </TabsList>
+                </div>
                 
                 <div className="flex-1 overflow-y-auto mt-4">
                     {allTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                         return (
-                            <TabsContent key={tab.id} value={tab.id}>
+                            <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>
                                 {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
                                 {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
-                            </TabsContent>
+                            </div>
                         )
                     })}
                 </div>
