@@ -1,103 +1,63 @@
 
 "use client";
 
-import * as React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useMemo } from "react";
 import { PacientesList } from "@/components/cadastros/pacientes-list";
 import { ProfissionaisList } from "@/components/cadastros/profissionais-list";
 import { DepartamentosList } from "@/components/cadastros/departamentos-list";
-import { User, Stethoscope, Building, Lock } from "lucide-react";
-import { getCurrentUser } from "@/services/authService";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { User, Stethoscope, Building } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-interface TabInfo {
-    id: string;
-    label: string;
-    icon: React.ElementType;
-    component: React.ElementType;
-}
-
-const allTabs: TabInfo[] = [
-    { id: 'pacientes', label: 'Pacientes', icon: User, component: PacientesList },
-    { id: 'profissionais', label: 'Profissionais', icon: Stethoscope, component: ProfissionaisList },
-    { id: 'departamentos', label: 'Departamentos', icon: Building, component: DepartamentosList },
-];
+type ActiveList = 'pacientes' | 'profissionais' | 'departamentos';
 
 export default function CadastrosPage() {
-    const [permissions, setPermissions] = React.useState<string[]>([]);
-    const [activeTab, setActiveTab] = React.useState<string | null>(null);
+    const [activeList, setActiveList] = useState<ActiveList>('pacientes');
 
-    React.useEffect(() => {
-        const user = getCurrentUser();
-        if (!user) return;
-
-        const userPermissions = user.permissoes || [];
-        if (user.usuario === 'master') {
-             const allPermissions = allTabs.map(t => `/cadastros/${t.id}`);
-            setPermissions(allPermissions);
-            setActiveTab(allTabs[0]?.id);
-        } else {
-            setPermissions(userPermissions);
-            const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/cadastros/${tab.id}`));
-            setActiveTab(firstAllowedTab ? firstAllowedTab.id : null);
+    const renderList = () => {
+        switch (activeList) {
+            case 'pacientes':
+                return <PacientesList />;
+            case 'profissionais':
+                return <ProfissionaisList />;
+            case 'departamentos':
+                return <DepartamentosList />;
+            default:
+                return <PacientesList />;
         }
-    }, []);
+    };
 
-    if (activeTab === null) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
-                <Lock className="h-10 w-10 text-muted-foreground/50" />
-                <p className="mt-4 text-center text-muted-foreground">
-                    Você não tem permissão para acessar esta seção.
-                </p>
-            </div>
-        );
-    }
+    const menuItems = [
+        { id: 'pacientes', label: 'Pacientes', icon: User },
+        { id: 'profissionais', label: 'Profissionais', icon: Stethoscope },
+        { id: 'departamentos', label: 'Departamentos', icon: Building },
+    ];
 
     return (
-        <Tabs defaultValue={activeTab} className="w-full flex flex-col flex-1">
-             <TabsList className={`grid w-full grid-cols-3`}>
-                {allTabs.map(tab => {
-                    const Icon = tab.icon;
-                    const hasPermission = permissions.includes(`/cadastros/${t.id}`);
+        <div className="flex flex-col h-full gap-4">
+            <div className="grid grid-cols-3 gap-4">
+                {menuItems.map(item => {
+                    const Icon = item.icon;
                     return (
-                        <TooltipProvider key={tab.id}>
-                            <Tooltip delayDuration={0}>
-                                <TooltipTrigger asChild>
-                                    <TabsTrigger value={tab.id} disabled={!hasPermission}>
-                                        {!hasPermission && <Lock className="mr-2 h-3 w-3" />}
-                                        <Icon className="mr-2 h-4 w-4" />
-                                        {tab.label}
-                                    </TabsTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    <p>{tab.label}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    );
-                })}
-            </TabsList>
-            <div className="flex-1 overflow-y-auto mt-4">
-                {allTabs.map(tab => {
-                    const Component = tab.component;
-                    const hasPermission = permissions.includes(`/cadastros/${t.id}`);
-                    return (
-                        <TabsContent key={tab.id} value={tab.id} className="mt-0">
-                            {hasPermission ? (
-                                <Component />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10 mt-10">
-                                    <Lock className="h-10 w-10 text-muted-foreground/50" />
-                                    <p className="mt-4 text-center text-muted-foreground">
-                                        Você não tem permissão para acessar esta aba.
-                                    </p>
-                                </div>
+                        <Button
+                            key={item.id}
+                            onClick={() => setActiveList(item.id as ActiveList)}
+                            className={cn(
+                                "h-20 text-lg",
+                                activeList === item.id
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-card text-card-foreground border hover:bg-muted"
                             )}
-                        </TabsContent>
+                        >
+                            <Icon className="mr-2 h-5 w-5" />
+                            {item.label}
+                        </Button>
                     );
                 })}
             </div>
-        </Tabs>
+            <div className="flex-1 overflow-y-auto">
+                {renderList()}
+            </div>
+        </div>
     );
 }

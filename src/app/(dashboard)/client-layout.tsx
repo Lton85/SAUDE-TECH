@@ -91,11 +91,6 @@ export const allMenuItems = [
     icon: Users, 
     component: CadastrosPage, 
     permissionRequired: true,
-    subItems: [
-        { id: '/cadastros/pacientes', label: 'Pacientes', permissionRequired: true },
-        { id: '/cadastros/profissionais', label: 'Profissionais', permissionRequired: true },
-        { id: '/cadastros/departamentos', label: 'Departamentos', permissionRequired: true },
-    ]
   },
   { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
@@ -404,8 +399,10 @@ export default function DashboardClientLayout({
             }
 
             let hasAccess = userPermissions.includes(item.id);
+            // If the item itself doesn't have a direct permission, check if any sub-item has permission
             if (item.subItems) {
                 const hasSubItemAccess = item.subItems.some(sub => userPermissions.includes(sub.id));
+                // A user has access to a top-level menu if they have permission for the menu itself OR any of its sub-items
                 hasAccess = hasAccess || hasSubItemAccess;
             }
 
