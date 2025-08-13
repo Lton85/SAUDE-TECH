@@ -74,9 +74,8 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const filteredPacientes = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase().trim();
     
-    // If search query is just a space or empty, show all patients.
-    if (!lowercasedQuery || lowercasedQuery === '') {
-        return pacientes;
+    if (!lowercasedQuery) {
+        return [];
     }
 
     // Check for specific filters like "rua " or "numero "
@@ -275,6 +274,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === ' ' && searchQuery === '') {
         e.preventDefault();
+        setSearchQuery(' '); // Trigger re-render of useMemo
         setShowPatientList(true);
     }
     if (showPatientList && filteredPacientes.length > 0) {
@@ -336,15 +336,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value)
-                    if(e.target.value) {
-                        setShowPatientList(true)
-                        setHighlightedIndex(-1);
-                    } else {
-                        setShowPatientList(false)
-                        setSelectedPaciente(null)
+                    setShowPatientList(!!e.target.value)
+                    setHighlightedIndex(-1);
+                    if (!e.target.value) {
+                      setSelectedPaciente(null)
                     }
                 }}
-                onFocus={() => { if(searchQuery || filteredPacientes.length > 0) setShowPatientList(true) }}
+                onFocus={() => { if(searchQuery) setShowPatientList(true) }}
                 onKeyDown={handleKeyDown}
                 className="pl-10"
                 />
