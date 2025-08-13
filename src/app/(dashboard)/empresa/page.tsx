@@ -51,7 +51,6 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
-    logoUrl: "",
     classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
@@ -366,30 +365,6 @@ export default function EmpresaPage() {
                                 <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
                             </div>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-             <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <ImageIcon className="h-6 w-6" />
-                        <CardTitle>Logotipo do Sistema</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Insira a URL da sua imagem (PNG, JPG) para personalizar a identidade visual do sistema.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        <Label htmlFor="logoUrl">URL do Logotipo</Label>
-                        <Input 
-                            id="logoUrl" 
-                            value={formData.logoUrl || ''} 
-                            onChange={handleInputChange}
-                            placeholder='https://exemplo.com/sua-imagem.png' 
-                            disabled={!isEditing}
-                        />
                     </div>
                 </CardContent>
             </Card>

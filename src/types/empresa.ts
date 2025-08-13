@@ -23,7 +23,6 @@ export interface Empresa {
     telefone: string;
     email: string;
     nomeImpressora?: string;
-    logoUrl?: string;
     classificacoes?: Classificacao[];
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
     tabletCardSize?: 'pequeno' | 'medio' | 'grande';

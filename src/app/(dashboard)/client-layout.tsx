@@ -105,7 +105,7 @@ export type Tab = (typeof allMenuItems)[number] & {
     subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
 };
 
-const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification, logoUrl }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; logoUrl?: string; }) => {
+const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
     const { state } = useSidebar();
     const [searchTerm, setSearchTerm] = React.useState("");
     const [isExitDialogOpen, setIsExitDialogOpen] = React.useState(false);
@@ -169,7 +169,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                  <CustomLogo className="h-8 w-8 text-primary" logoUrl={logoUrl} />
+                  <CustomLogo className="h-8 w-8 text-primary" />
                   <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
                       <h1 className="text-xl font-bold font-headline">Saúde Tech</h1>
                   </div>
@@ -510,7 +510,7 @@ export default function DashboardClientLayout({
   return (
     <SidebarProvider>
       <div className="flex">
-        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} onNotification={setNotification} logoUrl={empresa?.logoUrl} />
+        <AppSidebar onMenuItemClick={handleMenuItemClick} activeContentId={activeContentId} menuItems={userMenuItems} onNotification={setNotification} />
         <MainContent 
             openTabs={openTabs.filter(tab => tab.id !== '/')} 
             activeTab={activeTab}

@@ -34,26 +34,19 @@ const DefaultLogo = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 
-interface CustomLogoProps extends React.SVGProps<SVGSVGElement> {
-    logoUrl?: string;
-}
+interface CustomLogoProps extends React.SVGProps<SVGSVGElement> {}
 
-export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
+export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
+    const logoUrl = "https://i.ibb.co/3s5sy3g/logo.png";
 
-    if (logoUrl) {
-        return (
-            <div className={cn("relative", className)}>
-                <Image
-                    src={logoUrl}
-                    alt="Logotipo da empresa"
-                    layout="fill"
-                    objectFit="contain"
-                />
-            </div>
-        );
-    }
-    
     return (
-        <DefaultLogo className={cn(className)} {...props} />
+        <div className={cn("relative", className)}>
+            <Image
+                src={logoUrl}
+                alt="Logotipo do Sistema"
+                layout="fill"
+                objectFit="contain"
+            />
+        </div>
     );
 };
