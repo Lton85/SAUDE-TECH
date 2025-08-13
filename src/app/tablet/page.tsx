@@ -166,7 +166,7 @@ export default function TabletPage() {
                 transition={{ duration: 0.5 }}
                 className="mb-12 w-full"
             >
-                 <h1 className={cn("font-display font-black text-slate-100 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
+                 <h1 className={cn("font-display font-black text-amber-400 tracking-tighter uppercase", infoSizeClasses[config.infoSize])}>
                     RETIRE SUA SENHA
                 </h1>
                 <p className={cn("mt-4 text-slate-300 font-normal", subtitleSizeClasses[config.infoSize])}>
