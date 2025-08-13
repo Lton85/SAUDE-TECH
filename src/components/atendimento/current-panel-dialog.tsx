@@ -51,7 +51,10 @@ export function CurrentPanelDialog({ isOpen, onOpenChange }: { isOpen: boolean; 
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl bg-slate-900 border-slate-700 text-white">
+            <DialogContent 
+                className="max-w-4xl bg-slate-900 border-slate-700 text-white" 
+                onInteractOutside={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-amber-400">
                         <Tv2 />
@@ -119,7 +122,7 @@ export function CurrentPanelDialog({ isOpen, onOpenChange }: { isOpen: boolean; 
                 </div>
 
                 <DialogFooter className="sm:justify-end">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button type="button" className="bg-green-600 hover:bg-green-700" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
                 </DialogFooter>
@@ -127,5 +130,3 @@ export function CurrentPanelDialog({ isOpen, onOpenChange }: { isOpen: boolean; 
         </Dialog>
     );
 }
-
-    
