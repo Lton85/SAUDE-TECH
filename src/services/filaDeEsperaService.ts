@@ -241,14 +241,12 @@ export const getAtendimentosFinalizadosHoje = (
 
     const q = query(
         collection(db, "relatorios_atendimentos"),
-        where("finalizadaEm", ">=", startOfToday),
-        orderBy("finalizadaEm", "desc")
+        where("finalizadaEm", ">=", startOfToday)
     );
 
     const qCanceled = query(
         collection(db, "relatorios_atendimentos"),
-        where("canceladaEm", ">=", startOfToday),
-        orderBy("canceladaEm", "desc")
+        where("canceladaEm", ">=", startOfToday)
     );
 
     const combineAndUpdate = (finalizados: FilaDeEsperaItem[], cancelados: FilaDeEsperaItem[]) => {
