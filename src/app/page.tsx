@@ -11,6 +11,8 @@ import { login, checkAuth } from '@/services/authService';
 import { Loader2, LogIn } from 'lucide-react';
 import { NotificationDialog, NotificationType } from '@/components/ui/notification-dialog';
 import { CustomLogo } from '@/components/ui/custom-logo';
+import { getEmpresa } from '@/services/empresaService';
+import type { Empresa } from '@/types/empresa';
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -19,14 +21,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = () => {
+    const checkUser = async () => {
         if (checkAuth()) {
             router.replace('/atendimento');
         } else {
-            setIsCheckingAuth(false);
+            try {
+                const empresaData = await getEmpresa();
+                setLogoUrl(empresaData?.logoUrl);
+            } catch (error) {
+                console.warn("Could not load company logo for login screen.");
+            } finally {
+                setIsCheckingAuth(false);
+            }
         }
     };
     checkUser();
@@ -62,7 +72,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <CustomLogo className="h-12 w-12 text-primary"/>
+                <CustomLogo className="h-12 w-12 text-primary" logoUrl={logoUrl}/>
             </div>
           <CardTitle className="text-2xl">Saúde Tech</CardTitle>
           <CardDescription>Acesse sua conta para continuar</CardDescription>

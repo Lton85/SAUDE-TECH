@@ -22,11 +22,12 @@ export interface Empresa {
     uf: string;
     telefone: string;
     email: string;
-    nomeImpressora?: string;
-    classificacoes?: Classificacao[];
-    tabletInfoSize?: 'pequeno' | 'medio' | 'grande';
-    tabletCardSize?: 'pequeno' | 'medio' | 'grande';
-    exibirUltimasSenhas?: boolean;
-    localChamadaTriagem?: string;
-    exibirLocalChamadaTriagem?: boolean;
+    logoUrl: string;
+    nomeImpressora: string;
+    classificacoes: Classificacao[];
+    exibirUltimasSenhas: boolean;
+    localChamadaTriagem: string;
+    exibirLocalChamadaTriagem: boolean;
+    tabletInfoSize: 'pequeno' | 'medio' | 'grande';
+    tabletCardSize: 'pequeno' | 'medio' | 'grande';
 }

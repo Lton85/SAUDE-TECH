@@ -10,19 +10,25 @@ interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {
   logoUrl?: string | null;
 }
 
-export const CustomLogo = ({ className, logoUrl: propLogoUrl, ...props }: CustomLogoProps) => {
-    // URL do logotipo fixo para toda a aplicação.
-    const fixedLogoUrl = "https://i.ibb.co/3s5sy3g/logo.png";
-
+export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
+    if (logoUrl) {
+        return (
+            <div className={cn("relative", className)} {...props}>
+                <Image
+                    src={logoUrl}
+                    alt="Logotipo do Sistema"
+                    layout="fill"
+                    objectFit="contain"
+                    unoptimized
+                />
+            </div>
+        );
+    }
+    
+    // Fallback to a default icon if no logoUrl is provided
     return (
-        <div className={cn("relative", className)} {...props}>
-            <Image
-                src={fixedLogoUrl}
-                alt="Logotipo do Sistema"
-                layout="fill"
-                objectFit="contain"
-                unoptimized
-            />
+        <div className={cn("flex items-center justify-center", className)} {...props}>
+            <Stethoscope className="w-full h-full" />
         </div>
     );
 };
