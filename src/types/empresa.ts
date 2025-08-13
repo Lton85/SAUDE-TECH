@@ -22,6 +22,7 @@ export interface Empresa {
     uf: string;
     telefone: string;
     email: string;
+    logoUrl?: string; // Tornando opcional
     nomeImpressora: string;
     classificacoes: Classificacao[];
     exibirUltimasSenhas: boolean;

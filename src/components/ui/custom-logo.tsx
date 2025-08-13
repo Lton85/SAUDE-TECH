@@ -6,10 +6,13 @@ import Image from "next/image";
 import React from "react";
 import { Stethoscope } from "lucide-react";
 
-interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {
+    logoUrl?: string | null;
+}
 
 export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
-    const logoUrl = 'https://i.ibb.co/pwnVLr0/logo-saude.png';
+    // Usando a imagem local como padrão.
+    const logoUrl = '/img/logo.png'; 
 
     if (logoUrl) {
         return (
@@ -19,13 +22,12 @@ export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
                     alt="Logotipo do Sistema"
                     layout="fill"
                     objectFit="contain"
-                    unoptimized
                 />
             </div>
         );
     }
     
-    // Fallback to a default icon if no logoUrl is provided
+    // Fallback para um ícone padrão se nenhuma URL de logo for fornecida
     return (
         <div className={cn("flex items-center justify-center", className)} {...props}>
             <Stethoscope className="w-full h-full" />

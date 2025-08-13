@@ -50,6 +50,7 @@ const initialEmpresaState: Empresa = {
     uf: "",
     telefone: "",
     email: "",
+    logoUrl: "",
     nomeImpressora: "",
     classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
@@ -364,6 +365,10 @@ export default function EmpresaPage() {
                                 <Label htmlFor="email">E-mail</Label>
                                 <Input id="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="contato@ubs.com" disabled={!isEditing}/>
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="logoUrl">URL do Logotipo</Label>
+                            <Input id="logoUrl" value={formData.logoUrl || ''} onChange={handleInputChange} placeholder="https://.../logo.png" disabled={!isEditing}/>
                         </div>
                     </div>
                 </CardContent>
