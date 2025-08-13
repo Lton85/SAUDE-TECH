@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building, Tablet } from "lucide-react";
+import { Settings, RefreshCw, Trash2, ShieldAlert, Printer, Save, Loader2, Pencil, X, UserX, Stethoscope, Building, Tablet, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resetCounterByName } from "@/services/countersService";
 import { clearAllRelatorios, clearAllAtendimentos } from "@/services/filaDeEsperaService";
@@ -74,6 +74,12 @@ export default function ConfiguracoesPage() {
     const [isEditingPrinter, setIsEditingPrinter] = useState(false);
     
     const [classificacoes, setClassificacoes] = useState<Classificacao[]>([]);
+
+    const firestoreIndexes = {
+        atendimentos: "https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=CmFwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmVsYXRvcmlvc19hdGVuZGltZW50b3MvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaEAoMZmluYWxpemFkYUVtEAEaDAoIX19uYW1lX18QAQ",
+        filaDeEspera: "https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=Cl5wcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABGgoKBnN0YXR1cxABEg4KCnByaW9yaWRhZGUQARINCgljaGVnYWRhRW0QARoMCghfX25hbWVfXxAB",
+        pendentes: "https://console.firebase.google.com/v1/r/project/saude-facil-99832/firestore/indexes?create_composite=ClZwcm9qZWN0cy9zYXVkZS1mYWNpbC05OTgzMi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvZmlsYURlRXNwZXJhL2luZGV4ZXMvXxABGgoKBnN0YXR1cxABGg0KCWNoZWdhZGFFbRABGgwKCF9fbmFtZV9fEAE"
+    };
     
 
     useEffect(() => {
@@ -337,6 +343,18 @@ export default function ConfiguracoesPage() {
             </Button>
         </div>
     );
+    
+    const IndexRow = ({ label, href }: { label: string, href: string }) => (
+         <div className="flex items-center justify-between px-3 py-2 first:pt-0 last:pb-0">
+            <p className="font-medium text-sm text-gray-700">{label}</p>
+            <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                    <Database className="mr-2 h-3 w-3" />
+                    Criar Índice
+                </a>
+            </Button>
+        </div>
+    );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -433,6 +451,22 @@ export default function ConfiguracoesPage() {
                     </CardContent>
                 </Card>
             </div>
+             <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Database className="h-5 w-5" />
+                        <CardTitle className="text-lg">Índices do Firestore</CardTitle>
+                    </div>
+                    <CardDescription className="text-sm">
+                        Se ocorrerem erros de "índice necessário" nas telas, clique nos botões abaixo para criar os índices no Firebase.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <IndexRow label="Índice para Relatórios" href={firestoreIndexes.atendimentos} />
+                    <IndexRow label="Índice para Fila de Atendimento" href={firestoreIndexes.filaDeEspera} />
+                    <IndexRow label="Índice para Senhas Pendentes" href={firestoreIndexes.pendentes} />
+                </CardContent>
+            </Card>
         </div>
 
         {/* Coluna 3: Ações de Risco */}
@@ -475,7 +509,9 @@ export default function ConfiguracoesPage() {
         <ResetDepartamentoDialog isOpen={departamentoDialogOpen} onOpenChange={setDepartamentoDialogOpen} onConfirm={handleConfirmDepartamentoReset} />
 
         {deleteType && (<DeleteAllDialog isOpen={deleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} onConfirm={handleConfirmDeleteAll} itemType={deleteType} />)}
-        {notification && (<NotificationDialog type={notification.type} title={notification.title} message={notification.message} onOpenChange={() => setNotification(null)} />)}
+        {notification && (<NotificationDialog type={notification.type} title={notification.title} message={notification.message} onOpenChange={() => setNotification(null)} />}
     </div>
   );
 }
+
+    
