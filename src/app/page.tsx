@@ -61,8 +61,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-            <div className="flex justify-center items-center mb-4">
-                <CustomLogo className="h-12 w-12 text-primary" />
+            <div className="flex justify-center items-center mb-2">
+                <CustomLogo className="h-14 w-14 text-primary" />
             </div>
           <CardTitle className="text-2xl">Saúde Tech</CardTitle>
           <CardDescription>Acesse sua conta para continuar</CardDescription>
