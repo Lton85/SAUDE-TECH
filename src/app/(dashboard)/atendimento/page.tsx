@@ -21,10 +21,11 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
-import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle } from "lucide-react";
+import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
 import { getEmpresa, Empresa } from "@/services/empresaService";
 import type { Classificacao } from "@/types/empresa";
@@ -63,6 +64,8 @@ export default function AtendimentosPage() {
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
     const [cancellationConfirmation, setCancellationConfirmation] = useState<{ isOpen: boolean; itemName: string; }>({ isOpen: false, itemName: "" });
+    const [isClearPanelDialogOpen, setIsClearPanelDialogOpen] = useState(false);
+    const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
     
     // Dialog item states
     const [itemToCancel, setItemToCancel] = useState<FilaDeEsperaItem | null>(null);
@@ -138,15 +141,19 @@ export default function AtendimentosPage() {
         });
         
         const unsubFinalizados = getAtendimentosFinalizadosHoje((data) => {
+            onUpdate(data);
+        }, (error) => {
+            setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error });
+        });
+        
+        function onUpdate(data: FilaDeEsperaItem[]) {
             const sorted = data.sort((a, b) => {
                 const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
                 const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
                 return timeB - timeA;
             });
             setFinalizados(sorted);
-        }, (error) => {
-            setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error });
-        });
+        }
 
         return () => {
             unsubPacientes();
@@ -238,6 +245,7 @@ export default function AtendimentosPage() {
     };
 
     const handleClearPanel = async () => {
+        setIsClearPanelDialogOpen(false);
         try {
             await clearPainel();
             setNotification({ type: 'success', title: "Painel Limpo!", message: "O painel de senhas foi reiniciado." });
@@ -248,6 +256,7 @@ export default function AtendimentosPage() {
     };
 
     const handleClearHistory = async () => {
+        setIsClearHistoryDialogOpen(false);
         try {
             await clearHistoryChamadas();
             setNotification({ type: 'success', title: "Histórico Limpo!", message: "O histórico de últimas senhas do painel foi limpo." });
@@ -319,8 +328,8 @@ export default function AtendimentosPage() {
                             onHistory={setItemToHistory}
                             onCancel={setItemToCancel}
                             onAddToQueue={handleAddToQueue}
-                            onClearPanel={handleClearPanel}
-                            onClearHistory={handleClearHistory}
+                            onClearPanel={() => setIsClearPanelDialogOpen(true)}
+                            onClearHistory={() => setIsClearHistoryDialogOpen(true)}
                             onPreviewPanel={() => setIsPanelPreviewOpen(true)}
                             onReturnToTriage={handleReturnToTriage}
                         />
@@ -436,6 +445,26 @@ export default function AtendimentosPage() {
                 onOpenChange={(isOpen) => setCancellationConfirmation({ isOpen, itemName: "" })}
                 itemName={cancellationConfirmation.itemName}
             />
+            
+            <ConfirmationDialog
+                isOpen={isClearPanelDialogOpen}
+                onOpenChange={setIsClearPanelDialogOpen}
+                onConfirm={handleClearPanel}
+                title="Limpar Painel Principal?"
+                description="Esta ação removerá a senha atual do painel de TV, deixando-o em modo de espera. Deseja continuar?"
+                confirmText="Sim, Limpar Painel"
+                icon={Eraser}
+            />
+            
+            <ConfirmationDialog
+                isOpen={isClearHistoryDialogOpen}
+                onOpenChange={setIsClearHistoryDialogOpen}
+                onConfirm={handleClearHistory}
+                title="Limpar Histórico do Painel?"
+                description="Esta ação removerá a lista de 'Últimas Senhas' do painel de TV. A senha atual não será afetada. Deseja continuar?"
+                confirmText="Sim, Limpar Histórico"
+                icon={ListX}
+            />
 
             {itemToReturn && (
                 <ReturnToQueueDialog
@@ -471,7 +500,3 @@ export default function AtendimentosPage() {
         </div>
     );
 }
-
-    
-
-    
