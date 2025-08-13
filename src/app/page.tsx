@@ -11,6 +11,8 @@ import { login, checkAuth } from '@/services/authService';
 import { Loader2, LogIn } from 'lucide-react';
 import { NotificationDialog, NotificationType } from '@/components/ui/notification-dialog';
 import { CustomLogo } from '@/components/ui/custom-logo';
+import { getEmpresa } from '@/services/empresaService';
+import type { Empresa } from '@/types/empresa';
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -20,13 +22,24 @@ export default function LoginPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const router = useRouter();
+  const [empresa, setEmpresa] = useState<Empresa | null>(null);
 
   useEffect(() => {
-    if (checkAuth()) {
-      router.replace('/atendimento');
-    } else {
-      setIsCheckingAuth(false);
-    }
+    const checkUserAndFetchData = async () => {
+        if (checkAuth()) {
+            router.replace('/atendimento');
+        } else {
+            try {
+                const empresaData = await getEmpresa();
+                setEmpresa(empresaData);
+            } catch (error) {
+                console.error("Failed to fetch empresa data on login page", error);
+            } finally {
+                setIsCheckingAuth(false);
+            }
+        }
+    };
+    checkUserAndFetchData();
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -59,7 +72,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <CustomLogo className="h-12 w-12 text-primary" />
+                <CustomLogo className="h-12 w-12 text-primary" logoUrl={empresa?.logoUrl}/>
             </div>
           <CardTitle className="text-2xl">Saúde Tech</CardTitle>
           <CardDescription>Acesse sua conta para continuar</CardDescription>
