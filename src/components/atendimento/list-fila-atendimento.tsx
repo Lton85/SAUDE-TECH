@@ -9,7 +9,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser, ListX } from "lucide-react";
+import { Clock, User, Building, Pencil, FileText, XCircle, Megaphone, PlusCircle, Eraser, ListX, Tv2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface FilaDeAtendimentoListProps {
@@ -22,9 +22,10 @@ interface FilaDeAtendimentoListProps {
     onAddToQueue: () => void;
     onClearPanel: () => void;
     onClearHistory: () => void;
+    onPreviewPanel: () => void;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory, onPreviewPanel }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -37,6 +38,10 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                         <Button onClick={onAddToQueue}>
                           <PlusCircle className="mr-2 h-4 w-4" />
                             Adicionar na Fila
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={onPreviewPanel} className="h-9 w-9" title="Visualizar Painel Atual">
+                            <Tv2 className="h-4 w-4" />
+                            <span className="sr-only">Visualizar Painel Atual</span>
                         </Button>
                         <Button variant="outline" size="icon" onClick={onClearHistory} className="h-9 w-9" title="Limpar Histórico do Painel">
                             <ListX className="h-4 w-4" />
@@ -137,3 +142,5 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
         </Card>
     );
 }
+
+    

@@ -28,6 +28,7 @@ import { NotificationDialog, NotificationType } from "@/components/ui/notificati
 import { CancellationConfirmationDialog } from "@/components/atendimento/cancellation-confirmation-dialog";
 import { getEmpresa, Empresa } from "@/services/empresaService";
 import type { Classificacao } from "@/types/empresa";
+import { CurrentPanelDialog } from "@/components/atendimento/current-panel-dialog";
 
 interface Profissional {
   id: string;
@@ -58,6 +59,7 @@ export default function AtendimentosPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isPatientDialogOpen, setIsPatientDialogOpen] = useState(false);
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
+    const [isPanelPreviewOpen, setIsPanelPreviewOpen] = useState(false);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
     const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
     const [cancellationConfirmation, setCancellationConfirmation] = useState<{ isOpen: boolean; itemName: string; }>({ isOpen: false, itemName: "" });
@@ -136,7 +138,12 @@ export default function AtendimentosPage() {
         });
         
         const unsubFinalizados = getAtendimentosFinalizadosHoje((data) => {
-            setFinalizados(data);
+            const sorted = data.sort((a, b) => {
+                const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
+                const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
+                return timeB - timeA;
+            });
+            setFinalizados(sorted);
         }, (error) => {
             setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error });
         });
@@ -293,6 +300,7 @@ export default function AtendimentosPage() {
                             onAddToQueue={handleAddToQueue}
                             onClearPanel={handleClearPanel}
                             onClearHistory={handleClearHistory}
+                            onPreviewPanel={() => setIsPanelPreviewOpen(true)}
                         />
                     </TabsContent>
 
@@ -319,6 +327,11 @@ export default function AtendimentosPage() {
             </Tabs>
             
              {/* Dialogs */}
+             <CurrentPanelDialog 
+                isOpen={isPanelPreviewOpen}
+                onOpenChange={setIsPanelPreviewOpen}
+             />
+
             <AddToQueueDialog
                 isOpen={isAddToQueueDialogOpen}
                 onOpenChange={setIsAddToQueueDialogOpen}
@@ -436,3 +449,5 @@ export default function AtendimentosPage() {
         </div>
     );
 }
+
+    

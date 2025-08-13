@@ -1,9 +1,9 @@
 
 "use client"
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch, setDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, writeBatch, setDoc, doc, deleteDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 
-interface Chamada {
+export interface Chamada {
     id?: string; // Adicionado para rastrear a chamada
     senha: string;
     departamentoNome: string;
@@ -11,11 +11,12 @@ interface Chamada {
     profissionalNome: string;
     // O ID do item da fila original, para saber qual atendimento está no painel
     atendimentoId?: string; 
+    timestamp?: Timestamp;
 }
 
 const chamadasCollection = collection(db, 'chamadas');
 
-export const createChamada = async (chamadaData: Chamada) => {
+export const createChamada = async (chamadaData: Omit<Chamada, 'id' | 'timestamp'>) => {
     try {
         const chamadaRef = doc(chamadasCollection);
         await setDoc(chamadaRef, {
@@ -117,3 +118,22 @@ export const clearAllChamadas = async (): Promise<number> => {
         throw new Error("Não foi possível limpar o histórico de chamadas do painel.");
     }
 };
+
+export const getChamadasRealtime = (
+    onUpdate: (data: Chamada[]) => void,
+    onError: (error: string) => void
+) => {
+    const q = query(collection(db, "chamadas"), orderBy("timestamp", "desc"), limit(7));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const newCalls = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chamada));
+        onUpdate(newCalls);
+    }, (error) => {
+        console.error("Firebase snapshot error:", error);
+        onError("Não foi possível buscar os dados do painel.");
+    });
+
+    return unsubscribe;
+};
+
+    
