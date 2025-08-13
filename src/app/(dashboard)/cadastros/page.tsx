@@ -8,6 +8,7 @@ import { ProfissionaisList } from "@/components/cadastros/profissionais-list";
 import { DepartamentosList } from "@/components/cadastros/departamentos-list";
 import { User, Stethoscope, Building, Lock } from "lucide-react";
 import { getCurrentUser } from "@/services/authService";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface TabInfo {
     id: string;
@@ -55,17 +56,27 @@ export default function CadastrosPage() {
 
     return (
         <Tabs defaultValue={activeTab} className="w-full">
-            <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
-                {allTabs.map(tab => {
-                    const Icon = tab.icon;
-                    return (
-                        <TabsTrigger key={tab.id} value={tab.id}>
-                            <Icon className="mr-2 h-4 w-4" />
-                            {tab.label}
-                        </TabsTrigger>
-                    );
-                })}
-            </TabsList>
+             <TooltipProvider>
+                <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
+                    {allTabs.map(tab => {
+                        const Icon = tab.icon;
+                        const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                        return (
+                            <Tooltip key={tab.id} delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                    <TabsTrigger value={tab.id} disabled={!hasPermission}>
+                                        <Icon className="mr-2 h-4 w-4" />
+                                        {tab.label}
+                                    </TabsTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>{tab.label}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+                </TabsList>
+            </TooltipProvider>
             {allTabs.map(tab => {
                 const Component = tab.component;
                 const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
