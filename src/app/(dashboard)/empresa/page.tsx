@@ -50,6 +50,7 @@ const initialEmpresaState: Empresa = {
     uf: "",
     telefone: "",
     email: "",
+    logoUrl: "",
     nomeImpressora: "",
     classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
@@ -437,6 +438,29 @@ export default function EmpresaPage() {
                 </Card>
 
                 <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <ImageIcon className="h-6 w-6" />
+                                <CardTitle>Logotipo do Sistema</CardTitle>
+                            </div>
+                            <CardDescription>
+                                Cole a URL da imagem (PNG, JPG) para usar como logotipo.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-2">
+                                <Label htmlFor="logoUrl">URL do Logotipo</Label>
+                                <Input
+                                    id="logoUrl"
+                                    value={formData.logoUrl || ''}
+                                    onChange={handleInputChange}
+                                    placeholder="https://.../logo.png"
+                                    disabled={!isEditing}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
                     <Card>
                         <CardHeader>
                             <div className="flex items-center gap-3">

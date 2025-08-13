@@ -22,6 +22,7 @@ export interface Empresa {
     uf: string;
     telefone: string;
     email: string;
+    logoUrl?: string;
     nomeImpressora?: string;
     classificacoes?: Classificacao[];
     tabletInfoSize?: 'pequeno' | 'medio' | 'grande';

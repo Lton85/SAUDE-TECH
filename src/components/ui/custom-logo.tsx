@@ -4,22 +4,32 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React from "react";
+import { Stethoscope } from "lucide-react";
 
-// Corrigido para aceitar propriedades HTML de uma div, em vez de SVG.
-interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface CustomLogoProps extends React.HTMLAttributes<HTMLDivElement> {
+  logoUrl?: string | null;
+}
 
-export const CustomLogo = ({ className, ...props }: CustomLogoProps) => {
-    const logoUrl = "https://i.ibb.co/3s5sy3g/logo.png";
+export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
 
+    if (logoUrl) {
+        return (
+            <div className={cn("relative", className)} {...props}>
+                <Image
+                    src={logoUrl}
+                    alt="Logotipo do Sistema"
+                    layout="fill"
+                    objectFit="contain"
+                    unoptimized // Use this if you have issues with optimized images from external sources
+                />
+            </div>
+        );
+    }
+    
+    // Fallback Icon
     return (
-        // Adicionado o spread de props para o div container.
-        <div className={cn("relative", className)} {...props}>
-            <Image
-                src={logoUrl}
-                alt="Logotipo do Sistema"
-                layout="fill"
-                objectFit="contain"
-            />
+        <div className={cn("flex items-center justify-center", className)} {...props}>
+            <Stethoscope className="w-full h-full" />
         </div>
     );
 };
