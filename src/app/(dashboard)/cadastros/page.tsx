@@ -56,10 +56,10 @@ export default function CadastrosPage() {
 
     return (
         <Tabs defaultValue={activeTab} className="w-full flex flex-col flex-1">
-             <TabsList className={`grid w-full grid-cols-${allTabs.length}`}>
+             <TabsList className={`grid w-full grid-cols-3`}>
                 {allTabs.map(tab => {
                     const Icon = tab.icon;
-                    const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                    const hasPermission = permissions.includes(`/cadastros/${t.id}`);
                     return (
                         <TooltipProvider key={tab.id}>
                             <Tooltip delayDuration={0}>
@@ -81,7 +81,7 @@ export default function CadastrosPage() {
             <div className="flex-1 overflow-y-auto mt-4">
                 {allTabs.map(tab => {
                     const Component = tab.component;
-                    const hasPermission = permissions.includes(`/cadastros/${tab.id}`);
+                    const hasPermission = permissions.includes(`/cadastros/${t.id}`);
                     return (
                         <TabsContent key={tab.id} value={tab.id} className="mt-0">
                             {hasPermission ? (
