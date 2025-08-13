@@ -336,22 +336,11 @@ export default function AtendimentosPage() {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                         return (
                             <TabsContent key={tab.id} value={tab.id}>
-                                {!hasPermission ? (
-                                     <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
-                                        <Lock className="h-10 w-10 text-muted-foreground/50" />
-                                        <p className="mt-4 text-center text-muted-foreground">
-                                            Você não tem permissão para acessar esta aba.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <>
-                                     {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes}/>}
-                                     {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPending} classificacoes={activeClassificacoes}/>}
-                                     {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriage} />}
-                                     {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel}/>}
-                                     {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
-                                    </>
-                                )}
+                                {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPending} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriage} isReadOnly={!hasPermission} />}
+                                {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
+                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
                             </TabsContent>
                         )
                     })}
@@ -501,5 +490,3 @@ export default function AtendimentosPage() {
         </div>
     );
 }
-
-    

@@ -24,9 +24,10 @@ interface FilaDeAtendimentoListProps {
     onClearHistory: () => void;
     onPreviewPanel: () => void;
     onReturnToTriage: (item: FilaDeEsperaItem) => void;
+    isReadOnly?: boolean;
 }
 
-export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory, onPreviewPanel, onReturnToTriage }: FilaDeAtendimentoListProps) {
+export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHistory, onCancel, onAddToQueue, onClearPanel, onClearHistory, onPreviewPanel, onReturnToTriage, isReadOnly = false }: FilaDeAtendimentoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -36,19 +37,19 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                         <CardDescription>Pacientes aguardando para serem chamados.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button onClick={onAddToQueue}>
+                        <Button onClick={onAddToQueue} disabled={isReadOnly}>
                           <PlusCircle className="mr-2 h-4 w-4" />
                             Adicionar na Fila
                         </Button>
-                        <Button variant="outline" size="icon" onClick={onPreviewPanel} className="h-9 w-9" title="Visualizar Painel Atual">
+                        <Button variant="outline" size="icon" onClick={onPreviewPanel} className="h-9 w-9" title="Visualizar Painel Atual" disabled={isReadOnly}>
                             <Tv2 className="h-4 w-4" />
                             <span className="sr-only">Visualizar Painel Atual</span>
                         </Button>
-                        <Button variant="outline" size="icon" onClick={onClearHistory} className="h-9 w-9" title="Limpar Histórico do Painel">
+                        <Button variant="outline" size="icon" onClick={onClearHistory} className="h-9 w-9" title="Limpar Histórico do Painel" disabled={isReadOnly}>
                             <ListX className="h-4 w-4" />
                             <span className="sr-only">Limpar Histórico do Painel</span>
                         </Button>
-                        <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9" title="Limpar Painel Principal">
+                        <Button variant="destructive" size="icon" onClick={onClearPanel} className="h-9 w-9" title="Limpar Painel Principal" disabled={isReadOnly}>
                             <Eraser className="h-4 w-4" />
                             <span className="sr-only">Limpar Painel Principal</span>
                         </Button>
@@ -110,23 +111,23 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
                                     </TableCell>
                                     <TableCell className="text-right px-3 py-2">
                                          <div className="flex items-center justify-end gap-1">
-                                             <Button variant="default" size="sm" className="h-7 px-2 text-xs" onClick={() => onCall(item)}>
+                                             <Button variant="default" size="sm" className="h-7 px-2 text-xs" onClick={() => onCall(item)} disabled={isReadOnly}>
                                                 <Megaphone className="mr-1 h-3 w-3" />
                                                 Chamar
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReturnToTriage(item)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReturnToTriage(item)} disabled={isReadOnly}>
                                                 <Undo2 className="h-3 w-3" />
                                                 <span className="sr-only">Retornar para Triagem</span>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEdit(item)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEdit(item)} disabled={isReadOnly}>
                                                 <Pencil className="h-3 w-3" />
                                                 <span className="sr-only">Editar</span>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onHistory(item)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onHistory(item)} disabled={isReadOnly}>
                                                 <FileText className="h-3 w-3" />
                                                 <span className="sr-only">Prontuário</span>
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => onCancel(item)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => onCancel(item)} disabled={isReadOnly}>
                                                 <XCircle className="h-4 w-4" />
                                                 <span className="sr-only">Cancelar</span>
                                             </Button>
@@ -147,7 +148,3 @@ export function FilaDeAtendimentoList({ fila, isLoading, onCall, onEdit, onHisto
         </Card>
     );
 }
-
-    
-
-    

@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Classificacao } from "@/types/empresa";
 
-const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, colorClass: string }) => {
+const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass, isReadOnly }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, colorClass: string, isReadOnly: boolean }) => {
     const horaChegada = item.chegadaEm ? format(item.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
     const badgeBgColor = colorClass.replace('text', 'bg').replace('-600', '-600 hover:bg-red-700'); // Adaptação simples
@@ -41,15 +41,15 @@ const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass
                 </div>
                 
                 <div className="flex items-center gap-1">
-                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)}>
+                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onIdentify(item)} disabled={isReadOnly}>
                         <UserPlus className="mr-1 h-3 w-3"/>
                         Identificar
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReturnToPending(item)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReturnToPending(item)} disabled={isReadOnly}>
                         <Undo2 className="h-4 w-4" />
                         <span className="sr-only">Retornar para pendentes</span>
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)} disabled={isReadOnly}>
                         <XCircle className="h-4 w-4" />
                         <span className="sr-only">Cancelar</span>
                     </Button>
@@ -59,7 +59,7 @@ const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass
     )
 }
 
-const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, isLoading, colorClass }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string }) => {
+const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, isLoading, colorClass, isReadOnly }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string, isReadOnly: boolean }) => {
     return (
         <Card className="flex-1 flex flex-col">
             <CardHeader className="p-3 border-b">
@@ -74,7 +74,7 @@ const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, 
                          <Card key={i}><CardContent className="p-2"><Skeleton className="h-8 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
-                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} colorClass={colorClass} />)
+                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} colorClass={colorClass} isReadOnly={isReadOnly} />)
                 ) : (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                         Nenhuma senha.
@@ -101,16 +101,17 @@ interface EmTriagemListProps {
     onCancel: (item: FilaDeEsperaItem) => void;
     onReturnToPending: (item: FilaDeEsperaItem) => void;
     classificacoes: Classificacao[];
+    isReadOnly?: boolean;
 }
 
 
-export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, onReturnToPending, classificacoes }: EmTriagemListProps) {
+export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, onReturnToPending, classificacoes, isReadOnly = false }: EmTriagemListProps) {
     
     if (isLoading && emTriagem.length === 0) {
         return (
             <div className="flex gap-4 h-full">
                  {[...Array(4)].map((_, i) => (
-                      <TriagemColumn key={i} title="" items={[]} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} isLoading={true} colorClass=""/>
+                      <TriagemColumn key={i} title="" items={[]} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} isLoading={true} colorClass="" isReadOnly={isReadOnly}/>
                  ))}
             </div>
         )
@@ -139,6 +140,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, onRe
                         onReturnToPending={onReturnToPending}
                         isLoading={isLoading} 
                         colorClass={colorClass}
+                        isReadOnly={isReadOnly}
                     />
                 )
             })}

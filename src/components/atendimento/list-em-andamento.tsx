@@ -17,9 +17,10 @@ interface EmAndamentoListProps {
     onReturnToQueue: (item: FilaDeEsperaItem) => void;
     onFinalize: (item: FilaDeEsperaItem) => void;
     onCancel: (item: FilaDeEsperaItem) => void;
+    isReadOnly?: boolean;
 }
 
-export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onFinalize, onCancel }: EmAndamentoListProps) {
+export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onFinalize, onCancel, isReadOnly = false }: EmAndamentoListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -90,15 +91,15 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
                              {item.chamadaEm ? `Chamado ${formatDistanceToNow(item.chamadaEm.toDate(), { addSuffix: true, locale: ptBR })}` : 'Aguardando'}
                         </p>
                         <div className="flex gap-1.5">
-                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => onReturnToQueue(item)}>
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => onReturnToQueue(item)} disabled={isReadOnly}>
                                 <Undo2 className="mr-1 h-3 w-3" />
                                 Retornar
                             </Button>
-                             <Button size="sm" className="h-7 bg-green-600 hover:bg-green-700 text-xs px-2" onClick={() => onFinalize(item)}>
+                             <Button size="sm" className="h-7 bg-green-600 hover:bg-green-700 text-xs px-2" onClick={() => onFinalize(item)} disabled={isReadOnly}>
                                 <CheckCircle className="mr-1 h-3 w-3" />
                                 Finalizar
                             </Button>
-                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => onCancel(item)}>
+                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => onCancel(item)} disabled={isReadOnly}>
                                 <XCircle className="mr-1 h-3 w-3" />
                                 Cancelar
                             </Button>

@@ -18,9 +18,10 @@ interface SenhasPendentesListProps {
     onCall: (item: FilaDeEsperaItem) => void;
     onCancel: (item: FilaDeEsperaItem) => void;
     classificacoes: Classificacao[];
+    isReadOnly?: boolean;
 }
 
-export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificacoes }: SenhasPendentesListProps) {
+export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificacoes, isReadOnly = false }: SenhasPendentesListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -97,11 +98,11 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, cl
                             </div>
 
                             <div className="flex items-center gap-1.5">
-                                 <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)} title="Chamar para Triagem">
+                                 <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)} title="Chamar para Triagem" disabled={isReadOnly}>
                                     <Megaphone className="h-4 w-4" />
                                     <span className="sr-only">Chamar para Triagem</span>
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)} title="Cancelar Senha">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onCancel(item)} title="Cancelar Senha" disabled={isReadOnly}>
                                     <XCircle className="h-4 w-4" />
                                     <span className="sr-only">Cancelar Senha</span>
                                 </Button>
