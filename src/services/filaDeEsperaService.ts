@@ -70,7 +70,7 @@ export const addPreCadastroToFila = async (
 }
 
 export const addPacienteToFila = async (
-    item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade' | 'senha'>,
+    item: Omit<FilaDeEsperaItem, 'id' | 'chegadaEm' | 'chamadaEm' | 'finalizadaEm' | 'canceladaEm' | 'prioridade'>,
     atendimentoPendente?: FilaDeEsperaItem | null
 ) => {
     try {
@@ -101,39 +101,35 @@ export const addPacienteToFila = async (
             throw new Error("Classificação de atendimento inválida.");
         }
 
-        let finalSenha: string;
+        let finalItem: Partial<FilaDeEsperaItem>;
 
         if (atendimentoPendente) {
-            finalSenha = atendimentoPendente.senha;
-        } else {
-            const counterName = `senha_${classificacaoConfig.id.toLowerCase()}`;
-            const ticketPrefix = classificacaoConfig.nome.charAt(0).toUpperCase();
-            const ticketNumber = await getNextCounter(counterName, true);
-            finalSenha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
-        }
-        
-        const finalItem = {
-            ...item,
-            senha: finalSenha,
-            prioridade
-        };
-
-        // If it's completing a pending registration, update it
-        if (atendimentoPendente) {
+            finalItem = {
+                ...item,
+                senha: atendimentoPendente.senha,
+                prioridade,
+            };
             const docRef = doc(db, "filaDeEspera", atendimentoPendente.id);
-             await updateDoc(docRef, {
-                ...finalItem,
-                status: 'aguardando'
-            });
-        } else { // Otherwise, create a new one
-            await addDoc(filaDeEsperaCollection, {
-                ...finalItem,
-                chegadaEm: serverTimestamp(),
+            await updateDoc(docRef, { ...finalItem, status: 'aguardando' });
+
+        } else {
+             const counterName = `senha_${classificacaoConfig.id.toLowerCase()}`;
+             const ticketPrefix = classificacaoConfig.nome.charAt(0).toUpperCase();
+             const ticketNumber = await getNextCounter(counterName, true);
+             const senha = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
+             
+             finalItem = {
+                ...item,
+                senha,
+                prioridade,
+                chegadaEm: serverTimestamp() as Timestamp,
                 chamadaEm: null,
                 finalizadaEm: null,
                 status: 'aguardando'
-            });
+             }
+             await addDoc(filaDeEsperaCollection, finalItem);
         }
+
     } catch (error) {
         console.error("Erro ao adicionar paciente à fila: ", error);
         if (error instanceof Error) {

@@ -66,6 +66,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
   const searchRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<(HTMLButtonElement | null)[]>([]);
   
+  const [senha, setSenha] = useState("");
   const isCompleting = !!atendimentoParaCompletar;
 
   const selectedDepartamento = useMemo(() => departamentos.find(d => d.id === selectedDepartamentoId), [departamentos, selectedDepartamentoId]);
@@ -108,7 +109,39 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     setSearchQuery("");
     setShowPatientList(false);
     setHighlightedIndex(-1);
+    setSenha("");
   }, [classificacoes]);
+  
+  const generateTicketPreview = useCallback(async (currentClassificationId: string) => {
+    if (!currentClassificationId || isCompleting) {
+        setSenha(isCompleting ? atendimentoParaCompletar.senha : "");
+        return;
+    }
+    try {
+        const classificacao = classificacoes.find(c => c.id === currentClassificationId);
+        if (!classificacao) {
+            setSenha("Erro");
+            return;
+        }
+        const counterName = `senha_${classificacao.id.toLowerCase()}`;
+        const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
+
+        setSenha("Gerando...");
+        const ticketNumber = await getNextCounter(counterName, false); // false = peek next number
+        const ticket = `${ticketPrefix}-${String(ticketNumber).padStart(2, '0')}`;
+        setSenha(ticket);
+    } catch (error) {
+        setSenha("Erro");
+        setNotification({ type: "error", title: "Erro ao pré-visualizar senha", message: (error as Error).message });
+    }
+  }, [isCompleting, classificacoes, atendimentoParaCompletar]);
+
+  useEffect(() => {
+    if (isOpen) {
+        generateTicketPreview(classificationId);
+    }
+  }, [classificationId, isOpen, generateTicketPreview]);
+
 
   useEffect(() => {
     const fetchProfissionais = async () => {
@@ -130,14 +163,13 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
     
     if (isOpen) {
       if (classificacoes.length > 0) {
-        setClassificationId(classificacoes[0].id);
+        const initialClassification = atendimentoParaCompletar?.classificacao || classificacoes[0].id;
+        setClassificationId(initialClassification);
+        generateTicketPreview(initialClassification);
       }
       fetchProfissionais();
       if (patientToAdd) {
         handleSelectPatient(patientToAdd);
-      }
-      if (atendimentoParaCompletar) {
-        setClassificationId(atendimentoParaCompletar.classificacao);
       }
     } else {
         resetState();
@@ -434,7 +466,7 @@ export function AddToQueueDialog({ isOpen, onOpenChange, pacientes, departamento
                         <Label htmlFor="senha" className="flex items-center gap-2"><Tag className="h-4 w-4" />Senha</Label>
                         <Input 
                         id="senha" 
-                        value={isCompleting ? atendimentoParaCompletar.senha : "Será gerada ao confirmar"}
+                        value={senha}
                         readOnly
                         className="font-bold text-lg bg-background text-center tracking-wider"
                         disabled
