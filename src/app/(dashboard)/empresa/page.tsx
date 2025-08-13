@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,9 +30,9 @@ interface IbgeCityResponse {
 }
 
 const initialClassificacoes: Classificacao[] = [
-    { id: 'Normal', nome: 'Normal', nomeAtivo: true, descricao: 'Atendimento geral para todos os públicos', descricaoAtiva: true },
-    { id: 'Preferencial', nome: 'Preferencial', nomeAtivo: true, descricao: 'Gestantes, idosos, pessoas com deficiência.', descricaoAtiva: true },
-    { id: 'Urgencia', nome: 'Urgência', nomeAtivo: true, descricao: 'Atendimento de urgência e emergência.', descricaoAtiva: true },
+    { id: 'Normal', nome: 'Normal', nomeAtivo: true, descricao: 'Atendimento geral para todos os públicos', descricaoAtiva: true, ativa: true },
+    { id: 'Preferencial', nome: 'Preferencial', nomeAtivo: true, descricao: 'Gestantes, idosos, pessoas com deficiência.', descricaoAtiva: true, ativa: true },
+    { id: 'Urgencia', nome: 'Urgência', nomeAtivo: true, descricao: 'Atendimento de urgência e emergência.', descricaoAtiva: true, ativa: true },
 ];
 
 const initialEmpresaState: Empresa = {
@@ -162,7 +163,7 @@ export default function EmpresaPage() {
             const newId = `custom_${Date.now()}`;
             const newClassificacoes = [
                 ...(prev.classificacoes || []),
-                { id: newId, nome: '', nomeAtivo: true, descricao: '', descricaoAtiva: true }
+                { id: newId, nome: '', nomeAtivo: true, descricao: '', descricaoAtiva: true, ativa: true }
             ];
             return { ...prev, classificacoes: newClassificacoes };
         });
