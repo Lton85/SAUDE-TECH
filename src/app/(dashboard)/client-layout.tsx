@@ -66,10 +66,36 @@ const ConfiguracoesPage = React.lazy(() => import('./configuracoes/page'));
 
 export const allMenuItems = [
   { id: "/", href: "/", label: "Início", icon: Home, component: DashboardPage, permissionRequired: false },
-  { id: "/atendimento", href: "/atendimento", label: "Atendimentos", icon: Clock, component: AtendimentosPage, permissionRequired: true },
+  { 
+    id: "/atendimento", 
+    href: "/atendimento", 
+    label: "Atendimentos", 
+    icon: Clock, 
+    component: AtendimentosPage, 
+    permissionRequired: true,
+    subItems: [
+      { id: '/atendimento/pendentes', label: 'Senhas Pendentes', permissionRequired: true },
+      { id: '/atendimento/em-triagem', label: 'Em Triagem', permissionRequired: true },
+      { id: '/atendimento/fila-atendimento', label: 'Fila de Atendimento', permissionRequired: true },
+      { id: '/atendimento/em-andamento', label: 'Em Andamento', permissionRequired: true },
+      { id: '/atendimento/finalizados', label: 'Finalizados', permissionRequired: true },
+    ]
+  },
   { id: "painel", href: "/painel", label: "Abrir Painel", icon: Tv2, component: null, target: "_blank", permissionRequired: true },
   { id: "tablet", href: "/tablet", label: "Tablet", icon: Tablet, component: null, target: "_blank", permissionRequired: true },
-  { id: "/cadastros", href: "/cadastros", label: "Cadastros", icon: Users, component: CadastrosPage, permissionRequired: true },
+  { 
+    id: "/cadastros", 
+    href: "/cadastros", 
+    label: "Cadastros", 
+    icon: Users, 
+    component: CadastrosPage, 
+    permissionRequired: true,
+    subItems: [
+        { id: '/cadastros/pacientes', label: 'Pacientes', permissionRequired: true },
+        { id: '/cadastros/profissionais', label: 'Profissionais', permissionRequired: true },
+        { id: '/cadastros/departamentos', label: 'Departamentos', permissionRequired: true },
+    ]
+  },
   { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
   { id: "/empresa", href: "/empresa", label: "Empresa", icon: Building, component: EmpresaPage, permissionRequired: true },
@@ -78,7 +104,7 @@ export const allMenuItems = [
   { id: "sair", href: "#", label: "Sair do Sistema", icon: LogOut, component: null, permissionRequired: false },
 ];
 
-export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number };
+export type Tab = (typeof allMenuItems)[number] & { notificationCount?: number; subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[] };
 
 const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; }) => {
     const { state } = useSidebar();
@@ -362,12 +388,27 @@ export default function DashboardClientLayout({
   React.useEffect(() => {
     const currentUser = getCurrentUser();
     if (currentUser) {
-        const items = currentUser.usuario === 'master'
-            ? allMenuItems
-            : allMenuItems.filter(item => 
-                !item.permissionRequired || (currentUser.permissoes || []).includes(item.id)
-            );
-        setUserMenuItems(items);
+        if (currentUser.usuario === 'master') {
+            setUserMenuItems(allMenuItems);
+            return;
+        }
+
+        const userPermissions = currentUser.permissoes || [];
+        const allowedMenuItems = allMenuItems.filter(item => {
+            // It's allowed if it doesn't require permission
+            if (!item.permissionRequired) return true;
+            
+            // Or if it's explicitly in permissions
+            if (userPermissions.includes(item.id)) return true;
+
+            // Or if any of its sub-items are in permissions
+            if(item.subItems) {
+                return item.subItems.some(sub => userPermissions.includes(sub.id));
+            }
+            
+            return false;
+        });
+        setUserMenuItems(allowedMenuItems);
     }
   }, []);
 

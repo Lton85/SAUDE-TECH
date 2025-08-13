@@ -21,7 +21,7 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
-import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX } from "lucide-react";
+import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX, Lock, Tv2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
@@ -30,6 +30,7 @@ import { CancellationConfirmationDialog } from "@/components/atendimento/cancell
 import { getEmpresa, Empresa } from "@/services/empresaService";
 import type { Classificacao } from "@/types/empresa";
 import { CurrentPanelDialog } from "@/components/atendimento/current-panel-dialog";
+import { getCurrentUser } from "@/services/authService";
 
 interface Profissional {
   id: string;
@@ -42,6 +43,21 @@ const initialClassificationNames: Empresa['nomesClassificacoes'] = {
     Urgencia: "Urgência",
     Outros: "Outros",
 };
+
+interface TabInfo {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+}
+
+const allTabs: TabInfo[] = [
+    { id: 'pendentes', label: 'Senhas Pendentes', icon: AlertTriangle },
+    { id: 'em-triagem', label: 'Em Triagem', icon: HeartPulse },
+    { id: 'fila-atendimento', label: 'Fila de Atendimento', icon: Tags },
+    { id: 'em-andamento', label: 'Em Andamento', icon: Hourglass },
+    { id: 'finalizados', label: 'Finalizados', icon: CheckCircle },
+];
+
 
 export default function AtendimentosPage() {
     // Data states
@@ -76,6 +92,20 @@ export default function AtendimentosPage() {
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
+    // Permissions
+    const [allowedTabs, setAllowedTabs] = useState<TabInfo[]>([]);
+
+    useEffect(() => {
+        const user = getCurrentUser();
+        const userPermissions = user?.permissoes || [];
+        if(user?.usuario === 'master'){
+             setAllowedTabs(allTabs);
+        } else {
+            const tabs = allTabs.filter(tab => userPermissions.includes(`/atendimento/${tab.id}`));
+            setAllowedTabs(tabs);
+        }
+    }, []);
+
     // Data Fetching and Realtime Subscriptions
     useEffect(() => {
         const fetchSupportData = async () => {
@@ -140,20 +170,10 @@ export default function AtendimentosPage() {
             setIsLoading(false);
         });
         
-        const unsubFinalizados = getAtendimentosFinalizadosHoje((data) => {
-            onUpdate(data);
-        }, (error) => {
-            setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error });
-        });
-        
-        function onUpdate(data: FilaDeEsperaItem[]) {
-            const sorted = data.sort((a, b) => {
-                const timeA = a.finalizadaEm?.toMillis() || a.canceladaEm?.toMillis() || 0;
-                const timeB = b.finalizadaEm?.toMillis() || b.canceladaEm?.toMillis() || 0;
-                return timeB - timeA;
-            });
-            setFinalizados(sorted);
-        }
+         const unsubFinalizados = getAtendimentosFinalizadosHoje(
+            (data) => setFinalizados(data),
+            (error) => setNotification({ type: 'error', title: "Erro ao carregar finalizados", message: error })
+        );
 
         return () => {
             unsubPacientes();
@@ -266,35 +286,43 @@ export default function AtendimentosPage() {
         }
     };
     
+     if (allowedTabs.length === 0 && !isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
+                <Lock className="h-10 w-10 text-muted-foreground/50" />
+                <p className="mt-4 text-center text-muted-foreground">
+                    Você não tem permissão para acessar esta seção.
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="flex flex-col h-full">
-            <Tabs defaultValue="pendentes" className="flex flex-col flex-1">
+            <Tabs defaultValue={allowedTabs[0]?.id} className="flex flex-col flex-1">
                  <TabsList className="grid w-full grid-cols-5 sticky top-0 z-10 bg-card">
-                    <TabsTrigger value="pendentes">
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        Senhas Pendentes
-                        {pendentes.length > 0 && <Badge variant="destructive" className="ml-2 animate-pulse">{pendentes.length}</Badge>}
-                    </TabsTrigger>
-                    <TabsTrigger value="em-triagem">
-                        <HeartPulse className="mr-2 h-4 w-4" />
-                        Em Triagem
-                        {emTriagem.length > 0 && <Badge className="ml-2">{emTriagem.length}</Badge>}
-                    </TabsTrigger>
-                    <TabsTrigger value="fila-atendimento">
-                        <Tags className="mr-2 h-4 w-4" />
-                        Fila de Atendimento
-                        {fila.length > 0 && <Badge className="ml-2">{fila.length}</Badge>}
-                    </TabsTrigger>
-                     <TabsTrigger value="em-andamento">
-                        <Hourglass className="mr-2 h-4 w-4" />
-                        Em Andamento
-                        {emAtendimento.length > 0 && <Badge className="ml-2">{emAtendimento.length}</Badge>}
-                    </TabsTrigger>
-                     <TabsTrigger value="finalizados">
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Finalizados
-                        {finalizados.length > 0 && <Badge variant="secondary" className="ml-2">{finalizados.length}</Badge>}
-                    </TabsTrigger>
+                    {allTabs.map(tab => {
+                         if (!allowedTabs.some(allowed => allowed.id === tab.id)) return null;
+                         const Icon = tab.icon;
+                         let count = 0;
+                         if (tab.id === 'pendentes') count = pendentes.length;
+                         else if (tab.id === 'em-triagem') count = emTriagem.length;
+                         else if (tab.id === 'fila-atendimento') count = fila.length;
+                         else if (tab.id === 'em-andamento') count = emAtendimento.length;
+                         else if (tab.id === 'finalizados') count = finalizados.length;
+
+                        return (
+                            <TabsTrigger key={tab.id} value={tab.id}>
+                                <Icon className="mr-2 h-4 w-4" />
+                                {tab.label}
+                                {count > 0 && (
+                                    <Badge variant={tab.id === 'pendentes' ? 'destructive' : tab.id === 'finalizados' ? 'secondary' : 'default'} className="ml-2">
+                                        {count}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                        );
+                    })}
                 </TabsList>
                 
                 <div className="flex-1 overflow-y-auto mt-4">
@@ -365,7 +393,7 @@ export default function AtendimentosPage() {
 
             <AddToQueueDialog
                 isOpen={isAddToQueueDialogOpen}
-                onOpenChange={setIsAddToQueueDialogOpen}
+                onOpenChange={(open) => { if (!open) setIsAddToQueueDialogOpen(false); }}
                 pacientes={pacientes}
                 departamentos={departamentos}
                 classificacoes={activeClassificacoes}
@@ -377,7 +405,7 @@ export default function AtendimentosPage() {
 
             <PatientDialog
                 isOpen={isPatientDialogOpen}
-                onOpenChange={setIsPatientDialogOpen}
+                onOpenChange={(open) => { if (!open) setIsPatientDialogOpen(false); }}
                 onSuccess={handlePatientDialogSuccess}
                 paciente={null}
                 onNotification={setNotification}
@@ -386,7 +414,7 @@ export default function AtendimentosPage() {
             {itemToEdit && (
                 <EditQueueItemDialog
                     isOpen={!!itemToEdit}
-                    onOpenChange={() => setItemToEdit(null)}
+                    onOpenChange={(open) => { if (!open) setItemToEdit(null); }}
                     item={itemToEdit}
                     departamentos={departamentos}
                     profissionais={profissionais}
@@ -399,7 +427,7 @@ export default function AtendimentosPage() {
             {itemToEditFromHistory && (
                  <EditQueueItemDialog
                     isOpen={!!itemToEditFromHistory}
-                    onOpenChange={() => setItemToEditFromHistory(null)}
+                    onOpenChange={(open) => { if (!open) setItemToEditFromHistory(null); }}
                     item={itemToEditFromHistory}
                     departamentos={departamentos}
                     profissionais={profissionais}
@@ -412,7 +440,7 @@ export default function AtendimentosPage() {
             {itemToHistory && (
                 <ProntuarioDialog
                     isOpen={!!itemToHistory}
-                    onOpenChange={() => setItemToHistory(null)}
+                    onOpenChange={(open) => { if (!open) setItemToHistory(null); }}
                     item={itemToHistory}
                     onEdit={handleEditFromHistory}
                 />
@@ -421,7 +449,7 @@ export default function AtendimentosPage() {
             {itemToCancel && (
                 <CancelAtendimentoDialog
                     isOpen={!!itemToCancel}
-                    onOpenChange={() => setItemToCancel(null)}
+                    onOpenChange={(open) => { if (!open) setItemToCancel(null); }}
                     onConfirm={async (motivo) => {
                         if (itemToCancel) {
                             try {
@@ -469,7 +497,7 @@ export default function AtendimentosPage() {
             {itemToReturn && (
                 <ReturnToQueueDialog
                     isOpen={!!itemToReturn}
-                    onOpenChange={() => setItemToReturn(null)}
+                    onOpenChange={(open) => { if (!open) setItemToReturn(null); }}
                     item={itemToReturn}
                     departamentos={departamentos}
                     profissionais={profissionais}
@@ -500,3 +528,5 @@ export default function AtendimentosPage() {
         </div>
     );
 }
+
+    
