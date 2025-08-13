@@ -191,7 +191,7 @@ export default function PainelPage() {
         
         <footer className="bg-black/50 text-gray-300 p-3 md:p-4 flex justify-between items-center text-base md:text-lg font-sans">
             <div className="flex items-center gap-3">
-                <CustomLogo className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" logoSvg={empresaConfig?.logoSvg} />
+                <CustomLogo className="h-6 w-6 md:h-7 md:h-7 text-cyan-400" logoUrl={empresaConfig?.logoUrl} />
                 <span className="font-bold">SAÚDE TECH | {razaoSocial}</span>
             </div>
             {time ? (

@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const router = useRouter();
-  const [logoSvg, setLogoSvg] = useState<string | undefined>(undefined);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (checkAuth()) {
@@ -34,8 +34,8 @@ export default function LoginPage() {
   useEffect(() => {
     const fetchLogo = async () => {
       const empresa = await getEmpresa();
-      if(empresa?.logoSvg){
-        setLogoSvg(empresa.logoSvg);
+      if(empresa?.logoUrl){
+        setLogoUrl(empresa.logoUrl);
       }
     };
     fetchLogo();
@@ -71,7 +71,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center items-center mb-4">
-                <CustomLogo className="h-12 w-12 text-primary" logoSvg={logoSvg} />
+                <CustomLogo className="h-12 w-12 text-primary" logoUrl={logoUrl} />
             </div>
           <CardTitle className="text-2xl">Saúde Tech</CardTitle>
           <CardDescription>Acesse sua conta para continuar</CardDescription>

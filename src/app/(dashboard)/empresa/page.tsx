@@ -51,7 +51,7 @@ const initialEmpresaState: Empresa = {
     telefone: "",
     email: "",
     nomeImpressora: "",
-    logoSvg: "",
+    logoUrl: "",
     classificacoes: initialClassificacoes,
     exibirUltimasSenhas: true,
     localChamadaTriagem: "Recepção",
@@ -374,22 +374,21 @@ export default function EmpresaPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                         <ImageIcon className="h-6 w-6" />
-                        <CardTitle>Logotipo do Sistema (SVG)</CardTitle>
+                        <CardTitle>Logotipo do Sistema</CardTitle>
                     </div>
                     <CardDescription>
-                        Cole o código do seu logotipo em formato SVG para personalizar a identidade visual do sistema.
+                        Insira a URL da sua imagem (PNG, JPG) para personalizar a identidade visual do sistema.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2">
-                        <Label htmlFor="logoSvg">Código SVG</Label>
-                        <Textarea 
-                            id="logoSvg" 
-                            value={formData.logoSvg || ''} 
+                        <Label htmlFor="logoUrl">URL do Logotipo</Label>
+                        <Input 
+                            id="logoUrl" 
+                            value={formData.logoUrl || ''} 
                             onChange={handleInputChange}
-                            placeholder='<svg xmlns="http://www.w3.org/2000/svg" ...>' 
+                            placeholder='https://exemplo.com/sua-imagem.png' 
                             disabled={!isEditing}
-                            className="h-32 font-mono text-xs"
                         />
                     </div>
                 </CardContent>

@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import React from "react";
 import DOMPurify from 'isomorphic-dompurify';
 
@@ -34,19 +35,21 @@ const DefaultLogo = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 interface CustomLogoProps extends React.SVGProps<SVGSVGElement> {
-    logoSvg?: string;
+    logoUrl?: string;
 }
 
-export const CustomLogo = ({ className, logoSvg, ...props }: CustomLogoProps) => {
+export const CustomLogo = ({ className, logoUrl, ...props }: CustomLogoProps) => {
 
-    if (logoSvg) {
-        // Sanitize the SVG string before rendering
-        const cleanSvg = DOMPurify.sanitize(logoSvg);
+    if (logoUrl) {
         return (
-            <div 
-                className={cn(className)}
-                dangerouslySetInnerHTML={{ __html: cleanSvg }}
-            />
+            <div className={cn("relative", className)}>
+                <Image
+                    src={logoUrl}
+                    alt="Logotipo da empresa"
+                    layout="fill"
+                    objectFit="contain"
+                />
+            </div>
         );
     }
     
