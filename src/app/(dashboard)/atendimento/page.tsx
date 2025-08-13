@@ -332,7 +332,7 @@ export default function AtendimentosPage() {
     return (
         <div className="flex flex-col h-full">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
-                 <div className="flex gap-4">
+                 <div className="flex gap-2">
                     {allTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                          const Icon = tab.icon;
