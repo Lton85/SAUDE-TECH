@@ -32,21 +32,25 @@ const PermissionItem = ({
   onPermissionChange,
 }: {
   item: Tab;
-  selectedPermissions: string[];
+  selectedPermissions: Set<string>;
   onPermissionChange: (id: string, checked: boolean) => void;
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
-  
-  const isSelected = hasSubItems
-    ? item.subItems!.every(sub => selectedPermissions.includes(sub.id))
-    : selectedPermissions.includes(item.id);
+
+  const getCheckedState = () => {
+    if (!hasSubItems) {
+      return selectedPermissions.has(item.id);
+    }
+    const subItemIds = item.subItems!.map(sub => sub.id);
+    const selectedSubItemsCount = subItemIds.filter(id => selectedPermissions.has(id)).length;
+
+    if (selectedSubItemsCount === 0) return false;
+    if (selectedSubItemsCount === subItemIds.length) return true;
+    return "indeterminate";
+  };
 
   const handleParentChange = (checked: boolean) => {
-    // When a parent checkbox is clicked, it toggles its own permission and all its children's permissions.
     onPermissionChange(item.id, checked);
-    if (hasSubItems) {
-      item.subItems!.forEach(sub => onPermissionChange(sub.id, checked));
-    }
   };
   
   if (hasSubItems) {
@@ -55,7 +59,7 @@ const PermissionItem = ({
             <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
                 <Checkbox
                     id={`perm-${item.id}`}
-                    checked={isSelected}
+                    checked={getCheckedState()}
                     onCheckedChange={handleParentChange}
                     aria-label={`Selecionar tudo de ${item.label}`}
                 />
@@ -71,7 +75,7 @@ const PermissionItem = ({
                     <div key={sub.id} className="flex items-center space-x-3">
                          <Checkbox
                             id={`perm-${sub.id}`}
-                            checked={selectedPermissions.includes(sub.id)}
+                            checked={selectedPermissions.has(sub.id)}
                             onCheckedChange={(checked) => onPermissionChange(sub.id, !!checked)}
                         />
                          <Label htmlFor={`perm-${sub.id}`} className="font-normal cursor-pointer text-sm">
@@ -89,7 +93,7 @@ const PermissionItem = ({
     <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
       <Checkbox
         id={`perm-${item.id}`}
-        checked={selectedPermissions.includes(item.id)}
+        checked={selectedPermissions.has(item.id)}
         onCheckedChange={(checked) => onPermissionChange(item.id, !!checked)}
       />
       <Label htmlFor={`perm-${item.id}`} className="font-semibold cursor-pointer text-base">
@@ -102,11 +106,11 @@ const PermissionItem = ({
 
 export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, onNotification }: PermissionsDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = React.useState<Set<string>>(new Set());
 
   React.useEffect(() => {
     if (usuario && isOpen) {
-        setSelectedPermissions(usuario.permissoes || []);
+        setSelectedPermissions(new Set(usuario.permissoes || []));
     }
   }, [usuario, isOpen]);
 
@@ -117,25 +121,17 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
 
         if (checked) {
             newPermissions.add(id);
-            // If it's a parent item, also check all its children
             if (menuItem?.subItems) {
                 menuItem.subItems.forEach(sub => newPermissions.add(sub.id));
             }
         } else {
             newPermissions.delete(id);
-            // If it's a parent item, also uncheck all its children
             if (menuItem?.subItems) {
                 menuItem.subItems.forEach(sub => newPermissions.delete(sub.id));
             }
         }
-
-        // Check if unchecking a sub-item should uncheck its parent
-        const parentItem = allMenuItems.find(item => item.subItems?.some(sub => sub.id === id));
-        if (parentItem && !checked) {
-            newPermissions.delete(parentItem.id);
-        }
         
-        return Array.from(newPermissions);
+        return newPermissions;
     });
 };
   
@@ -144,36 +140,35 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
         const allIds = permissionableMenus.flatMap(menu => 
             menu.subItems ? [menu.id, ...menu.subItems.map(s => s.id)] : [menu.id]
         );
-      setSelectedPermissions(Array.from(new Set(allIds)));
+      setSelectedPermissions(new Set(allIds));
     } else {
-      setSelectedPermissions([]);
+      setSelectedPermissions(new Set());
     }
   };
   
-  const allPermissionIds = React.useMemo(() => {
-    return permissionableMenus.flatMap(menu => 
+  const isAllSelected = React.useMemo(() => {
+    const allPermissionIds = permissionableMenus.flatMap(menu => 
         menu.subItems ? [menu.id, ...menu.subItems.map(s => s.id)] : [menu.id]
     );
-  }, []);
-
-  const isAllSelected = React.useMemo(() => {
-    // Only check against the visible, permissionable menus
-    const relevantIds = permissionableMenus.flatMap(menu => {
-        const ids = [menu.id];
-        if (menu.subItems) {
-            ids.push(...menu.subItems.map(sub => sub.id));
-        }
-        return ids;
-    });
-    return relevantIds.every(id => selectedPermissions.includes(id));
-}, [selectedPermissions]);
+    return allPermissionIds.every(id => selectedPermissions.has(id));
+  }, [selectedPermissions]);
 
 
   const handleSubmit = async () => {
     if (!usuario) return;
     setIsSubmitting(true);
     try {
-        await updateUsuario(usuario.id, { permissoes: selectedPermissions });
+        const permissionsToSave = Array.from(selectedPermissions);
+        // Ensure parent item is included if all children are selected
+        permissionableMenus.forEach(menu => {
+            if (menu.subItems && menu.subItems.every(sub => permissionsToSave.includes(sub.id))) {
+                if (!permissionsToSave.includes(menu.id)) {
+                    permissionsToSave.push(menu.id);
+                }
+            }
+        });
+
+        await updateUsuario(usuario.id, { permissoes: permissionsToSave });
         onNotification({
             type: "success",
             title: "Permissões Atualizadas!",
