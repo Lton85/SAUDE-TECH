@@ -21,33 +21,65 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "../ui/button";
 import type { Classificacao } from "@/types/empresa";
+import { Separator } from "../ui/separator";
 
 
 interface FinalizadosListProps {
     finalizados: FilaDeEsperaItem[];
     isLoading: boolean;
-    filter: 'todos' | 'finalizado' | 'cancelado';
-    onFilterChange: (value: 'todos' | 'finalizado' | 'cancelado') => void;
+    statusFilter: 'todos' | 'finalizado' | 'cancelado';
+    onStatusFilterChange: (value: 'todos' | 'finalizado' | 'cancelado') => void;
+    classificacaoFilter: string;
+    onClassificacaoFilterChange: (value: string) => void;
     classificacoes: Classificacao[];
 }
 
-export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange, classificacoes }: FinalizadosListProps) {
+const getColorClassForClassification = (id: string, variant: 'badge' | 'text' | 'bg') => {
+    const baseColors: {[key: string]: {badge: string, text: string, bg: string}} = {
+        'Urgencia': { badge: 'bg-red-500 hover:bg-red-600', text: 'text-red-500', bg: 'bg-red-500/5' },
+        'Preferencial': { badge: 'bg-blue-500 hover:bg-blue-600', text: 'text-blue-500', bg: 'bg-blue-500/5' },
+        'Normal': { badge: 'bg-green-500 hover:bg-green-700', text: 'text-green-500', bg: 'bg-green-500/5' },
+    }
+    return baseColors[id]?.[variant] || 'bg-slate-500 hover:bg-slate-600';
+};
+
+
+export function FinalizadosList({ 
+    finalizados, 
+    isLoading, 
+    statusFilter, 
+    onStatusFilterChange, 
+    classificacaoFilter, 
+    onClassificacaoFilterChange, 
+    classificacoes 
+}: FinalizadosListProps) {
     
     const [motivoVisivel, setMotivoVisivel] = React.useState<string | null>(null);
 
     const counts = React.useMemo(() => {
-        const finalized = finalizados.filter(item => item.status === 'finalizado').length;
-        const canceled = finalizados.filter(item => item.status === 'cancelado').length;
-        const all = finalizados.length;
-        return { finalized, canceled, all };
+        return finalizados.reduce((acc, item) => {
+            if (item.status === 'finalizado') acc.finalized++;
+            if (item.status === 'cancelado') acc.canceled++;
+            
+            const classificacaoId = item.classificacao;
+            if (classificacaoId) {
+                if (!acc.classificacoes[classificacaoId]) {
+                    acc.classificacoes[classificacaoId] = 0;
+                }
+                acc.classificacoes[classificacaoId]++;
+            }
+            
+            return acc;
+        }, { finalized: 0, canceled: 0, classificacoes: {} as {[key: string]: number} });
     }, [finalizados]);
     
     const filteredList = React.useMemo(() => {
-        if (filter === 'todos') {
-            return finalizados;
-        }
-        return finalizados.filter(item => item.status === filter);
-    }, [finalizados, filter]);
+        return finalizados.filter(item => {
+            const statusMatch = statusFilter === 'todos' || item.status === statusFilter;
+            const classificacaoMatch = classificacaoFilter === 'todos' || item.classificacao === classificacaoFilter;
+            return statusMatch && classificacaoMatch;
+        });
+    }, [finalizados, statusFilter, classificacaoFilter]);
 
     if (isLoading) {
         return (
@@ -69,10 +101,10 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
     
     return (
          <div className="space-y-2">
-             <div className="flex items-center justify-end p-2 border-b">
+             <div className="flex flex-col gap-2 p-2 border-b">
                  <RadioGroup
-                    value={filter}
-                    onValueChange={onFilterChange}
+                    value={statusFilter}
+                    onValueChange={onStatusFilterChange}
                     className="flex items-center gap-4"
                 >
                      <div className="flex items-center space-x-2">
@@ -85,15 +117,38 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                     </div>
                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="todos" id="r-todos" />
-                        <Label htmlFor="r-todos" className="cursor-pointer">Todos <Badge variant="outline" className="ml-1">{counts.all}</Badge></Label>
+                        <Label htmlFor="r-todos" className="cursor-pointer">Todos <Badge variant="outline" className="ml-1">{finalizados.length}</Badge></Label>
                     </div>
                 </RadioGroup>
+                <Separator className="my-2" />
+                 <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                        size="sm"
+                        variant={classificacaoFilter === 'todos' ? 'default' : 'outline'}
+                        className="h-7 text-xs"
+                        onClick={() => onClassificacaoFilterChange('todos')}
+                    >
+                        Todos os Tipos
+                    </Button>
+                    {classificacoes.map(c => (
+                        <Button 
+                            key={c.id}
+                            size="sm"
+                            variant={classificacaoFilter === c.id ? 'default' : 'outline'}
+                            className={cn("h-7 text-xs", classificacaoFilter === c.id && getColorClassForClassification(c.id, 'badge'))}
+                            onClick={() => onClassificacaoFilterChange(c.id)}
+                        >
+                            {c.nome}
+                            <Badge variant="secondary" className="ml-2">{counts.classificacoes[c.id] || 0}</Badge>
+                        </Button>
+                    ))}
+                 </div>
              </div>
 
             {filteredList.length === 0 ? (
                  <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
                     <p className="text-muted-foreground">
-                        Nenhum registro encontrado para este filtro.
+                        Nenhum registro encontrado para os filtros selecionados.
                     </p>
                 </div>
             ) : (
@@ -156,11 +211,8 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                     <BadgeInfo className="h-3 w-3" />
                                     <Badge
                                         className={cn(
-                                            'text-xs font-semibold',
-                                            item.classificacao === 'Urgencia' && 'bg-red-500 text-white hover:bg-red-600',
-                                            item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
-                                            item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700',
-                                            !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) && 'bg-slate-500 hover:bg-slate-600 text-white'
+                                            'text-xs font-semibold text-white',
+                                           getColorClassForClassification(item.classificacao, 'badge')
                                         )}
                                     >
                                         {classificationName}

@@ -72,7 +72,8 @@ export default function AtendimentosPage() {
     const [isAddToQueueDialogOpen, setIsAddToQueueDialogOpen] = useState(false);
     const [isPanelPreviewOpen, setIsPanelPreviewOpen] = useState(false);
     const [notification, setNotification] = useState<{ type: NotificationType; title: string; message: string; } | null>(null);
-    const [finalizadosFilter, setFinalizadosFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
+    const [finalizadosStatusFilter, setFinalizadosStatusFilter] = useState<'todos' | 'finalizado' | 'cancelado'>('todos');
+    const [finalizadosClassificacaoFilter, setFinalizadosClassificacaoFilter] = useState<string>('todos');
     const [cancellationConfirmation, setCancellationConfirmation] = useState<{ isOpen: boolean; itemName: string; }>({ isOpen: false, itemName: "" });
     const [isClearPanelDialogOpen, setIsClearPanelDialogOpen] = useState(false);
     const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
@@ -103,7 +104,7 @@ export default function AtendimentosPage() {
         
         // Se for master, todas as permissões são concedidas
         if (user.usuario === 'master') {
-            const allPossiblePermissions = new Set(allTabs.map(tab => `/atendimento/${tab.id}`));
+            const allPossiblePermissions = new Set(allTabs.flatMap(tab => tab.id === 'atendimento' && tab.subItems ? tab.subItems.map(sub => sub.id) : `/atendimento/${tab.id}`));
             setPermissions(allPossiblePermissions);
             setActiveTab(allTabs[0]?.id);
             return;
@@ -338,9 +339,11 @@ export default function AtendimentosPage() {
                                     "text-sm font-medium flex-1",
                                     activeTab === tab.id
                                         ? "bg-primary text-primary-foreground"
-                                        : "bg-card text-card-foreground border hover:bg-muted"
+                                        : "bg-card text-card-foreground border hover:bg-muted",
+                                    !hasPermission && 'opacity-60 cursor-not-allowed'
                                 )}
                                 aria-disabled={!hasPermission}
+                                disabled={!hasPermission}
                             >
                                 <Icon className="mr-2 h-4 w-4" />
                                 {tab.label}
@@ -364,7 +367,7 @@ export default function AtendimentosPage() {
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
-                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificacoes={activeClassificacoes} />}
+                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} statusFilter={finalizadosStatusFilter} onStatusFilterChange={setFinalizadosStatusFilter} classificacaoFilter={finalizadosClassificacaoFilter} onClassificacaoFilterChange={setFinalizadosClassificacaoFilter} classificacoes={activeClassificacoes} />}
                             </div>
                         )
                     })}
