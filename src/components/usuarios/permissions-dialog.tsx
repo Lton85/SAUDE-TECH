@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Lock, Loader2, ChevronDown } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import type { Usuario } from "@/types/usuario";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -50,7 +50,12 @@ const PermissionItem = ({
   };
 
   const handleParentChange = (checked: boolean) => {
-    onPermissionChange(item.id, checked);
+    // This function will now correctly toggle all children based on its new state
+    const subItemIds = item.subItems?.map(sub => sub.id) || [];
+    const allIds = [item.id, ...subItemIds];
+    allIds.forEach(id => {
+      onPermissionChange(id, checked);
+    });
   };
   
   if (hasSubItems) {
@@ -115,50 +120,42 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
   }, [usuario, isOpen]);
 
   const handlePermissionChange = (id: string, checked: boolean) => {
-      setSelectedPermissions(prev => {
-          const newPermissions = new Set(prev);
-          const menuItem = permissionableMenus.find(item => item.id === id || item.subItems?.some(sub => sub.id === id));
+    setSelectedPermissions(prev => {
+        const newPermissions = new Set(prev);
+        const menuItem = permissionableMenus.find(item => item.id === id || item.subItems?.some(sub => sub.id === id));
+        const parentMenuItem = permissionableMenus.find(item => item.subItems?.some(sub => sub.id === id));
 
-          if (menuItem) {
-              const isParent = menuItem.id === id;
+        // Logic for toggling an item
+        if (checked) {
+            newPermissions.add(id);
+        } else {
+            newPermissions.delete(id);
+        }
 
-              if (isParent) {
-                  // Handle parent checkbox
-                  if (checked) {
-                      newPermissions.add(menuItem.id);
-                      menuItem.subItems?.forEach(sub => newPermissions.add(sub.id));
-                  } else {
-                      newPermissions.delete(menuItem.id);
-                      menuItem.subItems?.forEach(sub => newPermissions.delete(sub.id));
-                  }
-              } else {
-                  // Handle child checkbox
-                  if (checked) {
-                      newPermissions.add(id);
-                  } else {
-                      newPermissions.delete(id);
-                  }
-                  
-                  // Update parent state
-                  const allChildrenSelected = menuItem.subItems?.every(sub => newPermissions.has(sub.id));
-                  if (allChildrenSelected) {
-                      newPermissions.add(menuItem.id);
-                  } else {
-                      newPermissions.delete(menuItem.id);
-                  }
-              }
-          } else {
-            // Handle items without sub-items
-            if (checked) {
-                newPermissions.add(id);
+        // If the toggled item is a parent, toggle all its children
+        if (menuItem && menuItem.id === id && menuItem.subItems) {
+            menuItem.subItems.forEach(sub => {
+                if (checked) {
+                    newPermissions.add(sub.id);
+                } else {
+                    newPermissions.delete(sub.id);
+                }
+            });
+        }
+
+        // If the toggled item is a child, check if the parent should be updated
+        if (parentMenuItem && parentMenuItem.subItems) {
+            const allChildrenSelected = parentMenuItem.subItems.every(sub => newPermissions.has(sub.id));
+            if (allChildrenSelected) {
+                newPermissions.add(parentMenuItem.id);
             } else {
-                newPermissions.delete(id);
+                newPermissions.delete(parentMenuItem.id);
             }
-          }
-          
-          return newPermissions;
-      });
-  };
+        }
+
+        return newPermissions;
+    });
+};
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
