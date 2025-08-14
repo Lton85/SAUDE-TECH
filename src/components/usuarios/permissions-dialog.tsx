@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import * as React from "react";
@@ -38,50 +37,15 @@ const PermissionItem = ({
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
   
-  const isSelected = selectedPermissions.includes(item.id);
-
-  // For parent checkbox visual state, it's checked if all sub-items are checked.
-  const areAllSubItemsSelected = hasSubItems
+  const isSelected = hasSubItems
     ? item.subItems!.every(sub => selectedPermissions.includes(sub.id))
-    : isSelected;
-    
-  // A parent item has an "indeterminate" state if some, but not all, of its children are selected.
-  const isIndeterminate = hasSubItems && selectedPermissions.some(p => item.subItems!.map(s => s.id).includes(p)) && !areAllSubItemsSelected;
-
+    : selectedPermissions.includes(item.id);
 
   const handleParentChange = (checked: boolean) => {
     // When a parent checkbox is clicked, it toggles its own permission and all its children's permissions.
     onPermissionChange(item.id, checked);
     if (hasSubItems) {
       item.subItems!.forEach(sub => onPermissionChange(sub.id, checked));
-    }
-  };
-
-  const handleSubItemChange = (subId: string, checked: boolean) => {
-    onPermissionChange(subId, checked);
-  
-    // After a sub-item changes, determine if the parent should be checked or unchecked.
-    const allSubItemIds = item.subItems!.map(s => s.id);
-    // Create a new set with the potential new state
-    const newSelectedSubItems = new Set(selectedPermissions.filter(p => allSubItemIds.includes(p)));
-  
-    if (checked) {
-      newSelectedSubItems.add(subId);
-    } else {
-      newSelectedSubItems.delete(subId);
-    }
-  
-    // Check/uncheck the parent based on whether ALL sub-items are selected
-    if (newSelectedSubItems.size === item.subItems!.length) {
-      // All children are selected, so select the parent
-      if (!selectedPermissions.includes(item.id)) {
-        onPermissionChange(item.id, true);
-      }
-    } else {
-      // Not all children are selected, so unselect the parent
-      if (selectedPermissions.includes(item.id)) {
-        onPermissionChange(item.id, false);
-      }
     }
   };
   
@@ -91,7 +55,7 @@ const PermissionItem = ({
             <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
                 <Checkbox
                     id={`perm-${item.id}`}
-                    checked={areAllSubItemsSelected}
+                    checked={isSelected}
                     onCheckedChange={handleParentChange}
                     aria-label={`Selecionar tudo de ${item.label}`}
                 />
@@ -108,7 +72,7 @@ const PermissionItem = ({
                          <Checkbox
                             id={`perm-${sub.id}`}
                             checked={selectedPermissions.includes(sub.id)}
-                            onCheckedChange={(checked) => handleSubItemChange(sub.id, !!checked)}
+                            onCheckedChange={(checked) => onPermissionChange(sub.id, !!checked)}
                         />
                          <Label htmlFor={`perm-${sub.id}`} className="font-normal cursor-pointer text-sm">
                             {sub.label}
@@ -125,7 +89,7 @@ const PermissionItem = ({
     <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
       <Checkbox
         id={`perm-${item.id}`}
-        checked={isSelected}
+        checked={selectedPermissions.includes(item.id)}
         onCheckedChange={(checked) => onPermissionChange(item.id, !!checked)}
       />
       <Label htmlFor={`perm-${item.id}`} className="font-semibold cursor-pointer text-base">
@@ -146,17 +110,34 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
     }
   }, [usuario, isOpen]);
 
-  const handlePermissionChange = (menuId: string, checked: boolean) => {
+  const handlePermissionChange = (id: string, checked: boolean) => {
     setSelectedPermissions(prev => {
-      const newPermissions = new Set(prev);
-      if (checked) {
-        newPermissions.add(menuId);
-      } else {
-        newPermissions.delete(menuId);
-      }
-      return Array.from(newPermissions);
+        const newPermissions = new Set(prev);
+        const menuItem = allMenuItems.find(item => item.id === id);
+
+        if (checked) {
+            newPermissions.add(id);
+            // If it's a parent item, also check all its children
+            if (menuItem?.subItems) {
+                menuItem.subItems.forEach(sub => newPermissions.add(sub.id));
+            }
+        } else {
+            newPermissions.delete(id);
+            // If it's a parent item, also uncheck all its children
+            if (menuItem?.subItems) {
+                menuItem.subItems.forEach(sub => newPermissions.delete(sub.id));
+            }
+        }
+
+        // Check if unchecking a sub-item should uncheck its parent
+        const parentItem = allMenuItems.find(item => item.subItems?.some(sub => sub.id === id));
+        if (parentItem && !checked) {
+            newPermissions.delete(parentItem.id);
+        }
+        
+        return Array.from(newPermissions);
     });
-  };
+};
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -176,8 +157,17 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
   }, []);
 
   const isAllSelected = React.useMemo(() => {
-    return allPermissionIds.every(id => selectedPermissions.includes(id));
-  }, [selectedPermissions, allPermissionIds]);
+    // Only check against the visible, permissionable menus
+    const relevantIds = permissionableMenus.flatMap(menu => {
+        const ids = [menu.id];
+        if (menu.subItems) {
+            ids.push(...menu.subItems.map(sub => sub.id));
+        }
+        return ids;
+    });
+    return relevantIds.every(id => selectedPermissions.includes(id));
+}, [selectedPermissions]);
+
 
   const handleSubmit = async () => {
     if (!usuario) return;
@@ -256,4 +246,3 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
     </Dialog>
   );
 }
-
