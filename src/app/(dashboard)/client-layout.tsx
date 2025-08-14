@@ -167,17 +167,16 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
     return (
         <>
             <Sidebar collapsible="icon">
-              <SidebarHeader className="flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                  <CustomLogo className="h-12 w-12 text-primary" />
-                  <div className="duration-200 group-data-[collapsible=icon]:opacity-0">
-                      <h1 className="text-xl font-bold font-headline">SAÚDE TECH</h1>
-                  </div>
+              <SidebarHeader className="flex flex-col items-center justify-center text-center p-4 gap-2">
+                 <Link href="/" className="flex flex-col items-center gap-2 w-full">
+                    <CustomLogo className="h-12 w-12 text-primary" />
+                    <div className="duration-200 group-data-[collapsible=icon]:hidden w-full">
+                        <h1 className="text-xl font-bold font-headline">SAÚDE TECH</h1>
+                    </div>
                 </Link>
-                 <SidebarTrigger className="hidden md:flex h-7 w-7">
-                    {state === 'expanded' ? <PanelLeftClose /> : <PanelLeftOpen />}
-                 </SidebarTrigger>
-              </SidebarHeader>
+                <SidebarTrigger className="hidden md:flex h-7 w-7 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-2 group-data-[collapsible=icon]:right-2" />
+            </SidebarHeader>
+
               <SidebarContent>
                 <div className="p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-2">
                     <div className="relative">
@@ -204,7 +203,9 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                             <item.icon />
                             <span>{item.label}</span>
                              {item.notificationCount && item.notificationCount > 0 && (
-                                <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
+                                    {item.notificationCount}
+                                </span>
                             )}
                         </SidebarMenuButton>
                     </SidebarMenuItem>
