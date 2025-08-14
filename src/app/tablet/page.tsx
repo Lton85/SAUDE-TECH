@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -67,10 +68,12 @@ const cardSizeClasses = {
 export default function TabletPage() {
     const [isLoading, setIsLoading] = useState<FilaDeEsperaItem['classificacao'] | null>(null);
     const [config, setConfig] = useState<{
+        allClassifications: Classificacao[];
         activeClassifications: Classificacao[];
         infoSize: 'pequeno' | 'medio' | 'grande';
         cardSize: 'pequeno' | 'medio' | 'grande';
     }>({
+        allClassifications: [],
         activeClassifications: [],
         infoSize: 'medio',
         cardSize: 'medio',
@@ -85,11 +88,13 @@ export default function TabletPage() {
             setIsFetchingConfig(true);
             try {
                 const empresaData = await getEmpresa();
+                const all = empresaData?.classificacoes || [];
                 const active = empresaData?.classificacoes?.length 
                     ? empresaData.classificacoes.filter(c => c.ativa) 
                     : [];
                 
                 setConfig({
+                    allClassifications: all,
                     activeClassifications: active,
                     infoSize: empresaData?.tabletInfoSize || 'medio',
                     cardSize: empresaData?.tabletCardSize || 'medio'
@@ -121,7 +126,7 @@ export default function TabletPage() {
         setIsLoading(classificacao.id);
         setGeneratedTicket(null);
         try {
-            const senha = await addPreCadastroToFila(classificacao);
+            const senha = await addPreCadastroToFila(classificacao, config.allClassifications);
             setGeneratedTicket({ senha, tipo: classificacao.id, tipoNome: classificacao.nome });
         } catch (error) {
              setNotification({

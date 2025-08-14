@@ -49,16 +49,16 @@ const getPrioridade = (classificacaoId: string, classificacoesConfig: Classifica
 
 export const addPreCadastroToFila = async (
     classificacao: Classificacao,
+    todasClassificacoes: Classificacao[]
 ): Promise<string> => {
     try {
-        const empresaConfig = await getEmpresa();
-        if (!empresaConfig || !empresaConfig.classificacoes) {
-            throw new Error("Configurações da empresa ou de classificação não encontradas. Verifique o cadastro da empresa.");
+        if (!todasClassificacoes || todasClassificacoes.length === 0) {
+            throw new Error("Configurações de classificação não fornecidas ou vazias.");
         }
         
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
-        const prioridade = getPrioridade(classificacao.id, empresaConfig.classificacoes);
+        const prioridade = getPrioridade(classificacao.id, todasClassificacoes);
         const counterName = `senha_${classificacao.id.toLowerCase()}`;
         const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
 
@@ -734,5 +734,6 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     
 
     
+
 
 
