@@ -316,6 +316,12 @@ export default function AtendimentosPage() {
         }
     };
     
+    const handleSendToQueueFromPendente = (item: FilaDeEsperaItem) => {
+        setAtendimentoParaCompletar(item);
+        setPatientToAdd(null);
+        setIsAddToQueueDialogOpen(true);
+    };
+
     return (
         <div className="flex flex-col h-full">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
@@ -363,7 +369,7 @@ export default function AtendimentosPage() {
                         
                         return (
                             <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>
-                                {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} onSendToQueue={handleSendToQueueFromPendente} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}

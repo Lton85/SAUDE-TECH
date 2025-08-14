@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
-import { Megaphone, XCircle, Clock } from "lucide-react";
+import { Megaphone, XCircle, Clock, Send } from "lucide-react";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "../ui/badge";
@@ -17,11 +17,12 @@ interface SenhasPendentesListProps {
     isLoading: boolean;
     onCall: (item: FilaDeEsperaItem) => void;
     onCancel: (item: FilaDeEsperaItem) => void;
+    onSendToQueue: (item: FilaDeEsperaItem) => void;
     classificacoes: Classificacao[];
     isReadOnly?: boolean;
 }
 
-export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, classificacoes, isReadOnly = false }: SenhasPendentesListProps) {
+export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, onSendToQueue, classificacoes, isReadOnly = false }: SenhasPendentesListProps) {
     if (isLoading) {
         return (
             <div className="space-y-2">
@@ -98,6 +99,10 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, cl
                             </div>
 
                             <div className="flex items-center gap-1.5">
+                                 <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => onSendToQueue(item)} title="Enviar para Fila de Atendimento" disabled={isReadOnly}>
+                                    <Send className="mr-1 h-3 w-3" />
+                                    Enviar para Fila
+                                </Button>
                                  <Button variant="default" size="icon" className="h-7 w-7" onClick={() => onCall(item)} title="Chamar para Triagem" disabled={isReadOnly}>
                                     <Megaphone className="h-4 w-4" />
                                     <span className="sr-only">Chamar para Triagem</span>
