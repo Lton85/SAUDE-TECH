@@ -37,14 +37,18 @@ const getPrioridade = (classificacaoId: string, classificacoesConfig: Classifica
         return prioridadesFixas[classificacaoId];
     }
     
+    // Para classificações personalizadas, a prioridade é baseada na sua ordem na lista de configurações,
+    // começando após as prioridades fixas.
     const customIndex = classificacoesConfig.findIndex(c => c.id === classificacaoId);
     
+    // Se for encontrada (e não for uma das fixas), sua prioridade será 4, 5, 6...
+    // Se não for encontrada por algum motivo, recebe uma prioridade baixa.
     return customIndex !== -1 ? customIndex + 4 : 99;
 }
 
 
 export const addPreCadastroToFila = async (
-    classificacaoId: string,
+    classificacao: Classificacao,
 ): Promise<string> => {
     try {
         const empresaConfig = await getEmpresa();
@@ -52,11 +56,6 @@ export const addPreCadastroToFila = async (
             throw new Error("Configurações da empresa ou de classificação não encontradas. Verifique o cadastro da empresa.");
         }
         
-        const classificacao = empresaConfig.classificacoes.find(c => c.id === classificacaoId);
-        if (!classificacao) {
-            throw new Error(`Classificação com ID "${classificacaoId}" não encontrada.`);
-        }
-
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
         const prioridade = getPrioridade(classificacao.id, empresaConfig.classificacoes);
@@ -78,6 +77,9 @@ export const addPreCadastroToFila = async (
 
     } catch (error) {
         console.error("Erro ao adicionar pré-cadastro à fila: ", error);
+        if (error instanceof Error) {
+            throw error;
+        }
         throw new Error("Não foi possível gerar a senha no Firestore.");
     }
 }
@@ -732,4 +734,5 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     
 
     
+
 
