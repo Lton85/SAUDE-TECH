@@ -171,7 +171,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                  <Link href="/" className="flex flex-col items-center w-full">
                     <CustomLogo className="h-12 w-12 text-primary" />
                     <div className="duration-200 group-data-[collapsible=icon]:hidden w-full">
-                        <h1 className="text-xl font-bold font-headline">SAÚDE TECH</h1>
+                        <h1 className="text-xl font-bold font-headline mt-1">SAÚDE TECH</h1>
                     </div>
                 </Link>
                 <SidebarTrigger className="hidden md:flex h-7 w-7" />
@@ -400,11 +400,11 @@ export default function DashboardClientLayout({
             if (!item.permissionRequired) {
                 return true; // Always show non-protected routes
             }
+            // For items with sub-items, show the parent if ANY sub-item has permission
             if (item.subItems) {
-                // Show parent if any child has permission
                 return item.subItems.some(sub => userPermissions.includes(sub.id));
             }
-            // Show item if it has direct permission
+            // For regular items, check for direct permission
             return userPermissions.includes(item.id);
         });
         setUserMenuItems(allowedMenuItems);

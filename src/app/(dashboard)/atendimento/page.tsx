@@ -128,7 +128,7 @@ export default function AtendimentosPage() {
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
                 
                  if (empresaData?.classificacoes?.length) {
-                    setActiveClassificacoes(empresaData.classificacoes);
+                    setActiveClassificacoes(empresaData.classificacoes.filter(c => c.ativa));
                 }
                 
              } catch (error) {
@@ -357,13 +357,15 @@ export default function AtendimentosPage() {
                 <div className="flex-1 overflow-y-auto mt-4">
                     {allowedTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
+                        if (!hasPermission) return null;
+                        
                         return (
                             <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>
-                                {hasPermission && tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
-                                {hasPermission && tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
-                                {hasPermission && tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
-                                {hasPermission && tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
-                                {hasPermission && tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificacoes={activeClassificacoes} />}
+                                {tab.id === 'pendentes' && <SenhasPendentesList pendentes={pendentes} isLoading={isLoading} onCall={handleChamarParaTriagem} onCancel={setItemToCancel} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
+                                {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
+                                {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
+                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificacoes={activeClassificacoes} />}
                             </div>
                         )
                     })}
@@ -381,7 +383,7 @@ export default function AtendimentosPage() {
                 onOpenChange={(open) => { if (!open) setIsAddToQueueDialogOpen(false); }}
                 pacientes={pacientes}
                 departamentos={departamentos}
-                classificacoes={activeClassificacoes.filter(c => c.ativa)}
+                classificacoes={activeClassificacoes}
                 onAddNewPatient={handleOpenNewPatientDialog}
                 patientToAdd={patientToAdd}
                 atendimentoParaCompletar={atendimentoParaCompletar}
