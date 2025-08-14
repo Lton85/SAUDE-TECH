@@ -59,7 +59,7 @@ export function FinalizadosList({
     classificacoes 
 }: FinalizadosListProps) {
     
-    const [motivoVisivel, setMotivoVisivel] = React.useState<string | null>(null);
+    const [itemComMotivoVisivel, setItemComMotivoVisivel] = React.useState<FilaDeEsperaItem | null>(null);
 
     const counts = React.useMemo(() => {
         return finalizados.reduce((acc, item) => {
@@ -85,6 +85,8 @@ export function FinalizadosList({
             return statusMatch && classificacaoMatch;
         });
     }, [finalizados, statusFilter, classificacaoFilter]);
+    
+    const cancelTime = itemComMotivoVisivel?.canceladaEm ? format(itemComMotivoVisivel.canceladaEm.toDate(), "dd/MM/yyyy 'às' HH:mm:ss", { locale: ptBR }) : '';
 
     if (isLoading) {
         return (
@@ -183,7 +185,7 @@ export function FinalizadosList({
                                             Cancelado
                                         </Badge>
                                         {item.motivoCancelamento && (
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700" onClick={() => setMotivoVisivel(item.motivoCancelamento || null)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700" onClick={() => setItemComMotivoVisivel(item)}>
                                                 <MessageSquareWarning className="h-4 w-4 cursor-pointer" />
                                             </Button>
                                         )}
@@ -245,19 +247,22 @@ export function FinalizadosList({
                 </>
             )}
 
-            <AlertDialog open={!!motivoVisivel} onOpenChange={() => setMotivoVisivel(null)}>
+            <AlertDialog open={!!itemComMotivoVisivel} onOpenChange={() => setItemComMotivoVisivel(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2">
                             <MessageSquareWarning />
                             Motivo do Cancelamento
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="pt-4 text-base text-foreground">
-                           {motivoVisivel}
+                        <AlertDialogDescription asChild>
+                            <div className="pt-4 space-y-2">
+                                <p className="text-base text-foreground">{itemComMotivoVisivel?.motivoCancelamento}</p>
+                                {cancelTime && <p className="text-sm text-muted-foreground">Cancelado em: {cancelTime}</p>}
+                            </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <Button onClick={() => setMotivoVisivel(null)}>Fechar</Button>
+                        <Button onClick={() => setItemComMotivoVisivel(null)}>Fechar</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
