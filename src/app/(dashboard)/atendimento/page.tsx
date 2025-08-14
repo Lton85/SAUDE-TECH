@@ -450,7 +450,7 @@ export default function AtendimentosPage() {
                             try {
                                 await cancelarAtendimento(itemToCancel, motivo);
                                 const itemName = itemToCancel.pacienteNome || `Senha ${itemToCancel.senha}`;
-                                setCancellationConfirmation({ isOpen: true, itemName: itemName });
+                                setCancellationConfirmation({ isOpen: true, itemName });
                             } catch (error) {
                                 const err = error as Error;
                                 setNotification({ type: 'error', title: "Erro ao cancelar", message: err.message });
