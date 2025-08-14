@@ -398,18 +398,14 @@ export default function DashboardClientLayout({
         const userPermissions = currentUser.permissoes || [];
         const allowedMenuItems = allMenuItems.filter(item => {
             if (!item.permissionRequired) {
-                return true;
+                return true; // Always show non-protected routes
             }
-
-            let hasAccess = userPermissions.includes(item.id);
-            // If the item itself doesn't have a direct permission, check if any sub-item has permission
             if (item.subItems) {
-                const hasSubItemAccess = item.subItems.some(sub => userPermissions.includes(sub.id));
-                // A user has access to a top-level menu if they have permission for the menu itself OR any of its sub-items
-                hasAccess = hasAccess || hasSubItemAccess;
+                // Show parent if any child has permission
+                return item.subItems.some(sub => userPermissions.includes(sub.id));
             }
-
-            return hasAccess;
+            // Show item if it has direct permission
+            return userPermissions.includes(item.id);
         });
         setUserMenuItems(allowedMenuItems);
     }
