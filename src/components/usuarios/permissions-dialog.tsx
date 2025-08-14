@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react";
@@ -36,9 +37,14 @@ const PermissionItem = ({
   onPermissionChange: (id: string, checked: boolean) => void;
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
+  
+  // This is the source of truth for the parent checkbox state
   const isSelected = selectedPermissions.includes(item.id);
-  const areAllSubItemsSelected = hasSubItems && item.subItems!.every(sub => selectedPermissions.includes(sub.id));
-  const areSomeSubItemsSelected = hasSubItems && item.subItems!.some(sub => selectedPermissions.includes(sub.id));
+
+  // This is for visual state of the parent checkbox, especially for sub-items
+  const areAllSubItemsSelected = hasSubItems 
+    ? item.subItems!.every(sub => selectedPermissions.includes(sub.id))
+    : isSelected;
 
   const handleParentChange = (checked: boolean) => {
     onPermissionChange(item.id, checked);
@@ -49,25 +55,29 @@ const PermissionItem = ({
 
   const handleSubItemChange = (subId: string, checked: boolean) => {
     onPermissionChange(subId, checked);
-  };
-  
-  React.useEffect(() => {
-    if (hasSubItems) {
-        const allSubsSelected = item.subItems!.every(sub => selectedPermissions.includes(sub.id));
-        if (allSubsSelected && !selectedPermissions.includes(item.id)) {
+
+    // After a sub-item changes, we might need to update the parent
+    const allSubItemIds = item.subItems!.map(s => s.id);
+    const currentSelectedSubItems = new Set(selectedPermissions.filter(p => allSubItemIds.includes(p)));
+
+    if (checked) {
+        currentSelectedSubItems.add(subId);
+    } else {
+        currentSelectedSubItems.delete(subId);
+    }
+    
+    // If all sub-items are now checked, check the parent
+    if(currentSelectedSubItems.size === item.subItems!.length) {
+        if (!selectedPermissions.includes(item.id)) {
             onPermissionChange(item.id, true);
-        } else if (!allSubsSelected && selectedPermissions.includes(item.id)) {
-            // This part is tricky. Maybe if any is selected, parent should be?
-            // Or only deselect parent if ALL children are deselected.
-            const anySubSelected = item.subItems!.some(sub => selectedPermissions.includes(sub.id));
-            if(!anySubSelected){
-                onPermissionChange(item.id, false);
-            }
+        }
+    } else { // otherwise, uncheck the parent
+        if (selectedPermissions.includes(item.id)) {
+             onPermissionChange(item.id, false);
         }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPermissions, hasSubItems, item]);
-
+  };
+  
   if (hasSubItems) {
     return (
         <AccordionItem value={item.id} className="border-b-0">
