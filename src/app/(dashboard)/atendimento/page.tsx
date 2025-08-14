@@ -93,6 +93,7 @@ export default function AtendimentosPage() {
     
     // Permissions
     const [permissions, setPermissions] = useState<string[]>([]);
+    const [allowedTabs, setAllowedTabs] = useState<TabInfo[]>([]);
     const [activeTab, setActiveTab] = useState<string | null>(null);
     
     useEffect(() => {
@@ -100,15 +101,15 @@ export default function AtendimentosPage() {
         if (!user) return;
 
         const userPermissions = user.permissoes || [];
+        setPermissions(userPermissions);
+
         if (user.usuario === 'master') {
-            const allPermissions = allTabs.map(t => `/atendimento/${t.id}`);
-            setPermissions(allPermissions);
+            setAllowedTabs(allTabs);
             setActiveTab(allTabs[0]?.id);
         } else {
-            setPermissions(userPermissions);
-            // Set the first allowed tab as active
-            const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/atendimento/${tab.id}`));
-            setActiveTab(firstAllowedTab ? firstAllowedTab.id : null);
+            const filteredTabs = allTabs.filter(tab => userPermissions.includes(`/atendimento/${tab.id}`));
+            setAllowedTabs(filteredTabs);
+            setActiveTab(filteredTabs[0]?.id ?? null);
         }
     }, []);
 
@@ -321,9 +322,7 @@ export default function AtendimentosPage() {
         <div className="flex flex-col h-full">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
                  <div className="flex gap-2">
-                    {allTabs.map(tab => {
-                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
-                         if (!hasPermission) return null; // Don't render the button if no permission
+                    {allowedTabs.map(tab => {
                          const Icon = tab.icon;
                          let count = 0;
                          if (tab.id === 'pendentes') count = pendentes.length;
@@ -336,7 +335,6 @@ export default function AtendimentosPage() {
                              <Button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                disabled={!hasPermission}
                                 className={cn(
                                     "text-sm font-medium flex-1",
                                     activeTab === tab.id
@@ -344,7 +342,6 @@ export default function AtendimentosPage() {
                                         : "bg-card text-card-foreground border hover:bg-muted"
                                 )}
                             >
-                                {!hasPermission && <Lock className="mr-2 h-3 w-3" />}
                                 <Icon className="mr-2 h-4 w-4" />
                                 {tab.label}
                                 {count > 0 && (
@@ -358,7 +355,7 @@ export default function AtendimentosPage() {
                 </div>
                 
                 <div className="flex-1 overflow-y-auto mt-4">
-                    {allTabs.map(tab => {
+                    {allowedTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
                         return (
                             <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>
