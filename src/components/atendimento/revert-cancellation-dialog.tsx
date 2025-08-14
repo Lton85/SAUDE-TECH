@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import {
   Dialog,
@@ -68,7 +69,7 @@ export function RevertCancellationDialog({
         <div className="py-4 space-y-4">
           <RadioGroup 
             value={targetStatus} 
-            onValueChange={(value: FilaDeEsperaItem['status']) => setTargetStatus(value)}
+            onValueChange={(value) => setTargetStatus(value as FilaDeEsperaItem['status'])}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="pendente" id="r-pendente" />
