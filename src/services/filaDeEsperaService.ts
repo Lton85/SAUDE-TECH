@@ -501,14 +501,12 @@ export const reverterCancelamento = async (itemId: string, targetStatus: FilaDeE
     
     const filaDeEsperaCollection = collection(db, 'filaDeEspera');
     
+    // Adicionar o item de volta à fila de espera em um novo documento
+    const newDocRef = doc(filaDeEsperaCollection, itemId); // Re-use the same ID
+    
     const batch = writeBatch(db);
-
-    // Adiciona o item de volta à fila de espera
-    const newDocRef = doc(filaDeEsperaCollection);
     batch.set(newDocRef, newItem);
-
-    // Exclui o registro de cancelamento do histórico
-    batch.delete(relatorioDocRef);
+    batch.delete(relatorioDocRef); // Remove from history
 
     await batch.commit();
 };
@@ -734,4 +732,3 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     
 
     
-
