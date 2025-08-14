@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { db } from '@/lib/firebase';
@@ -26,20 +27,24 @@ interface FullSearchFilters extends SearchFilters {
 }
 
 const getPrioridade = (classificacaoId: string, classificacoesConfig: Classificacao[]): number => {
-    // Prioridades padrão para os 4 tipos base
-    if (classificacaoId === 'Preferencial') return 1;
-    if (classificacaoId === 'Urgencia') return 2;
-    if (classificacaoId === 'Normal') return 3;
-    if (classificacaoId === 'Outros') return 4;
-    
-    // Para novos tipos, a prioridade é baseada na ordem em que aparecem na lista de configurações
-    const config = classificacoesConfig.find(c => c.id === classificacaoId);
-    if (config) {
-        const index = classificacoesConfig.indexOf(config);
-        return index + 5; // Começa de 5 para não colidir com as padrões
+    // Prioridades Fichas
+    const prioridadesFixas: { [key: string]: number } = {
+        'Urgencia': 1,
+        'Preferencial': 2,
+        'Normal': 3,
+        'Outros': 4,
+    };
+
+    if (prioridadesFixas[classificacaoId] !== undefined) {
+        return prioridadesFixas[classificacaoId];
     }
     
-    return 99; // Fallback para classificações não encontradas
+    // Prioridades Dinâmicas para classificações customizadas
+    const customIndex = classificacoesConfig.findIndex(c => c.id === classificacaoId);
+    
+    // Se encontrar, retorna o índice + 5 (para não colidir com as fixas).
+    // Se não encontrar (fallback, embora improvável), retorna uma prioridade baixa.
+    return customIndex !== -1 ? customIndex + 5 : 99;
 }
 
 
