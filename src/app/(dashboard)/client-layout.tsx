@@ -176,7 +176,14 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
         <>
             <Sidebar collapsible="icon">
               <SidebarHeader className="flex flex-col items-center justify-center text-center p-4 gap-2">
-                 <Link href="/" className="flex flex-col items-center w-full">
+                 <Link href="/" className="flex flex-col items-center w-full" onClick={(e) => {
+                    e.preventDefault();
+                    const homeItem = allMenuItems.find(item => item.id === "/");
+                    if (homeItem) {
+                      handleButtonClick(homeItem as Tab);
+                    }
+                }}
+>
                     <CustomLogo className="h-12 w-12 text-primary" />
                     <div className="duration-200 group-data-[collapsible=icon]:hidden w-full">
                         <h1 className="text-xl font-bold font-headline mt-1">SAÚDE TECH</h1>
@@ -470,7 +477,11 @@ export default function DashboardClientLayout({
   };
 
   const handleMenuItemClick = (item: Tab) => {
-     if (!item.hasPermission) return;
+    // Lista de IDs que correspondem aos cards de acesso rápido
+    const quickAccessCardIds = ["/atendimento", "painel", "tablet", "/cadastros", "/produtividade", "/relatorios"];
+
+    // Verifica a permissão SOMENTE se o item NÃO for um card de acesso rápido
+    if (!item.hasPermission && !quickAccessCardIds.includes(item.id)) return;
 
     if (item.target === '_blank' && item.href) {
         handleOpenInNewTab(item.href);
