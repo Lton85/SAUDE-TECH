@@ -91,6 +91,11 @@ export const allMenuItems = [
     icon: Users, 
     component: CadastrosPage, 
     permissionRequired: true,
+    subItems: [
+      { id: '/cadastros/pacientes', label: 'Pacientes', permissionRequired: true },
+      { id: '/cadastros/profissionais', label: 'Profissionais', permissionRequired: true },
+      { id: '/cadastros/departamentos', label: 'Departamentos', permissionRequired: true },
+    ]
   },
   { id: "/produtividade", href: "/produtividade", label: "Produtividade", icon: BarChart3, component: ProdutividadePage, permissionRequired: true },
   { id: "/relatorios", href: "/relatorios", label: "Relatórios", icon: ClipboardList, component: RelatoriosPage, permissionRequired: true },
