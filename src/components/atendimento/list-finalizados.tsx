@@ -40,7 +40,12 @@ const getColorClassForClassification = (id: string, variant: 'badge' | 'text' | 
         'Preferencial': { badge: 'bg-blue-500 hover:bg-blue-600', text: 'text-blue-500', bg: 'bg-blue-500/5' },
         'Normal': { badge: 'bg-green-500 hover:bg-green-700', text: 'text-green-500', bg: 'bg-green-500/5' },
     }
-    return baseColors[id]?.[variant] || 'bg-slate-500 hover:bg-slate-600';
+    const customColor = { badge: 'bg-slate-500 hover:bg-slate-600', text: 'text-slate-500', bg: 'bg-slate-500/5' };
+    
+    if (baseColors[id]) {
+        return baseColors[id][variant];
+    }
+    return customColor[variant];
 };
 
 
@@ -101,7 +106,36 @@ export function FinalizadosList({
     
     return (
          <div className="space-y-2">
-             <div className="flex flex-col gap-2 p-2 border-b">
+             <div className="flex items-center justify-between gap-2 p-2 border-b">
+                 {/* Filtros de Classificação à esquerda */}
+                 <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                        size="sm"
+                        variant={classificacaoFilter === 'todos' ? 'default' : 'outline'}
+                        className="h-7 text-xs"
+                        onClick={() => onClassificacaoFilterChange('todos')}
+                    >
+                        Todos os Tipos
+                    </Button>
+                    {classificacoes.map(c => (
+                        <Button 
+                            key={c.id}
+                            size="sm"
+                            variant={classificacaoFilter === c.id ? 'default' : 'outline'}
+                            className={cn(
+                                "h-7 text-xs", 
+                                classificacaoFilter === c.id && getColorClassForClassification(c.id, 'badge'),
+                                classificacaoFilter === c.id && 'text-white'
+                            )}
+                            onClick={() => onClassificacaoFilterChange(c.id)}
+                        >
+                            {c.nome}
+                            <Badge variant="secondary" className="ml-2">{counts.classificacoes[c.id] || 0}</Badge>
+                        </Button>
+                    ))}
+                 </div>
+                 
+                 {/* Filtros de Status à direita */}
                  <RadioGroup
                     value={statusFilter}
                     onValueChange={onStatusFilterChange}
@@ -120,29 +154,6 @@ export function FinalizadosList({
                         <Label htmlFor="r-todos" className="cursor-pointer">Todos <Badge variant="outline" className="ml-1">{finalizados.length}</Badge></Label>
                     </div>
                 </RadioGroup>
-                <Separator className="my-2" />
-                 <div className="flex items-center gap-2 flex-wrap">
-                    <Button
-                        size="sm"
-                        variant={classificacaoFilter === 'todos' ? 'default' : 'outline'}
-                        className="h-7 text-xs"
-                        onClick={() => onClassificacaoFilterChange('todos')}
-                    >
-                        Todos os Tipos
-                    </Button>
-                    {classificacoes.map(c => (
-                        <Button 
-                            key={c.id}
-                            size="sm"
-                            variant={classificacaoFilter === c.id ? 'default' : 'outline'}
-                            className={cn("h-7 text-xs", classificacaoFilter === c.id && getColorClassForClassification(c.id, 'badge'))}
-                            onClick={() => onClassificacaoFilterChange(c.id)}
-                        >
-                            {c.nome}
-                            <Badge variant="secondary" className="ml-2">{counts.classificacoes[c.id] || 0}</Badge>
-                        </Button>
-                    ))}
-                 </div>
              </div>
 
             {filteredList.length === 0 ? (
