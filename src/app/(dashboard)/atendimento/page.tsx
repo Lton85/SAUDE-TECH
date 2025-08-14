@@ -39,13 +39,6 @@ interface Profissional {
   nome: string;
 }
 
-const initialClassificationNames: Empresa['nomesClassificacoes'] = {
-    Normal: "Normal",
-    Preferencial: "Preferencial",
-    Urgencia: "Urgência",
-    Outros: "Outros",
-};
-
 interface TabInfo {
     id: string;
     label: string;
@@ -72,7 +65,6 @@ export default function AtendimentosPage() {
     const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
     const [profissionais, setProfissionais] = useState<Profissional[]>([]);
     const [activeClassificacoes, setActiveClassificacoes] = useState<Classificacao[]>([]);
-    const [classificationNames, setClassificationNames] = useState<Empresa['nomesClassificacoes']>(initialClassificationNames);
     
     // UI states
     const [isLoading, setIsLoading] = useState(true);
@@ -135,13 +127,9 @@ export default function AtendimentosPage() {
                 setProfissionais([...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome)));
                 
                  if (empresaData?.classificacoes?.length) {
-                    setActiveClassificacoes(empresaData.classificacoes.filter(c => c.ativa));
+                    setActiveClassificacoes(empresaData.classificacoes);
                 }
                 
-                if (empresaData?.nomesClassificacoes) {
-                    setClassificationNames(empresaData.nomesClassificacoes);
-                }
-
              } catch (error) {
                  setNotification({ type: "error", title: "Erro ao carregar dados de apoio", message: "Não foi possível carregar departamentos ou profissionais." });
              }
@@ -377,7 +365,7 @@ export default function AtendimentosPage() {
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
-                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificationNames={classificationNames} />}
+                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} filter={finalizadosFilter} onFilterChange={setFinalizadosFilter} classificacoes={activeClassificacoes} />}
                             </div>
                         )
                     })}
@@ -395,7 +383,7 @@ export default function AtendimentosPage() {
                 onOpenChange={(open) => { if (!open) setIsAddToQueueDialogOpen(false); }}
                 pacientes={pacientes}
                 departamentos={departamentos}
-                classificacoes={activeClassificacoes}
+                classificacoes={activeClassificacoes.filter(c => c.ativa)}
                 onAddNewPatient={handleOpenNewPatientDialog}
                 patientToAdd={patientToAdd}
                 atendimentoParaCompletar={atendimentoParaCompletar}

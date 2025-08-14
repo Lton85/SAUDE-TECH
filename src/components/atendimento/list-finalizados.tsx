@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog"
 import { Button } from "../ui/button";
-import type { Empresa } from "@/types/empresa";
+import type { Classificacao } from "@/types/empresa";
 
 
 interface FinalizadosListProps {
@@ -28,10 +28,10 @@ interface FinalizadosListProps {
     isLoading: boolean;
     filter: 'todos' | 'finalizado' | 'cancelado';
     onFilterChange: (value: 'todos' | 'finalizado' | 'cancelado') => void;
-    classificationNames?: Empresa['nomesClassificacoes'];
+    classificacoes: Classificacao[];
 }
 
-export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange, classificationNames }: FinalizadosListProps) {
+export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange, classificacoes }: FinalizadosListProps) {
     
     const [motivoVisivel, setMotivoVisivel] = React.useState<string | null>(null);
 
@@ -101,7 +101,8 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                 {filteredList.map((item) => {
                     const isCanceled = item.status === 'cancelado';
                     const eventTime = isCanceled ? item.canceladaEm?.toDate() : item.finalizadaEm?.toDate();
-                    const classificationName = classificationNames?.[item.classificacao] || item.classificacao;
+                    const classificacaoInfo = classificacoes.find(c => c.id === item.classificacao);
+                    const classificationName = classificacaoInfo ? classificacaoInfo.nome : item.classificacao;
                     
                     return (
                         <div key={item.id} className={cn(
