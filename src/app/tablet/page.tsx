@@ -174,7 +174,7 @@ export default function TabletPage() {
                 </p>
             </motion.div>
 
-            <div className="flex flex-wrap justify-center items-stretch gap-8 w-full max-w-7xl">
+            <div className="flex justify-center items-stretch gap-8 w-full max-w-7xl overflow-x-auto pb-4">
                 {config.activeClassifications.map((classificacao, index) => {
                      const colors = getColors(classificacao.id);
                      return (
@@ -184,7 +184,7 @@ export default function TabletPage() {
                         initial="hidden" 
                         animate="visible" 
                         variants={cardVariants}
-                        className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
+                        className="w-full basis-1/2 md:basis-1/3 lg:basis-1/4 flex-shrink-0"
                      >
                         <Card 
                             className={cn(
