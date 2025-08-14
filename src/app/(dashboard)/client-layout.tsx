@@ -196,25 +196,28 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                     </div>
                 </div>
                 <SidebarMenu>
-                  {filteredMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                        <SidebarMenuButton
-                            onClick={() => handleButtonClick(item)}
-                            isActive={activeContentId === item.id}
-                            tooltip={{children: item.label, side: "right"}}
-                            aria-disabled={!item.hasPermission}
-                            className={cn(!item.hasPermission && "opacity-50 cursor-not-allowed")}
-                        >
-                            <item.icon />
-                            <span>{item.label}</span>
-                             {item.notificationCount && item.notificationCount > 0 && (
-                                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
-                                    {item.notificationCount}
-                                </span>
-                            )}
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {filteredMenuItems.map((item) => {
+                    if (!item.hasPermission) {
+                        return null; // Don't render if no permission
+                    }
+                    return (
+                        <SidebarMenuItem key={item.id}>
+                            <SidebarMenuButton
+                                onClick={() => handleButtonClick(item)}
+                                isActive={activeContentId === item.id}
+                                tooltip={{children: item.label, side: "right"}}
+                            >
+                                <item.icon />
+                                <span>{item.label}</span>
+                                {item.notificationCount && item.notificationCount > 0 && (
+                                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
+                                        {item.notificationCount}
+                                    </span>
+                                )}
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarContent>
                 <SidebarFooter>

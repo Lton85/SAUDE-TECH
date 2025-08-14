@@ -92,29 +92,31 @@ export default function AtendimentosPage() {
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
     // Permissions
-    const [permissions, setPermissions] = useState<string[]>([]);
+    const [permissions, setPermissions] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState<string>('pendentes');
     
     useEffect(() => {
         const user = getCurrentUser();
         if (!user) return;
 
-        const userPermissions = user.permissoes || [];
-        setPermissions(userPermissions);
+        const userPermissions = new Set(user.permissoes || []);
         
         // Se for master, todas as permissões são concedidas
         if (user.usuario === 'master') {
-            const allPossiblePermissions = allTabs.map(tab => `/atendimento/${tab.id}`);
+            const allPossiblePermissions = new Set(allTabs.map(tab => `/atendimento/${tab.id}`));
             setPermissions(allPossiblePermissions);
             setActiveTab(allTabs[0]?.id);
             return;
         }
 
+        setPermissions(userPermissions);
+        
         // Definir a aba ativa inicial como a primeira aba para a qual o usuário tem permissão
-        const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/atendimento/${tab.id}`));
+        const firstAllowedTab = allTabs.find(tab => userPermissions.has(`/atendimento/${tab.id}`));
         if (firstAllowedTab) {
             setActiveTab(firstAllowedTab.id);
         } else {
+             // Se não tiver permissão para nenhuma, mostra a primeira como padrão (mas desabilitada)
              setActiveTab(allTabs[0]?.id);
         }
     }, []);
@@ -313,17 +315,6 @@ export default function AtendimentosPage() {
         }
     };
     
-     if (permissions.length === 0 && getCurrentUser()?.usuario !== 'master') {
-        return (
-            <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
-                <Lock className="h-10 w-10 text-muted-foreground/50" />
-                <p className="mt-4 text-center text-muted-foreground">
-                    Você não tem permissão para acessar esta seção.
-                </p>
-            </div>
-        );
-    }
-    
     return (
         <div className="flex flex-col h-full">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
@@ -337,7 +328,7 @@ export default function AtendimentosPage() {
                          else if (tab.id === 'em-andamento') count = emAtendimento.length;
                          else if (tab.id === 'finalizados') count = finalizados.length;
                          
-                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
+                         const hasPermission = permissions.has(`/atendimento/${tab.id}`);
 
                         return (
                              <Button
@@ -349,7 +340,6 @@ export default function AtendimentosPage() {
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-card text-card-foreground border hover:bg-muted"
                                 )}
-                                disabled={!hasPermission}
                                 aria-disabled={!hasPermission}
                             >
                                 <Icon className="mr-2 h-4 w-4" />
@@ -366,7 +356,7 @@ export default function AtendimentosPage() {
                 
                 <div className="flex-1 overflow-y-auto mt-4">
                     {allTabs.map(tab => {
-                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
+                         const hasPermission = permissions.has(`/atendimento/${tab.id}`);
                         
                         return (
                             <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>
