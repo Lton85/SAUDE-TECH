@@ -195,24 +195,29 @@ export function FinalizadosList({
                                     </Badge>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    {item.pacienteNome ? (
-                                        <>
-                                            <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
-                                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                                <div className="flex items-center gap-1.5 truncate">
-                                                    <Building className="h-3 w-3" />
-                                                    <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 truncate">
-                                                    <User className="h-3 w-3" />
-                                                    <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
-                                                </div>
+                                    <div className="flex items-center gap-2">
+                                        {item.pacienteNome ? (
+                                            <>
+                                                <Badge variant="outline" className="text-xs">{item.senha}</Badge>
+                                                <p className="font-semibold text-sm text-foreground/80 truncate" title={item.pacienteNome}>{item.pacienteNome}</p>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <Tag className="h-3 w-3 text-muted-foreground" />
+                                                <p className="font-semibold text-sm text-foreground/80">Senha {item.senha}</p>
                                             </div>
-                                        </>
-                                    ) : (
-                                        <div className="flex items-center gap-2">
-                                            <Tag className="h-3 w-3 text-muted-foreground" />
-                                            <p className="font-semibold text-sm text-foreground/80">Senha {item.senha}</p>
+                                        )}
+                                    </div>
+                                    {item.pacienteNome && (
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground pl-2 mt-0.5">
+                                            <div className="flex items-center gap-1.5 truncate">
+                                                <Building className="h-3 w-3" />
+                                                <span className="truncate" title={item.departamentoNome}>{item.departamentoNome}{item.departamentoNumero ? ` - Sala ${item.departamentoNumero}` : ''}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 truncate">
+                                                <User className="h-3 w-3" />
+                                                <span className="truncate" title={item.profissionalNome}>{item.profissionalNome}</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
