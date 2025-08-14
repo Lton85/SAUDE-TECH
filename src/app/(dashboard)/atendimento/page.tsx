@@ -93,8 +93,7 @@ export default function AtendimentosPage() {
     
     // Permissions
     const [permissions, setPermissions] = useState<string[]>([]);
-    const [allowedTabs, setAllowedTabs] = useState<TabInfo[]>([]);
-    const [activeTab, setActiveTab] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<string>('pendentes');
     
     useEffect(() => {
         const user = getCurrentUser();
@@ -102,14 +101,21 @@ export default function AtendimentosPage() {
 
         const userPermissions = user.permissoes || [];
         setPermissions(userPermissions);
-
+        
+        // Se for master, todas as permissões são concedidas
         if (user.usuario === 'master') {
-            setAllowedTabs(allTabs);
+            const allPossiblePermissions = allTabs.map(tab => `/atendimento/${tab.id}`);
+            setPermissions(allPossiblePermissions);
             setActiveTab(allTabs[0]?.id);
+            return;
+        }
+
+        // Definir a aba ativa inicial como a primeira aba para a qual o usuário tem permissão
+        const firstAllowedTab = allTabs.find(tab => userPermissions.includes(`/atendimento/${tab.id}`));
+        if (firstAllowedTab) {
+            setActiveTab(firstAllowedTab.id);
         } else {
-            const filteredTabs = allTabs.filter(tab => userPermissions.includes(`/atendimento/${tab.id}`));
-            setAllowedTabs(filteredTabs);
-            setActiveTab(filteredTabs[0]?.id ?? null);
+             setActiveTab(allTabs[0]?.id);
         }
     }, []);
 
@@ -307,7 +313,7 @@ export default function AtendimentosPage() {
         }
     };
     
-    if (activeTab === null) {
+     if (permissions.length === 0 && getCurrentUser()?.usuario !== 'master') {
         return (
             <div className="flex flex-col items-center justify-center h-full rounded-md border border-dashed py-10">
                 <Lock className="h-10 w-10 text-muted-foreground/50" />
@@ -322,7 +328,7 @@ export default function AtendimentosPage() {
         <div className="flex flex-col h-full">
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
                  <div className="flex gap-2">
-                    {allowedTabs.map(tab => {
+                    {allTabs.map(tab => {
                          const Icon = tab.icon;
                          let count = 0;
                          if (tab.id === 'pendentes') count = pendentes.length;
@@ -330,6 +336,8 @@ export default function AtendimentosPage() {
                          else if (tab.id === 'fila-atendimento') count = fila.length;
                          else if (tab.id === 'em-andamento') count = emAtendimento.length;
                          else if (tab.id === 'finalizados') count = finalizados.length;
+                         
+                         const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
 
                         return (
                              <Button
@@ -341,6 +349,8 @@ export default function AtendimentosPage() {
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-card text-card-foreground border hover:bg-muted"
                                 )}
+                                disabled={!hasPermission}
+                                aria-disabled={!hasPermission}
                             >
                                 <Icon className="mr-2 h-4 w-4" />
                                 {tab.label}
@@ -355,9 +365,8 @@ export default function AtendimentosPage() {
                 </div>
                 
                 <div className="flex-1 overflow-y-auto mt-4">
-                    {allowedTabs.map(tab => {
+                    {allTabs.map(tab => {
                          const hasPermission = permissions.includes(`/atendimento/${tab.id}`);
-                        if (!hasPermission) return null;
                         
                         return (
                             <div key={tab.id} className={cn("h-full", activeTab !== tab.id && "hidden")}>

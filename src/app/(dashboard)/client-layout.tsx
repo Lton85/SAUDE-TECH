@@ -102,6 +102,7 @@ export const allMenuItems = [
 
 export type Tab = (typeof allMenuItems)[number] & { 
     notificationCount?: number; 
+    hasPermission?: boolean;
     subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
 };
 
@@ -155,6 +156,8 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
     }, [searchTerm, menuItems]);
     
     const handleButtonClick = (item: Tab) => {
+        if (!item.hasPermission) return;
+        
         if (item.target === '_blank' && item.href) {
             handleOpenInNewTab(item.href);
         } else if (item.id === 'sair') {
@@ -199,6 +202,8 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                             onClick={() => handleButtonClick(item)}
                             isActive={activeContentId === item.id}
                             tooltip={{children: item.label, side: "right"}}
+                            aria-disabled={!item.hasPermission}
+                            className={cn(!item.hasPermission && "opacity-50 cursor-not-allowed")}
                         >
                             <item.icon />
                             <span>{item.label}</span>
@@ -391,25 +396,30 @@ export default function DashboardClientLayout({
     const currentUser = getCurrentUser();
     if (currentUser) {
         if (currentUser.usuario === 'master') {
-            setUserMenuItems(allMenuItems);
+             const itemsWithPermission = allMenuItems.map(item => ({ ...item, hasPermission: true }));
+            setUserMenuItems(itemsWithPermission);
             return;
         }
 
-        const userPermissions = currentUser.permissoes || [];
-        const allowedMenuItems = allMenuItems.filter(item => {
+        const userPermissions = new Set(currentUser.permissoes || []);
+
+        const menuItemsWithPermissions = allMenuItems.map(item => {
+            let hasPermission = false;
             if (!item.permissionRequired) {
-                return true; // Always show non-protected routes
+                hasPermission = true;
+            } else if (item.subItems) {
+                // Parent item has permission if any sub-item has permission
+                hasPermission = item.subItems.some(sub => userPermissions.has(sub.id));
+            } else {
+                hasPermission = userPermissions.has(item.id);
             }
-            // For items with sub-items, show the parent if ANY sub-item has permission
-            if (item.subItems) {
-                return item.subItems.some(sub => userPermissions.includes(sub.id));
-            }
-            // For regular items, check for direct permission
-            return userPermissions.includes(item.id);
+            return { ...item, hasPermission };
         });
-        setUserMenuItems(allowedMenuItems);
+        
+        setUserMenuItems(menuItemsWithPermissions);
     }
-  }, []);
+}, []);
+
 
   // Effect to check for pending appointments and update notifications
     React.useEffect(() => {
@@ -452,6 +462,8 @@ export default function DashboardClientLayout({
   };
 
   const handleMenuItemClick = (item: Tab) => {
+     if (!item.hasPermission) return;
+
     if (item.target === '_blank' && item.href) {
         handleOpenInNewTab(item.href);
         return;
