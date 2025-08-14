@@ -121,7 +121,7 @@ export default function TabletPage() {
         setIsLoading(classificacao.id);
         setGeneratedTicket(null);
         try {
-            const senha = await addPreCadastroToFila(classificacao, config.activeClassifications);
+            const senha = await addPreCadastroToFila(classificacao.id);
             setGeneratedTicket({ senha, tipo: classificacao.id, tipoNome: classificacao.nome });
         } catch (error) {
              setNotification({

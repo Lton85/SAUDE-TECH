@@ -25,28 +25,41 @@ interface FullSearchFilters extends SearchFilters {
     status?: string;
 }
 
-const getPrioridade = (classificacao: FilaDeEsperaItem['classificacao'], classificacoesConfig: Classificacao[]): FilaDeEsperaItem['prioridade'] => {
-    const config = classificacoesConfig.find(c => c.id === classificacao);
-    const index = config ? classificacoesConfig.indexOf(config) : -1;
-
+const getPrioridade = (classificacaoId: string, classificacoesConfig: Classificacao[]): number => {
     // Prioridades padrão para os 4 tipos base
-    if (classificacao === 'Preferencial') return 1;
-    if (classificacao === 'Urgencia') return 2;
-    if (classificacao === 'Normal') return 3;
-    if (classificacao === 'Outros') return 4;
+    if (classificacaoId === 'Preferencial') return 1;
+    if (classificacaoId === 'Urgencia') return 2;
+    if (classificacaoId === 'Normal') return 3;
+    if (classificacaoId === 'Outros') return 4;
     
-    // Para novos tipos, a prioridade é baseada na ordem em que aparecem, após os padrões
-    return index !== -1 ? index + 5 : 99;
+    // Para novos tipos, a prioridade é baseada na ordem em que aparecem na lista de configurações
+    const config = classificacoesConfig.find(c => c.id === classificacaoId);
+    if (config) {
+        const index = classificacoesConfig.indexOf(config);
+        return index + 5; // Começa de 5 para não colidir com as padrões
+    }
+    
+    return 99; // Fallback para classificações não encontradas
 }
 
+
 export const addPreCadastroToFila = async (
-    classificacao: Classificacao,
-    classificacoes: Classificacao[]
+    classificacaoId: string,
 ): Promise<string> => {
     try {
+        const empresaConfig = await getEmpresa();
+        if (!empresaConfig || !empresaConfig.classificacoes) {
+            throw new Error("Configurações de classificação não encontradas.");
+        }
+        
+        const classificacao = empresaConfig.classificacoes.find(c => c.id === classificacaoId);
+        if (!classificacao) {
+            throw new Error(`Classificação com ID "${classificacaoId}" não encontrada.`);
+        }
+
         const filaDeEsperaCollection = collection(db, 'filaDeEspera');
         
-        const prioridade = getPrioridade(classificacao.id, classificacoes);
+        const prioridade = getPrioridade(classificacao.id, empresaConfig.classificacoes);
         const counterName = `senha_${classificacao.id.toLowerCase()}`;
         const ticketPrefix = classificacao.nome.charAt(0).toUpperCase();
 
@@ -55,7 +68,7 @@ export const addPreCadastroToFila = async (
 
         await addDoc(filaDeEsperaCollection, {
             senha,
-            classificacao: classificacao.id, // Salva o ID da classificação
+            classificacao: classificacao.id,
             prioridade,
             chegadaEm: serverTimestamp(),
             status: 'pendente'
