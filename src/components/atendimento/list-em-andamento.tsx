@@ -56,17 +56,17 @@ export function EmAndamentoList({ emAtendimento, isLoading, onReturnToQueue, onF
                     item.classificacao === "Urgencia" && "border-red-500/30 bg-red-500/5",
                     item.classificacao === "Preferencial" && "border-blue-500/30 bg-blue-500/5",
                     item.classificacao === "Normal" && "border-green-500/30 bg-green-500/5",
-                    item.classificacao === "Outros" && "border-slate-500/30 bg-slate-500/5"
+                    !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) && "border-slate-500/30 bg-slate-500/5"
                 )}>
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                          <Badge variant={
                                 item.classificacao === 'Urgencia' ? 'destructive' : 
                                 item.classificacao === 'Preferencial' ? 'default' : 
-                                item.classificacao === 'Outros' ? 'default' : 'secondary'
+                                !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) ? 'default' : 'secondary'
                             } className={cn("text-base",
                                 item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                                 item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                                item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600'
+                                !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) && 'bg-slate-500 hover:bg-slate-600'
                             )}>
                             {item.senha}
                         </Badge>

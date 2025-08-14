@@ -159,7 +159,7 @@ export function FinalizadosList({ finalizados, isLoading, filter, onFilterChange
                                             item.classificacao === 'Urgencia' && 'bg-red-500 text-white hover:bg-red-600',
                                             item.classificacao === 'Preferencial' && 'bg-blue-500 text-white hover:bg-blue-600',
                                             item.classificacao === 'Normal' && 'bg-green-500 text-white hover:bg-green-700',
-                                            item.classificacao === 'Outros' && 'bg-slate-500 hover:bg-slate-600 text-white'
+                                            !['Urgencia', 'Preferencial', 'Normal'].includes(item.classificacao) && 'bg-slate-500 hover:bg-slate-600 text-white'
                                         )}
                                     >
                                         {classificationName}

@@ -64,13 +64,13 @@ export function SenhasPendentesList({ pendentes, isLoading, onCall, onCancel, cl
                     if (id === "Urgencia") return "destructive";
                     if (id === "Preferencial") return "default";
                     if (id === "Normal") return "secondary";
-                    return "default"; // slate
+                    return "default";
                 }
                 
                 const getCustomBadgeStyle = (id: string) => {
                     if (id === "Preferencial") return 'bg-blue-600 hover:bg-blue-700';
                     if (id === "Normal") return 'bg-green-600 hover:bg-green-700 text-white';
-                    if (!['Urgencia'].includes(id)) return 'bg-slate-500 hover:bg-slate-600';
+                    if (!['Urgencia', 'Preferencial', 'Normal'].includes(id)) return 'bg-slate-500 hover:bg-slate-600';
                     return '';
                 }
 

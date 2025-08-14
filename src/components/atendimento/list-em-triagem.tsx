@@ -12,11 +12,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Classificacao } from "@/types/empresa";
 
-const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass, isReadOnly }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, colorClass: string, isReadOnly: boolean }) => {
+const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass, isReadOnly, classificationName }: { item: FilaDeEsperaItem, onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, colorClass: string, isReadOnly: boolean, classificationName: string }) => {
     const horaChegada = item.chegadaEm ? format(item.chegadaEm.toDate(), "HH:mm:ss", { locale: ptBR }) : 'N/A';
     
-    const badgeBgColor = colorClass.replace('text', 'bg').replace('-600', '-600 hover:bg-red-700'); // Adaptação simples
-
     return (
         <Card key={item.id} className={cn("w-full", colorClass.replace('text', 'border').replace('-600', '-500/50'), colorClass.replace('text', 'bg').replace('-600', '-500/5'))}>
              <CardContent className="p-2 flex items-center justify-between gap-2">
@@ -25,13 +23,13 @@ const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass
                      <Badge variant={
                         item.classificacao === 'Urgencia' ? 'destructive' :
                         item.classificacao === 'Preferencial' ? 'default' : 
-                        item.classificacao === 'Outros' ? 'default' : 'secondary'
+                        item.classificacao === 'Outros' || item.classificacao.startsWith('custom_') ? 'default' : 'secondary'
                     } className={cn("text-xs",
                         item.classificacao === 'Preferencial' && 'bg-blue-600 hover:bg-blue-700',
                         item.classificacao === 'Normal' && 'bg-green-600 hover:bg-green-700 text-white',
-                        item.classificacao === 'Outros' && 'bg-slate-600 hover:bg-slate-700 text-white'
+                        (item.classificacao === 'Outros' || item.classificacao.startsWith('custom_')) && 'bg-slate-600 hover:bg-slate-700 text-white'
                     )}>
-                        {item.classificacao}
+                        {classificationName}
                     </Badge>
                 </div>
                 
@@ -59,7 +57,7 @@ const TriagemCard = ({ item, onIdentify, onCancel, onReturnToPending, colorClass
     )
 }
 
-const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, isLoading, colorClass, isReadOnly }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string, isReadOnly: boolean }) => {
+const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, isLoading, colorClass, isReadOnly, classificacoes }: { title: string, items: FilaDeEsperaItem[], onIdentify: (item: FilaDeEsperaItem) => void, onCancel: (item: FilaDeEsperaItem) => void, onReturnToPending: (item: FilaDeEsperaItem) => void, isLoading: boolean, colorClass: string, isReadOnly: boolean, classificacoes: Classificacao[] }) => {
     return (
         <Card className="flex-1 flex flex-col">
             <CardHeader className="p-3 border-b">
@@ -74,7 +72,11 @@ const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, 
                          <Card key={i}><CardContent className="p-2"><Skeleton className="h-8 w-full" /></CardContent></Card>
                     ))
                 ) : items.length > 0 ? (
-                    items.map(item => <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} colorClass={colorClass} isReadOnly={isReadOnly} />)
+                    items.map(item => {
+                        const classificacaoInfo = classificacoes.find(c => c.id === item.classificacao);
+                        const classificationName = classificacaoInfo ? classificacaoInfo.nome : item.classificacao;
+                        return <TriagemCard key={item.id} item={item} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} colorClass={colorClass} isReadOnly={isReadOnly} classificationName={classificationName} />
+                    })
                 ) : (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                         Nenhuma senha.
@@ -86,12 +88,10 @@ const TriagemColumn = ({ title, items, onIdentify, onCancel, onReturnToPending, 
 }
 
 const getColorClassForClassification = (id: string): string => {
-    switch (id) {
-        case "Urgencia": return "text-red-600";
-        case "Preferencial": return "text-blue-600";
-        case "Normal": return "text-green-600";
-        default: return "text-slate-600"; // Cor padrão para 'Outros' e customizadas
-    }
+    if (id === "Urgencia") return "text-red-600";
+    if (id === "Preferencial") return "text-blue-600";
+    if (id === "Normal") return "text-green-600";
+    return "text-slate-600"; // Cor padrão para 'Outros' e customizadas
 }
 
 interface EmTriagemListProps {
@@ -110,8 +110,8 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, onRe
     if (isLoading && emTriagem.length === 0) {
         return (
             <div className="flex gap-4 h-full">
-                 {[...Array(4)].map((_, i) => (
-                      <TriagemColumn key={i} title="" items={[]} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} isLoading={true} colorClass="" isReadOnly={isReadOnly}/>
+                 {[...Array(classificacoes.length || 4)].map((_, i) => (
+                      <TriagemColumn key={i} title="" items={[]} onIdentify={onIdentify} onCancel={onCancel} onReturnToPending={onReturnToPending} isLoading={true} colorClass="" isReadOnly={isReadOnly} classificacoes={classificacoes} />
                  ))}
             </div>
         )
@@ -141,6 +141,7 @@ export function EmTriagemList({ emTriagem, isLoading, onIdentify, onCancel, onRe
                         isLoading={isLoading} 
                         colorClass={colorClass}
                         isReadOnly={isReadOnly}
+                        classificacoes={classificacoes}
                     />
                 )
             })}
