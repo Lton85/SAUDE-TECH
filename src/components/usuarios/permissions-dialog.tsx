@@ -115,25 +115,50 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
   }, [usuario, isOpen]);
 
   const handlePermissionChange = (id: string, checked: boolean) => {
-    setSelectedPermissions(prev => {
-        const newPermissions = new Set(prev);
-        const menuItem = allMenuItems.find(item => item.id === id);
+      setSelectedPermissions(prev => {
+          const newPermissions = new Set(prev);
+          const menuItem = permissionableMenus.find(item => item.id === id || item.subItems?.some(sub => sub.id === id));
 
-        if (checked) {
-            newPermissions.add(id);
-            if (menuItem?.subItems) {
-                menuItem.subItems.forEach(sub => newPermissions.add(sub.id));
+          if (menuItem) {
+              const isParent = menuItem.id === id;
+
+              if (isParent) {
+                  // Handle parent checkbox
+                  if (checked) {
+                      newPermissions.add(menuItem.id);
+                      menuItem.subItems?.forEach(sub => newPermissions.add(sub.id));
+                  } else {
+                      newPermissions.delete(menuItem.id);
+                      menuItem.subItems?.forEach(sub => newPermissions.delete(sub.id));
+                  }
+              } else {
+                  // Handle child checkbox
+                  if (checked) {
+                      newPermissions.add(id);
+                  } else {
+                      newPermissions.delete(id);
+                  }
+                  
+                  // Update parent state
+                  const allChildrenSelected = menuItem.subItems?.every(sub => newPermissions.has(sub.id));
+                  if (allChildrenSelected) {
+                      newPermissions.add(menuItem.id);
+                  } else {
+                      newPermissions.delete(menuItem.id);
+                  }
+              }
+          } else {
+            // Handle items without sub-items
+            if (checked) {
+                newPermissions.add(id);
+            } else {
+                newPermissions.delete(id);
             }
-        } else {
-            newPermissions.delete(id);
-            if (menuItem?.subItems) {
-                menuItem.subItems.forEach(sub => newPermissions.delete(sub.id));
-            }
-        }
-        
-        return newPermissions;
-    });
-};
+          }
+          
+          return newPermissions;
+      });
+  };
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -150,6 +175,7 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
     const allPermissionIds = permissionableMenus.flatMap(menu => 
         menu.subItems ? [menu.id, ...menu.subItems.map(s => s.id)] : [menu.id]
     );
+    if (allPermissionIds.length === 0) return false;
     return allPermissionIds.every(id => selectedPermissions.has(id));
   }, [selectedPermissions]);
 
@@ -159,20 +185,12 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
     setIsSubmitting(true);
     try {
         const permissionsToSave = Array.from(selectedPermissions);
-        // Ensure parent item is included if all children are selected
-        permissionableMenus.forEach(menu => {
-            if (menu.subItems && menu.subItems.every(sub => permissionsToSave.includes(sub.id))) {
-                if (!permissionsToSave.includes(menu.id)) {
-                    permissionsToSave.push(menu.id);
-                }
-            }
-        });
-
+        
         await updateUsuario(usuario.id, { permissoes: permissionsToSave });
         onNotification({
             type: "success",
             title: "Permissões Atualizadas!",
-            message: `As permissões de ${usuario.nome} foram salvas.`,
+            message: `As permissões de ${usuario.nome} foram salvas com sucesso.`,
         });
         onSuccess();
         onOpenChange(false);
