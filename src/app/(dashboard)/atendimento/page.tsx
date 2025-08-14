@@ -21,6 +21,7 @@ import { EmTriagemList } from "@/components/atendimento/list-em-triagem";
 import { FilaDeAtendimentoList } from "@/components/atendimento/list-fila-atendimento";
 import { EmAndamentoList } from "@/components/atendimento/list-em-andamento";
 import { FinalizadosList } from "@/components/atendimento/list-finalizados";
+import { RevertCancellationDialog } from "@/components/atendimento/revert-cancellation-dialog";
 import { AlertTriangle, HeartPulse, Hourglass, Tags, User, FileText, CheckCircle, Eraser, ListX, Lock, Tv2, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { clearPainel, clearHistoryChamadas } from "@/services/chamadasService";
@@ -296,10 +297,10 @@ export default function AtendimentosPage() {
         setIsRevertCancellationDialogOpen(true);
     };
 
-    const handleConfirmRevertCancellation = async () => {
+    const handleConfirmRevertCancellation = async (targetStatus: FilaDeEsperaItem['status']) => {
         if (!itemToRevertCancellation) return;
         try {
-            await reverterCancelamento(itemToRevertCancellation.id);
+            await reverterCancelamento(itemToRevertCancellation.id, targetStatus);
             setNotification({
                 type: 'success',
                 title: "Cancelamento Revertido!",
@@ -528,14 +529,11 @@ export default function AtendimentosPage() {
             )}
 
             {itemToRevertCancellation && (
-                 <ConfirmationDialog
+                 <RevertCancellationDialog
                     isOpen={isRevertCancellationDialogOpen}
                     onOpenChange={setIsRevertCancellationDialogOpen}
                     onConfirm={handleConfirmRevertCancellation}
-                    title="Reverter Cancelamento?"
-                    description={`Tem certeza que deseja reverter o cancelamento de ${itemToRevertCancellation.pacienteNome || `Senha ${itemToRevertCancellation.senha}`}? O atendimento retornará à fila.`}
-                    confirmText="Sim, Reverter"
-                    icon={Undo2}
+                    item={itemToRevertCancellation}
                 />
             )}
 

@@ -475,7 +475,7 @@ export const cancelarAtendimento = async (item: FilaDeEsperaItem, motivo?: strin
     await deleteDoc(filaDocRef);
 };
 
-export const reverterCancelamento = async (itemId: string): Promise<void> => {
+export const reverterCancelamento = async (itemId: string, targetStatus: FilaDeEsperaItem['status']): Promise<void> => {
     const relatorioDocRef = doc(db, "relatorios_atendimentos", itemId);
     const relatorioSnap = await getDoc(relatorioDocRef);
 
@@ -485,15 +485,16 @@ export const reverterCancelamento = async (itemId: string): Promise<void> => {
 
     const item = relatorioSnap.data() as FilaDeEsperaItem;
 
-    // Define o novo status com base se o paciente já foi identificado ou não
-    const novoStatus = item.pacienteId ? 'aguardando' : 'pendente';
+    if (targetStatus === 'aguardando' && !item.pacienteId) {
+        throw new Error("Não é possível mover para 'Fila de Atendimento' sem um paciente identificado.");
+    }
     
     // Remove os campos de controle de finalização/cancelamento
     const { finalizadaEm, canceladaEm, motivoCancelamento, status, ...itemParaFila } = item;
     
     const newItem = {
         ...itemParaFila,
-        status: novoStatus,
+        status: targetStatus,
         chegadaEm: item.chegadaEm || serverTimestamp(), // Mantém a chegada original se existir
         chamadaEm: null,
     };
@@ -733,3 +734,4 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     
 
     
+
