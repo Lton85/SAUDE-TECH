@@ -38,15 +38,19 @@ const PermissionItem = ({
 }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
   
-  // This is the source of truth for the parent checkbox state
   const isSelected = selectedPermissions.includes(item.id);
 
-  // This is for visual state of the parent checkbox, especially for sub-items
-  const areAllSubItemsSelected = hasSubItems 
+  // For parent checkbox visual state, it's checked if all sub-items are checked.
+  const areAllSubItemsSelected = hasSubItems
     ? item.subItems!.every(sub => selectedPermissions.includes(sub.id))
     : isSelected;
+    
+  // A parent item has an "indeterminate" state if some, but not all, of its children are selected.
+  const isIndeterminate = hasSubItems && selectedPermissions.some(p => item.subItems!.map(s => s.id).includes(p)) && !areAllSubItemsSelected;
+
 
   const handleParentChange = (checked: boolean) => {
+    // When a parent checkbox is clicked, it toggles its own permission and all its children's permissions.
     onPermissionChange(item.id, checked);
     if (hasSubItems) {
       item.subItems!.forEach(sub => onPermissionChange(sub.id, checked));
@@ -55,26 +59,29 @@ const PermissionItem = ({
 
   const handleSubItemChange = (subId: string, checked: boolean) => {
     onPermissionChange(subId, checked);
-
-    // After a sub-item changes, we might need to update the parent
+  
+    // After a sub-item changes, determine if the parent should be checked or unchecked.
     const allSubItemIds = item.subItems!.map(s => s.id);
-    const currentSelectedSubItems = new Set(selectedPermissions.filter(p => allSubItemIds.includes(p)));
-
+    // Create a new set with the potential new state
+    const newSelectedSubItems = new Set(selectedPermissions.filter(p => allSubItemIds.includes(p)));
+  
     if (checked) {
-        currentSelectedSubItems.add(subId);
+      newSelectedSubItems.add(subId);
     } else {
-        currentSelectedSubItems.delete(subId);
+      newSelectedSubItems.delete(subId);
     }
-    
-    // If all sub-items are now checked, check the parent
-    if(currentSelectedSubItems.size === item.subItems!.length) {
-        if (!selectedPermissions.includes(item.id)) {
-            onPermissionChange(item.id, true);
-        }
-    } else { // otherwise, uncheck the parent
-        if (selectedPermissions.includes(item.id)) {
-             onPermissionChange(item.id, false);
-        }
+  
+    // Check/uncheck the parent based on whether ALL sub-items are selected
+    if (newSelectedSubItems.size === item.subItems!.length) {
+      // All children are selected, so select the parent
+      if (!selectedPermissions.includes(item.id)) {
+        onPermissionChange(item.id, true);
+      }
+    } else {
+      // Not all children are selected, so unselect the parent
+      if (selectedPermissions.includes(item.id)) {
+        onPermissionChange(item.id, false);
+      }
     }
   };
   
@@ -249,3 +256,4 @@ export function PermissionsDialog({ isOpen, onOpenChange, onSuccess, usuario, on
     </Dialog>
   );
 }
+
