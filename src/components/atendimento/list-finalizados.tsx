@@ -7,7 +7,7 @@ import type { FilaDeEsperaItem } from "@/types/fila";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag, MessageSquareWarning } from "lucide-react";
+import { Clock, User, Building, CheckCircle, BadgeInfo, XCircle, Tag, MessageSquareWarning, Undo2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "../ui/label";
@@ -32,6 +32,7 @@ interface FinalizadosListProps {
     classificacaoFilter: string;
     onClassificacaoFilterChange: (value: string) => void;
     classificacoes: Classificacao[];
+    onRevert: (item: FilaDeEsperaItem) => void;
 }
 
 const getColorClassForClassification = (id: string, variant: 'badge' | 'text' | 'bg') => {
@@ -56,7 +57,8 @@ export function FinalizadosList({
     onStatusFilterChange, 
     classificacaoFilter, 
     onClassificacaoFilterChange, 
-    classificacoes 
+    classificacoes,
+    onRevert
 }: FinalizadosListProps) {
     
     const [itemComMotivoVisivel, setItemComMotivoVisivel] = React.useState<FilaDeEsperaItem | null>(null);
@@ -178,24 +180,26 @@ export function FinalizadosList({
                             isCanceled ? "bg-orange-500/5" : "bg-muted/30"
                         )}>
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                {isCanceled ? (
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="destructive" className="text-xs font-semibold bg-orange-500 hover:bg-orange-600">
-                                            <XCircle className="h-3 w-3 mr-1.5" />
-                                            Cancelado
+                                <div className="flex items-center gap-1">
+                                    {isCanceled ? (
+                                        <>
+                                            <Badge variant="destructive" className="text-xs font-semibold bg-orange-500 hover:bg-orange-600">
+                                                <XCircle className="h-3 w-3 mr-1.5" />
+                                                Cancelado
+                                            </Badge>
+                                            {item.motivoCancelamento && (
+                                                <Button variant="ghost" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700" onClick={() => setItemComMotivoVisivel(item)}>
+                                                    <MessageSquareWarning className="h-4 w-4 cursor-pointer" />
+                                                </Button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs font-semibold">
+                                        <CheckCircle className="h-3 w-3 mr-1.5" />
+                                        Finalizado
                                         </Badge>
-                                        {item.motivoCancelamento && (
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700" onClick={() => setItemComMotivoVisivel(item)}>
-                                                <MessageSquareWarning className="h-4 w-4 cursor-pointer" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs font-semibold">
-                                       <CheckCircle className="h-3 w-3 mr-1.5" />
-                                       Finalizado
-                                    </Badge>
-                                )}
+                                    )}
+                                </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         {item.pacienteNome ? (
@@ -240,6 +244,12 @@ export function FinalizadosList({
                                     <Clock className="h-3 w-3" />
                                      {eventTime ? format(eventTime, "HH:mm:ss") : '-'}
                                 </p>
+                                {isCanceled && (
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRevert(item)} title="Reverter Cancelamento">
+                                        <Undo2 className="h-4 w-4" />
+                                        <span className="sr-only">Reverter Cancelamento</span>
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )

@@ -475,6 +475,43 @@ export const cancelarAtendimento = async (item: FilaDeEsperaItem, motivo?: strin
     await deleteDoc(filaDocRef);
 };
 
+export const reverterCancelamento = async (itemId: string): Promise<void> => {
+    const relatorioDocRef = doc(db, "relatorios_atendimentos", itemId);
+    const relatorioSnap = await getDoc(relatorioDocRef);
+
+    if (!relatorioSnap.exists()) {
+        throw new Error("Atendimento cancelado não encontrado para reverter.");
+    }
+
+    const item = relatorioSnap.data() as FilaDeEsperaItem;
+
+    // Define o novo status com base se o paciente já foi identificado ou não
+    const novoStatus = item.pacienteId ? 'aguardando' : 'pendente';
+    
+    // Remove os campos de controle de finalização/cancelamento
+    const { finalizadaEm, canceladaEm, motivoCancelamento, status, ...itemParaFila } = item;
+    
+    const newItem = {
+        ...itemParaFila,
+        status: novoStatus,
+        chegadaEm: item.chegadaEm || serverTimestamp(), // Mantém a chegada original se existir
+        chamadaEm: null,
+    };
+    
+    const filaDeEsperaCollection = collection(db, 'filaDeEspera');
+    
+    const batch = writeBatch(db);
+
+    // Adiciona o item de volta à fila de espera
+    const newDocRef = doc(filaDeEsperaCollection);
+    batch.set(newDocRef, newItem);
+
+    // Exclui o registro de cancelamento do histórico
+    batch.delete(relatorioDocRef);
+
+    await batch.commit();
+};
+
 
 export const deleteFilaItem = async (id: string): Promise<void> => {
     if (!id) {

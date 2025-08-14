@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento, retornarParaPendente, retornarPacienteParaTriagem } from "@/services/filaDeEsperaService";
+import { getFilaDeEspera, getAtendimentosPendentes, chamarPaciente, getAtendimentosEmAndamento, finalizarAtendimento, retornarPacienteParaFila, updateFilaItem, updateHistoricoItem, getAtendimentosEmTriagem, getAtendimentosFinalizadosHoje, cancelarAtendimento, retornarParaPendente, retornarPacienteParaTriagem, reverterCancelamento } from "@/services/filaDeEsperaService";
 import type { FilaDeEsperaItem } from "@/types/fila";
 import type { Paciente } from "@/types/paciente";
 import type { Departamento } from "@/types/departamento";
@@ -79,6 +79,7 @@ export default function AtendimentosPage() {
     const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
     const [isReturnToTriageDialogOpen, setIsReturnToTriageDialogOpen] = useState(false);
     const [isReturnToPendingDialogOpen, setIsReturnToPendingDialogOpen] = useState(false);
+    const [isRevertCancellationDialogOpen, setIsRevertCancellationDialogOpen] = useState(false);
 
     
     // Dialog item states
@@ -89,6 +90,7 @@ export default function AtendimentosPage() {
     const [itemToReturn, setItemToReturn] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturnToTriage, setItemToReturnToTriage] = useState<FilaDeEsperaItem | null>(null);
     const [itemToReturnToPending, setItemToReturnToPending] = useState<FilaDeEsperaItem | null>(null);
+    const [itemToRevertCancellation, setItemToRevertCancellation] = useState<FilaDeEsperaItem | null>(null);
     const [patientToAdd, setPatientToAdd] = useState<Paciente | null>(null);
     const [atendimentoParaCompletar, setAtendimentoParaCompletar] = useState<FilaDeEsperaItem | null>(null);
     
@@ -289,6 +291,30 @@ export default function AtendimentosPage() {
         }
     };
     
+    const handleRevertCancellationRequest = (item: FilaDeEsperaItem) => {
+        setItemToRevertCancellation(item);
+        setIsRevertCancellationDialogOpen(true);
+    };
+
+    const handleConfirmRevertCancellation = async () => {
+        if (!itemToRevertCancellation) return;
+        try {
+            await reverterCancelamento(itemToRevertCancellation.id);
+            setNotification({
+                type: 'success',
+                title: "Cancelamento Revertido!",
+                message: `O atendimento de ${itemToRevertCancellation.pacienteNome || `Senha ${itemToRevertCancellation.senha}`} retornou para a fila.`
+            });
+        } catch (error) {
+            const err = error as Error;
+            setNotification({ type: 'error', title: "Erro ao reverter", message: err.message });
+        } finally {
+            setIsRevertCancellationDialogOpen(false);
+            setItemToRevertCancellation(null);
+        }
+    };
+
+
     const handleEditFromHistory = (item: FilaDeEsperaItem) => {
         setItemToHistory(null); // Close history dialog
         setItemToEditFromHistory(item); // Open edit dialog for history item
@@ -373,7 +399,7 @@ export default function AtendimentosPage() {
                                 {tab.id === 'em-triagem' && <EmTriagemList emTriagem={emTriagem} isLoading={isLoading} onIdentify={handleCompletarCadastro} onCancel={setItemToCancel} onReturnToPending={handleReturnToPendingRequest} classificacoes={activeClassificacoes} isReadOnly={!hasPermission} />}
                                 {tab.id === 'fila-atendimento' && <FilaDeAtendimentoList fila={fila} isLoading={isLoading} onCall={handleChamarParaAtendimento} onEdit={setItemToEdit} onHistory={setItemToHistory} onCancel={setItemToCancel} onAddToQueue={handleAddToQueue} onClearPanel={() => setIsClearPanelDialogOpen(true)} onClearHistory={() => setIsClearHistoryDialogOpen(true)} onPreviewPanel={() => setIsPanelPreviewOpen(true)} onReturnToTriage={handleReturnToTriageRequest} isReadOnly={!hasPermission} />}
                                 {tab.id === 'em-andamento' && <EmAndamentoList emAtendimento={emAtendimento} isLoading={isLoading} onReturnToQueue={setItemToReturn} onFinalize={handleFinalizarAtendimento} onCancel={setItemToCancel} isReadOnly={!hasPermission} />}
-                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} statusFilter={finalizadosStatusFilter} onStatusFilterChange={setFinalizadosStatusFilter} classificacaoFilter={finalizadosClassificacaoFilter} onClassificacaoFilterChange={setFinalizadosClassificacaoFilter} classificacoes={activeClassificacoes} />}
+                                {tab.id === 'finalizados' && <FinalizadosList finalizados={finalizados} isLoading={isLoading} statusFilter={finalizadosStatusFilter} onStatusFilterChange={setFinalizadosStatusFilter} classificacaoFilter={finalizadosClassificacaoFilter} onClassificacaoFilterChange={setFinalizadosClassificacaoFilter} classificacoes={activeClassificacoes} onRevert={handleRevertCancellationRequest} />}
                             </div>
                         )
                     })}
@@ -497,6 +523,18 @@ export default function AtendimentosPage() {
                     title="Retornar Paciente para a Triagem?"
                     description={`Tem certeza que deseja retornar o paciente ${itemToReturnToTriage.pacienteNome} para a triagem inicial? Ele sairá da fila de atendimento.`}
                     confirmText="Sim, Retornar"
+                    icon={Undo2}
+                />
+            )}
+
+            {itemToRevertCancellation && (
+                 <ConfirmationDialog
+                    isOpen={isRevertCancellationDialogOpen}
+                    onOpenChange={setIsRevertCancellationDialogOpen}
+                    onConfirm={handleConfirmRevertCancellation}
+                    title="Reverter Cancelamento?"
+                    description={`Tem certeza que deseja reverter o cancelamento de ${itemToRevertCancellation.pacienteNome || `Senha ${itemToRevertCancellation.senha}`}? O atendimento retornará à fila.`}
+                    confirmText="Sim, Reverter"
                     icon={Undo2}
                 />
             )}
