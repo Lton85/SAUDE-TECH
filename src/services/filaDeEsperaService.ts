@@ -27,24 +27,19 @@ interface FullSearchFilters extends SearchFilters {
 }
 
 const getPrioridade = (classificacaoId: string, classificacoesConfig: Classificacao[]): number => {
-    // Prioridades Fichas
     const prioridadesFixas: { [key: string]: number } = {
         'Urgencia': 1,
         'Preferencial': 2,
         'Normal': 3,
-        'Outros': 4,
     };
 
     if (prioridadesFixas[classificacaoId] !== undefined) {
         return prioridadesFixas[classificacaoId];
     }
     
-    // Prioridades Dinâmicas para classificações customizadas
     const customIndex = classificacoesConfig.findIndex(c => c.id === classificacaoId);
     
-    // Se encontrar, retorna o índice + 5 (para não colidir com as fixas).
-    // Se não encontrar (fallback, embora improvável), retorna uma prioridade baixa.
-    return customIndex !== -1 ? customIndex + 5 : 99;
+    return customIndex !== -1 ? customIndex + 4 : 99;
 }
 
 
@@ -54,7 +49,7 @@ export const addPreCadastroToFila = async (
     try {
         const empresaConfig = await getEmpresa();
         if (!empresaConfig || !empresaConfig.classificacoes) {
-            throw new Error("Configurações de classificação não encontradas.");
+            throw new Error("Configurações da empresa ou de classificação não encontradas. Verifique o cadastro da empresa.");
         }
         
         const classificacao = empresaConfig.classificacoes.find(c => c.id === classificacaoId);
@@ -737,3 +732,4 @@ export const clearAllAtendimentos = async (): Promise<number> => {
     
 
     
+
