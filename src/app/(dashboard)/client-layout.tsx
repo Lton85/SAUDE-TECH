@@ -174,7 +174,7 @@ const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotificatio
                         <h1 className="text-xl font-bold font-headline">SAÚDE TECH</h1>
                     </div>
                 </Link>
-                <SidebarTrigger className="hidden md:flex h-7 w-7 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-2 group-data-[collapsible=icon]:right-2" />
+                <SidebarTrigger className="hidden md:flex h-7 w-7" />
             </SidebarHeader>
 
               <SidebarContent>
