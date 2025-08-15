@@ -8,9 +8,9 @@ import { BarChart3, Clock, Tv2, Users, ClipboardList, Stethoscope, Users2, Calen
 import { allMenuItems, Tab } from "./client-layout";
 import { getCurrentUser } from "@/services/authService";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { collection, onSnapshot, query, where, getDocs, Timestamp, getCountFromServer } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay, startOfDay, startOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getEmpresa, Empresa } from "@/services/empresaService";
 import { FilaDeEsperaItem } from "@/types/fila";
@@ -100,17 +100,12 @@ const DailySummaryCard = ({ dailyCounts, isLoading }: { dailyCounts: DailyCount[
 export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     const [pacientesCount, setPacientesCount] = useState<number | null>(null);
     const [pacientesInativosCount, setPacientesInativosCount] = useState<number | null>(null);
-
     const [profissionaisCount, setProfissionaisCount] = useState<number | null>(null);
     const [profissionaisInativosCount, setProfissionaisInativosCount] = useState<number | null>(null);
-    
     const [departamentosCount, setDepartamentosCount] = useState<number | null>(null);
     const [departamentosInativosCount, setDepartamentosInativosCount] = useState<number | null>(null);
-    
     const [atendimentosMesCount, setAtendimentosMesCount] = useState<number | null>(null);
-
     const [userMenuItems, setUserMenuItems] = React.useState<Tab[]>([]);
-
     const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
     const [isDailyCountLoading, setIsDailyCountLoading] = useState(true);
 
@@ -139,111 +134,95 @@ export default function DashboardPage({ onCardClick }: DashboardPageProps) {
     }, []);
 
     useEffect(() => {
-        // Pacientes
-        const qPacientes = query(collection(db, "pacientes"));
-        const unsubscribePacientes = onSnapshot(qPacientes, (snapshot) => {
-            let inativos = 0;
-            snapshot.docs.forEach(doc => {
-                if (doc.data().situacao === 'Inativo') {
-                    inativos++;
-                }
-            });
-            setPacientesCount(snapshot.size);
-            setPacientesInativosCount(inativos);
-        });
+        async function fetchCounts() {
+            try {
+                // Pacientes
+                const pacientesColl = collection(db, "pacientes");
+                const pacientesSnapshot = await getCountFromServer(pacientesColl);
+                setPacientesCount(pacientesSnapshot.data().count);
+                const pacientesInativosSnapshot = await getCountFromServer(query(pacientesColl, where("situacao", "==", "Inativo")));
+                setPacientesInativosCount(pacientesInativosSnapshot.data().count);
 
-        // Profissionais
-        const qProfissionais = query(collection(db, "profissionais"));
-        const unsubscribeProfissionais = onSnapshot(qProfissionais, (snapshot) => {
-             let inativos = 0;
-            snapshot.docs.forEach(doc => {
-                if (doc.data().situacao === 'Inativo') {
-                    inativos++;
-                }
-            });
-            setProfissionaisCount(snapshot.size);
-            setProfissionaisInativosCount(inativos);
-        });
-        
-        // Departamentos
-        const qDepartamentos = query(collection(db, "departamentos"));
-        const unsubscribeDepartamentos = onSnapshot(qDepartamentos, (snapshot) => {
-             let inativos = 0;
-            snapshot.docs.forEach(doc => {
-                if (doc.data().situacao === 'Inativo') {
-                    inativos++;
-                }
-            });
-            setDepartamentosCount(snapshot.size);
-            setDepartamentosInativosCount(inativos);
-        });
-        
-         // Atendimentos no Mês
-        const fetchAtendimentosMes = async () => {
-             const today = new Date();
-             const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-             const endOfThisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
-             const qMes = query(
-                 collection(db, "relatorios_atendimentos"), 
-                 where("finalizadaEm", ">=", startOfThisMonth), 
-                 where("finalizadaEm", "<=", endOfThisMonth)
-             );
-             const snapshotMes = await getDocs(qMes);
-             setAtendimentosMesCount(snapshotMes.size);
+                // Profissionais
+                const profissionaisColl = collection(db, "profissionais");
+                const profissionaisSnapshot = await getCountFromServer(profissionaisColl);
+                setProfissionaisCount(profissionaisSnapshot.data().count);
+                const profissionaisInativosSnapshot = await getCountFromServer(query(profissionaisColl, where("situacao", "==", "Inativo")));
+                setProfissionaisInativosCount(profissionaisInativosSnapshot.data().count);
+
+                // Departamentos
+                const departamentosColl = collection(db, "departamentos");
+                const departamentosSnapshot = await getCountFromServer(departamentosColl);
+                setDepartamentosCount(departamentosSnapshot.data().count);
+                const deptosInativosSnapshot = await getCountFromServer(query(departamentosColl, where("situacao", "==", "Inativo")));
+                setDepartamentosInativosCount(deptosInativosSnapshot.data().count);
+
+                // Atendimentos no Mês
+                 const today = new Date();
+                 const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                 const endOfThisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+                 const relatoriosColl = collection(db, "relatorios_atendimentos");
+                 const qMes = query(relatoriosColl, where("finalizadaEm", ">=", startOfThisMonth), where("finalizadaEm", "<=", endOfThisMonth));
+                 const snapshotMes = await getCountFromServer(qMes);
+                 setAtendimentosMesCount(snapshotMes.size);
+            } catch (error) {
+                console.error("Error fetching counts: ", error);
+            }
         }
 
-        // Atendimentos do Dia por Classificação
+        fetchCounts();
+    }, []);
+
+    useEffect(() => {
         const setupDailyCountsListener = async () => {
             setIsDailyCountLoading(true);
-            const empresaData = await getEmpresa();
-            const activeClassifications = empresaData?.classificacoes?.filter(c => c.ativa) || [];
+            try {
+                const empresaData = await getEmpresa();
+                const activeClassifications = empresaData?.classificacoes?.filter(c => c.ativa) || [];
 
-            const startOfToday = startOfDay(new Date());
-            const endOfToday = endOfDay(new Date());
+                const startOfToday = startOfDay(new Date());
+                const endOfToday = endOfDay(new Date());
 
-            const qDia = query(
-                collection(db, "relatorios_atendimentos"),
-                where("status", "==", "finalizado"),
-                where("finalizadaEm", ">=", Timestamp.fromDate(startOfToday)),
-                where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday))
-            );
-            
-            const unsubscribeDaily = onSnapshot(qDia, (snapshot) => {
-                const counts = activeClassifications.map(c => ({
-                    id: c.id,
-                    nome: c.nome,
-                    count: 0,
-                    ...getClassificationIconAndColor(c.id)
-                }));
+                const qDia = query(
+                    collection(db, "relatorios_atendimentos"),
+                    where("status", "==", "finalizado"),
+                    where("finalizadaEm", ">=", Timestamp.fromDate(startOfToday)),
+                    where("finalizadaEm", "<=", Timestamp.fromDate(endOfToday))
+                );
                 
-                snapshot.forEach(doc => {
-                    const item = doc.data() as FilaDeEsperaItem;
-                    if(item.status === 'finalizado') {
-                        const classificationCount = counts.find(c => c.id === item.classificacao);
-                        if (classificationCount) {
-                            classificationCount.count++;
-                        }
-                    }
+                const unsubscribeDaily = onSnapshot(qDia, (snapshot) => {
+                    const countsMap: { [key: string]: number } = {};
+                     snapshot.forEach(doc => {
+                        const item = doc.data() as FilaDeEsperaItem;
+                        const classId = item.classificacao;
+                        countsMap[classId] = (countsMap[classId] || 0) + 1;
+                    });
+                    
+                    const dailyData = activeClassifications.map(c => ({
+                        id: c.id,
+                        nome: c.nome,
+                        count: countsMap[c.id] || 0,
+                        ...getClassificationIconAndColor(c.id)
+                    }));
+
+                    setDailyCounts(dailyData);
+                    setIsDailyCountLoading(false);
+                }, (error) => {
+                     console.error("Failed to get daily counts:", error);
+                     setIsDailyCountLoading(false);
                 });
-                
-                setDailyCounts(counts);
+
+                return unsubscribeDaily;
+            } catch (error) {
+                console.error("Error setting up daily counts listener:", error);
                 setIsDailyCountLoading(false);
-            }, (error) => {
-                 console.error("Failed to get daily counts:", error);
-                 setIsDailyCountLoading(false);
-            });
-            return unsubscribeDaily;
+            }
         }
 
-        fetchAtendimentosMes();
-        const dailyUnsub = setupDailyCountsListener();
-
+        const unsub = setupDailyCountsListener();
 
         return () => {
-            unsubscribePacientes();
-            unsubscribeProfissionais();
-            unsubscribeDepartamentos();
-            dailyUnsub.then(unsub => unsub());
+            unsub.then(u => u && u());
         };
     }, []);
 

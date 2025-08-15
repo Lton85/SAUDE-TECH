@@ -39,7 +39,7 @@ export const getPacientesRealtime = (
     onUpdate: (data: Paciente[]) => void,
     onError: (error: string) => void
 ) => {
-    const q = query(collection(db, "pacientes"), orderBy("codigo", "asc"));
+    const q = query(collection(db, "pacientes"), orderBy("nome", "asc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
         const data: Paciente[] = snapshot.docs.map(doc => ({
@@ -130,5 +130,3 @@ export const clearAllPacientes = async (): Promise<number> => {
         throw new Error("Não foi possível excluir todos os pacientes.");
     }
 };
-
-    

@@ -42,7 +42,7 @@ import { clearPainel } from "@/services/chamadasService";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { getEmpresa, onEmpresaSnapshot } from "@/services/empresaService";
-import type { Empresa } from "@/types/empresa";
+import type { Empresa, Classificacao } from "@/types/empresa";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,6 +52,8 @@ import { useRouter } from "next/navigation";
 import { getAtendimentosPendentes } from "@/services/filaDeEsperaService";
 import { NotificationDialog, NotificationType } from "@/components/ui/notification-dialog";
 import { CustomLogo } from "@/components/ui/custom-logo";
+import { getProfissionais } from "@/services/profissionaisService";
+import { getDepartamentos } from "@/services/departamentosService";
 
 
 // Import page components dynamically
@@ -110,6 +112,12 @@ export type Tab = (typeof allMenuItems)[number] & {
     hasPermission?: boolean;
     subItems?: Omit<Tab, 'icon'|'component'|'subItems'>[];
 };
+
+interface AppData {
+    profissionais: { id: string; nome: string }[];
+    departamentos: { id: string; nome: string; situacao: string }[];
+    classificacoes: Classificacao[];
+}
 
 const AppSidebar = ({ onMenuItemClick, activeContentId, menuItems, onNotification, empresa }: { onMenuItemClick: (item: Tab) => void; activeContentId: string; menuItems: Tab[]; onNotification: (notification: { type: NotificationType; title: string; message: string; }) => void; empresa: Empresa | null; }) => {
     const { state } = useSidebar();
@@ -289,7 +297,7 @@ const DateTimeDisplay = () => {
 };
 
 
-const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, onMenuItemClick, empresa, isLoadingEmpresa }: { 
+const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabClose, onMenuItemClick, empresa, isLoadingEmpresa, appData }: { 
     openTabs: Tab[];
     activeTab: string;
     activeContentId: string;
@@ -298,6 +306,7 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
     onMenuItemClick: (item: Tab) => void;
     empresa: Empresa | null;
     isLoadingEmpresa: boolean;
+    appData: AppData | null;
 }) => {
   const router = useRouter();
 
@@ -311,6 +320,10 @@ const MainContent = ({ openTabs, activeTab, activeContentId, onTabClick, onTabCl
     const props: any = {};
     if (activeComponentInfo.id === '/') {
         props.onCardClick = onMenuItemClick;
+        props.appData = appData;
+    }
+     if (activeComponentInfo.id === '/atendimento') {
+        props.appData = appData;
     }
     return React.createElement(activeComponentInfo.component, props);
   }
@@ -391,6 +404,7 @@ export default function DashboardClientLayout({
   const [notification, setNotification] = React.useState<{ type: NotificationType; title: string; message: string; } | null>(null);
   const [empresa, setEmpresa] = React.useState<Empresa | null>(null);
   const [isLoadingEmpresa, setIsLoadingEmpresa] = React.useState(true);
+  const [appData, setAppData] = React.useState<AppData | null>(null);
   
   React.useEffect(() => {
     setIsLoadingEmpresa(true);
@@ -405,6 +419,35 @@ export default function DashboardClientLayout({
       }
     );
     return () => unsubscribe();
+  }, []);
+  
+  React.useEffect(() => {
+    const fetchInitialData = async () => {
+        try {
+            const [profissionaisData, departamentosData, empresaData] = await Promise.all([
+                getProfissionais(),
+                getDepartamentos(),
+                getEmpresa(),
+            ]);
+
+            const profissionaisList = profissionaisData.map(m => ({ id: m.id, nome: `Dr(a). ${m.nome}` }));
+            const sortedProfissionais = [...profissionaisList].sort((a,b) => a.nome.localeCompare(b.nome));
+
+            const activeDepartamentos = departamentosData.filter(d => d.situacao === 'Ativo');
+            
+            const activeClassificacoes = empresaData?.classificacoes?.filter(c => c.ativa) || [];
+
+            setAppData({
+                profissionais: sortedProfissionais,
+                departamentos: activeDepartamentos,
+                classificacoes: activeClassificacoes,
+            });
+
+        } catch (error) {
+            setNotification({ type: 'error', title: 'Erro ao Carregar Dados', message: 'Não foi possível carregar os dados essenciais da aplicação.' });
+        }
+    };
+    fetchInitialData();
   }, []);
 
   React.useEffect(() => {
@@ -548,6 +591,7 @@ export default function DashboardClientLayout({
             onMenuItemClick={handleMenuItemClick}
             empresa={empresa}
             isLoadingEmpresa={isLoadingEmpresa}
+            appData={appData}
         />
         {notification && (
           <NotificationDialog
